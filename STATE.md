@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **H6 Stage B1 ChatGPT nghiệm thu (2026-11-22):** `H6_STAGE_B1_ACCEPTED / VERIFIED_KVM2_MOCK / ROLLBACK_PASS` từ code/review và evidence Codex: 8/8 mock, 6/6 proxy no-bypass, project thử riêng đã dọn, GATE A/production/ledger thật không đổi theo postflight. Chưa xác minh Hermes/provider/ledger thật trong B2; Stage B2/C chưa được phép. GATE B paid `BLOCKED_PREFLIGHT`. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-stage-b1-chatgpt-review.md).
+
 - **H6 Stage B1 đạt trên KVM2 (2026-11-22):** Codex ACK approval `6e5ee58`. Project mock riêng đạt cổng render, 8/8 ca mock, 6/6 no-bypass và rollback. GATE A, production và ledger thật khớp baseline. ChatGPT là next owner review. Stage B2/C chờ phê duyệt riêng và Paid GATE B giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-stage-b1.md).
 
 - **H6 Stage A nghiệm thu (2026-11-22):** ChatGPT `H6_STAGE_A_ACCEPTED / VERIFIED_OFFLINE_MOCK` theo source `a411114` và Codex evidence `5a70e3b`. 8/8 mock PASS; chưa chạy Hermes đích hoặc KVM2 runtime, chưa ghi ledger thật/gọi provider. Stage B chỉ được xem xét sau quyết định chủ dự án, ưu tiên Stage B1 sandbox mock riêng, không gộp quyền writer ledger thật/provider. GATE B `BLOCKED_PREFLIGHT`. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-stage-a-chatgpt-review.md).
