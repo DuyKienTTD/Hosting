@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **B2-A nghiệm thu & B2-B read-only mở (2026-11-22):** ChatGPT `H6_B2_A_ACCEPTED` trên bằng chứng offline Codex và mã Level 2; 1/4 admission ACK, hai crash không ACK, 14 từ chối. Phát hiện Level 2 `atomic_write` chưa fsync directory. Cho phép Codex `H6_B2_B_READ_ONLY_PREFLIGHT`: kiểm KVM2 UID/mount/lock bằng stat/inspect và render overlay đề xuất offline; **không đổi quyền/ghi ledger thật, không recreate, không provider/paid**. GATE B `BLOCKED_PREFLIGHT`. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-b2-a-chatgpt-review.md).
+
 - **H6 B2-A hoàn tất offline (2026-11-22):** Codex ACK `8d705b0`, bàn giao `H6_B2_A_COMPLETE` với schema P0 v1, lock Level 2, atomic admission và settlement trên fixture giả. ChatGPT nghiệm thu và quyết định bước an toàn kế tiếp theo §10. Quyền UID/lock trên KVM2 và rollback là gate của B2-B. GATE B paid giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-a.md).
 
 - **H6 Stage B1 ChatGPT nghiệm thu (2026-11-22):** `H6_STAGE_B1_ACCEPTED / VERIFIED_KVM2_MOCK / ROLLBACK_PASS` từ code/review và evidence Codex: 8/8 mock, 6/6 proxy no-bypass, project thử riêng đã dọn, GATE A/production/ledger thật không đổi theo postflight. Chưa xác minh Hermes/provider/ledger thật trong B2; Stage B2/C chưa được phép. GATE B paid `BLOCKED_PREFLIGHT`. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-stage-b1-chatgpt-review.md).
