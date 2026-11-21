@@ -1,0 +1,37 @@
+services:
+  writer:
+    profiles: [canary]
+    image: ghcr.io/hostinger/hvps-hermes-agent@sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f
+    pull_policy: never
+    container_name: h6-b2-m-idle-canary-writer
+    user: "0:0"
+    read_only: true
+    network_mode: none
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 24
+    mem_limit: 96m
+    restart: "no"
+    entrypoint: [python3, -B, /opt/b2m-src/h6_writer.py, --b2-l-startup-fixture, /tmp/h6-b2l-canary]
+    command: []
+    healthcheck:
+      disable: true
+    labels:
+      ttd.h6.b2m.owner: ${B2M_OWNER:?canary owner required}
+    tmpfs:
+      - /opt/data:rw,nosuid,nodev,noexec,size=8m
+    volumes:
+      - type: bind
+        source: ${B2M_ROOT:?canary root required}/src
+        target: /opt/b2m-src
+        read_only: true
+        bind: {create_host_path: false, propagation: rprivate}
+      - type: bind
+        source: ${B2M_ROOT:?canary root required}/fixture
+        target: /tmp/h6-b2l-canary
+        read_only: true
+        bind: {create_host_path: false, propagation: rprivate}
+      - type: bind
+        source: ${B2M_ROOT:?canary root required}/fixture/ipc
+        target: /tmp/h6-b2l-canary/ipc
+        bind: {create_host_path: false, propagation: rprivate}
