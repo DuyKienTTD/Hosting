@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Chủ dự án phê duyệt H6 Stage A cho Codex: phát triển Guard/writer/Compose overlay trong repo và chạy offline/mock trên ledger giả; không KVM2 apply, không ledger live, không provider/paid/production. Phê duyệt ghi trực tiếp trong [task GATE B](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md); Stage B/C chưa duyệt, handoff PREPARED_FOR_OWNER_FORWARD.
+
 - ChatGPT chấp nhận **phần chuẩn bị** H6 và kiến trúc writer độc lập **có điều kiện**, chưa duyệt áp dụng sandbox. Phải kiểm socket peer, inode/lock, atomic reserve, provider path và rollback qua mock; Gate B paid tiếp tục BLOCKED_PREFLIGHT. [Review](reports/2026-11-22-hermes-gate-b-h6-chatgpt-design-review.md).
 
 - Codex hoàn tất chuẩn bị H6 bằng đối chiếu KVM2 chỉ đọc. Ghi bằng chứng về ledger mount theo file, bản backup và digest ứng viên, cùng phương án writer giới hạn và rollback để ChatGPT review. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-preparation.md).
