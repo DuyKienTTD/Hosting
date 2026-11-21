@@ -1,7 +1,9 @@
 ---
 id: ttd-p0-reasoning-integration-proposal-2026-11-21
 type: decision
-status: proposed
+status: partially_approved
+approval_level: 1
+approved_at: 2026-11-21
 updated_at: 2026-11-21
 sensitivity: public
 decision_owner: business-owner
@@ -10,7 +12,7 @@ related_task: ttd-ai-p0-integration-001
 
 # ADR-P0-001 — Đề xuất hoàn tất n8n ↔ Hermes E2E
 
-**Chưa được phê duyệt.** Đây là đề xuất kỹ thuật để chủ dự án xem xét, không phải quyền thay đổi production hoặc sử dụng dịch vụ trả phí.
+**ĐÃ PHÊ DUYỆT MỨC 1 (2026-11-21).** Chủ dự án cho phép Codex tiếp tục khảo sát tương thích, chuẩn bị và triển khai kỹ thuật sandbox cô lập tối thiểu, có backup/rollback và xác minh hậu thay đổi. **Mức 2 CHƯA phê duyệt:** không gọi model/API trả phí, chưa chọn provider/model hoặc cost cap. Không được thay Hermes image/container chính, thay public port/firewall/DNS, tác động U4S `ttdnew.tech`, tự tạo downtime hay thay business accounts. Nếu cần restart/recreate production, thay credential hiện có hoặc mở quyền mạng ngoài sandbox, dừng xin phê duyệt riêng.
 
 ## Bằng chứng
 
@@ -28,6 +30,14 @@ related_task: ttd-ai-p0-integration-001
 5. **Acceptance:** n8n trigger → Hermes **real inference** → authenticated callback/workflow n8n → JSON Schema, `task_id`, correlation ID, execution log, error/timeout/retry/idempotency tests; xác minh health, không phát sinh phí vượt cap, không chạm business account. Khả năng inference phải được chứng minh bằng output của model, không phải HTTP 200 của dashboard.
 6. **Resource envelope:** KVM 2 chỉ 2 vCPU/8 GB; đánh giá CPU/RAM của service phụ. Tránh chạy model nặng cục bộ hay thêm database/queue layer chưa cần.
 
+## Phê duyệt đã nhận và giới hạn hiệu lực
+
+- **D1 APPROVED — Level 1:** nghiên cứu rồi có thể triển khai runtime inference phụ/adapter **cô lập** nếu preflight compatibility, giới hạn tài nguyên, service authentication, backup/rollback và khả năng không gián đoạn được chứng minh; không thay container Hermes chính.
+- **D2 APPROVED — Level 1:** triển khai đúng **một authenticated webhook sandbox** với dữ liệu giả, không public mới và không bật instance-wide MCP; thực hiện schema/negative auth/dry-run tests khi có thể.
+- **D3 PENDING — Level 2:** chỉ lập bảng provider/model/đơn giá và đề xuất giới hạn theo job/ngày, không sử dụng API inference trả phí hoặc làm lộ secret. Phải xin chủ dự án duyệt mức tiền cụ thể trước inference thật.
+- **D4 PENDING:** mọi thao tác có khả năng gây restart/downtime, thay public exposure hay đụng production business services cần phê duyệt riêng.
+- Mọi bước cần điều kiện kỹ thuật chưa đáp ứng được ghi BLOCKED; không diễn giải phê duyệt Mức 1 là quyền vượt qua security gate.
+
 ## Quyết định đang chờ
 
 - **D1:** Đồng ý định hướng inference private **cô lập** (không thay Hermes chính), nhưng chỉ sau Codex chứng minh compatibility, backup và rollback.
@@ -42,4 +52,4 @@ related_task: ttd-ai-p0-integration-001
 - Hostinger Agent: xác minh VPS/U4S boundaries, backup và change impact.
 - Chủ dự án: quyết định các gate D1-D4.
 
-**Trạng thái:** PROPOSED; không ghi `APPROVED` trừ khi có ủy quyền rõ ràng của chủ dự án. Không có thay đổi VPS trong quá trình viết tài liệu này.
+**Trạng thái:** PARTIALLY_APPROVED — chỉ Mức 1. Đây là bản ghi phê duyệt, không phải bằng chứng Codex đã thực hiện bước tiếp theo. Mức 2 và maintenance change vẫn chờ quyết định.
