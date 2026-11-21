@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- ChatGPT accepted H6 B2-G `c3c233a` KVM2 fake TLS/rollback (13 scenarios) and opened B2-H read-only real integration readiness; no live ledger mount/provider/paid authorization. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-g-chatgpt-review.md).
+
 - Codex hoàn tất H6 B2-G CONNECT/TLS giả trên KVM2. Xác minh chain/hostname, exact-wire POST, deadline slow-drip, no-bypass và rollback. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-g-kvm2-fake-tls.md).
 
 - ChatGPT reviewed `b670a65` H6 B2-F source/mock (13/13 Codex PASS) and opened B2-G on KVM2 with isolated synthetic CONNECT/TLS proxy/provider, cert negative tests and rollback; no real ledger/provider or paid. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-f-chatgpt-review.md).
