@@ -20,14 +20,15 @@ Mục tiêu dài hạn là chu trình `nhận mục tiêu -> lập kế hoạch 
 - Hostinger VPS KVM 2 ở Kuala Lumpur; Ubuntu 24.04.4 LTS, 2 vCPU, 8 GB RAM, 100 GB SSD.
 - n8n và Hermes Agent **đã cài và đang chạy qua Docker Compose tại thời điểm kiểm kê**. Không cài lại trước khi kiểm tra.
 - Docker, PostgreSQL, Nginx cùng các dịch vụ hệ thống: đọc chi tiết trong [kiểm kê VPS](inventory/current-vps-state.md).
-- Hai container có Docker networks tách biệt; tài liệu **chưa chứng minh được gọi API hai chiều**. Không xem đây là kết nối đã thành công.
+- Hai container có Docker networks tách biệt. Audit live đã chứng minh network hai chiều qua host bridge, nhưng chưa có service discovery nội bộ hoặc luồng AI end-to-end production-ready.
 - Có tồn đọng hardening VPS; đọc [đánh giá bảo mật](reports/2026-11-21-vps-security-review.md). Chưa tự ý thực hiện thay đổi production.
 
 ## Chúng ta đang ở đâu?
 
-- **Đã có:** hạ tầng VPS, bản kiểm kê, quy tắc an toàn, hệ thống tri thức GitHub và hai ứng dụng n8n/Hermes.
-- **Chưa xác minh:** API/khả năng thực tế của Hermes image Hostinger; kết nối n8n -> Hermes và Hermes -> n8n; workflow đa bước; giám sát, điều phối, mức chi phí, quyền tích hợp dịch vụ bên ngoài.
-- **Công việc kỹ thuật ưu tiên kế tiếp:** kiểm toán hai ứng dụng và kiểm thử tích hợp an toàn bằng dữ liệu giả lập; sau đó đề xuất kiến trúc và lộ trình triển khai theo kết quả đo được.
+- **Đã có:** hạ tầng VPS, bản kiểm kê, quy tắc an toàn, hệ thống tri thức GitHub, n8n `2.45.7`, Hermes `0.22.5` và [kiểm toán live hai chiều](reports/2026-11-21-n8n-hermes-integration-audit.md).
+- **Đã xác minh:** hai runtime độc lập khỏe; network/auth n8n → Hermes dashboard và Hermes → n8n readiness hoạt động.
+- **Chưa hoàn tất:** Hermes inference API chưa expose; n8n MCP đang tắt; n8n có 0 workflow; chưa có luồng AI end-to-end, monitoring hoặc connector marketing đã test.
+- **Công việc kỹ thuật ưu tiên kế tiếp:** phê duyệt P0 sandbox change window để tạo internal network, bật Hermes API private, bật n8n MCP cho một workflow giả lập và chạy lại test end-to-end.
 - Đây là định hướng; **chưa phải phê duyệt** để sửa cấu hình VPS, quảng cáo, website, publish video hay phát sinh chi phí.
 
 ## Tài liệu nào cần đọc?

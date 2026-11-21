@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "task_id": "TTD-AI-PLATFORM-AUDIT-001",
+  "observed_at": "2026-11-21T04:53:25Z",
+  "sensitivity": "public-redacted",
+  "method": "read-only live probes and ephemeral in-container clients; no production configuration changes",
+  "target": {
+    "provider": "Hostinger",
+    "plan": "KVM 2",
+    "location": "Kuala Lumpur",
+    "operating_system": "Ubuntu 24.04.4 LTS"
+  },
+  "services": {
+    "n8n": {
+      "version": "2.45.7",
+      "image": "docker.n8n.io/n8nio/n8n:latest",
+      "image_digest": "sha256:9a8d8dcea75667496695d7810d7e1fe018a65efb36cc499d347f3931b3957b5d",
+      "container_user": "node",
+      "restart_policy": "unless-stopped",
+      "healthcheck_configured": false,
+      "resource_limits_configured": false,
+      "writable_root_filesystem": true,
+      "live_state": {
+        "restart_count": 0,
+        "oom_killed": false,
+        "cpu_percent": 0.45,
+        "memory_mib": 374.7,
+        "pids": 21
+      },
+      "application_state": {
+        "healthz_status": 200,
+        "readiness_status": 200,
+        "settings_mode": "public",
+        "authentication_method": "email",
+        "initial_setup_needed": false,
+        "smtp_configured": false,
+        "mcp_http_status": 404,
+        "mcp_message": "MCP access is disabled",
+        "workflows_total": 0,
+        "workflows_active": 0,
+        "credentials_total": 1,
+        "executions_total": 0
+      }
+    },
+    "hermes": {
+      "version": "0.22.5",
+      "upstream_commit_prefix": "bf0203a7",
+      "image": "ghcr.io/hostinger/hvps-hermes-agent:latest",
+      "image_digest": "sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f",
+      "container_user": "root",
+      "restart_policy": "unless-stopped",
+      "healthcheck_configured": false,
+      "resource_limits_configured": false,
+      "writable_root_filesystem": true,
+      "live_state": {
+        "restart_count": 0,
+        "oom_killed": false,
+        "cpu_percent": 0.57,
+        "memory_mib": 435.9,
+        "pids": 39
+      },
+      "application_state": {
+        "dashboard_health_status": 200,
+        "dashboard_auth_required": true,
+        "cron_jobs_total": 0,
+        "webhooks_enabled": false,
+        "sessions_total": 0,
+        "api_server_v1_exposed": false,
+        "dashboard_main_hermes_service": "no-op sleep process"
+      }
+    }
+  },
+  "network": {
+    "shared_docker_network": false,
+    "n8n_resolves_hermes_container": false,
+    "hermes_resolves_n8n_container": false,
+    "transport_path_used_for_tests": "published host bridge ports",
+    "note": "The services are on separate Docker bridge networks. The test path proves reachability, not an approved production service-discovery design."
+  },
+  "tests": [
+    {
+      "id": "AUDIT-N2H-AUTH-002",
+      "direction": "n8n-to-hermes",
+      "purpose": "protected dashboard API transport and authentication",
+      "input": "GET protected cron jobs collection; no customer data",
+      "unauthenticated_status": 401,
+      "login_status": 200,
+      "authenticated_status": 200,
+      "response_schema": "array",
+      "returned_items": 0,
+      "latency_ms": 146,
+      "result": "PASS"
+    },
+    {
+      "id": "AUDIT-H2N-001",
+      "direction": "hermes-to-n8n",
+      "purpose": "n8n readiness transport",
+      "input": "GET readiness",
+      "status": 200,
+      "response": {
+        "status": "ok"
+      },
+      "latency_ms": 21,
+      "result": "PASS"
+    },
+    {
+      "id": "AUDIT-H2N-MCP-001",
+      "direction": "hermes-to-n8n",
+      "purpose": "instance-level MCP tools discovery",
+      "input": {
+        "jsonrpc": "2.0",
+        "method": "tools/list",
+        "sample_context": {
+          "channel": "ads",
+          "spend": 100,
+          "clicks": 10
+        }
+      },
+      "status": 404,
+      "response": {
+        "message": "MCP access is disabled"
+      },
+      "latency_ms": 3,
+      "result": "BLOCKED"
+    },
+    {
+      "id": "AUDIT-E2E-001",
+      "direction": "n8n-hermes-n8n",
+      "purpose": "fake advertising analysis and permitted action",
+      "result": "BLOCKED",
+      "blockers": [
+        "n8n instance-level MCP is disabled",
+        "n8n has zero workflows and zero executions",
+        "the deployed Hermes dashboard does not expose the upstream OpenAI-compatible inference API"
+      ],
+      "not_attempted_reason": "Completing the flow would require production configuration changes and may invoke a paid model, both outside the approved audit scope."
+    }
+  ],
+  "media": {
+    "host_ffmpeg": false,
+    "n8n_ffmpeg": false,
+    "hermes_ffmpeg": true,
+    "hermes_ffmpeg_version": "n9.0.1-11-ge47273f4d9-20260831",
+    "proposed_media_path_exists": false,
+    "disk_total_gib": 96,
+    "disk_used_gib": 12,
+    "disk_free_gib": 85
+  },
+  "logs_last_24h": {
+    "n8n_lines": 4,
+    "n8n_error_or_warning_lines": 0,
+    "hermes_lines": 2,
+    "hermes_warning_lines": 2,
+    "hermes_warning_summary": "invalid HTTP request received; consistent with unsolicited traffic against a public port",
+    "raw_logs_persisted": false
+  },
+  "overall": {
+    "status": "PARTIAL",
+    "independent_runtime": "PASS",
+    "bidirectional_transport": "PASS",
+    "private_service_discovery": "FAIL",
+    "n8n_to_hermes_management_api": "PASS",
+    "n8n_to_hermes_ai_inference": "BLOCKED",
+    "hermes_to_n8n_readiness": "PASS",
+    "hermes_to_n8n_mcp": "BLOCKED",
+    "minimal_end_to_end_workflow": "BLOCKED"
+  },
+  "production_changes": []
+}

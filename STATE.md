@@ -31,8 +31,10 @@ sensitivity: public-redacted
 
 - Mục tiêu tổng thể: [PROJECT.md](PROJECT.md).
 - Đã chuẩn hóa giao nhiệm vụ qua `tasks/`, kết quả qua `reports/`; [quy tắc](rules/AGENT_WORKFLOW.md).
-- Báo cáo tự đánh giá Hermes đã được bổ sung tại `reports/2026-11-21-hermes-self-assessment.md`; đã xác minh được skills, session recall, GitHub push và đường tích hợp n8n theo docs, nhưng chưa xác minh API/live n8n.
-- Chưa kiểm thử thực tế tích hợp hai chiều n8n ↔ Hermes. Đã giao đặc tả cho Codex tại [TTD-AI-PLATFORM-AUDIT-001](tasks/2026-11-21-n8n-hermes-integration-audit.md); chưa có báo cáo thực thi.
+- Đã hoàn tất [TTD-AI-PLATFORM-AUDIT-001](tasks/2026-11-21-n8n-hermes-integration-audit.md); xem [báo cáo live n8n ↔ Hermes](reports/2026-11-21-n8n-hermes-integration-audit.md).
+- Đã xác minh n8n `2.45.7` và Hermes `0.22.5`; cả hai health/readiness PASS, 0 restart/OOM và có thể chạm nhau hai chiều qua host bridge.
+- n8n → Hermes dashboard auth PASS; Hermes → n8n readiness PASS. Tuy nhiên, n8n MCP đang tắt, n8n có 0 workflow/0 execution và Hermes chưa expose agent inference API nên end-to-end vẫn `BLOCKED`.
+- Kiến trúc được khuyến nghị: n8n làm control plane, Hermes reasoning qua API private, một internal Docker network, schema/policy/approval gate và media-worker FFmpeg riêng.
 
 ## Việc đang chờ
 
@@ -40,10 +42,12 @@ sensitivity: public-redacted
 - Chưa đặt n8n/Hermes sau reverse proxy HTTPS.
 - Chưa xử lý các backup Hostinger có thể chứa ứng dụng đã xóa.
 - Chưa cập nhật hệ điều hành hoặc reboot.
-- Chưa xác minh exact build/version của Hermes Hostinger image hoặc live API endpoint từ runtime hiện tại.
+- Chưa phê duyệt bật Hermes API server internal-only, n8n instance-level MCP hoặc workflow sandbox để chạy lại test end-to-end.
+- Chưa kết nối/xác minh Google Ads, GA4, WordPress/WooCommerce, YouTube, TikTok, Meta, Kling, HeyGen hoặc ElevenLabs.
 
 ## Tài liệu tiếp theo
 
 - Kiểm kê: `inventory/current-vps-state.md`
+- Kiểm toán n8n ↔ Hermes: `reports/2026-11-21-n8n-hermes-integration-audit.md`
 - Báo cáo bảo mật: `reports/2026-11-21-vps-security-review.md`
 - Quy tắc an toàn: `rules/REPOSITORY_SECURITY.md`

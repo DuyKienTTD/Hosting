@@ -1,13 +1,17 @@
 ---
 id: ttd-ai-platform-audit-001
 type: task
-status: current
+status: complete
 updated_at: 2026-11-21
+completed_at: 2026-11-21
 sensitivity: public
 owner: codex
+result: ../reports/2026-11-21-n8n-hermes-integration-audit.md
 ---
 
 # TTD-AI-PLATFORM-AUDIT-001 — Kiểm toán n8n ↔ Hermes và kiến trúc AI Automation
+
+> **Hoàn tất ngày 2026-11-21.** Kết quả tổng thể `PARTIAL`: runtime và network hai chiều PASS; suy luận n8n → Hermes, MCP Hermes → n8n và end-to-end BLOCKED do cấu hình chưa bật. Xem [báo cáo nghiệm thu](../reports/2026-11-21-n8n-hermes-integration-audit.md) và [evidence đã khử định danh](../reports/evidence/2026-11-21-ttd-ai-platform-audit-001.json).
 
 ## Mục tiêu và bối cảnh
 

@@ -72,10 +72,28 @@ documents:
     verified_at: 2026-11-21
     sensitivity: public-redacted
 
+  - id: n8n-hermes-integration-audit-2026-11-21
+    path: reports/2026-11-21-n8n-hermes-integration-audit.md
+    type: report
+    status: current
+    authoritative_for: n8n-hermes-live-integration-status-and-ai-automation-architecture-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-ai-platform-audit-001-evidence
+    path: reports/evidence/2026-11-21-ttd-ai-platform-audit-001.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-machine-readable-evidence-for-ttd-ai-platform-audit-001
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
   - id: ttd-ai-platform-audit-001
     path: tasks/2026-11-21-n8n-hermes-integration-audit.md
     type: task
-    status: current
+    status: complete
     authoritative_for: codex-n8n-hermes-integration-audit-scope
     updated_at: 2026-11-21
     sensitivity: public

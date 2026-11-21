@@ -2,7 +2,12 @@
 
 ## 2026-11-21
 
-- Tạo task `TTD-AI-PLATFORM-AUDIT-001` kiểm toán live n8n ↔ Hermes và thiết kế hệ thống AI Automation dựa trên báo cáo tự đánh giá Hermes. Chưa thực hiện kiểm toán VPS.
+- Hoàn tất `TTD-AI-PLATFORM-AUDIT-001` và thêm báo cáo/evidence đã khử định danh cho kiểm toán live n8n ↔ Hermes.
+- Xác minh n8n `2.45.7`, Hermes `0.22.5`, network/auth hai chiều và trạng thái runtime; ghi rõ MCP, inference API và end-to-end còn `BLOCKED`.
+- Đề xuất kiến trúc n8n control plane + Hermes reasoning + internal network + policy/approval gate + media-worker; cập nhật `PROJECT.md`, `STATE.md`, inventory và catalog.
+- Không thay đổi production, không gọi model/media trả phí và không kết nối tài khoản marketing.
+
+- Tạo task `TTD-AI-PLATFORM-AUDIT-001` kiểm toán live n8n ↔ Hermes và thiết kế hệ thống AI Automation dựa trên báo cáo tự đánh giá Hermes.
 
 - Thêm `reports/2026-11-21-hermes-self-assessment.md`, catalog tương ứng và cập nhật `STATE.md` cho đợt tự đánh giá năng lực Hermes Agent hiện tại.
 - Ghi nhận đã xác minh được skills, session recall và GitHub push của agent; đồng thời giữ trạng thái chưa kiểm chứng cho exact Hermes build/version, live API endpoint và live n8n integration.

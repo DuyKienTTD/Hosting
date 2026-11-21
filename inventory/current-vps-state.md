@@ -104,14 +104,18 @@ Ghi chú:
 | Compose file | `/docker/n8n-nbqy/docker-compose.yml` |
 | Container | `n8n-nbqy-n8n-1` |
 | Image | `docker.n8n.io/n8nio/n8n:latest` |
+| Version / image digest | `2.45.7` / `sha256:9a8d...7b5d` |
 | Trạng thái | Up khoảng 3 tuần |
 | Restart policy | `unless-stopped` |
 | User trong container | `node` |
 | Root filesystem | Có quyền ghi |
+| Docker healthcheck / resource limits | Chưa cấu hình / chưa cấu hình |
 | Public mapping | `32770 -> 5678/tcp` |
 | Volume | `n8n-nbqy_n8n_data` -> `/home/node/.n8n` (read/write) |
 | Dữ liệu volume | khoảng 6.6 MiB |
-| Sử dụng lúc kiểm tra | khoảng 0.49% CPU, 371 MiB RAM |
+| Sử dụng lúc kiểm tra | khoảng 0.45% CPU, 374.7 MiB RAM, 21 PID |
+| Restart/OOM | 0 / false |
+| App state | health/readiness 200; 0 workflow; 1 credential; 0 execution; MCP disabled |
 
 Tên biến môi trường được phát hiện, không lưu giá trị: `GENERIC_TIMEZONE`, `N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS`, `N8N_RELEASE_TYPE`, `N8N_RUNNERS_ENABLED`, `N8N_SECURE_COOKIE`, `NODE_ENV`, `TZ`, `WEBHOOK_URL` và các biến runtime chuẩn.
 
@@ -123,14 +127,18 @@ Tên biến môi trường được phát hiện, không lưu giá trị: `GENER
 | Compose file | `/docker/hermes-agent-l7fe/docker-compose.yml` |
 | Container | `hermes-agent-l7fe-hermes-agent-1` |
 | Image | `ghcr.io/hostinger/hvps-hermes-agent:latest` |
+| Version / image digest | `0.22.5`, upstream `bf0203a7` / `sha256:0ea6...344f` |
 | Trạng thái | Up khoảng 3 tuần |
 | Restart policy | `unless-stopped` |
 | User trong container | `root` |
 | Root filesystem | Có quyền ghi |
+| Docker healthcheck / resource limits | Chưa cấu hình / chưa cấu hình |
 | Public mapping | `32768 -> 4860/tcp` |
 | Bind mount | `/docker/hermes-agent-l7fe/data` -> `/opt/data` (read/write) |
 | Dữ liệu project | khoảng 14 MiB ngoài image |
-| Sử dụng lúc kiểm tra | khoảng 0.94% CPU, 430 MiB RAM |
+| Sử dụng lúc kiểm tra | khoảng 0.57% CPU, 435.9 MiB RAM, 39 PID |
+| Restart/OOM | 0 / false |
+| App state | dashboard health 200; 0 cron job/session; webhook disabled; chưa expose agent `/v1/*` API |
 
 Tên biến môi trường nhạy cảm tồn tại nhưng giá trị không được ghi lại: `ADMIN_PASSWORD`, `ADMIN_USERNAME`, `DASHBOARD_AUTH_SECRET`, `OXYLABS_AI_STUDIO_API_KEY`; ngoài ra có các biến runtime và cấu hình Hermes.
 
@@ -144,6 +152,20 @@ Các file cấu hình ứng dụng tồn tại trên VPS:
 ```
 
 Các file `.env` không được sao chép vào repository.
+
+### Trạng thái tích hợp n8n ↔ Hermes
+
+Kiểm thử live ngày 2026-11-21 xác nhận:
+
+- Hai container ở hai Docker bridge riêng và không resolve được tên nhau.
+- Network transport hai chiều hoạt động qua các cổng publish trên host.
+- n8n → API bảo vệ của Hermes dashboard: 401 trước auth, 200 sau auth.
+- Hermes → n8n readiness: 200.
+- n8n instance-level MCP: tắt, endpoint trả `MCP access is disabled`.
+- Hermes image hiện chạy dashboard quản trị; agent inference API `/v1/*` của upstream chưa expose.
+- Vì n8n không có workflow/execution và hai tính năng trên chưa bật, luồng AI end-to-end vẫn `BLOCKED`.
+
+Chi tiết và latency nằm trong [báo cáo kiểm toán tích hợp](../reports/2026-11-21-n8n-hermes-integration-audit.md).
 
 ## 4. Web, TLS và cơ sở dữ liệu
 
