@@ -31,6 +31,10 @@ Mục tiêu dài hạn là chu trình `nhận mục tiêu -> lập kế hoạch 
 - **Công việc kỹ thuật ưu tiên kế tiếp:** phê duyệt P0 sandbox change window để tạo internal network, bật Hermes API private, bật n8n MCP cho một workflow giả lập và chạy lại test end-to-end.
 - Đây là định hướng; **chưa phải phê duyệt** để sửa cấu hình VPS, quảng cáo, website, publish video hay phát sinh chi phí.
 
+## Phân vai và cách phối hợp
+
+Xem [danh bạ tác nhân](agents/README.md). ChatGPT phụ trách tư vấn/đặc tả/review theo yêu cầu; Codex ưu tiên kỹ thuật/kiểm thử; Hermes ưu tiên AI reasoning/tool execution; n8n là workflow engine; Hostinger là nền tảng VPS, còn Hostinger Agent cần khảo sát năng lực độc lập. Phân vai mang tính ưu tiên, không khóa cứng; quyền production/chi phí do chủ dự án cấp cụ thể. Trong giai đoạn khảo sát, chủ dự án chuyển tiếp lời giao việc giữa các tác nhân. Tất cả bàn giao tài liệu và kết quả qua GitHub nếu có quyền, trạng thái job realtime qua n8n/DB khi đã triển khai.
+
 ## Tài liệu nào cần đọc?
 
 1. [README](README.md) — bản đồ repository.
