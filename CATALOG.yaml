@@ -1088,6 +1088,14 @@ documents:
     updated_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: ttd-work-ws02-monitoring-triage-001
+    path: tasks/2026-11-22-work-ws02-monitoring-and-triage.md
+    type: task
+    status: prepared
+    authoritative_for: independent-Work-WS02-monitoring-and-triage-runbook-scope
+    updated_at: 2026-11-22
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
