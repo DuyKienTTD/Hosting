@@ -66,6 +66,12 @@ Nguồn: [Codex capability survey](../reports/2026-11-21-codex-capability-survey
 - ChatGPT/business owner cho yêu cầu, priority và review nghiệp vụ.
 - Con người cho credentials, ngân sách, Ads write, publish và thay đổi DNS/SSH/firewall.
 
+## Thực thi liền mạch trong quyền hiện hành
+
+- Áp dụng [AGENT_WORKFLOW mục 9](../rules/AGENT_WORKFLOW.md): tự hoàn thành các phép kiểm tra còn thiếu và những bước hợp lệ trong scope đã duyệt; không kết thúc nhiệm vụ chỉ vì preflight chưa đo.
+- STOP thao tác ghi/recreate/paid khi thiếu điều kiện an toàn, nhưng tiếp tục các bước read-only hoặc độc lập an toàn. Nếu không thể tiếp tục vì phiên/công cụ, ghi blocker hoặc INTERRUPTED_BY_ENVIRONMENT có bằng chứng.
+- Không tự retry paid inference, không vượt approval, không coi báo cáo tiến độ là nghiệm thu cuối.
+
 ## Cách nhận và bàn giao
 
 - Nhận task từ URL/file Git hoặc prompt chat; n8n/API chưa nối trực tiếp vào Codex session.
