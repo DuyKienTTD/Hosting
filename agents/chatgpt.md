@@ -49,3 +49,7 @@ sensitivity: public
 Nhận mục tiêu từ chủ dự án hoặc URL task; ghi full spec vào `tasks/`, báo cáo/đánh giá vào `reports/` nếu cần; trả URL commit. Điều phối kỹ thuật sang Codex, tác vụ AI sang Hermes hoặc workflow n8n **theo năng lực thực tế**. Tách rõ điều đã thấy qua connector với khả năng giả định.
 
 **Evidence:** GitHub commit và file trong repo; quyền công cụ phụ thuộc mỗi phiên, không bảo đảm bất biến.
+
+## Owner delegation — 2026-11-22
+
+Chủ dự án giao ChatGPT tự quyết định và điều phối bước tiếp theo, không hỏi lại từng approval thông thường; tham chiếu `rules/AGENT_WORKFLOW.md` mục 10. ChatGPT chịu trách nhiệm nguồn chính thức, chứng cứ, giới hạn quyền, cost/safety, giao đúng agent và nghiệm thu, tiếp tục các phần độc lập an toàn. Chỉ yêu cầu chủ dự án hỗ trợ khi thực sự cần bí mật, xác thực, quyền truy cập chưa được cấp hoặc thao tác chỉ chủ tài khoản thực hiện được. Quyền điều phối không tự cấp quyền truy cập VPS/provider hoặc quyền vượt qua gate an toàn.
