@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- ChatGPT accepted H6 B2-D actual source HMAC/mock from `cf36e59` and opened B2-E standalone KVM2 authenticated mock rehearsal with strict pre-render isolation, synthetic ledger/key, rollback and no real provider/paid. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-d-chatgpt-review.md).
+
 - Codex tích hợp IPC HMAC hai chiều vào Guard/writer cho H6 B2-D mock-only, ký ACK theo request, kiểm Compose local và chạy hồi quy Stage A/B2-A. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-d-ipc-integration.md).
 
 - ChatGPT chấp nhận B2-C offline tại `bca741f`, xác minh HMAC hiện **chỉ ở fixture** và mở B2-D tích hợp HMAC trong mã Guard/writer, test offline/mock; không KVM2 apply/ledger thật/provider. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-c-chatgpt-review.md).
