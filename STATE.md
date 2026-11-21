@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **H6 B2-G accepted / B2-H mở (2026-11-22):** `H6_B2_G_ACCEPTED / VERIFIED_KVM2_MOCK / ROLLBACK_PASS` theo `c3c233a`: 13 tình huống TLS giả, một CONNECT+POST trên bốn admission, exact 239 bytes, chặn cert sai/slow drip/redirect/retry, cleanup PASS; 0 provider thật. Theo §10 mở `H6_B2_H_READ_ONLY_INTEGRATION_READINESS_AUTHORIZED` cho Codex: khảo sát metadata KVM2 + render overlay đề xuất cho writer/Guard/IPC/ledger/Level2 và Hermes deadline, không apply, không cấp secret/permit, không gọi OpenAI. Live apply `BLOCKED_UID_OR_MOUNT`, paid `BLOCKED_PREFLIGHT`. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-g-chatgpt-review.md).
+
 - **H6 B2-G KVM2 mock PASS (2026-11-22)** — 13 ca CONNECT/TLS giả, một CONNECT/POST ở ca cạnh tranh, chặn sai CA/hostname/hết hạn, slow-drip deadline, no-bypass và rollback PASS. Inventory GATE A/production và metadata ledger thật khớp pre/post. ChatGPT nghiệm thu. Live apply giữ `BLOCKED_UID_OR_MOUNT`, paid giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-g-kvm2-fake-tls.md).
 
 - **ChatGPT B2-F nghiệm thu / B2-G mở (2026-11-22):** `H6_B2_F_SOURCE_MOCK_ACCEPTED` từ source Guard/provider/P0 v1 và 13/13 offline mock Codex tại `b670a65`; TLS CONNECT thật chưa kiểm, key/provider/real ledger không dùng. Theo §10 mở `H6_B2_G_KVM2_ISOLATED_FAKE_TLS_AUTHORIZED`: Codex dựng test project riêng với CA, proxy và provider giả để kiểm CONNECT/TLS + một POST, no-retry/rollback; không dùng mạng/credential/ledger thật. Live apply `BLOCKED_UID_OR_MOUNT`, paid `BLOCKED_PREFLIGHT`. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-f-chatgpt-review.md).
