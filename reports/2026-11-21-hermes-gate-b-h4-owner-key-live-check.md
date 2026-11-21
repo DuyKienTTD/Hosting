@@ -82,7 +82,7 @@ gọi provider hoặc tạo paid permit.
 `read_complete: true`; `base_commit: e93cd2939fa672f3312c37a77672e6d30401d702`;
 `write_set: H4 live-check report/evidence + task result + STATE/CATALOG/CHANGELOG`;
 `invariants_checked: task owner/status/approval unchanged, no secret value/digest/size, no runtime mutation`;
-`remote_readback: pending documentation push`;
+`remote_readback: verified on origin/main at 09f0e44cf53d2c24dde48a62f95327e4d09ff620`;
 `next_owner: business-owner`; `handoff_state: NEEDS_OWNER_DECISION`.
 
 ## Việc còn lại
