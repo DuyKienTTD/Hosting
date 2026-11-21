@@ -46,6 +46,12 @@ sensitivity: public-redacted
 - **Hostinger Account Inventory** đã được bổ sung tại [reports/2026-11-21-hostinger-account-capability-inventory.md](reports/2026-11-21-hostinger-account-capability-inventory.md): Cloud Startup (4 WordPress chính + staging, Builder/other site), VPS KVM 2, email, domain, Reach và resource Docker/AI. Phân biệt công cụ hỗ trợ với quyền truy cập thực tế; resource `ttdnew.tech` có metadata OpenClaw nhưng runtime `u4s-hermes-agent` chưa được định danh.
 - Ba phần bổ sung của [TTD-AGENT-CAPABILITY-SURVEY-001](tasks/2026-11-21-agent-capability-survey.md) đã có báo cáo; quyền vẫn phải xác minh lại theo từng phiên/task.
 
+## Nhiệm vụ mới: định danh resource rồi tích hợp P0
+
+- Đã tạo [TTD-RESOURCE-IDENTITY-001](tasks/2026-11-21-ttdnew-resource-identity-verification.md), owner Hostinger Agent; xác minh thực thể `ttdnew.tech`, phân biệt OpenClaw metadata và `u4s-hermes-agent`, so sánh với Hermes trên KVM 2. Chưa có kết quả live mới.
+- Đã tạo [TTD-AI-P0-INTEGRATION-001](tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md), owner Codex; status BLOCKED cho tới khi identity gate PASS và pre-change safety gate đạt. Cho phép chuẩn bị/test sandbox tối thiểu trong giới hạn, không cấp quyền cắt public port hay chi trả API chưa duyệt.
+- Người dùng chuyển tiếp đường dẫn nhiệm vụ giữa Hostinger Agent, Codex và Hermes; chưa có thay đổi production nào từ ChatGPT trong lượt này.
+
 ## Việc đang chờ
 
 - Chưa thực hiện hardening SSH/XRDP hoặc firewall.
