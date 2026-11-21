@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "task_id": "ttd-hermes-gate-b-001",
+  "handoff": "H1",
+  "verified_at": "2026-11-21",
+  "mode": "read_only",
+  "paid_api_calls": 0,
+  "production_mutations": 0,
+  "status": "MIXED",
+  "gate_status": "NOT_READY",
+  "rule_context_read": "VERIFIED_LIVE",
+  "live": {
+    "gate_a_containers": "running_healthy",
+    "gate_a_networks": [
+      "control",
+      "provider",
+      "upstream",
+      "sandbox"
+    ],
+    "gate_a_published_ports": 0,
+    "guard_code_mount_mode": "read_only",
+    "credential_mount_values": "redacted",
+    "state_mounts_present": true,
+    "backup_count": 2,
+    "backup_schedule": "enabled_weekly"
+  },
+  "assessment": {
+    "network_isolation": "VERIFIED_LIVE_TOPOLOGY",
+    "guard_only_credential_mount": "NOT_VERIFIED_STRICT",
+    "persistence_after_redeploy": "UNKNOWN_NOT_TESTED",
+    "no_bypass_dynamic": "UNKNOWN_NOT_RUN",
+    "rollback_execution": "UNKNOWN_NOT_TESTED",
+    "gate_b_private_membership": "UNKNOWN_LOOKUP_TEMPORARY_FAILURE"
+  },
+  "redaction": {
+    "secret_values": "omitted",
+    "api_keys": "not_requested_or_called",
+    "private_ips": "omitted",
+    "private_endpoints": "omitted"
+  }
+}
