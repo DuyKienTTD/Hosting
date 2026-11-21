@@ -1,7 +1,8 @@
 ---
 id: ttd-ai-p0-integration-001
 type: task
-status: blocked
+status: in_progress
+approval_level: 1
 updated_at: 2026-11-21
 sensitivity: public
 owner: codex
@@ -61,6 +62,17 @@ Nếu chưa được phép call inference, báo **PARTIAL** và tách riêng ph�
 ## Bàn giao
 
 Tạo `reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md` hoặc file ngày thực tế; ghi lại thao tác thực hiện vs đề xuất, schema, evidence kết nối, test matrix, downtime (nếu có), chi phí thực tế, thay đổi cấu hình đã redacted và rollback. Cập nhật `STATE.md`, `CATALOG.yaml`, `CHANGELOG.md`; push GitHub, trả URL report và commit. Không đưa secret, private endpoint, IP, tài khoản đăng nhập vào repo public.
+
+## Phê duyệt Mức 1 — 2026-11-21
+
+Chủ dự án phê duyệt tiếp tục P0 theo [ADR-P0-001](../decisions/2026-11-21-p0-reasoning-integration-proposal.md), **chỉ trong sandbox cô lập**. Codex được khảo sát kỹ thuật, chuẩn bị và triển khai runtime phụ/adapter private (nếu compatibility, backup, resource/cost isolation và rollback đều đạt) và **một authenticated webhook workflow giả lập**. Không thay image/container Hermes chính, không bật MCP instance-wide, không mở public endpoint/đổi firewall/DNS, không chạm U4S `ttdnew.tech` và không sửa business account. Nếu thay đổi ảnh hưởng production, restart/recreate hoặc downtime, **dừng xin approval riêng**. Việc chọn provider/model, trần chi phí và mọi paid inference call thuộc Mức 2 **chưa được phê duyệt**. Có thể kiểm thử HTTP/auth/schema và mock reasoning miễn phí; tuyệt đối không đánh dấu E2E real reasoning PASS bằng mock.
+
+### Bàn giao tiếp theo của Codex
+
+- Feasibility runtime inference cô lập, service auth, backup/rollback và giới hạn tài nguyên.
+- Một webhook sandbox với dữ liệu giả, token riêng, schema validation, timeout/negative auth và execution evidence nếu có thể làm không gián đoạn.
+- Bảng các provider/model có thể dùng, đơn giá đã xác minh và đề xuất cost cap cho chủ dự án chọn.
+- Báo cáo live các bước đã triển khai, blocker Mức 2; commit/push report + evidence đã khử nhạy cảm.
 
 ## Tiến độ thực thi 2026-11-21
 
