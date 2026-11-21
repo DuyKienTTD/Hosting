@@ -34,6 +34,12 @@
 - Thiếu năng lực hoặc công cụ: chuyển cho tác nhân phù hợp hoặc ghi BLOCKED. Không giả định mọi nền tảng có quyền sửa production.
 - Để biết ai có năng lực mới nhất, xem hồ sơ và các evidence liên kết; nếu cần xác minh lại, giao [khảo sát bổ sung](../tasks/2026-11-21-agent-capability-survey.md).
 
+## Điều phối nghiên cứu trước thực thi
+
+**Bắt buộc đọc** [AGENTS](../AGENTS.md), [AGENT_WORKFLOW mục 7](../rules/AGENT_WORKFLOW.md), [quy tắc bảo mật](../rules/REPOSITORY_SECURITY.md), [STATE](../STATE.md), [CATALOG](../CATALOG.yaml), hồ sơ của mình và task trước khi nhận việc. Thứ tự ưu tiên: ChatGPT tổng hợp nguồn chính thức + evidence; Hostinger Agent khảo sát VPS/hPanel/network/hosting; Hermes khảo sát agent/inference/tools/serialized request; Codex viết code, chạy test, deploy sandbox/rollback; n8n thực thi workflow khi đã bật. **Phân vai dựa trên năng lực và quyền được chứng minh trong phiên, không độc quyền.**
+
+Mọi handoff phải có **một owner**, nguồn đầu vào, **bước bắt đầu cụ thể**, bằng chứng nghiệm thu, giới hạn quyền, next owner và trạng thái `PREPARED/SENT/ACKNOWLEDGED/IN_PROGRESS/DONE/BLOCKED`. GitHub task đã commit chỉ là `PREPARED`, chưa phải đã gửi/nhận. Nếu phải chuyển tiếp thủ công, báo `PREPARED_FOR_OWNER_FORWARD` và cung cấp thông điệp rõ người nhận. Người nhận đọc lại quy tắc và ghi rule commit đã dùng trong ACK/report.
+
 ## Phân công theo nghiệp vụ — định hướng, chưa có nghĩa đã sẵn sàng
 
 | Nghiệp vụ | Owner ưu tiên | Thành phần hỗ trợ | Giới hạn |
