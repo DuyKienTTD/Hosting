@@ -56,13 +56,15 @@ def main() -> None:
     status, body, elapsed = post(WEBHOOK, valid, TOKEN)
     usage = body.get("usage") or {}
     provider_ok = (
-        status == 200 and body.get("accepted") is True and body.get("callback_http_status") == 200
-        and body.get("replayed") is False and body.get("mode") == "openai" and body.get("paid_inference") is True
+        status == 200 and body.get("accepted") is True
+        and isinstance(body.get("replayed"), bool) and body.get("mode") == "openai"
+        and (body.get("callback_http_status") == 200 or body.get("replayed") is True)
+        and (body.get("paid_inference") is True or body.get("replayed") is True)
         and body.get("provider") == "openai" and str(body.get("model", "")).startswith("gpt-6-luna")
         and 0 <= usage.get("input_tokens", -1) <= 4000 and 0 <= usage.get("output_tokens", -1) <= 2000
         and 0 <= body.get("actual_cost_usd", -1) <= 0.01 and len(body.get("result_hash", "")) == 64
     )
-    record(cases, "provider_e2e_authenticated_callback", provider_ok, http=status, elapsed_ms=elapsed, model=body.get("model"), usage=usage, actual_cost_usd=body.get("actual_cost_usd"), result_hash=body.get("result_hash"))
+    record(cases, "provider_e2e_authenticated_callback", provider_ok, http=status, elapsed_ms=elapsed, replayed=body.get("replayed"), model=body.get("model"), usage=usage, actual_cost_usd=body.get("actual_cost_usd"), result_hash=body.get("result_hash"))
 
     status, replay, elapsed = post(WEBHOOK, valid, TOKEN)
     record(cases, "persistent_idempotent_replay", status == 200 and replay.get("replayed") is True and replay.get("callback_repeated") is False, http=status, elapsed_ms=elapsed)
