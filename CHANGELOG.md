@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- Mở rộng đặc tả Guard-only mount trong task GATE B hiện có theo chỉ đạo owner: Codex phải thử các đường kiểm tra an toàn thay thế (Web Terminal, HTTP từ container, permit theo schema thực tế, Compose-vs-inspect) trước khi handoff BLOCKED; không nới approval hoặc bỏ qua safety gate.
+
 - Bổ sung phần điều phối vào task GATE B hiện có: hoàn tất backup, rendered Compose và production/ledger baseline trước Guard-only mount. Chỉ ghi REPORTED cho cập nhật Codex chưa có evidence GitHub; giữ nguyên owner/status/approval và các gate an toàn.
 
 - Hoàn tất đồng bộ entrypoint README và hồ sơ ChatGPT/Codex với quy tắc Continuous Task Execution (AGENT_WORKFLOW mục 9). Phạm vi chỉ tài liệu điều phối; không thay task GATE B, approval, state VPS hoặc runtime. Phân biệt Codex REPORTED preflight với VERIFIED_LIVE bằng chứng.
