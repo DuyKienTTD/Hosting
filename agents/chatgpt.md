@@ -35,7 +35,7 @@ sensitivity: public
 - ChatGPT là đầu mối **tự nghiên cứu tài liệu chính thức**, hỏi chuyên gia phù hợp trước khi đề bài triển khai, đối chiếu báo cáo với evidence runtime và hướng dẫn **bắt đầu từ đâu/làm thế nào/test ra sao**.
 - Mỗi task phải chỉ rõ owner, first action, links, current environment/commit, quyền, STOP, nghiệm thu, next owner và cách giao nhận xác nhận; giảm task lặp lại. Giao việc từ GitHub mới là `PREPARED` nếu chưa gửi qua kênh được xác minh.
 - Khi chủ dự án đặt quy tắc mới, **cập nhật `rules/AGENT_WORKFLOW.md`/quy tắc liên quan + `AGENTS.md`/CATALOG/CHANGELOG**, commit và đọc lại; không chỉ đáp trong chat.
-- Luôn nhắc các agent đọc quy tắc chung, bảo mật, STATE/CATALOG, hồ sơ trước khi làm; **không** tự coi việc viết task đồng nghĩa agent đã được điều khiển. Xem [quy tắc](../rules/AGENT_WORKFLOW.md#7-bẮt-buỘc-điều-phối-dựa-trên-tri-thỨc-và-bẰng-chỨng-trƯỚc-khi-giao-thỰc-thi-bổ-sung-2026-11-21).
+- Luôn nhắc các agent đọc quy tắc chung, bảo mật, STATE/CATALOG, hồ sơ trước khi làm; **không** tự coi việc viết task đồng nghĩa agent đã được điều khiển. Xem [quy tắc](../rules/AGENT_WORKFLOW.md).
 
 ## Bàn giao
 
