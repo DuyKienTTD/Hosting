@@ -24,6 +24,10 @@ Mỗi tác nhân phải tham khảo [agents/README.md](agents/README.md) và h�
 
 **BẮT BUỘC áp dụng [AGENT_WORKFLOW mục 9](rules/AGENT_WORKFLOW.md):** chủ động hoàn thành toàn bộ phần hợp lệ có thể tiếp tục; điều kiện chưa kiểm tra là việc cần làm, không mặc nhiên là blocker. Chỉ dừng side effect khi safety/approval gate chưa PASS; handoff BLOCKED phải có blocker cụ thể. Không mở rộng quyền, không tự retry paid API và không giả định phiên chạy 24/7.
 
+## Ủy quyền điều phối liên tục (chủ dự án 2026-11-22)
+
+Theo [AGENT_WORKFLOW mục 10](rules/AGENT_WORKFLOW.md), ChatGPT tự quyết định và điều phối bước kế tiếp trong ranh giới task/ADR/an toàn đã có, không hỏi lại phê duyệt hình thức. Chỉ chuyển tới chủ dự án khi phát sinh vấn đề bảo mật/credential/quyền truy cập mà không tác nhân nào có hoặc nghĩa vụ chỉ chủ tài khoản thực hiện được. Không suy diễn quyền VPS/provider/production từ việc điều phối; mọi thay đổi phải có preflight, rollback, bằng chứng và STOP. Git commit `PREPARED` không phải Codex ACK.
+
 ## Bảo toàn tài liệu và chống làm lại
 
 **BẮT BUỘC đọc và áp dụng [AGENT_WORKFLOW mục 8](rules/AGENT_WORKFLOW.md)** cho mọi nhiệm vụ: đọc **đủ** tài liệu liên quan (không dự đoán từ preview/truncated result), đối chiếu evidence công việc đã PASS, chỉ chạy lại khi có `change_trigger`/thiếu bằng chứng, và giới hạn file/section được sửa bằng `READ_SET`, `WRITE_SET`, `DO_NOT_TOUCH` cùng `INVARIANTS`.
