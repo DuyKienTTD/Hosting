@@ -2,8 +2,8 @@
 """Owner-only, no-echo OpenAI key setup for the GATE B sandbox guard.
 
 This program opens no network listener and never calls an OpenAI endpoint.  It
-stores the credential in a root-only file, then recreates only the sandbox
-guard with a Compose overlay that mounts that file read-only.
+validates the sandbox Compose overlay read-only and stores the credential in a
+root-only file.  It never starts, stops, or recreates a container.
 """
 
 from __future__ import annotations
@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import contextlib
 import getpass
-import hashlib
 import json
 import os
 from pathlib import Path
@@ -111,20 +110,17 @@ def write_secret_atomic(path: Path, key: bytearray) -> None:
             temp_path.unlink()
 
 
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(65536), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def _compose_command(with_overlay: bool, *arguments: str) -> list[str]:
-    command = ["docker", "compose", "-f", str(BASE_COMPOSE)]
-    if with_overlay:
-        command += ["-f", str(OVERLAY_COMPOSE)]
-    command += list(arguments)
-    return command
+def _compose_config_command() -> list[str]:
+    return [
+        "docker",
+        "compose",
+        "-f",
+        str(BASE_COMPOSE),
+        "-f",
+        str(OVERLAY_COMPOSE),
+        "config",
+        "--quiet",
+    ]
 
 
 def _run(command: list[str]) -> subprocess.CompletedProcess[str]:
@@ -152,52 +148,10 @@ def _inspect_all_secret_mounts() -> list[tuple[str, bool]]:
     return found
 
 
-def apply_guard_mount() -> None:
+def validate_compose_read_only() -> None:
     if not BASE_COMPOSE.is_file() or not OVERLAY_COMPOSE.is_file():
         raise RuntimeError("Compose base or H4 overlay is unavailable.")
-    base_hash = _sha256(BASE_COMPOSE)
-    _run(_compose_command(True, "config", "--quiet"))
-    _run(
-        _compose_command(
-            True,
-            "up",
-            "-d",
-            "--no-deps",
-            "--force-recreate",
-            "--wait",
-            "--wait-timeout",
-            "35",
-            "guard",
-        )
-    )
-    if _sha256(BASE_COMPOSE) != base_hash:
-        raise RuntimeError("Base Compose changed unexpectedly.")
-    mounts = _inspect_all_secret_mounts()
-    if mounts != [(GUARD_CONTAINER, False)]:
-        raise RuntimeError("Provider secret is not isolated to one read-only guard mount.")
-    inspected = json.loads(_run(["docker", "inspect", GUARD_CONTAINER]).stdout)[0]
-    port_bindings = inspected.get("HostConfig", {}).get("PortBindings") or {}
-    if any(port_bindings.values()):
-        raise RuntimeError("Guard unexpectedly has a published port.")
-
-
-def rollback_guard_mount() -> None:
-    _run(_compose_command(False, "config", "--quiet"))
-    _run(
-        _compose_command(
-            False,
-            "up",
-            "-d",
-            "--no-deps",
-            "--force-recreate",
-            "--wait",
-            "--wait-timeout",
-            "35",
-            "guard",
-        )
-    )
-    if _inspect_all_secret_mounts():
-        raise RuntimeError("Provider secret remains mounted after rollback.")
+    _run(_compose_config_command())
 
 
 @contextlib.contextmanager
@@ -241,7 +195,7 @@ def interactive_install(
     timeout_seconds: int = 300,
     input_fn: Callable[[str], str] = input,
     getpass_fn: Callable[[str], str] = getpass.getpass,
-    apply_fn: Callable[[], None] = apply_guard_mount,
+    validate_fn: Callable[[], None] = validate_compose_read_only,
 ) -> None:
     current = secret_status(path)
     if action == "install" and current.get("present"):
@@ -251,8 +205,10 @@ def interactive_install(
 
     print("OpenAI provider credential setup — GATE B sandbox")
     print(f"Project: {PROJECT_LABEL}")
-    print("Destination: one read-only mount on the sandbox guard only")
-    print("This interface opens no listener and performs no provider request.")
+    print("Destination: root-only staging file for a future guard-only mount")
+    print("This interface opens no listener, performs no provider request, and changes no container.")
+
+    validate_fn()
 
     key = bytearray()
     repeated = bytearray()
@@ -264,12 +220,11 @@ def interactive_install(
         if not secrets.compare_digest(key, repeated):
             raise ValueError("The two hidden values do not match.")
         expected = action.upper()
-        if input_fn(f"Type {expected} to store and mount the key, or anything else to cancel: ") != expected:
+        if input_fn(f"Type {expected} to store the key, or anything else to cancel: ") != expected:
             raise Cancelled("Final confirmation cancelled.")
 
     try:
         write_secret_atomic(path, key)
-        apply_fn()
     finally:
         for buffer in (key, repeated):
             for index in range(len(buffer)):
@@ -278,7 +233,8 @@ def interactive_install(
     verified = secret_status(path)
     if os.name == "posix" and verified.get("mode") != 0o600:
         raise RuntimeError("Secret mode verification failed.")
-    print("READY: secret stored root-only and mounted read-only to the sandbox guard.")
+    print("STORED_NOT_MOUNTED: secret stored root-only; no container was changed.")
+    print("A separately approved guard recreate is required before the secret can be mounted.")
     print("No OpenAI request, paid inference, permit, ledger change, or public listener was created.")
 
 
@@ -286,16 +242,17 @@ def interactive_revoke(
     *,
     path: Path = SECRET_PATH,
     input_fn: Callable[[str], str] = input,
-    rollback_fn: Callable[[], None] = rollback_guard_mount,
+    mounted_fn: Callable[[], list[tuple[str, bool]]] = _inspect_all_secret_mounts,
 ) -> None:
     if not secret_status(path).get("present"):
         print("ABSENT: no provider secret is stored.")
         return
-    if input_fn("Type REVOKE to unmount and delete the stored provider key: ") != "REVOKE":
+    if input_fn("Type REVOKE to delete the unmounted stored provider key: ") != "REVOKE":
         raise Cancelled("Revocation cancelled.")
-    rollback_fn()
+    if mounted_fn():
+        raise RuntimeError("Secret is mounted; obtain separate approval to recreate the guard before deletion.")
     path.unlink()
-    print("REVOKED: provider key unmounted and removed; ledger was not touched.")
+    print("REVOKED: unmounted provider key removed; no container or ledger was touched.")
 
 
 def print_status(path: Path = SECRET_PATH) -> None:
@@ -304,8 +261,12 @@ def print_status(path: Path = SECRET_PATH) -> None:
         print("ABSENT: no provider secret is stored.")
         return
     mounted = _inspect_all_secret_mounts()
-    safe = current.get("mode") == 0o600 and mounted == [(GUARD_CONTAINER, False)]
-    print(f"PRESENT: mode=0600, guard_only_read_only={str(safe).lower()}")
+    safe_mount = mounted == [(GUARD_CONTAINER, False)]
+    print(
+        "PRESENT: mode=0600, "
+        f"mounted={str(bool(mounted)).lower()}, "
+        f"guard_only_read_only={str(safe_mount).lower()}"
+    )
 
 
 def main() -> int:

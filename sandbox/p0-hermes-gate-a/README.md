@@ -43,13 +43,15 @@ does not measure provider formatting tokens.
 
 `owner_key_input.py` is a terminal-only, no-echo interface for the project
 owner. It opens no listener and makes no provider request. On the VPS it stores
-the key at a root-owned `0600` path excluded from Git, validates
-`compose.h4-provider-secret.yaml`, recreates only `guard`, and verifies that the
-credential is mounted read-only at `/run/secrets/openai_provider_api_key` by
-that container alone. The base Compose file is hashed before and after apply.
+the key at a root-owned `0600` path excluded from Git and validates
+`compose.h4-provider-secret.yaml` with `docker compose config --quiet`. It does
+not start, stop, or recreate any container. The reviewed overlay is prepared to
+mount the credential read-only at `/run/secrets/openai_provider_api_key` on
+`guard` alone, but applying that mount requires separate approval.
 
 Run `python3 owner_key_input_test.py` with fake values before owner input. The
-`install`, `rotate`, `status`, and `revoke` actions never print the key. The
-overlay adds no port, does not change the provider route, does not create a paid
-permit, and does not authorize a Responses request. Provider capability and
-token-count preflight remain separate after the owner has entered the key.
+`install`, `rotate`, `status`, and `revoke` actions never print the key.
+`revoke` refuses to delete a mounted secret. The overlay adds no port, does not
+change the provider route, does not create a paid permit, and does not
+authorize a Responses request. Provider capability, approved guard recreate,
+and token-count preflight remain separate after the owner has entered the key.

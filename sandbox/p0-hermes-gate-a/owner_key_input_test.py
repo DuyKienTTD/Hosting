@@ -38,7 +38,7 @@ class OwnerKeyInputTests(unittest.TestCase):
                 path=self.path,
                 input_fn=lambda _prompt: next(answers),
                 getpass_fn=lambda _prompt: next(hidden),
-                apply_fn=lambda: None,
+                validate_fn=lambda: None,
             )
         return output.getvalue()
 
@@ -60,7 +60,7 @@ class OwnerKeyInputTests(unittest.TestCase):
                 path=self.path,
                 input_fn=lambda _prompt: next(answers),
                 getpass_fn=lambda _prompt: next(hidden),
-                apply_fn=lambda: None,
+                validate_fn=lambda: None,
             )
         self.assertFalse(self.path.exists())
 
@@ -71,7 +71,7 @@ class OwnerKeyInputTests(unittest.TestCase):
                 path=self.path,
                 input_fn=lambda _prompt: "CANCEL",
                 getpass_fn=lambda _prompt: self.fail("hidden input should not run"),
-                apply_fn=lambda: None,
+                validate_fn=lambda: None,
             )
         self.assertFalse(self.path.exists())
 
@@ -83,7 +83,7 @@ class OwnerKeyInputTests(unittest.TestCase):
                 timeout_seconds=0,
                 input_fn=lambda _prompt: self.fail("input should not run"),
                 getpass_fn=lambda _prompt: self.fail("hidden input should not run"),
-                apply_fn=lambda: None,
+                validate_fn=lambda: None,
             )
         self.assertFalse(self.path.exists())
 
@@ -98,16 +98,26 @@ class OwnerKeyInputTests(unittest.TestCase):
     def test_revoke_requires_exact_confirmation(self) -> None:
         self.install(fake_key())
         with self.assertRaises(subject.Cancelled):
-            subject.interactive_revoke(path=self.path, input_fn=lambda _prompt: "NO", rollback_fn=lambda: None)
+            subject.interactive_revoke(path=self.path, input_fn=lambda _prompt: "NO", mounted_fn=lambda: [])
         self.assertTrue(self.path.exists())
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
             subject.interactive_revoke(
                 path=self.path,
                 input_fn=lambda _prompt: "REVOKE",
-                rollback_fn=lambda: None,
+                mounted_fn=lambda: [],
             )
         self.assertFalse(self.path.exists())
+
+    def test_revoke_refuses_while_mounted(self) -> None:
+        self.install(fake_key())
+        with self.assertRaises(RuntimeError):
+            subject.interactive_revoke(
+                path=self.path,
+                input_fn=lambda _prompt: "REVOKE",
+                mounted_fn=lambda: [(subject.GUARD_CONTAINER, False)],
+            )
+        self.assertTrue(self.path.exists())
 
     def test_symlink_target_is_rejected(self) -> None:
         self.root.mkdir(mode=0o700)
@@ -134,6 +144,12 @@ class OwnerKeyInputTests(unittest.TestCase):
         self.assertNotIn("HTTPServer", source)
         self.assertNotIn("socket.listen", source)
         self.assertNotIn("localStorage", source)
+
+    def test_source_contains_no_compose_mutation(self) -> None:
+        source = Path(subject.__file__).read_text(encoding="utf-8")
+        self.assertNotIn('"up"', source)
+        self.assertNotIn('"down"', source)
+        self.assertNotIn("--force-recreate", source)
 
 
 if __name__ == "__main__":
