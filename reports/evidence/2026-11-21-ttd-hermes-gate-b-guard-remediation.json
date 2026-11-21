@@ -1,0 +1,15 @@
+{
+  "task_id": "ttd-hermes-gate-b-guard-remediation-001",
+  "result": "MOCK_INTEGRATION_PASS",
+  "environment": {"os": "Ubuntu 24.04.4", "kernel": "6.8.0-147-generic", "python": "3.12.3"},
+  "linux_fault_test": {"exit": 0, "contenders": 20, "admitted": 1, "rejected": 19, "fault_cases": 14, "paid_calls": 0},
+  "shared_lock_interop": {"exit": 0, "same_lock_inode": true, "adapter_update_preserved": true, "attempts_on_copy": 2, "reserved_usd_on_copy": 0.007, "paid_calls": 0},
+  "mock_e2e": {"exit": 0, "first_http": 200, "callback_http": 200, "mode": "hermes_mock", "paid_inference": false, "replay_http": 200, "replayed": true},
+  "mock_ledger_after": {"attempts": 2, "reserved_usd": 0.007, "permit_state": "consumed", "kill_switch": true, "directory_mode": "700", "file_mode": "600"},
+  "live_ledger_after_read_only": {"attempts": 1, "reserved_usd": 0.0035, "actual_usd_usage_estimate": 0.0000496, "kill_switch": true, "one_shot_permits": 0},
+  "rollback": {"guard_file_cmp_exit": 0, "compose_file_cmp_exit": 0, "sandbox_guard_healthy": true, "sandbox_bridge_healthy": true},
+  "production_after": {"n8n_health_http": 200, "hermes_health_http": 200, "n8n_restart_count": 0, "hermes_restart_count": 0},
+  "incremental_paid_calls": 0,
+  "incremental_api_cost_usd": 0,
+  "paid_gate_b_status": "BLOCKED_PREFLIGHT"
+}

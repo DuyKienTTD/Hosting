@@ -365,7 +365,7 @@ documents:
   - id: ttd-hermes-gate-b-guard-remediation-001
     path: tasks/2026-11-21-hermes-gate-b-permit-ledger-remediation.md
     type: task
-    status: blocked
+    status: complete
     authoritative_for: Codex-Hermes-Gate-B-one-shot-permit-and-shared-ledger-guard-remediation
     updated_at: 2026-11-21
     sensitivity: public
@@ -402,6 +402,24 @@ documents:
     type: evidence
     status: current
     authoritative_for: sanitized-KVM2-Linux-remediation-test-evidence
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-guard-remediation-results-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-guard-remediation-results.md
+    type: report
+    status: complete
+    authoritative_for: Gate-B-guard-mock-integration-acceptance
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-guard-remediation-results-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-guard-remediation.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-Gate-B-guard-mock-acceptance-evidence
     updated_at: 2026-11-21
     verified_at: 2026-11-21
     sensitivity: public-redacted

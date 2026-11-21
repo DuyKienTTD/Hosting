@@ -64,15 +64,13 @@ sensitivity: public-redacted
 
 - Đã review GATE A mock **PASS** dựa trên báo cáo/evidence GitHub; đã tạo [ADR-P0-003](decisions/2026-11-21-hermes-gate-b-single-paid-call-proposal.md) **APPROVED_WITH_RESTRICTIONS (2026-11-21)** cho Codex thực hiện tối đa một Hermes Agent paid call. [Task Codex GATE B](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md) đã giao; chỉ one-shot permit khóa lại trước dispatch, global kill switch vẫn ON, không mở toàn cục và không paid retry. **Chưa có evidence thực thi GATE B.**
 
-- GATE B preflight ghi **BLOCKED_PREFLIGHT**: guard chưa có atomic one-shot permit hoặc shared-ledger reservation. Theo evidence từ kiểm tra repository, Hermes paid attempts mới 0, chi phí mới 0; **ledger/kill switch/production chưa được xác minh live ở phiên này**. Đã tạo [TTD-HERMES-GATE-B-GUARD-REMEDIATION-001](tasks/2026-11-21-hermes-gate-b-permit-ledger-remediation.md) cho Codex thực hiện sửa và thử nghiệm **mock-only**, không gọi paid inference và không đổi production. GATE B paid execution tiếp tục BLOCKED đến khi preflight live PASS.
+- GATE B guard remediation đã **MOCK_INTEGRATION_PASS** với one-shot permit và shared-ledger reservation trên ledger copy; sandbox đã rollback về cấu hình GATE A sau test. Ledger thật, kill switch và production health được xác minh live; paid attempts mới 0, chi phí mới 0. [Báo cáo tổng hợp](reports/2026-11-21-hermes-gate-b-guard-remediation-results.md). GATE B paid execution tiếp tục `BLOCKED_PREFLIGHT` đến khi preflight live riêng PASS.
 
 ## Việc đang chờ
 
-- KVM2 Linux transaction unit cho one-shot permit PASS (20 tiến trình, một admission trên ledger copy), hai crash boundary PASS, ledger live/kill switch và production health đã xác minh read-only; full crash matrix và guard mock E2E chưa PASS. GATE B vẫn BLOCKED. [Báo cáo mới](reports/2026-11-21-hermes-gate-b-remediation-linux-check.md).
+- [TTD-HERMES-GATE-B-GUARD-REMEDIATION-001](tasks/2026-11-21-hermes-gate-b-permit-ledger-remediation.md) đã **MOCK_INTEGRATION_PASS**: shared-lock interop, 20-process race, 14 fault cases và full mock E2E qua n8n→Hermes→guard→callback PASS. Sandbox đã rollback, production health 200/restart 0, ledger thật 1 attempt/kill switch ON và không đổi, paid calls mới 0. [Báo cáo nghiệm thu](reports/2026-11-21-hermes-gate-b-guard-remediation-results.md). Paid GATE B vẫn BLOCKED_PREFLIGHT, cần preflight live riêng.
 
-- Remediation permit/ledger có bản nháp mã nhưng Linux mock tests và live preflight chưa xác minh; GATE B vẫn `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-21-hermes-gate-b-permit-ledger-remediation.md).
-
-- GATE B được phê duyệt có điều kiện nhưng preflight hiện `BLOCKED_PREFLIGHT`: guard GATE A chưa có atomic one-shot permit, consume/relock trước dispatch và worst-case reservation; 0 paid Hermes attempt mới. [Báo cáo](reports/2026-11-21-hermes-gate-b-paid-results.md).
+- GATE B paid execution vẫn `BLOCKED_PREFLIGHT`: cần kiểm tra lại live provider/account pricing, authorization, paid route và contract fingerprint trước bất kỳ paid attempt nào. [Báo cáo nghiệm thu mock](reports/2026-11-21-hermes-gate-b-guard-remediation-results.md).
 
 - Chưa thực hiện hardening SSH/XRDP hoặc firewall.
 - Chưa đặt n8n/Hermes sau reverse proxy HTTPS.

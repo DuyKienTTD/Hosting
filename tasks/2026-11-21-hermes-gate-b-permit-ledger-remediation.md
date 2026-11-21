@@ -1,7 +1,7 @@
 ---
 id: ttd-hermes-gate-b-guard-remediation-001
 type: task
-status: blocked
+status: complete
 updated_at: 2026-11-21
 sensitivity: public
 owner: codex
@@ -80,3 +80,7 @@ Bằng chứng mới: [Linux check](../reports/2026-11-21-hermes-gate-b-remediat
 5. Push **một** báo cáo nghiệm thu tổng hợp với evidence redacted: `MOCK_INTEGRATION_PASS` hay `BLOCKED` kèm nguyên nhân còn lại. Không coi unit PASS là paid readiness; GATE B paid attempt vẫn chờ preflight live toàn bộ theo ADR-P0-003.
 
 **Không gọi API trả phí trong remediation, không đổi production, giữ kill switch ON.**
+
+## Nghiệm thu cuối phiên
+
+**MOCK_INTEGRATION_PASS / remediation complete.** Shared-lock interop, 14 fault cases, 20-process race, full n8n→Hermes→guard→provider mock→callback, replay và rollback đã PASS trên KVM2; ledger thật không đổi, kill switch ON, paid calls mới 0. Xem [báo cáo nghiệm thu tổng hợp](../reports/2026-11-21-hermes-gate-b-guard-remediation-results.md) và [evidence](../reports/evidence/2026-11-21-ttd-hermes-gate-b-guard-remediation.json). **Paid GATE B vẫn BLOCKED_PREFLIGHT** cho đến khi preflight live riêng hoàn tất; không coi mock PASS là quyền dispatch trả phí.
