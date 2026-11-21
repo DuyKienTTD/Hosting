@@ -1,12 +1,15 @@
 ---
 id: ttd-agent-capability-survey-001
 type: task
-status: current
+status: complete
 updated_at: 2026-11-21
+completed_at: 2026-11-21
 sensitivity: public
 ---
 
 # TTD-AGENT-CAPABILITY-SURVEY-001 — Tự kiểm tra năng lực và cách phối hợp
+
+> **Hoàn tất ngày 2026-11-21:** [Codex](../reports/2026-11-21-codex-capability-survey.md), [Hermes](../reports/2026-11-21-hermes-capability-survey.md) và [Hostinger Agent](../reports/2026-11-21-hostinger-agent-capability-survey.md) đã nộp báo cáo. Các quyền vẫn có tính session-scoped và phải kiểm tra lại khi giao task mới.
 
 **Phạm vi:** khảo sát bổ sung Codex, Hermes và Hostinger Agent. Mục tiêu làm rõ năng lực **thực sự có trong instance/session và quyền được cấp**, không tạo thêm thủ tục hành chính. Đây là yêu cầu *assessment-only*, không sửa production.
 

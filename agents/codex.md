@@ -3,38 +3,84 @@ id: agent-codex
 type: knowledge
 status: current
 updated_at: 2026-11-21
-sensitivity: public
+verified_at: 2026-11-21
+sensitivity: public-redacted
 ---
 
 # Codex — kỹ thuật, kiểm toán, xây dựng và triển khai
 
-**Role ưu tiên:** Software/infrastructure engineer; người thiết kế/test và duy trì API, Docker, network, workflows, media-worker và CI khi được giao. Không độc quyền mọi thay đổi kỹ thuật.
+**Role ưu tiên:** software/infrastructure engineer; thiết kế, code, test và vận hành API, Docker, network, workflow, media-worker và CI khi task cấp đúng quyền. Hồ sơ là bằng chứng năng lực, không phải quyền production.
 
-## REPORTED/VERIFIED theo artifact 2026-11-21
+## Identity và môi trường đã xác minh
 
-- Đã thực hiện live audit từ Hostinger Web Terminal, có [báo cáo](../reports/2026-11-21-n8n-hermes-integration-audit.md), [evidence](../reports/evidence/2026-11-21-ttd-ai-platform-audit-001.json) và commit trên GitHub.
-- Xác định n8n `2.45.7`, Hermes dashboard `0.22.5`, các health probe/pass network-auth hai chiều; nhận diện chính xác blocker inference/MCP.
-- Đã kiểm kê Docker images, compose/network/storage, giới hạn runtime và hiện trạng media. Đợt kiểm toán là **read-only**, chưa chứng minh quyền triển khai hay các khả năng khác.
-- GitHub write/commit thực tế được chứng minh qua kết quả đã push. Phương thức truy cập VPS dùng trong audit có thể khác phiên Codex tương lai.
+- Codex chạy trong ChatGPT desktop app trên Windows; app `26.1117.41037`, build `29803`, kênh production tại lần kiểm tra 2026-11-21.
+- Exact model/reasoning effort không được tool/session metadata expose: `UNKNOWN`.
+- Phiên khảo sát có local PowerShell, filesystem read/write, network và Git trong checkout `Hosting`.
+- Local shell và VPS là hai runtime khác nhau. VPS được truy cập qua hPanel/Web Terminal đã đăng nhập; direct SSH local chưa test.
+- Permission/network/browser/account state là **session-scoped** và phải kiểm tra lại ở task tương lai.
 
-## Có thể giao phù hợp (cần kiểm chứng nếu chưa từng làm)
+## VERIFIED
 
-- Phát triển mã nguồn, API connector, test harness, workflow/adapter và thiết kế dữ liệu.
-- Tối ưu Docker, mạng nội bộ, TLS/reverse proxy, backup/rollback, quan sát vận hành.
-- Tích hợp Hermes↔n8n, phương tiện media-worker FFmpeg và chuẩn hóa kết quả.
-- Thiết lập thử nghiệm regression, chất lượng mã và tài liệu triển khai.
+- Đọc/sửa file, chạy command/test, review diff, commit/push GitHub bằng Git HTTPS.
+- Toolchain local có Git, ripgrep, Node.js, Python, OpenSSH và PowerShell.
+- Browser/Computer Use trên Windows; đọc hPanel đang đăng nhập trong current session, có confirmation gate cho action nhạy cảm.
+- Audit VPS read-only qua Hostinger Web Terminal; kiểm kê Docker/image/network/storage/resource.
+- Debug live n8n `2.45.7` và Hermes dashboard `0.22.5`; xác định health, auth, network và blocker MCP/inference/E2E.
+- Tải/đối chiếu official docs, dùng skills, tạo report/evidence đã redaction và cập nhật state/catalog/changelog.
 
-## UNKNOWN/BLOCKED
+Nguồn: [Codex capability survey](../reports/2026-11-21-codex-capability-survey.md), [live audit](../reports/2026-11-21-n8n-hermes-integration-audit.md) và [evidence](../reports/evidence/2026-11-21-ttd-ai-platform-audit-001.json).
 
-- Danh mục tools/skills/models/đơn vị tính chi phí trong **phiên Codex cụ thể** chưa có tự đánh giá độc lập.
-- Quyền được cấp trên VPS, GitHub, Hostinger API, n8n admin, Ads/WordPress ở mỗi phiên phải kiểm tra lại.
-- Không có bằng chứng Codex có thể chủ động nhận event và vận hành nền liên tục ngoài phiên.
-- Không có quyền tự sửa production chỉ vì từng audit được root terminal.
+## AVAILABLE_UNTESTED
 
-## Bàn giao và phối hợp
+- Tạo branch/worktree/PR và cấu hình CI; repo hiện chưa có GitHub Actions workflow.
+- Direct SSH read-only bằng account least-privilege; SSH client có mặt nhưng auth chưa test.
+- Triển khai Docker/Compose, internal network, reverse proxy/TLS, monitoring và hardening sau approval riêng.
+- Xây n8n workflow, Hermes API adapter, schema/idempotency/retry/error workflow và media-worker FFmpeg.
+- Dùng document/PDF/spreadsheet/presentation/image skills khi task cần.
+- Dùng Codex goal/automation/worktree/remote-control surfaces; chưa xác minh chạy bền khi UI/host đóng.
 
-- Nhận task từ `tasks/`; nếu cần sửa kỹ thuật thì chuẩn bị diff + rollback + test, và chờ phê duyệt tác động production.
-- Lưu báo cáo có ngày trong `reports/`, code/config mẫu trong thư mục phù hợp, evidence đã làm sạch, cập nhật state/catalog khi cần.
-- Có thể giao nội dung/triage cho Hermes; n8n giữ lịch chạy, trigger và trạng thái tự động.
+## BLOCKED / DEGRADED / UNKNOWN
 
-**Khảo sát còn thiếu:** [Agent capability survey](../tasks/2026-11-21-agent-capability-survey.md), mục Codex.
+- Local Docker CLI có nhưng Docker Desktop daemon không chạy: `BLOCKED_LOCAL_DAEMON`.
+- GitHub CLI bị precedence bởi `GITHUB_TOKEN` không hợp lệ; Git HTTPS vẫn VERIFIED. Không dựa vào `gh` cho đến khi có task dọn cấu hình.
+- 0 MCP resources/templates được expose; không có marketing/website/media connector trong phiên.
+- n8n MCP disabled, Hermes inference API chưa expose và n8n có 0 workflow: E2E `BLOCKED`.
+- Google Ads/GA4, WordPress/WooCommerce, YouTube/TikTok/Meta, Kling/HeyGen/ElevenLabs API scopes và credentials: `BLOCKED/UNKNOWN`.
+- Durable memory ngoài chat/Git, model/cost/quota và execution 24/7 khi app đóng: `UNKNOWN`.
+- Không có quyền tự sửa production chỉ vì từng đọc root Web Terminal.
+
+## Nhiệm vụ nên giao Codex
+
+1. Code/API adapters/test harness/schema/migration có rollback.
+2. Docker, network, TLS, observability, security hardening theo task đã duyệt.
+3. n8n↔Hermes sandbox/E2E, queue/retry/idempotency/callback và monitoring.
+4. Media-worker/FFmpeg, storage lifecycle và CI/release engineering.
+5. Technical audit, incident diagnosis, evidence/report và Git handoff.
+
+## Việc nên phối hợp hoặc giao bên khác
+
+- Hermes cho reasoning/content/tool execution sau khi API/MCP an toàn.
+- n8n cho schedule, connector, execution state và retry.
+- Hostinger/hPanel cho provider control plane theo approval.
+- ChatGPT/business owner cho yêu cầu, priority và review nghiệp vụ.
+- Con người cho credentials, ngân sách, Ads write, publish và thay đổi DNS/SSH/firewall.
+
+## Cách nhận và bàn giao
+
+- Nhận task từ URL/file Git hoặc prompt chat; n8n/API chưa nối trực tiếp vào Codex session.
+- Có thể dùng Codex threads/subagents khi người dùng yêu cầu; không tự spawn trong survey này.
+- Bàn giao bằng report có ngày, code/config, evidence đã làm sạch, commit/PR và trạng thái PASS/FAIL/BLOCKED.
+- Không đảm bảo tiếp tục khi app/host dừng. Automation/worktree cần cấu hình và vẫn không thay n8n/DB làm job-state store.
+
+## Approval và an toàn
+
+- Production mutation, restart/recreate, firewall/SSH/DNS/SSL, credentials, paid API, Ads write và publish cần task + approval riêng.
+- Browser access tới account đã đăng nhập không phải API scope hoặc quyền đại diện.
+- Mọi diff public phải scan secret/IP/hostname/cookie/raw log trước push.
+- Quyền và tools phải xác minh lại theo từng chat/host; không lấy hồ sơ này làm ủy quyền.
+
+## Ba phép thử tiếp theo đề xuất
+
+1. Fake-data n8n↔Hermes E2E trong sandbox sau approval P0.
+2. Branch/PR + repository validator/secret-scan CI smoke test.
+3. Direct SSH read-only bằng user least-privilege, đối chiếu inventory với hPanel.

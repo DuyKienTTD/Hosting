@@ -102,10 +102,28 @@ documents:
   - id: agent-capability-survey-001
     path: tasks/2026-11-21-agent-capability-survey.md
     type: task
-    status: current
+    status: complete
     authoritative_for: capability-validation-questions-to-codex-hermes-hostinger-agent
     updated_at: 2026-11-21
     sensitivity: public
+
+  - id: codex-capability-survey-2026-11-21
+    path: reports/2026-11-21-codex-capability-survey.md
+    type: report
+    status: complete
+    authoritative_for: codex-session-capabilities-and-limits-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hostinger-agent-capability-survey-2026-11-21
+    path: reports/2026-11-21-hostinger-agent-capability-survey.md
+    type: report
+    status: complete
+    authoritative_for: hostinger-agent-capabilities-and-limits-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
 
   - id: agent-chatgpt
     path: agents/chatgpt.md
@@ -121,7 +139,8 @@ documents:
     status: current
     authoritative_for: codex-role-capabilities
     updated_at: 2026-11-21
-    sensitivity: public
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
 
   - id: agent-hermes
     path: agents/hermes.md

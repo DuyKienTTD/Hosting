@@ -39,10 +39,11 @@ sensitivity: public-redacted
 ## Khảo sát năng lực và phối hợp các tác nhân
 
 - Đã thiết lập [agents/README.md](agents/README.md) và hồ sơ ChatGPT, Codex, Hermes, Hostinger, n8n dựa trên báo cáo, GitHub connector và quan sát hPanel.
-- ChatGPT đã xác minh GitHub read/write và có thể đọc tab Hostinger. Codex có audit live và GitHub push. Hermes có self-assessment và các giới hạn API/MCP đã biết. Hostinger hPanel có quản trị VPS/Docker/backup; **khả năng thao tác của Hostinger Agent chưa được kiểm thử trực tiếp**.
-- Đã tạo [TTD-AGENT-CAPABILITY-SURVEY-001](tasks/2026-11-21-agent-capability-survey.md) để từng bên tự xác minh phần còn thiếu.
-- Hermes đã hoàn tất khảo sát bổ sung tại [reports/2026-11-21-hermes-capability-survey.md](reports/2026-11-21-hermes-capability-survey.md): GitHub write, skills/memory/session recall và tool surface của WebUI session là **VERIFIED**; inference API trên VPS, n8n MCP và các connector business vẫn chưa production-ready.
-- Chủ dự án vẫn đang chuyển tiếp câu hỏi và kết quả giữa các tác nhân; chưa có báo cáo khảo sát bổ sung từ Codex/Hostinger Agent.
+- ChatGPT đã xác minh GitHub read/write và có thể đọc tab Hostinger.
+- Codex đã hoàn tất [capability survey](reports/2026-11-21-codex-capability-survey.md): local code/Git/browser/hPanel/VPS audit VERIFIED; local Docker daemon, marketing connectors, persistent execution và exact model còn BLOCKED/UNKNOWN theo session.
+- Hermes đã hoàn tất [capability survey](reports/2026-11-21-hermes-capability-survey.md): GitHub write, skills/memory/session recall và WebUI tool surface VERIFIED; inference API, n8n MCP và connector business còn BLOCKED/UNKNOWN.
+- Hostinger Agent đã hoàn tất [capability survey](reports/2026-11-21-hostinger-agent-capability-survey.md) với phạm vi hPanel/provider tools và các approval boundary.
+- Ba phần bổ sung của [TTD-AGENT-CAPABILITY-SURVEY-001](tasks/2026-11-21-agent-capability-survey.md) đã có báo cáo; quyền vẫn phải xác minh lại theo từng phiên/task.
 
 ## Việc đang chờ
 

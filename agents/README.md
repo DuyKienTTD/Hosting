@@ -7,9 +7,9 @@
 | Thành phần | Loại | Vai trò ưu tiên | Hồ sơ | Mức xác minh |
 |---|---|---|---|---|
 | ChatGPT | AI trợ lý tương tác | tư vấn, đặc tả, phân tích, điều phối bằng GitHub | [chatgpt](chatgpt.md) | GitHub write/read đã thử trong phiên; thực thi nền chưa có |
-| Codex | Tác nhân kỹ thuật | code, VPS, Docker, API, kiểm thử, vận hành | [codex](codex.md) | có audit/evidence đã push; tự đánh giá rộng hơn còn thiếu |
-| Hermes | AI agent trên VPS/WebUI | suy luận, tools, memory, thực thi tác vụ | [hermes](hermes.md) | self-assessment và VPS audit; E2E với n8n chưa chạy |
-| Hostinger | Nhà cung cấp / control plane | VPS, Docker Manager, backup, firewall, hỗ trợ | [hostinger](hostinger.md) | hPanel và kiểm kê VPS; quyền của Hostinger Agent chưa đo |
+| Codex | Tác nhân kỹ thuật | code, VPS, Docker, API, kiểm thử, vận hành | [codex](codex.md) | capability survey hoàn tất; quyền được ghi theo session |
+| Hermes | AI agent trên VPS/WebUI | suy luận, tools, memory, thực thi tác vụ | [hermes](hermes.md) | capability survey hoàn tất; E2E với n8n chưa chạy |
+| Hostinger | Nhà cung cấp / control plane | VPS, Docker Manager, backup, firewall, hỗ trợ | [hostinger](hostinger.md) | Hostinger Agent survey hoàn tất; quyền theo tool/approval |
 | n8n | Workflow engine, **không phải AI agent** | trigger, connectors, schedule, job state | [n8n](n8n.md) | service healthy, 0 workflow, MCP tắt |
 
 **Hostinger Agent** là trợ lý AI có giao diện trong hPanel, phải khảo sát riêng; không đồng nhất với Hostinger là nhà cung cấp hoặc với quyền root/VPS. Các hồ sơ là **bản ghi năng lực** không phải lệnh cấp quyền.
