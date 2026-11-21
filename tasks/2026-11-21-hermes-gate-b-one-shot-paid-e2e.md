@@ -285,3 +285,7 @@ Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và s�
 5. Push **một báo cáo tổng hợp** cùng evidence redacted lên GitHub, đọc lại remote và giữ nguyên task metadata/approval. `next_owner: chatgpt` review. Nếu chỉ là gián đoạn phiên không thể tránh, checkpoint tối thiểu cùng first safe action thay vì lặp các báo cáo `BLOCKED_PREFLIGHT` không có thông tin mới.
 
 **Ranh giới tuyệt đối:** Không thay đổi permission, SSH, firewall, network, port, production, provider key, ledger/permit/kill switch để "vượt cản"; không tự cấp approval, bỏ qua phép đo bắt buộc hoặc chạy paid inference trong đợt mount. Quy tắc "alternative-first" yêu cầu **cố gắng hợp lý và đủ chứng cứ**, không bắt agent thực hiện việc thiếu quyền hoặc không thể thực hiện về mặt kỹ thuật.
+
+## Kết quả phiên Guard-only mount — 2026-11-22
+
+**BLOCKED / INTERRUPTED_BY_ENVIRONMENT.** Codex nhận chỉ thị `cc88484` và đối chiếu quy tắc tại `ba3ad2b`. Computer Use dừng ở cửa sổ Web Terminal vì không xác minh được URL. Phiên chưa có đích SSH KVM2 đã xác minh và Docker chỉ có context local. Đã kiểm chứng bản render local chỉ thêm một bind mount read-only vào Guard. Việc xác minh runtime và mount còn chờ đường truy cập KVM2. [Báo cáo và bằng chứng](../reports/2026-11-22-hermes-gate-b-guard-mount-access-result.md).

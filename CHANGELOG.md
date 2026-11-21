@@ -1,5 +1,9 @@
 # Lịch sử cập nhật
 
+## 2026-11-22
+
+- Ghi kết quả phiên Guard-only mount bị chặn ở đường truy cập KVM2. Docker Compose local xác nhận overlay chỉ thêm một bind mount read-only cho Guard. [Báo cáo](reports/2026-11-22-hermes-gate-b-guard-mount-access-result.md).
+
 ## 2026-11-21
 
 - Codex hoàn tất onboarding tại commit `30ccdfa`: đọc đầy đủ entrypoint, quy tắc, hồ sơ, toàn bộ tài liệu/evidence được catalog chỉ mục và các Markdown ngoài archive; ghi ACK sẵn sàng nhận task nhưng chưa tự bắt đầu GATE B hoặc thay đổi runtime. Repository validator PASS 137 tracked files.
