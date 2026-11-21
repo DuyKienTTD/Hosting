@@ -1,0 +1,238 @@
+# Kiểm kê VPS hiện tại
+
+Ngày kiểm kê: **2026-11-21**
+
+Nguồn: kiểm tra trực tiếp trong Hostinger hPanel và terminal root.
+
+Phạm vi: hệ điều hành, tài nguyên, mạng, bảo mật, Docker, web, cơ sở dữ liệu và sao lưu.
+
+> Repository là công khai nên IP, hostname và mọi bí mật xác thực đã được che. Không có giá trị `.env`, mật khẩu, token hoặc khóa riêng nào được đưa vào báo cáo.
+
+## 1. Tổng quan máy chủ
+
+| Hạng mục | Giá trị |
+|---|---|
+| Nhà cung cấp / gói | Hostinger KVM 2 |
+| Vị trí | Kuala Lumpur, Malaysia |
+| Trạng thái | Đang chạy |
+| Hệ điều hành | Ubuntu 24.04.4 LTS |
+| Kernel | Linux 6.8.0-147-generic |
+| Kiến trúc / ảo hóa | x86_64 / KVM (QEMU) |
+| CPU | 2 vCPU, AMD EPYC 9354P |
+| RAM | 7.8 GiB khả dụng; khoảng 2.0 GiB đang dùng tại thời điểm kiểm tra |
+| Swap | Không có |
+| Đĩa gói | 100 GB |
+| Phân vùng `/` | ext4, 96 GiB khả dụng, 12 GiB đã dùng, 85 GiB trống (13%) |
+| Băng thông gói | 8 TB/tháng; hPanel ghi nhận 2.4 GB trong tháng |
+| Uptime | Khoảng 34 ngày 16 giờ |
+| Múi giờ hệ điều hành | UTC |
+| IP / hostname | `[REDACTED_PUBLIC_IP]` / `[REDACTED_HOSTNAME]` |
+| Trạng thái cập nhật | 90 gói có thể nâng cấp; hệ thống yêu cầu khởi động lại |
+
+Phân vùng boot:
+
+- `/boot`: 881 MiB, sử dụng 15%.
+- `/boot/efi`: 105 MiB, sử dụng 6%.
+
+## 2. Mạng và cổng dịch vụ
+
+Các cổng TCP đang lắng nghe công khai:
+
+| Cổng | Dịch vụ | Ghi chú |
+|---:|---|---|
+| 22 | OpenSSH | IPv4 và IPv6 |
+| 3389 | XRDP | Remote Desktop |
+| 32768 | Docker proxy | Hermes Agent, chuyển tiếp đến cổng container 4860 |
+| 32770 | Docker proxy | n8n, chuyển tiếp đến cổng container 5678 |
+
+Các dịch vụ chỉ lắng nghe cục bộ:
+
+- PostgreSQL: `127.0.0.1:5432` và `[::1]:5432`.
+- CUPS: loopback cổng 631.
+- systemd-resolved: loopback cổng 53.
+- XRDP session manager: loopback cổng 3350.
+
+Mạng Docker:
+
+- `docker0`: `172.17.0.0/16`, hiện không hoạt động.
+- `hermes-agent-l7fe_default`: bridge `172.18.0.0/16`.
+- `n8n-nbqy_default`: bridge `172.19.0.0/16`.
+
+UFW đang bật với chính sách mặc định:
+
+- Incoming: deny.
+- Outgoing: allow.
+- Routed: deny.
+- Logging: low.
+- Cho phép cả IPv4 và IPv6 trên: `22/tcp`, `80/tcp`, `443/tcp`, `3389/tcp`, `8501/tcp`.
+
+Ghi chú:
+
+- Không có tiến trình lắng nghe trên 80, 443 hoặc 8501 tại thời điểm kiểm tra.
+- Quy tắc 8501 là dấu vết cũ sau khi xóa `CHUNG_KHOAN_PRO`.
+- Hostinger hPanel chưa cấu hình tường lửa cấp nhà cung cấp: **0 quy tắc**.
+- Docker đang publish trực tiếp 32768 và 32770 trên mọi giao diện.
+
+## 3. Docker
+
+| Hạng mục | Giá trị |
+|---|---|
+| Docker Engine | 29.9.2 |
+| Storage driver | overlayfs |
+| Cgroup driver | systemd |
+| Containers | 2, đều đang chạy |
+| Images | 2 |
+| Dung lượng image | 6.9 GB |
+| Dung lượng container writable layer | khoảng 50 MB |
+| Build cache | 0 B |
+
+### n8n
+
+| Thuộc tính | Giá trị |
+|---|---|
+| Compose project | `n8n-nbqy` |
+| Compose file | `/docker/n8n-nbqy/docker-compose.yml` |
+| Container | `n8n-nbqy-n8n-1` |
+| Image | `docker.n8n.io/n8nio/n8n:latest` |
+| Trạng thái | Up khoảng 3 tuần |
+| Restart policy | `unless-stopped` |
+| User trong container | `node` |
+| Root filesystem | Có quyền ghi |
+| Public mapping | `32770 -> 5678/tcp` |
+| Volume | `n8n-nbqy_n8n_data` -> `/home/node/.n8n` (read/write) |
+| Dữ liệu volume | khoảng 6.6 MiB |
+| Sử dụng lúc kiểm tra | khoảng 0.49% CPU, 371 MiB RAM |
+
+Tên biến môi trường được phát hiện, không lưu giá trị: `GENERIC_TIMEZONE`, `N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS`, `N8N_RELEASE_TYPE`, `N8N_RUNNERS_ENABLED`, `N8N_SECURE_COOKIE`, `NODE_ENV`, `TZ`, `WEBHOOK_URL` và các biến runtime chuẩn.
+
+### Hermes Agent
+
+| Thuộc tính | Giá trị |
+|---|---|
+| Compose project | `hermes-agent-l7fe` |
+| Compose file | `/docker/hermes-agent-l7fe/docker-compose.yml` |
+| Container | `hermes-agent-l7fe-hermes-agent-1` |
+| Image | `ghcr.io/hostinger/hvps-hermes-agent:latest` |
+| Trạng thái | Up khoảng 3 tuần |
+| Restart policy | `unless-stopped` |
+| User trong container | `root` |
+| Root filesystem | Có quyền ghi |
+| Public mapping | `32768 -> 4860/tcp` |
+| Bind mount | `/docker/hermes-agent-l7fe/data` -> `/opt/data` (read/write) |
+| Dữ liệu project | khoảng 14 MiB ngoài image |
+| Sử dụng lúc kiểm tra | khoảng 0.94% CPU, 430 MiB RAM |
+
+Tên biến môi trường nhạy cảm tồn tại nhưng giá trị không được ghi lại: `ADMIN_PASSWORD`, `ADMIN_USERNAME`, `DASHBOARD_AUTH_SECRET`, `OXYLABS_AI_STUDIO_API_KEY`; ngoài ra có các biến runtime và cấu hình Hermes.
+
+Các file cấu hình ứng dụng tồn tại trên VPS:
+
+```text
+/docker/hermes-agent-l7fe/.env
+/docker/hermes-agent-l7fe/docker-compose.yml
+/docker/n8n-nbqy/.env
+/docker/n8n-nbqy/docker-compose.yml
+```
+
+Các file `.env` không được sao chép vào repository.
+
+## 4. Web, TLS và cơ sở dữ liệu
+
+### Nginx / TLS
+
+- Nginx 1.24.0 đang chạy; kiểm tra cú pháp thành công.
+- Không có site trong `/etc/nginx/sites-enabled`.
+- Không có reverse proxy, `server_name` hoặc listener 80/443 được nạp.
+- Certbot hiện không quản lý chứng chỉ nào.
+- Nginx đang chạy nhưng chưa phục vụ website.
+
+### PostgreSQL
+
+- PostgreSQL 16.15 đang chạy.
+- Chỉ lắng nghe trên loopback.
+- Database người dùng còn lại: `postgres`, khoảng 7.5 MiB.
+- Không còn database `stock_ai`.
+- MySQL, MariaDB và Redis không hoạt động.
+
+## 5. Dịch vụ hệ thống và người dùng
+
+Dịch vụ quan trọng đang chạy:
+
+- `docker`, `containerd`.
+- `nginx`.
+- `postgresql@16-main`.
+- `ssh`, `fail2ban`, `ufw`.
+- `cron`, `rsyslog`, `unattended-upgrades`.
+- `xrdp`, `xrdp-sesman`.
+- Các dịch vụ desktop/phụ trợ: CUPS, Avahi, NetworkManager, ModemManager, colord, fwupd, udisks2, upower và wpa_supplicant.
+
+Không có systemd service bị lỗi tại thời điểm kiểm tra.
+
+Tài khoản tương tác:
+
+- `root`.
+- `desktopuser`, thành viên nhóm `sudo`.
+
+## 6. Bảo mật hiện tại
+
+- UFW: bật.
+- Fail2ban: bật, có jail `sshd`.
+- AppArmor: đã nạp 121 profile, 28 profile ở chế độ enforce.
+- Trình quét mã độc Monarx của Hostinger: **chưa cài đặt**.
+- Hostinger firewall: **chưa cấu hình**.
+
+Cấu hình SSH hiệu lực:
+
+```text
+port 22
+permitrootlogin yes
+passwordauthentication yes
+pubkeyauthentication yes
+maxauthtries 6
+x11forwarding yes
+clientaliveinterval 0
+clientalivecountmax 3
+```
+
+## 7. Cập nhật và lịch chạy tự động
+
+- 1.522 gói Debian/Ubuntu đã cài.
+- 90 gói có thể nâng cấp.
+- `unattended-upgrades` được bật.
+- VPS đang yêu cầu khởi động lại để hoàn tất cập nhật.
+- Root crontab không có job tùy chỉnh.
+- `/etc/cron.d` có Certbot, dọn Docker builder/image, e2scrub và sysstat.
+- Cron hằng ngày có apt/dpkg, logrotate, man-db, apport và sysstat.
+
+## 8. Sao lưu
+
+Hostinger đang cung cấp sao lưu tự động **hàng tuần** và lưu tách khỏi máy chủ chính.
+
+| Thời điểm tạo | Vị trí lưu | Kích thước | Ước tính khôi phục |
+|---|---|---:|---:|
+| 2026-11-16 16:21 | Ấn Độ | 12.37 GB | 30 phút |
+| 2026-11-09 20:13 | Ấn Độ | 12.34 GB | 30 phút |
+
+Lưu ý quan trọng: hai bản sao lưu này được tạo trước ngày xóa `CHUNG_KHOAN_PRO` và Alibaba OneTalk, nên có thể vẫn chứa trạng thái cũ của hai ứng dụng. Đây là bản sao lưu do Hostinger quản lý, không nằm trong filesystem đang chạy.
+
+Dung lượng dữ liệu hệ thống khác:
+
+- `/var/backups`: khoảng 3.8 MiB.
+- `/var/log`: khoảng 177 MiB.
+- `/var/lib/postgresql`: khoảng 55 MiB.
+
+## 9. Xác nhận trạng thái sau dọn dẹp
+
+Đã kiểm tra và xác nhận trên VPS đang chạy:
+
+- Không còn `/opt/CHUNG_KHOAN_PRO`.
+- Không còn `/opt/alibaba-onetalk-callback`.
+- Không còn systemd service hoặc user `alibaba-callback`.
+- Không còn database `stock_ai`.
+- Không còn cron backup `stock_ai`.
+- Không còn Nginx site hoặc Certbot certificate của `ttdnew.tech`, `admin.ttdnew.tech`, `oauth.ttdnew.tech`.
+- Không còn listener trên 8501, 8502 hoặc 8510.
+- n8n và Hermes Agent vẫn hoạt động.
+
+## 10. Kết luận
+
+VPS hiện chủ yếu dùng cho hai Docker workload: n8n và Hermes Agent. Máy còn nhiều dung lượng đĩa và RAM, nhưng cần ưu tiên siết SSH/XRDP, giới hạn cổng Docker, bổ sung firewall cấp Hostinger, cập nhật 90 gói và khởi động lại có kế hoạch. Chi tiết ưu tiên nằm trong báo cáo bảo mật đi kèm.
