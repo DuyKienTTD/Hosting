@@ -7,7 +7,10 @@ services:
     entrypoint: ["python3", "/opt/ttd/provider_mock.py"]
     volumes:
       - ./provider_mock.py:/opt/ttd/provider_mock.py:ro
-      - ./secrets/guard-service-token:/run/secrets/guard_service_token:ro
+      - type: bind
+        source: ./secrets/guard-service-token
+        target: /run/secrets/guard_service_token
+        read_only: true
     networks:
       gate_upstream:
         aliases: [gate-a-provider-mock]
@@ -33,7 +36,10 @@ services:
     volumes:
       - ./guard.py:/opt/ttd/guard.py:ro
       - ./guard_contract_test.py:/opt/ttd/guard_contract_test.py:ro
-      - ./secrets/guard-service-token:/run/secrets/guard_service_token:ro
+      - type: bind
+        source: ./secrets/guard-service-token
+        target: /run/secrets/guard_service_token
+        read_only: true
       - /root/ttd-p0-level1/level2-state/level2-budget.json:/opt/ttd/ledger/level2-budget.json:ro
       - ./capture:/opt/ttd/capture
     networks:
@@ -61,8 +67,9 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - >-
-        export API_SERVER_KEY="$$(cat /run/secrets/api_server_key)";
-        export OPENAI_API_KEY="$$(cat /run/secrets/guard_service_token)";
+        read -r API_SERVER_KEY < /run/secrets/api_server_key;
+        read -r OPENAI_API_KEY < /run/secrets/guard_service_token;
+        export API_SERVER_KEY OPENAI_API_KEY;
         export HOME=/opt/data;
         export HERMES_HOME=/opt/data/.hermes;
         exec /command/s6-setuidgid hermes /opt/hermes/.venv/bin/hermes gateway run --no-supervise --force
@@ -78,8 +85,14 @@ services:
       NO_PROXY: "*"
     volumes:
       - ./hermes-home:/opt/data/.hermes
-      - ./secrets/api-server-key:/run/secrets/api_server_key:ro
-      - ./secrets/guard-service-token:/run/secrets/guard_service_token:ro
+      - type: bind
+        source: ./secrets/api-server-key
+        target: /run/secrets/api_server_key
+        read_only: true
+      - type: bind
+        source: ./secrets/guard-service-token
+        target: /run/secrets/guard_service_token
+        read_only: true
     networks:
       gate_control:
         aliases: [gate-a-hermes]
@@ -110,8 +123,14 @@ services:
     volumes:
       - ./bridge.py:/opt/ttd/bridge.py:ro
       - ./gate_a_test.py:/opt/ttd/gate_a_test.py:ro
-      - ./secrets/api-server-key:/run/secrets/api_server_key:ro
-      - ./secrets/existing-p0-token:/run/secrets/existing_p0_token:ro
+      - type: bind
+        source: ./secrets/api-server-key
+        target: /run/secrets/api_server_key
+        read_only: true
+      - type: bind
+        source: ./secrets/existing-p0-token
+        target: /run/secrets/existing_p0_token
+        read_only: true
       - ./bridge-state:/opt/ttd/state
       - ./capture:/opt/ttd/capture:ro
     networks:

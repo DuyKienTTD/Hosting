@@ -20,15 +20,15 @@ Mục tiêu dài hạn là chu trình `nhận mục tiêu -> lập kế hoạch 
 - Hostinger VPS KVM 2 ở Kuala Lumpur; Ubuntu 24.04.4 LTS, 2 vCPU, 8 GB RAM, 100 GB SSD.
 - n8n và Hermes Agent **đã cài và đang chạy qua Docker Compose tại thời điểm kiểm kê**. Không cài lại trước khi kiểm tra.
 - Docker, PostgreSQL, Nginx cùng các dịch vụ hệ thống: đọc chi tiết trong [kiểm kê VPS](inventory/current-vps-state.md).
-- Hai service production vẫn ở Docker networks riêng. P0 đã bổ sung bridge internal và hai runtime sandbox có private service discovery; chưa có luồng AI model end-to-end production-ready.
+- Hai service production vẫn ở Docker networks riêng. P0 có n8n sandbox và GATE A gồm Hermes auxiliary, authenticated bridge, private guard, provider mock trên các internal network; chưa có luồng paid Hermes end-to-end production-ready.
 - Có tồn đọng hardening VPS; đọc [đánh giá bảo mật](reports/2026-11-21-vps-security-review.md). Chưa tự ý thực hiện thay đổi production.
 
 ## Chúng ta đang ở đâu?
 
 - **Đã có:** hạ tầng VPS, bản kiểm kê, quy tắc an toàn, hệ thống tri thức GitHub, n8n `2.45.7`, Hermes `0.22.5` và [kiểm toán live hai chiều](reports/2026-11-21-n8n-hermes-integration-audit.md).
-- **Đã xác minh:** hai runtime production độc lập khỏe; P0 Mức 1 có runtime phụ cô lập và đúng một authenticated n8n sandbox workflow; structural E2E 9/9 và rollback/restore PASS.
-- **Chưa hoàn tất:** real AI inference, monitoring dài hạn và connector marketing; Hermes chính chưa expose inference API, n8n production MCP vẫn tắt và production có 0 workflow.
-- **Công việc kỹ thuật ưu tiên kế tiếp:** chủ dự án chọn provider/model và cost cap Mức 2; sau đó chạy tối đa một batch fake-data real-inference nhỏ trong cùng sandbox.
+- **Đã xác minh:** hai runtime production độc lập khỏe; P0 Mức 1 structural E2E 9/9; Provider E2E real GPT-6 Luna PASS; GATE A Hermes auxiliary/guard/bridge mock E2E, no-bypass và rollback PASS.
+- **Chưa hoàn tất:** paid Hermes Agent E2E, monitoring dài hạn và connector marketing; Hermes production không bị thay thế, n8n production MCP vẫn tắt và production có 0 workflow.
+- **Công việc kỹ thuật ưu tiên kế tiếp:** chủ dự án quyết định có phê duyệt GATE B cho đúng một paid Hermes call qua guard và shared atomic ledger hay không. GATE A không tự trao quyền này.
 - Đây là định hướng; **chưa phải phê duyệt** để sửa cấu hình VPS, quảng cáo, website, publish video hay phát sinh chi phí.
 
 ## Phân vai và cách phối hợp

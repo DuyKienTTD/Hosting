@@ -67,7 +67,8 @@ Mạng Docker:
 - `docker0`: `172.17.0.0/16`, hiện không hoạt động.
 - `hermes-agent-l7fe_default`: bridge `172.18.0.0/16`.
 - `n8n-nbqy_default`: bridge `172.19.0.0/16`.
-- `ttd-ai-p0-sandbox`: internal bridge cho P0; không publish port và không có Internet egress. Hai production container và hai auxiliary container cùng attach để service discovery private; production bridge cũ vẫn giữ nguyên.
+- `ttd-ai-p0-sandbox`: internal bridge cho P0; không publish port và không có Internet egress. Hai production container, n8n sandbox và GATE A bridge cùng attach để service discovery private; reasoner cũ đang stopped và production bridge cũ vẫn giữ nguyên.
+- GATE A bổ sung ba network `internal=true` cho control, provider mock và upstream. Hermes auxiliary chỉ đi qua private guard; không có direct provider egress hoặc public port.
 
 UFW đang bật với chính sách mặc định:
 
@@ -91,7 +92,7 @@ Ghi chú:
 | Docker Engine | 29.9.2 |
 | Storage driver | overlayfs |
 | Cgroup driver | systemd |
-| Containers | 4, gồm 2 production và 2 P0 auxiliary; đều đang chạy tại điểm kiểm tra cuối |
+| Containers | 7 đang chạy tại điểm kiểm tra cuối: 2 production, n8n sandbox và 4 GATE A; reasoner mock cũ được giữ ở trạng thái stopped để rollback |
 | Images | 2 |
 | Dung lượng image | 6.9 GB |
 | Dung lượng container writable layer | khoảng 50 MB |
@@ -143,7 +144,7 @@ Tên biến môi trường được phát hiện, không lưu giá trị: `GENER
 | Restart/OOM | 0 / false |
 | App state | dashboard health 200; 0 cron job/session; webhook disabled; chưa expose agent `/v1/*` API |
 
-P0 Level 1 không thay Hermes production. Auxiliary `ttd-p0-reasoner` dùng image đã cache chỉ làm vỏ runtime cho deterministic mock adapter, không phải Hermes real inference: không provider, không Internet egress, read-only root, drop all capabilities; limit 0.25 CPU, 384 MiB RAM và 64 PID. Health cuối `healthy`.
+P0 Level 1 không thay Hermes production. GATE A thay reasoner mock cũ trong sandbox bằng Hermes auxiliary thật, private inference guard, authenticated bridge và provider mock; bốn service đều healthy, restart count 0, không public port. Reasoner cũ vẫn tồn tại ở trạng thái stopped cho rollback. Hermes auxiliary không có provider credential hay direct egress; provider cuối vẫn là mock.
 
 Tên biến môi trường nhạy cảm tồn tại nhưng giá trị không được ghi lại: `ADMIN_PASSWORD`, `ADMIN_USERNAME`, `DASHBOARD_AUTH_SECRET`, `OXYLABS_AI_STUDIO_API_KEY`; ngoài ra có các biến runtime và cấu hình Hermes.
 
@@ -178,9 +179,17 @@ Chi tiết và latency nằm trong [báo cáo kiểm toán tích hợp](../repor
 - Hai secret persistent riêng của sandbox được sinh bằng CSPRNG và lưu root-only; không thay encryption key/credential/volume production.
 - Đúng một authenticated webhook workflow; structural E2E 9/9 và rollback/restore PASS.
 - Production n8n/Hermes health PASS, restart count 0, downtime 0 trong toàn bộ change/rehearsal.
-- Real model inference chưa chạy; paid call 0; trạng thái `AWAITING_LEVEL2_APPROVAL`.
+- Mốc Level 1 kết thúc với paid call 0. Sau đó Provider E2E Mức 2 chạy đúng 1 paid call trong cap; GATE A mock không tạo thêm paid call và kill switch vẫn ON.
 
 Chi tiết hiện hành và bằng chứng đã khử bí mật: [P0 Level 1 report](../reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md).
+
+### Hermes GATE A mock sandbox — cập nhật 2026-11-21
+
+- Đã triển khai Hermes auxiliary, private guard, authenticated bridge và provider mock trên các network nội bộ; không đổi production, DNS, firewall hoặc public port.
+- Exact `gpt-6-luna`, hard cap 600, full serialized request lớn nhất 3.315 ASCII bytes, tools disabled, one-turn và direct/provider-egress bypass đều được kiểm chứng.
+- Mock E2E n8n → Hermes → guard → mock → authenticated callback, negative/fault/idempotency/concurrency và corrected rollback/restore đều PASS.
+- Production health HTTP 200 trước/sau, restart count 0, downtime 0. Kill switch vẫn ON, ledger thật không đổi, paid calls mới 0 và chi phí API mới USD 0.
+- GATE B chưa được phê duyệt hoặc thực hiện. Chi tiết: [GATE A report](../reports/2026-11-21-hermes-gate-a-mock-results.md).
 
 ## 4. Web, TLS và cơ sở dữ liệu
 
@@ -282,4 +291,4 @@ Dung lượng dữ liệu hệ thống khác:
 
 ## 10. Kết luận
 
-VPS hiện có hai workload production n8n/Hermes và hai auxiliary workload P0 được giới hạn tài nguyên. Máy còn dung lượng đĩa và RAM, nhưng cần ưu tiên siết SSH/XRDP, giới hạn cổng Docker, bổ sung firewall cấp Hostinger, cập nhật 90 gói và khởi động lại có kế hoạch. Chi tiết ưu tiên nằm trong báo cáo bảo mật đi kèm.
+VPS hiện có hai workload production n8n/Hermes, n8n sandbox và bốn service GATE A mock được giới hạn tài nguyên; reasoner mock cũ dừng để làm đường rollback. Máy còn dung lượng đĩa và RAM, nhưng cần ưu tiên siết SSH/XRDP, giới hạn cổng Docker, bổ sung firewall cấp Hostinger, cập nhật 90 gói và khởi động lại có kế hoạch. Chi tiết ưu tiên nằm trong báo cáo bảo mật đi kèm.

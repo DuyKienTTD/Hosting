@@ -298,17 +298,35 @@ documents:
     path: decisions/2026-11-21-hermes-auxiliary-guard-bridge-approval-proposal.md
     type: decision
     status: partially_approved
-    authoritative_for: pending-approval-to-deploy-isolated-hermes-guard-bridge-with-mock-only
+    authoritative_for: Gate-A-approved-and-complete-with-Gate-B-still-pending-separate-approval
     updated_at: 2026-11-21
     sensitivity: public
 
   - id: ttd-hermes-gate-a-001
     path: tasks/2026-11-21-hermes-auxiliary-guard-bridge-gate-a.md
     type: task
-    status: approved_to_execute
+    status: complete
     authoritative_for: Codex-sandbox-Hermes-guard-bridge-mock-only-implementation
     updated_at: 2026-11-21
     sensitivity: public
+
+  - id: hermes-gate-a-mock-results-2026-11-21
+    path: reports/2026-11-21-hermes-gate-a-mock-results.md
+    type: report
+    status: complete
+    authoritative_for: Hermes-auxiliary-guard-bridge-Gate-A-mock-acceptance-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-a-001-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-a-001.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-machine-readable-evidence-for-ttd-hermes-gate-a-001
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
 
 collections:
   agents: verified agent role profiles and capability evidence

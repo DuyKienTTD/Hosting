@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "task_id": "ttd-hermes-gate-a-001",
+  "verified_at": "2026-11-21",
+  "result": "GATE_A_MOCK_PASS",
+  "scope": {
+    "provider_mock_only": true,
+    "new_service_secret_values": 2,
+    "paid_calls_delta": 0,
+    "paid_cost_delta_usd": 0,
+    "kill_switch_changed": false,
+    "production_changed": false,
+    "gate_b_executed": false
+  },
+  "runtime": {
+    "image_digest": "sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f",
+    "services": {
+      "hermes_auxiliary": {"healthy": true, "restart_count": 0, "published_ports": 0},
+      "inference_guard": {"healthy": true, "restart_count": 0, "published_ports": 0},
+      "provider_mock": {"healthy": true, "restart_count": 0, "published_ports": 0},
+      "authenticated_bridge": {"healthy": true, "restart_count": 0, "published_ports": 0}
+    },
+    "new_networks": 3,
+    "all_new_networks_internal": true,
+    "provider_credential_exposed_to_hermes": false
+  },
+  "authentication": {
+    "hermes_wrong_token_http": 401,
+    "hermes_valid_token_invalid_body_http": 400,
+    "n8n_missing_auth_http": 401,
+    "n8n_wrong_auth_http": 401,
+    "n8n_invalid_schema_http": 422,
+    "callback_authenticated": true,
+    "secret_values_recorded": false,
+    "secret_directory_mode": "700",
+    "secret_file_mode": "600",
+    "secret_generator": "CSPRNG"
+  },
+  "request_policy": {
+    "physical_mock_requests_total_including_diagnostics": 10,
+    "exact_model": "gpt-6-luna",
+    "exact_model_pass": true,
+    "max_output_tokens": 600,
+    "hard_output_cap_pass": true,
+    "max_full_serialized_request_bytes": 3315,
+    "input_limit": 4000,
+    "input_measurement": "canonical_ascii_bytes_conservative_upper_bound",
+    "input_limit_pass": true,
+    "tools_absent": true,
+    "one_turn": true,
+    "fallback_disabled": true,
+    "direct_public_provider_egress_blocked": true,
+    "existing_provider_egress_bypass_blocked": true
+  },
+  "contract_negative_tests": {
+    "wrong_auth_http": 401,
+    "wrong_path_http": 404,
+    "wrong_model_http": 422,
+    "tools_present_http": 422,
+    "cap_too_high_http": 422,
+    "oversize_http": 422,
+    "provider_dispatches_after_contract_tests": 0
+  },
+  "e2e": {
+    "result": "PASS",
+    "normal": {"http": 200, "callback_http": 200, "mode": "hermes_mock", "paid_inference": false, "physical_delta": 1},
+    "client_timeout": {"observed": true, "physical_delta": 1, "replay_http": 200, "replayed": true},
+    "concurrency": {"requests": 5, "physical_delta": 1, "final_http": 200, "replayed": true},
+    "idempotency_conflict": {"http": 409, "physical_delta": 0},
+    "provider_error": {"http": 502, "physical_delta": 1},
+    "post_rollback_smoke": {"http": 200, "callback_http": 200, "paid_inference": false}
+  },
+  "rollback": {
+    "backup_created": true,
+    "initial_rehearsal_issue": "n8n_sandbox_import_file_ownership",
+    "production_affected_by_issue": false,
+    "issue_fixed": true,
+    "corrected_rehearsal_pass": true,
+    "previous_sandbox_restored_healthy": true,
+    "gate_a_redeployed_healthy": true
+  },
+  "ledger": {
+    "attempts_before": 1,
+    "attempts_after": 1,
+    "reserved_usd_before": 0.0035,
+    "reserved_usd_after": 0.0035,
+    "actual_usd_before": 0.0000496,
+    "actual_usd_after": 0.0000496,
+    "sha256_before_after_equal": true,
+    "kill_switch_final": true
+  },
+  "production": {
+    "n8n_health_http": 200,
+    "hermes_health_http": 200,
+    "n8n_restart_count": 0,
+    "hermes_restart_count": 0,
+    "downtime_observed": false,
+    "public_port_firewall_dns_changed": false,
+    "credentials_or_encryption_changed": false
+  },
+  "evidence_handling": {
+    "raw_request_payload_in_git": false,
+    "raw_request_capture_retained_root_only_on_vps": true,
+    "public_evidence_redacted": true
+  },
+  "gate_b": {
+    "executed": false,
+    "paid_hermes_e2e_pass": false,
+    "separate_explicit_approval_required": true,
+    "recommendation": "GO_FOR_GATE_B_APPROVAL"
+  }
+}

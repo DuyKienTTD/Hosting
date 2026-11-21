@@ -1,15 +1,17 @@
 ---
 id: ttd-hermes-gate-a-001
 type: task
-status: approved_to_execute
+status: complete
 updated_at: 2026-11-21
 approved_at: 2026-11-21
+completed_at: 2026-11-21
 approval_scope: gate-a-mock-only
 sensitivity: public
 owner: codex
 support: [hermes, hostinger-agent]
 depends_on: [ttd-hermes-e2e-hard-cap-001]
 paid_inference_approval: false
+result: gate_a_mock_pass
 ---
 
 # TTD-HERMES-GATE-A-001 — Triển khai Hermes auxiliary, inference guard và bridge (mock only)
@@ -50,3 +52,19 @@ Dừng ngay nếu: không chứng minh được giới hạn token trước requ
 ## Bàn giao
 
 Codex tạo báo cáo `reports/2026-11-21-hermes-gate-a-mock-results.md` (hoặc ngày thực hiện), evidence JSON trong `reports/evidence/`, cập nhật task, STATE, CATALOG và CHANGELOG. Nêu rõ: đã triển khai/không triển khai, kết quả test, ảnh hưởng môi trường, chính sách token, trạng thái ledger/kill switch, rollback và có đủ điều kiện **đề xuất GATE B** hay chưa. Chỉ report redacted lên GitHub public, commit/push và cung cấp URL kết quả.
+
+## Kết quả thực thi — 2026-11-21
+
+Trạng thái: **COMPLETE / GATE_A_MOCK_PASS**.
+
+- Hermes auxiliary, private guard, authenticated bridge và provider mock đã triển khai trên private sandbox; bốn service healthy, restart count 0, không publish port.
+- Full request capture xác nhận exact `gpt-6-luna`, hard cap 600, toàn bộ serialized request tối đa 3.315 ASCII bytes, no-tools, one-turn và direct/provider-egress bypass đều bị chặn.
+- Auth, negative schema/model/path/cap/oversize, timeout, idempotency, concurrency, provider fault và authenticated callback đều PASS.
+- Corrected rollback/restore rehearsal và post-rollback redeploy smoke PASS; production health HTTP 200 trước/sau, restart/downtime 0.
+- Kill switch vẫn ON; ledger thật không đổi; paid calls mới 0 và chi phí API mới USD 0.
+- **Không thực hiện GATE B.** Chỉ đề xuất `GO_FOR_GATE_B_APPROVAL`; cần phê duyệt riêng trước đúng một paid Hermes call.
+
+Bàn giao:
+
+- [Báo cáo nghiệm thu](../reports/2026-11-21-hermes-gate-a-mock-results.md)
+- [Evidence JSON đã khử bí mật](../reports/evidence/2026-11-21-ttd-hermes-gate-a-001.json)

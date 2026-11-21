@@ -33,10 +33,10 @@ sensitivity: public-redacted
 - Đã chuẩn hóa giao nhiệm vụ qua `tasks/`, kết quả qua `reports/`; [quy tắc](rules/AGENT_WORKFLOW.md).
 - Đã hoàn tất [TTD-AI-PLATFORM-AUDIT-001](tasks/2026-11-21-n8n-hermes-integration-audit.md); xem [báo cáo live n8n ↔ Hermes](reports/2026-11-21-n8n-hermes-integration-audit.md).
 - Đã xác minh n8n `2.45.7` và Hermes `0.22.5`; cả hai health/readiness PASS, 0 restart/OOM và có thể chạm nhau hai chiều qua host bridge.
-- P0 Mức 1 đã triển khai hai runtime phụ cô lập trên `ttd-ai-p0-sandbox`: n8n sandbox có đúng một authenticated webhook và reasoner deterministic mock không provider/Internet egress.
+- P0 Mức 1 đã thiết lập n8n sandbox và reasoner deterministic mock cô lập trên `ttd-ai-p0-sandbox`; GATE A hiện giữ n8n sandbox, dừng reasoner cũ để dùng authenticated bridge tới Hermes auxiliary/guard/mock, vẫn không public port.
 - Structural E2E 9/9, negative auth, schema, callback, timeout/retry/idempotency và rollback/restore đều PASS. Production n8n/Hermes không restart, downtime 0, public port/firewall/DNS không đổi và paid inference call bằng 0.
 - Mức 2 đã chạy: **Provider E2E PASS** qua GPT-6 Luna với đúng 1 paid attempt, 131 input + 73 output + 0 reasoning token và usage-based cost USD 0,0000496; authenticated callback, schema, replay và kill switch đều PASS. [Báo cáo Mức 2](reports/2026-11-21-n8n-hermes-p0-level2-results.md).
-- **Hermes Agent E2E vẫn BLOCKED_COST_CONTROL**, nhưng khảo sát hard-cap đã complete: cấu hình/CLI upstream đơn thuần là NO-GO; phương án khả thi nhất là Hermes auxiliary nguyên bản sau private pre-dispatch guard dùng cùng ledger P0, cùng authenticated bridge/callback. Offline contract rehearsal đã PASS exact model, cap 600, no-tools, kill switch, idempotency và concurrency; chưa triển khai hoặc paid test. [Báo cáo feasibility](reports/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md).
+- **Hermes Agent paid E2E vẫn chưa được thực hiện**, nhưng GATE A mock đã PASS: Hermes auxiliary nguyên bản, private pre-dispatch guard, authenticated bridge/callback và provider mock chạy trên sandbox private; exact model, cap 600, full request tối đa 3.315 ASCII bytes, no-tools, no-bypass, idempotency/concurrency và rollback đều PASS. Kill switch vẫn ON, paid calls mới 0. [Báo cáo GATE A](reports/2026-11-21-hermes-gate-a-mock-results.md).
 - Kill switch persistent hiện bật, chặn task paid mới bằng HTTP 429; n8n production MCP vẫn tắt và production có 0 workflow.
 - Kiến trúc được khuyến nghị: n8n làm control plane, Hermes reasoning qua API private, một internal Docker network, schema/policy/approval gate và media-worker FFmpeg riêng.
 
@@ -56,11 +56,11 @@ sensitivity: public-redacted
 - [TTD-AI-P0-INTEGRATION-001](tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md) có kết quả `LEVEL1_PASS / PROVIDER_E2E_PASS / HERMES_E2E_BLOCKED`: sandbox workflow/callback và real GPT-6 Luna inference đã PASS; Hermes Agent route chưa đạt. Xem [báo cáo P0 Mức 1](reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md) và [Mức 2](reports/2026-11-21-n8n-hermes-p0-level2-results.md).
 - Không thay U4S, account business, public port/firewall hoặc production credential; downtime production 0. Paid usage Mức 2 là USD 0,0000496 theo response usage, chưa đối soát invoice.
 
-- [ADR-P0-001](decisions/2026-11-21-p0-reasoning-integration-proposal.md) đã **APPROVED_WITH_RESTRICTIONS**: Mức 1 PASS; Mức 2 Provider PASS trong cap; [task Mức 2](tasks/2026-11-21-n8n-hermes-p0-level2-real-inference.md) hiện `blocked` riêng ở Hermes hard cost control.
+- [ADR-P0-001](decisions/2026-11-21-p0-reasoning-integration-proposal.md) đã **APPROVED_WITH_RESTRICTIONS**: Mức 1 PASS; Mức 2 Provider PASS trong cap; Hermes hard guard đã PASS mock ở GATE A, còn paid Hermes E2E chờ phê duyệt GATE B riêng.
 
-- [TTD-HERMES-E2E-HARD-CAP-001](tasks/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md) đã complete ở chế độ read-only/offline với kết luận `GO_FOR_SEPARATE_IMPLEMENTATION_APPROVAL`. Đề nghị Hermes auxiliary + private inference guard + authenticated bridge; **chưa phê duyệt triển khai runtime phụ, thay egress, tạo secret mới, mở kill switch hoặc gọi AI thêm**. Kill switch vẫn bật.
+- [TTD-HERMES-E2E-HARD-CAP-001](tasks/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md) đã complete ở chế độ read-only/offline với kết luận `GO_FOR_SEPARATE_IMPLEMENTATION_APPROVAL`; phương án được kiểm chứng tiếp trong GATE A.
 
-- Đã tạo [ADR-P0-002](decisions/2026-11-21-hermes-auxiliary-guard-bridge-approval-proposal.md) **GATE A APPROVED (2026-11-21)**, cho phép Codex triển khai Hermes auxiliary + guard + bridge, tạo 2 service secrets, mock full request capture và rollback; giữ kill switch ON, **0 paid Hermes call**. GATE B (một paid Hermes call) cần phê duyệt riêng sau khi mock PASS. GATE A đã được phê duyệt để thực thi trên sandbox; chưa có bằng chứng đã triển khai trong phiên ChatGPT này. [Task Codex GATE A](tasks/2026-11-21-hermes-auxiliary-guard-bridge-gate-a.md).
+- [ADR-P0-002](decisions/2026-11-21-hermes-auxiliary-guard-bridge-approval-proposal.md) **GATE A APPROVED** đã được thực hiện: [TTD-HERMES-GATE-A-001](tasks/2026-11-21-hermes-auxiliary-guard-bridge-gate-a.md) hiện `complete / GATE_A_MOCK_PASS`. Bốn service sandbox private healthy, mock E2E và corrected rollback PASS; production health HTTP 200, restart/downtime 0. GATE B chưa được phê duyệt và không được thực hiện.
 
 ## Việc đang chờ
 
@@ -68,7 +68,7 @@ sensitivity: public-redacted
 - Chưa đặt n8n/Hermes sau reverse proxy HTTPS.
 - Chưa xử lý các backup Hostinger có thể chứa ứng dụng đã xóa.
 - Chưa cập nhật hệ điều hành hoặc reboot.
-- Provider E2E đã có evidence. GATE A đã được phê duyệt để Codex triển khai guard/bridge/runtime phụ và chạy mock capture full serialized Hermes request ≤4K, chứng minh không có direct egress/bypass; **GATE B vẫn cần phê duyệt riêng cho một paid call**; không được dùng adapter OpenAI trực tiếp để thay bằng chứng Hermes.
+- Provider E2E và GATE A mock đã có evidence. **GATE B vẫn cần phê duyệt riêng cho đúng một paid Hermes call**; không được tự đổi guard sang provider trả phí hoặc dùng adapter OpenAI trực tiếp để thay bằng chứng Hermes.
 - Chưa kết nối/xác minh Google Ads, GA4, WordPress/WooCommerce, YouTube, TikTok, Meta, Kling, HeyGen hoặc ElevenLabs.
 
 ## Tài liệu tiếp theo

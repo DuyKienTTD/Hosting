@@ -2,6 +2,10 @@
 
 ## 2026-11-21
 
+- Hoàn tất `TTD-HERMES-GATE-A-001`: triển khai Hermes auxiliary, private guard, authenticated bridge và provider mock trên internal sandbox; exact model, cap 600, full request ≤4K, no-tools/no-bypass, auth, fault/idempotency/concurrency và mock E2E đều PASS.
+- Phát hiện ownership workflow trong rollback rehearsal đầu, sửa script và chạy lại corrected rollback/restore PASS; redeploy smoke PASS. Production n8n/Hermes HTTP 200, restart/downtime 0; kill switch/ledger không đổi, paid calls và chi phí mới bằng 0.
+- Ghi trạng thái `GATE_A_MOCK_PASS / GO_FOR_GATE_B_APPROVAL`; GATE B không được thực hiện và vẫn cần phê duyệt riêng cho đúng một paid Hermes call.
+
 - Chủ dự án phê duyệt GATE A theo ADR-P0-002: Codex triển khai Hermes auxiliary, private guard, authenticated bridge và hai service secrets chỉ trên KVM2 sandbox; mock capture, kill switch ON, paid calls 0, không đổi production. Tạo task `TTD-HERMES-GATE-A-001`; GATE B chưa được phê duyệt. Việc ghi nhận GitHub không có nghĩa VPS đã được thay đổi.
 
 - Review feasibility Hermes hard cap và lập ADR-P0-002 ở trạng thái PROPOSED: đề xuất GATE A cho Hermes auxiliary, guard, bridge và provider mock capture (kill switch bật, 0 paid call); paid Hermes call GATE B yêu cầu phê duyệt riêng. Không thực hiện thay đổi VPS.

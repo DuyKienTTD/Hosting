@@ -14,6 +14,8 @@ related_task: ttd-hermes-e2e-hard-cap-001
 
 **TRẠNG THÁI: GATE A ĐÃ ĐƯỢC CHỦ DỰ ÁN PHÊ DUYỆT (2026-11-21).** Cho phép Codex triển khai Hermes phụ, inference guard, authenticated bridge/callback và hai service secrets trên sandbox KVM2; **chỉ provider mock, giữ kill switch ON, 0 paid calls, không thay production**. **GATE B chưa được phê duyệt.** Xem [nhiệm vụ thực thi Bước A](../tasks/2026-11-21-hermes-auxiliary-guard-bridge-gate-a.md).
 
+**KẾT QUẢ GATE A: `GATE_A_MOCK_PASS` (2026-11-21).** Mock E2E, hard cap/input bound, no-tools/no-bypass, authentication, corrected rollback và production health đều PASS; paid calls mới 0, kill switch/ledger không đổi. Xem [báo cáo nghiệm thu](../reports/2026-11-21-hermes-gate-a-mock-results.md). Kết quả không tự phê duyệt GATE B.
+
 ## Cơ sở bằng chứng
 
 - [Feasibility report](../reports/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md) / [Evidence](../reports/evidence/2026-11-21-ttd-hermes-e2e-hard-cap-001.json), commit `6d9b71cb2e797c386917e7d3d32ecc47458329a7`.
