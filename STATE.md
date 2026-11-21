@@ -66,6 +66,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- GATE B được phê duyệt có điều kiện nhưng preflight hiện `BLOCKED_PREFLIGHT`: guard GATE A chưa có atomic one-shot permit, consume/relock trước dispatch và worst-case reservation; 0 paid Hermes attempt mới. [Báo cáo](reports/2026-11-21-hermes-gate-b-paid-results.md).
+
 - Chưa thực hiện hardening SSH/XRDP hoặc firewall.
 - Chưa đặt n8n/Hermes sau reverse proxy HTTPS.
 - Chưa xử lý các backup Hostinger có thể chứa ứng dụng đã xóa.

@@ -339,10 +339,28 @@ documents:
   - id: ttd-hermes-gate-b-001
     path: tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md
     type: task
-    status: approved_to_execute
+    status: blocked
     authoritative_for: codex-one-shot-approved-paid-hermes-e2e-with-cost-control
     updated_at: 2026-11-21
     sensitivity: public
+
+  - id: hermes-gate-b-paid-results-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-paid-results.md
+    type: report
+    status: blocked
+    authoritative_for: Gate-B-preflight-blocked-before-paid-dispatch
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-001-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-001.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-Gate-B-preflight-evidence
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
 
 collections:
   agents: verified agent role profiles and capability evidence

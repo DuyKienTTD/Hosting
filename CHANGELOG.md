@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- GATE B preflight `BLOCKED_PREFLIGHT`: guard GATE A chưa triển khai atomic one-shot permit và reservation trên shared ledger; dừng trước dispatch, 0 paid Hermes attempt, 0 chi phí API mới. Thêm báo cáo/evidence và cập nhật task/ADR/state.
+
 - Chủ dự án phê duyệt GATE B theo ADR-P0-003: Codex được thực hiện tối đa một paid Hermes Agent call qua `gpt-6-luna`, ≤4K input và max_output_tokens=600, fake data, shared P0 USD 0.05 cap, không tools/retry/production change; one-shot permit phải tự tiêu thụ và khóa lại trước dispatch, global kill switch luôn ON. Tạo task `TTD-HERMES-GATE-B-001`; chưa có evidence paid Hermes E2E mới.
 
 - Đối chiếu GATE A Hermes auxiliary+guard+bridge mock PASS với evidence và commit `ab319ee`; cập nhật đề xuất ADR-P0-003 (PROPOSED), chỉ cho một Hermes Agent paid call nếu chủ dự án phê duyệt riêng, có one-shot permit/atomic ledger/kill-switch, không đổi production. Chưa thực hiện GATE B.

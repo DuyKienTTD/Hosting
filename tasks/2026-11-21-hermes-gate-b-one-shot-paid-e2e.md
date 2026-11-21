@@ -1,7 +1,7 @@
 ---
 id: ttd-hermes-gate-b-001
 type: task
-status: approved_to_execute
+status: blocked
 approved_at: 2026-11-21
 updated_at: 2026-11-21
 approval_scope: exactly_one_hermes_paid_attempt
@@ -53,3 +53,7 @@ Bất kỳ vấn đề về hard-cap, budget admission, one-shot permit, model, 
 ## Bàn giao
 
 Codex lưu `reports/2026-11-21-hermes-gate-b-paid-results.md` và JSON evidence đã khử bí mật (hoặc ngày thực tế), nêu preflight, exactly one attempt or zero if blocked, model, input/output/reasoning token, reserved/actual cost, invoice status, task/run IDs dưới dạng hash, correlation and callback, one-shot state, ledger, health/rollback. Push vào repo, cập nhật task, ADR, STATE.md, CATALOG.yaml, CHANGELOG.md; không đưa API keys/secret/private endpoints vào repo.
+
+## Kết quả preflight 2026-11-21
+
+`BLOCKED_PREFLIGHT`: guard GATE A chưa có atomic scoped one-shot permit/consume/relock và worst-case reservation. Không thực hiện paid request; xem [báo cáo](../reports/2026-11-21-hermes-gate-b-paid-results.md). Approval vẫn giới hạn tối đa một attempt sau khi toàn bộ gate được chứng minh.

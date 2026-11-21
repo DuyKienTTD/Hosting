@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "task_id": "ttd-hermes-gate-b-001",
+  "verified_at": "2026-11-21",
+  "result": "BLOCKED_PREFLIGHT",
+  "paid_attempts_this_task": 0,
+  "paid_cost_this_task_usd": 0,
+  "evidence_source": "repository_code_and_approved_documents",
+  "guard": {
+    "shared_ledger_mount": "read_only",
+    "global_kill_switch_required_on": true,
+    "one_shot_permit_implemented": false,
+    "atomic_consume_before_dispatch_proven": false,
+    "worst_case_reservation_implemented": false,
+    "upstream": "provider_mock"
+  },
+  "live_runtime_preflight_completed": false,
+  "ledger_live_post_state_verified": false,
+  "production_live_health_verified_this_task": false,
+  "hermes_paid_e2e_pass": false
+}

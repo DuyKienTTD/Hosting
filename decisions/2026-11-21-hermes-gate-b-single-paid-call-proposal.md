@@ -50,6 +50,8 @@ Chỉ **một** fake-data task, tối đa **một physical paid attempt**. Dừn
 
 **GATE B APPROVED / NOT EXECUTED BY THIS RECORD.** GATE A đã PASS; chủ dự án đã cho phép Codex thực hiện đúng một lượt trong các gate được quy định. Việc cập nhật GitHub không tự kích hoạt Hermes paid inference.
 
+Preflight thực thi ghi `BLOCKED_PREFLIGHT / 0 paid attempt`: [báo cáo](../reports/2026-11-21-hermes-gate-b-paid-results.md). Atomic one-shot permit và reservation chưa được chứng minh trên runtime hiện có; chưa có GATE B paid E2E PASS.
+
 ## Bàn giao Codex sau thực thi
 
 Codex tạo `reports/2026-11-21-hermes-gate-b-paid-results.md` và evidence JSON redacted, cập nhật ADR/task/STATE/CATALOG/CHANGELOG, ghi rõ STOP/PASS và commit.
