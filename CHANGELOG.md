@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Codex hoàn tất H6 B2-F source/mock cho Guard provider transport bị khóa, IPC P0 v1, reserve bền vững, exact bytes, settlement và callback mô phỏng. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-f-source-mock.md).
+
 - ChatGPT accepts `H6_B2_E_KVM2_MOCK_PASS` and `ROLLBACK_PASS` from `e4269f0`, opens B2-F disabled-by-default real path implementation in source+fake-ledger/provider offline mocks only; KVM2 real ledger/paid remain blocked. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-e-chatgpt-review.md).
 
 - Codex hoàn tất H6 B2-E mock cô lập trên KVM2/ext4. Kiểm pre-up, HMAC v2, Level 2, crash/replay/callback và rollback, đối chiếu pre/post GATE A, production và metadata ledger thật. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-e-kvm2-mock.md).

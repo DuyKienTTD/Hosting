@@ -1,0 +1,28 @@
+# Standalone Docker Desktop test. Only code binds and disposable tmpfs.
+services:
+  tests:
+    image: python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89
+    pull_policy: never
+    network_mode: none
+    read_only: true
+    user: "0:0"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    entrypoint: [python, -B, -u, /opt/ttd/h6_b2f_test.py]
+    tmpfs:
+      - /tmp:rw,nodev,nosuid,noexec,mode=0700,size=32m
+    volumes:
+      - ./h6_b2f_test.py:/opt/ttd/h6_b2f_test.py:ro
+      - ./h6_provider.py:/opt/ttd/h6_provider.py:ro
+      - ./h6_p0.py:/opt/ttd/h6_p0.py:ro
+      - ./h6_ipc_auth.py:/opt/ttd/h6_ipc_auth.py:ro
+      - ./h6_writer.py:/opt/ttd/h6_writer.py:ro
+      - ./one_shot.py:/opt/ttd/one_shot.py:ro
+      - ./guard.py:/opt/ttd/guard.py:ro
+      - ./bridge.py:/opt/ttd/bridge.py:ro
+      - ./mock_contract.py:/opt/ttd/mock_contract.py:ro
+      - ./h6_b2d_mock_test.py:/opt/ttd/h6_b2d_mock_test.py:ro
+      - ./h6_stage_a_test.py:/opt/ttd/h6_stage_a_test.py:ro
+      - ./one_shot_linux_test.py:/opt/ttd/one_shot_linux_test.py:ro
+      - ../p0-level2/adapter.py:/opt/ttd/level2-adapter.py:ro

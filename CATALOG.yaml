@@ -846,6 +846,24 @@ documents:
     verified_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: hermes-gate-b-h6-b2-f-source-mock-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-f-source-mock.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-F-disabled-provider-source-and-P0-v1-mock-tests
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-f-source-mock-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-f-source-mock.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-F-source-blobs-offline-faults-and-scope-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria

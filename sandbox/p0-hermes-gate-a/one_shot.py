@@ -94,15 +94,36 @@ def validate_budget(row):
     return attempts, reserved, actual
 
 
+def root_ledger_entry(info, kind, mode):
+    if ((info.st_mode, info.st_uid, info.st_gid) != (kind | mode, 0, 0)
+            or (kind == stat.S_IFREG and info.st_nlink != 1)):
+        raise PermissionError("P0_LEDGER_LAYOUT")
+
+
+def require_root_layout(path: Path):
+    if not path.is_absolute() or path.resolve() != path:
+        raise PermissionError("P0_LEDGER_PATH")
+    root_ledger_entry(path.parent.lstat(), stat.S_IFDIR, 0o700)
+    for entry in (path, path.with_suffix(path.suffix + ".lock")):
+        root_ledger_entry(entry.lstat(), stat.S_IFREG, 0o600)
+
+
 @contextmanager
-def locked(path: Path):
+def locked(path: Path, *, existing_root=False):
     lock_path = path.with_suffix(path.suffix + ".lock")
-    fd = os.open(lock_path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600)
+    flags = os.O_RDWR | os.O_NOFOLLOW | os.O_NONBLOCK
+    fd = os.open(lock_path, flags if existing_root else flags | os.O_CREAT, 0o600)
     try:
         if not stat.S_ISREG(os.fstat(fd).st_mode):
             raise ValueError("LEDGER_LOCK_NOT_REGULAR")
-        os.fchmod(fd, 0o600)
+        if not existing_root:
+            os.fchmod(fd, 0o600)
         fcntl.flock(fd, fcntl.LOCK_EX)
+        if existing_root:
+            require_root_layout(path)
+            held, current = os.fstat(fd), lock_path.lstat()
+            if (held.st_dev, held.st_ino) != (current.st_dev, current.st_ino):
+                raise PermissionError("P0_LEDGER_LOCK_REPLACED")
         ledger, _ = read_ledger(path)
         yield ledger
     finally:
@@ -129,14 +150,16 @@ def _durable_write(path: Path, value: dict) -> None:
 
 
 def admit(path: Path, task_id: str, key_hash: str, fingerprint: str,
-          now: datetime | None = None, *, stage_a: bool = False) -> str:
+          now: datetime | None = None, *, stage_a: bool = False, permit_check=None) -> str | dict:
     """Consume a pre-created scoped permit and reserve in one ledger commit.
 
     Permit must already be stored in ledger['one_shot_permits'][task_id] with
     key_hash, fingerprint, model, expires_at (UTC ISO), state='ready'. This
     function never creates a permit or a ledger. The global switch stays ON.
     """
-    with locked(path) as ledger:
+    if stage_a and permit_check is not None:
+        raise ValueError("P0_ADMISSION_MODE_CONFLICT")
+    with locked(path, existing_root=permit_check is not None) as ledger:
         if stage_a and ledger.get("h6_stage_a_fixture") is not True:
             raise RuntimeError("STAGE_A_FIXTURE_REQUIRED")
         now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
@@ -155,6 +178,7 @@ def admit(path: Path, task_id: str, key_hash: str, fingerprint: str,
         expiry = datetime.fromisoformat(permit["expires_at"])
         if expiry.tzinfo is None or now >= expiry:
             raise RuntimeError("PERMIT_EXPIRED")
+        provider_scope = None if permit_check is None else permit_check(ledger, permit, now)
         if task_id in ledger["tasks"] or ledger["attempts"] >= MAX_CALLS:
             raise RuntimeError("ATTEMPT_LIMIT")
         day = now.date().isoformat()
@@ -173,8 +197,10 @@ def admit(path: Path, task_id: str, key_hash: str, fingerprint: str,
         ledger["days"][day] = day_state
         ledger["tasks"][task_id] = {"fingerprint": fingerprint, "state": "inflight", "one_shot": True,
                                      "attempt": ledger["attempts"], "reserved_usd": RESERVE_USD, "day": day}
+        if provider_scope is not None:
+            ledger["tasks"][task_id].update(key_hash=key_hash, provider_scope=provider_scope)
         _durable_write(path, ledger)
-        return "admitted"
+        return "admitted" if provider_scope is None else provider_scope
 
 
 def settle_mock(path: Path, task_id: str, fingerprint: str, outcome: str,

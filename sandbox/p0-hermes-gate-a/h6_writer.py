@@ -145,12 +145,18 @@ def serve(address, path):
 
 
 def serve_fixture(address, path, uid, gid, directory_mode, socket_mode, handler):
-    if (os.geteuid(), os.getegid()) != (uid, gid):
-        raise PermissionError("H6_WRITER_IDENTITY")
     if path.name != FIXTURE_PATH.name or path.parent.resolve().name != "mock-ledger" or path.is_symlink():
         raise ValueError("STAGE_A_FIXTURE_REQUIRED")
+    if (os.geteuid(), os.getegid()) != (uid, gid):
+        raise PermissionError("H6_WRITER_IDENTITY")
     if fixture_snapshot(path)["kill_switch"] is not True:
         raise ValueError("KILL_SWITCH_NOT_ON")
+    listen(address, path, uid, gid, directory_mode, socket_mode, handler)
+
+
+def listen(address, path, uid, gid, directory_mode, socket_mode, handler):
+    if (os.geteuid(), os.getegid()) != (uid, gid):
+        raise PermissionError("H6_WRITER_IDENTITY")
     directory = address.parent.lstat()
     if (not stat.S_ISDIR(directory.st_mode)
             or (directory.st_uid, directory.st_gid, stat.S_IMODE(directory.st_mode)) != (uid, gid, directory_mode)):
@@ -188,6 +194,10 @@ if __name__ == "__main__":
         from h6_ipc_auth import serve_mock
 
         serve_mock()
+    elif sys.argv[1:] == ["--b2-f-real"]:
+        from h6_provider import serve_live_writer
+
+        serve_live_writer()
     elif len(sys.argv) == 1:
         serve(SOCKET_PATH, FIXTURE_PATH)
     else:

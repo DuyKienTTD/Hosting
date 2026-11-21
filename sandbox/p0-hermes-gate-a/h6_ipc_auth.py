@@ -26,11 +26,15 @@ def read_mock_key():
     """Check fixture-only identity and the permissions of the opened file."""
     if (os.geteuid(), os.getegid()) != (0, 0) or os.path.lexists(PROVIDER_KEY_PATH):
         raise PermissionError("H6_IPC_MOCK_ISOLATION")
-    directory = KEY_PATH.parent.lstat()
+    return read_key(KEY_PATH)
+
+
+def read_key(path):
+    directory = path.parent.lstat()
     if (not stat.S_ISDIR(directory.st_mode)
             or (directory.st_uid, directory.st_gid, stat.S_IMODE(directory.st_mode)) != (0, 0, 0o700)):
         raise PermissionError("H6_IPC_KEY_POLICY")
-    fd = os.open(KEY_PATH, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     with os.fdopen(fd, "rb") as stream:
         info = os.fstat(stream.fileno())
         if (not stat.S_ISREG(info.st_mode) or info.st_uid != 0 or info.st_gid != 0
@@ -87,8 +91,8 @@ def proof_bytes(value):
     return bytes.fromhex(value)
 
 
-def proof(key, role, client, server, payload=b""):
-    return hmac.digest(key, DOMAIN + role + client + server + payload, "sha256")
+def proof(key, role, client, server, payload=b"", *, domain=DOMAIN):
+    return hmac.digest(key, domain + role + client + server + payload, "sha256")
 
 
 def verify(value, expected):
@@ -97,26 +101,7 @@ def verify(value, expected):
 
 
 def call(operation, **fields):
-    key = read_mock_key()
-    deadline = time.monotonic() + TIMEOUT
-    request = {**fields, "op": operation}
-    with socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET) as conn:
-        set_remaining(conn, deadline)
-        conn.connect(os.fspath(SOCKET_PATH))
-        root_peer(conn)
-        client = os.urandom(PROOF_BYTES)
-        send(conn, deadline, client=client.hex())
-        challenge = receive(conn, deadline, "server", "proof")
-        server = proof_bytes(challenge["server"])
-        verify(challenge["proof"], proof(key, b"S", client, server))
-        wire = encode(request)
-        send(conn, deadline, request=request, proof=proof(key, b"C", client, server, wire).hex())
-        envelope = receive(conn, deadline, "reply", "proof")
-        reply = envelope["reply"]
-        verify(envelope["proof"], proof(key, b"R", client, server, hashlib.sha256(wire).digest() + encode(reply)))
-    if not isinstance(reply, dict) or set(reply) != {"result"}:
-        raise RuntimeError("H6_WRITER_REJECTED")
-    result = reply["result"]
+    result = exchange(SOCKET_PATH, read_mock_key(), DOMAIN, {**fields, "op": operation})
     if operation == "snapshot":
         if not isinstance(result, dict) or set(result) != h6_writer.SUMMARY_FIELDS:
             raise RuntimeError("H6_WRITER_INVALID_SNAPSHOT")
@@ -125,29 +110,55 @@ def call(operation, **fields):
     return result
 
 
+def exchange(address, key, domain, request):
+    deadline = time.monotonic() + TIMEOUT
+    with socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET) as conn:
+        set_remaining(conn, deadline)
+        conn.connect(os.fspath(address))
+        root_peer(conn)
+        client = os.urandom(PROOF_BYTES)
+        send(conn, deadline, client=client.hex())
+        challenge = receive(conn, deadline, "server", "proof")
+        server = proof_bytes(challenge["server"])
+        verify(challenge["proof"], proof(key, b"S", client, server, domain=domain))
+        wire = encode(request)
+        send(conn, deadline, request=request, proof=proof(key, b"C", client, server, wire, domain=domain).hex())
+        envelope = receive(conn, deadline, "reply", "proof")
+        reply = envelope["reply"]
+        signed = hashlib.sha256(wire).digest() + encode(reply)
+        verify(envelope["proof"], proof(key, b"R", client, server, signed, domain=domain))
+    if not isinstance(reply, dict) or set(reply) != {"result"}:
+        raise RuntimeError("H6_WRITER_REJECTED")
+    return reply["result"]
+
+
 def handle(conn, path, key):
+    handle_exchange(conn, path, key, DOMAIN, h6_writer.dispatch)
+
+
+def handle_exchange(conn, path, key, domain, dispatch):
     deadline = time.monotonic() + TIMEOUT
     root_peer(conn)
     try:
         client = proof_bytes(receive(conn, deadline, "client")["client"])
         server = os.urandom(PROOF_BYTES)
-        send(conn, deadline, server=server.hex(), proof=proof(key, b"S", client, server).hex())
+        send(conn, deadline, server=server.hex(), proof=proof(key, b"S", client, server, domain=domain).hex())
         envelope = receive(conn, deadline, "request", "proof")
         request = envelope["request"]
         wire = encode(request)
-        verify(envelope["proof"], proof(key, b"C", client, server, wire))
+        verify(envelope["proof"], proof(key, b"C", client, server, wire, domain=domain))
     except (ValueError, RecursionError) as error:
         raise PermissionError("H6_IPC_AUTH_REJECTED") from error
     set_remaining(conn, deadline)
     try:
         if not isinstance(request, dict) or "v" in request:
             raise ValueError("H6_IPC_REQUEST")
-        reply = {"result": h6_writer.dispatch(path, request)}
+        reply = {"result": dispatch(path, request)}
     except (OSError, ValueError, RuntimeError, KeyError, TypeError, AttributeError):
         reply = {"error": "H6_WRITER_REJECTED"}
     # Never publish a successful ACK before dispatch returns from the durable commit.
     signed = hashlib.sha256(wire).digest() + encode(reply)
-    send(conn, deadline, reply=reply, proof=proof(key, b"R", client, server, signed).hex())
+    send(conn, deadline, reply=reply, proof=proof(key, b"R", client, server, signed, domain=domain).hex())
 
 
 def serve_mock():

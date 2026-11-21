@@ -34,6 +34,14 @@ LEDGER_PATH = Path("/opt/ttd/ledger/level2-budget.json")
 MOCK_ONE_SHOT_LEDGER = os.environ.get("TTD_MOCK_ONE_SHOT_LEDGER", "")
 H6_STAGE_A_SOCKET = os.environ.get("TTD_H6_STAGE_A_SOCKET", "")
 H6_B2_D_SOCKET = os.environ.get("TTD_H6_B2_D_SOCKET", "")
+PROVIDER_MODE = os.environ.get("TTD_H6_PROVIDER_MODE", "")
+PROVIDER_LANE = None
+if PROVIDER_MODE:
+    from h6_provider import live_lane
+
+    if PROVIDER_MODE != "real" or H6_STAGE_A_SOCKET or H6_B2_D_SOCKET or MOCK_ONE_SHOT_LEDGER:
+        raise SystemExit("invalid H6 provider mode configuration")
+    PROVIDER_LANE = live_lane()
 if H6_B2_D_SOCKET:
     from h6_ipc_auth import SOCKET_PATH as B2_D_SOCKET_PATH
 
@@ -127,6 +135,8 @@ def writer_call(operation, **fields):
 
 
 def ledger_summary() -> dict[str, Any]:
+    if PROVIDER_LANE is not None:
+        return PROVIDER_LANE.snapshot()
     if H6_B2_D_SOCKET or H6_STAGE_A_SOCKET:
         return writer_call("snapshot")
     ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
@@ -248,6 +258,19 @@ class Handler(BaseHTTPRequestHandler):
         else:
             settle_mock(LEDGER_PATH, task_id, fingerprint, outcome, usage)
 
+    def run_provider_one_shot(self, body):
+        try:
+            content_type, payload = PROVIDER_LANE.run(body, freeze_stage_a, mock_scope)
+        except (OSError, ValueError, RuntimeError, KeyError, TypeError, AttributeError):
+            self.send_json(503, {"error": "H6_PROVIDER_BLOCKED_OR_UNKNOWN"})
+            return
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(payload)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(payload)
+
     def run_one_shot_mock(self, body, wire, task_id, fingerprint):
         try:
             forwarded = json.loads(wire)
@@ -295,7 +318,9 @@ class Handler(BaseHTTPRequestHandler):
                 ledger = ledger_summary()
                 status = 200 if ledger["kill_switch"] is True else 503
                 mode = "mock_only"
-                if H6_B2_D_SOCKET:
+                if PROVIDER_LANE is not None:
+                    mode = "h6_provider"
+                elif H6_B2_D_SOCKET:
                     mode = "h6_b2_d_mock"
                 elif H6_STAGE_A_SOCKET:
                     mode = "h6_stage_a_mock"
@@ -332,6 +357,9 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError
         except (ValueError, json.JSONDecodeError, UnicodeDecodeError):
             self.send_json(400, {"error": "INVALID_JSON"})
+            return
+        if PROVIDER_LANE is not None:
+            self.run_provider_one_shot(body)
             return
         try:
             forwarded, _ = enforce(body)
