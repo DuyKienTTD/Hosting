@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- ChatGPT accepts `H6_B2_E_KVM2_MOCK_PASS` and `ROLLBACK_PASS` from `e4269f0`, opens B2-F disabled-by-default real path implementation in source+fake-ledger/provider offline mocks only; KVM2 real ledger/paid remain blocked. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-e-chatgpt-review.md).
+
 - Codex hoàn tất H6 B2-E mock cô lập trên KVM2/ext4. Kiểm pre-up, HMAC v2, Level 2, crash/replay/callback và rollback, đối chiếu pre/post GATE A, production và metadata ledger thật. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-e-kvm2-mock.md).
 
 - ChatGPT accepted H6 B2-D actual source HMAC/mock from `cf36e59` and opened B2-E standalone KVM2 authenticated mock rehearsal with strict pre-render isolation, synthetic ledger/key, rollback and no real provider/paid. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-d-chatgpt-review.md).
