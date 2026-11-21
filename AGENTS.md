@@ -20,6 +20,14 @@ Mỗi tác nhân phải tham khảo [agents/README.md](agents/README.md) và h�
 
 **Mọi quy tắc mới của chủ dự án phải được cập nhật ngay vào `rules/`, đồng bộ entrypoint, `CATALOG.yaml`, `CHANGELOG.md`, commit/push/read-back.** Lời nói trong chat không phải kho tri thức bền vững. Quy tắc mới không tự cấp thêm quyền production/paid API.
 
+## Bảo toàn tài liệu và chống làm lại
+
+**BẮT BUỘC đọc và áp dụng [AGENT_WORKFLOW mục 8](rules/AGENT_WORKFLOW.md)** cho mọi nhiệm vụ: đọc **đủ** tài liệu liên quan (không dự đoán từ preview/truncated result), đối chiếu evidence công việc đã PASS, chỉ chạy lại khi có `change_trigger`/thiếu bằng chứng, và giới hạn file/section được sửa bằng `READ_SET`, `WRITE_SET`, `DO_NOT_TOUCH` cùng `INVARIANTS`.
+
+Trước update: fetch phiên bản remote mới nhất, đọc toàn bộ tài liệu sắp sửa, xác minh owner/status/approval và base SHA, tạo patch tối thiểu, review **toàn bộ diff/deletions**. Sau commit/push: đọc lại từ remote và xác minh trường bất biến cùng nội dung liên quan. Không đổi metadata task mẹ khi chỉ được giao nhiệm vụ tư vấn. Khi bị truncation/không đọc được toàn bộ: đánh `PARTIAL_READ`, không tự kết luận hoặc ghi đè.
+
+Mỗi đặc tả phải nêu đã làm gì, evidence nào còn áp dụng, test delta nào thật sự cần và phạm vi thao tác của agent. Ưu tiên định danh ổn định, dữ liệu tách theo trách nhiệm để khoanh vùng lỗi; không ghi secret trên Git public. Quy tắc này không chứng minh branch protection/CI đã bật và không tự cấp quyền chi phí/production.
+
 ## Thứ tự đọc bắt buộc
 
 1. `README.md` — phạm vi và bản đồ repository.
