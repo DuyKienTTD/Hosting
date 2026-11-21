@@ -1,7 +1,7 @@
 ---
 id: ttd-hermes-gate-b-guard-remediation-001
 type: task
-status: ready_for_mock_only_remediation
+status: blocked
 updated_at: 2026-11-21
 sensitivity: public
 owner: codex
@@ -45,3 +45,7 @@ Sau khi sửa thành công, Codex cần kiểm tra **live** state/ledger/kill sw
 ## Bàn giao
 
 Codex push mã secret-free, test report và evidence đã khử bí mật, đề xuất tiếp tục/STOP, cập nhật task/STATE/CATALOG/CHANGELOG; không đưa secret, private endpoint, raw request chứa nhạy cảm hoặc token lên GitHub public.
+
+## Kết quả phiên này
+
+`CODE_DRAFT / MOCK_NOT_VERIFIED / BLOCKED`: có [module one-shot](../sandbox/p0-hermes-gate-a/one_shot.py), nhưng Linux mock test và live preflight chưa chạy được. Không có paid call hoặc live mutation. Xem [báo cáo](../reports/2026-11-21-hermes-gate-b-permit-ledger-remediation.md).

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "task_id": "ttd-hermes-gate-b-guard-remediation-001",
+  "result": "BLOCKED_MOCK_NOT_VERIFIED",
+  "paid_attempts_this_task": 0,
+  "live_mutations_this_task": 0,
+  "code_draft_created": true,
+  "linux_mock_test_pass": false,
+  "local_test_error": "ModuleNotFoundError: fcntl",
+  "local_docker_daemon_available": false,
+  "live_ledger_verified": false,
+  "live_kill_switch_verified": false,
+  "production_health_verified_this_task": false,
+  "guard_integrated_or_deployed": false
+}

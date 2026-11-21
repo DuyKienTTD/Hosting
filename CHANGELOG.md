@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- Thêm bản nháp one-shot transaction trên ledger copy cho GATE B. Local Windows thiếu `fcntl` và Docker daemon không chạy, nên mock/live chưa xác minh; dừng ở `BLOCKED_PREFLIGHT`, 0 paid calls và không đổi runtime.
+
 - Đối chiếu GATE B `BLOCKED_PREFLIGHT` (0 Hermes paid attempts mới, 0 USD phát sinh). Guard hiện thiếu one-shot permit và reserve ngân sách trên shared ledger; ledger/kill switch/production chưa xác minh live. Giao Codex task `TTD-HERMES-GATE-B-GUARD-REMEDIATION-001` để sửa và kiểm thử mock-only, không mở paid dispatch hoặc nới phạm vi.
 
 - GATE B preflight `BLOCKED_PREFLIGHT`: guard GATE A chưa triển khai atomic one-shot permit và reservation trên shared ledger; dừng trước dispatch, 0 paid Hermes attempt, 0 chi phí API mới. Thêm báo cáo/evidence và cập nhật task/ADR/state.

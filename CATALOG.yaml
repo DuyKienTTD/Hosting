@@ -365,10 +365,28 @@ documents:
   - id: ttd-hermes-gate-b-guard-remediation-001
     path: tasks/2026-11-21-hermes-gate-b-permit-ledger-remediation.md
     type: task
-    status: ready_for_mock_only_remediation
+    status: blocked
     authoritative_for: Codex-Hermes-Gate-B-one-shot-permit-and-shared-ledger-guard-remediation
     updated_at: 2026-11-21
     sensitivity: public
+
+  - id: hermes-gate-b-permit-ledger-remediation-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-permit-ledger-remediation.md
+    type: report
+    status: blocked
+    authoritative_for: Gate-B-permit-ledger-code-draft-and-unverified-mock-status
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-guard-remediation-001-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-guard-remediation-001.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-Gate-B-remediation-blocker-evidence
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
 
 collections:
   agents: verified agent role profiles and capability evidence

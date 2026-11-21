@@ -68,6 +68,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- Remediation permit/ledger có bản nháp mã nhưng Linux mock tests và live preflight chưa xác minh; GATE B vẫn `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-21-hermes-gate-b-permit-ledger-remediation.md).
+
 - GATE B được phê duyệt có điều kiện nhưng preflight hiện `BLOCKED_PREFLIGHT`: guard GATE A chưa có atomic one-shot permit, consume/relock trước dispatch và worst-case reservation; 0 paid Hermes attempt mới. [Báo cáo](reports/2026-11-21-hermes-gate-b-paid-results.md).
 
 - Chưa thực hiện hardening SSH/XRDP hoặc firewall.
