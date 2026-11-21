@@ -63,6 +63,15 @@ documents:
     updated_at: 2026-11-21
     sensitivity: public
 
+  - id: hermes-self-assessment-2026-11-21
+    path: reports/2026-11-21-hermes-self-assessment.md
+    type: report
+    status: current
+    authoritative_for: hermes-agent-capability-assessment-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
 collections:
   tasks: committed work orders and acceptance criteria
   inventory: current configuration updated in place

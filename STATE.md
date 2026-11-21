@@ -31,6 +31,7 @@ sensitivity: public-redacted
 
 - Mục tiêu tổng thể: [PROJECT.md](PROJECT.md).
 - Đã chuẩn hóa giao nhiệm vụ qua `tasks/`, kết quả qua `reports/`; [quy tắc](rules/AGENT_WORKFLOW.md).
+- Báo cáo tự đánh giá Hermes đã được bổ sung tại `reports/2026-11-21-hermes-self-assessment.md`; đã xác minh được skills, session recall, GitHub push và đường tích hợp n8n theo docs, nhưng chưa xác minh API/live n8n.
 - Chưa kiểm thử thực tế tích hợp hai chiều n8n ↔ Hermes; đây là nhiệm vụ kỹ thuật tiếp theo, chưa triển khai.
 
 ## Việc đang chờ
@@ -39,6 +40,7 @@ sensitivity: public-redacted
 - Chưa đặt n8n/Hermes sau reverse proxy HTTPS.
 - Chưa xử lý các backup Hostinger có thể chứa ứng dụng đã xóa.
 - Chưa cập nhật hệ điều hành hoặc reboot.
+- Chưa xác minh exact build/version của Hermes Hostinger image hoặc live API endpoint từ runtime hiện tại.
 
 ## Tài liệu tiếp theo
 
