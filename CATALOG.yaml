@@ -183,6 +183,22 @@ documents:
     updated_at: 2026-11-21
     sensitivity: public-redacted
 
+  - id: ttd-resource-identity-001
+    path: tasks/2026-11-21-ttdnew-resource-identity-verification.md
+    type: task
+    status: current
+    authoritative_for: ttdnew-docker-hosting-resource-identification
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: ttd-ai-p0-integration-001
+    path: tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md
+    type: task
+    status: blocked
+    authoritative_for: gated-n8n-hermes-p0-sandbox-implementation
+    updated_at: 2026-11-21
+    sensitivity: public
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
