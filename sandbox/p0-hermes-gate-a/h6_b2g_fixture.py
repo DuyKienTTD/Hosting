@@ -273,6 +273,12 @@ def guard_matrix(provider_ip, outside_ips):
         context = ssl.create_default_context(cafile=f"/trust/{trust}")
         assert context.verify_mode == ssl.CERT_REQUIRED and context.check_hostname and context.cert_store_stats()["x509_ca"] == 1
         factory_calls, errors = [], []
+        deadline_fired = threading.Event()
+        abort = provider.abort
+
+        def observe_deadline(sock):
+            deadline_fired.set()
+            abort(sock)
 
         def tunnel():
             factory_calls.append(case)
@@ -297,6 +303,7 @@ def guard_matrix(provider_ip, outside_ips):
         with (patch.multiple(guard, PROVIDER_LANE=lane, service_token=lambda: TOKEN),
               patch.object(guard.Handler, "run_one_shot_mock", forbid_mock),
               patch.object(provider, "RESPONSE_TIMEOUT", 0.8 if case == "slow" else 4),
+              patch.object(provider, "abort", observe_deadline),
               ThreadingHTTPServer(("127.0.0.1", 0), guard.Handler) as entry):
             thread = threading.Thread(target=entry.serve_forever, daemon=True)
             thread.start()
@@ -321,9 +328,13 @@ def guard_matrix(provider_ip, outside_ips):
             if case in ("wrong-ca", "wrong-host", "expired"):
                 expected = {"wrong-ca": {20, 21}, "wrong-host": {62}, "expired": {10}}
                 assert isinstance(error, ssl.SSLCertVerificationError) and error.verify_code in expected[case], repr(error)
-            elif case in ("handshake", "slow"):
-                assert isinstance(error, (TimeoutError, http.client.IncompleteRead)), repr(error)
-                assert 0.50 <= elapsed < 1.75, elapsed
+            elif case == "handshake":
+                assert isinstance(error, TimeoutError) and 0.50 <= elapsed < 1.75, (repr(error), elapsed)
+            elif case == "slow":
+                # A timer shutdown during a TLS read can surface as timeout,
+                # truncation or an SSL write to the just-closed socket.
+                assert deadline_fired.is_set() and 0.70 <= elapsed < 1.75, (repr(error), elapsed)
+                assert isinstance(error, (OSError, http.client.IncompleteRead)), repr(error)
             elif case == "reject":
                 assert isinstance(error, OSError) and "403" in str(error)
             elif case == "drop":
