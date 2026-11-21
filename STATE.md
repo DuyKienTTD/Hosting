@@ -35,7 +35,7 @@ sensitivity: public-redacted
 - Đã xác minh n8n `2.45.7` và Hermes `0.22.5`; cả hai health/readiness PASS, 0 restart/OOM và có thể chạm nhau hai chiều qua host bridge.
 - P0 Mức 1 đã triển khai hai runtime phụ cô lập trên `ttd-ai-p0-sandbox`: n8n sandbox có đúng một authenticated webhook và reasoner deterministic mock không provider/Internet egress.
 - Structural E2E 9/9, negative auth, schema, callback, timeout/retry/idempotency và rollback/restore đều PASS. Production n8n/Hermes không restart, downtime 0, public port/firewall/DNS không đổi và paid inference call bằng 0.
-- AI reasoning thật vẫn `AWAITING_LEVEL2_APPROVAL`; n8n production MCP vẫn tắt, production có 0 workflow và Hermes chính vẫn không expose inference API.
+- AI reasoning thật vẫn `AWAITING_LEVEL2_APPROVAL`; n8n production MCP vẫn tắt, production có 0 workflow và Hermes chính vẫn không expose inference API. [Review Mức 1/2](reports/2026-11-21-p0-level1-review-and-level2-criteria.md) phân biệt **provider E2E** (adapter gọi GPT-6 Luna) và **Hermes E2E** (n8n giao việc cho Hermes Agent thật); provider-only PASS chưa đủ nghiệm thu mục tiêu n8n↔Hermes.
 - Kiến trúc được khuyến nghị: n8n làm control plane, Hermes reasoning qua API private, một internal Docker network, schema/policy/approval gate và media-worker FFmpeg riêng.
 
 ## Khảo sát năng lực và phối hợp các tác nhân
