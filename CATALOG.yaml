@@ -234,6 +234,14 @@ documents:
     updated_at: 2026-11-21
     sensitivity: public
 
+  - id: p0-level1-review-and-level2-criteria-2026-11-21
+    path: reports/2026-11-21-p0-level1-review-and-level2-criteria.md
+    type: report
+    status: current
+    authoritative_for: chatgpt-review-of-level1-and-differentiated-level2-e2e-acceptance
+    updated_at: 2026-11-21
+    sensitivity: public
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
