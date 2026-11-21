@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- ChatGPT review source `a411114` + evidence `5a70e3b`: **H6_STAGE_A_ACCEPTED** (8/8 isolated mock supported), không chứng minh Hermes/KVM2/provider E2E; Stage B chưa duyệt, paid GATE B BLOCKED_PREFLIGHT. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-stage-a-chatgpt-review.md).
+
 - Hoàn tất H6 Stage A với Guard/writer mock, IPC xác thực hai chiều, Compose overlay và kiểm thử offline trên ledger giả. Gate B paid giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-stage-a.md).
 
 - Chủ dự án phê duyệt H6 Stage A cho Codex: phát triển Guard/writer/Compose overlay trong repo và chạy offline/mock trên ledger giả; không KVM2 apply, không ledger live, không provider/paid/production. Phê duyệt ghi trực tiếp trong [task GATE B](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md); Stage B/C chưa duyệt, handoff PREPARED_FOR_OWNER_FORWARD.
