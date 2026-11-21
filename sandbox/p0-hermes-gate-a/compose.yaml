@@ -67,6 +67,7 @@ services:
     environment:
       HOME: /root
       HERMES_HOME: /root/.hermes
+      HERMES_DOCKER_EXEC_AS_ROOT: "1"
       OPENAI_BASE_URL: http://gate-a-guard:8081/v1
       HERMES_IGNORE_RULES: "1"
       PYTHONDONTWRITEBYTECODE: "1"
