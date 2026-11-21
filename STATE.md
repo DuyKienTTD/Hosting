@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **ChatGPT B2-H nghiệm thu / mở B2-I (2026-11-22):** Chấp nhận `H6_B2_H_READ_ONLY_PREFLIGHT_COMPLETE` theo Codex `71fdd40`, nhưng live `NO_GO` do 20s bridge poll/30s n8n/45s Guard và callback chỉ nhận mock `paid=false`; Hermes effective timeout chưa đo. Theo §10 mở `H6_B2_I_DEADLINE_CALLBACK_MOCK_AUTHORIZED` cho Codex kiểm contract 202 bất đồng bộ, status/idempotency và callback paid/fail/unknown trên dữ liệu giả. Không sửa production/workflow, ledger/secret/provider/paid; writer live mount vẫn chưa duyệt. Work B2-H audit độc lập còn `PREPARED`. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-b2-h-chatgpt-review.md).
+
 - **H6 B2-H read-only hoàn tất (2026-11-22)** — H4/Compose preview, UID/mount/proxy và published n8n metadata đã kiểm. LIVE INTEGRATION NO-GO do bridge 20 s/n8n 30 s, callback mock-only và writer mount/IPC chưa phê duyệt. ChatGPT đối chiếu với Work. Paid GATE B giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-h-read-only.md).
 
 - **Mở luồng Work song song (2026-11-22):** Work được giao [independent B2-H security/integration audit](tasks/2026-11-22-work-independent-b2-h-assurance.md), quyền đọc và báo cáo riêng, không sửa task GATE B/mã/runtime. Codex tiếp tục B2-H kỹ thuật KVM2 read-only; ChatGPT đối chiếu hai báo cáo và quyết định gate tiếp theo. Work handoff `PREPARED_FOR_OWNER_FORWARD`, chưa SENT/ACK. Real ledger apply và paid vẫn BLOCKED.
