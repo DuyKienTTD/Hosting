@@ -2,6 +2,10 @@
 
 ## 2026-11-21
 
+- Tạo checkpoint GATE B tại điểm dừng guard mount: Codex mới đối chiếu approval/overlay từ GitHub, chưa đọc đủ rules, chưa xác minh live Compose/backup/rollback nên chưa recreate guard. Giữ nguyên H3/H4 evidence PASS và giới hạn owner phê duyệt; GATE B `BLOCKED_PREFLIGHT`. [Checkpoint](reports/2026-11-21-hermes-gate-b-guard-mount-paused-checkpoint.md).
+
+
+
 - Chủ dự án chấp thuận bước recreate **riêng sandbox guard** để mount OpenAI API secret read-only theo H4 overlay; điều kiện bắt buộc: backup/rollback, no-bypass, no-public-port, production health và ledger/kill switch bất biến; không gọi provider hoặc paid inference. Bổ sung approval vào task mẹ, không thay owner/status/approval gốc; handoff Codex còn `PREPARED_FOR_OWNER_FORWARD`.
 
 
