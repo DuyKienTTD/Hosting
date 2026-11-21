@@ -32,7 +32,7 @@ sensitivity: public-redacted
 - Mục tiêu tổng thể: [PROJECT.md](PROJECT.md).
 - Đã chuẩn hóa giao nhiệm vụ qua `tasks/`, kết quả qua `reports/`; [quy tắc](rules/AGENT_WORKFLOW.md).
 - Báo cáo tự đánh giá Hermes đã được bổ sung tại `reports/2026-11-21-hermes-self-assessment.md`; đã xác minh được skills, session recall, GitHub push và đường tích hợp n8n theo docs, nhưng chưa xác minh API/live n8n.
-- Chưa kiểm thử thực tế tích hợp hai chiều n8n ↔ Hermes; đây là nhiệm vụ kỹ thuật tiếp theo, chưa triển khai.
+- Chưa kiểm thử thực tế tích hợp hai chiều n8n ↔ Hermes. Đã giao đặc tả cho Codex tại [TTD-AI-PLATFORM-AUDIT-001](tasks/2026-11-21-n8n-hermes-integration-audit.md); chưa có báo cáo thực thi.
 
 ## Việc đang chờ
 
