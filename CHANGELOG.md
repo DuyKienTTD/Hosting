@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Chủ dự án ủy quyền ChatGPT điều phối liên tục (quy tắc §10) và ChatGPT mở H6 Stage B2-A: Codex xây dựng/test tương thích shared P0 ledger và Level 2 writer hoàn toàn trên mock/schema giả, không chạm ledger thật, provider, production hoặc paid. [Task](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md).
+
 - ChatGPT nghiệm thu H6 Stage B1: `H6_STAGE_B1_ACCEPTED` theo code `7a03aeb`, evidence `afcd07e`, 8/8 KVM2 mock, 6/6 bounded no-bypass và rollback PASS; Stage B2/C chưa duyệt, paid GATE B BLOCKED_PREFLIGHT. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-stage-b1-chatgpt-review.md).
 
 - Codex hoàn tất H6 Stage B1 trên KVM2 sau khi qua cổng render và kiểm trùng tài nguyên. 8/8 ca mock, 6/6 no-bypass, rollback và đối chiếu baseline PASS. ChatGPT review, paid GATE B vẫn `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-stage-b1.md).
