@@ -20,6 +20,10 @@ Mỗi tác nhân phải tham khảo [agents/README.md](agents/README.md) và h�
 
 **Mọi quy tắc mới của chủ dự án phải được cập nhật ngay vào `rules/`, đồng bộ entrypoint, `CATALOG.yaml`, `CHANGELOG.md`, commit/push/read-back.** Lời nói trong chat không phải kho tri thức bền vững. Quy tắc mới không tự cấp thêm quyền production/paid API.
 
+## Thực thi liền mạch trong phạm vi đã phê duyệt
+
+**BẮT BUỘC áp dụng [AGENT_WORKFLOW mục 9](rules/AGENT_WORKFLOW.md):** chủ động hoàn thành toàn bộ phần hợp lệ có thể tiếp tục; điều kiện chưa kiểm tra là việc cần làm, không mặc nhiên là blocker. Chỉ dừng side effect khi safety/approval gate chưa PASS; handoff BLOCKED phải có blocker cụ thể. Không mở rộng quyền, không tự retry paid API và không giả định phiên chạy 24/7.
+
 ## Bảo toàn tài liệu và chống làm lại
 
 **BẮT BUỘC đọc và áp dụng [AGENT_WORKFLOW mục 8](rules/AGENT_WORKFLOW.md)** cho mọi nhiệm vụ: đọc **đủ** tài liệu liên quan (không dự đoán từ preview/truncated result), đối chiếu evidence công việc đã PASS, chỉ chạy lại khi có `change_trigger`/thiếu bằng chứng, và giới hạn file/section được sửa bằng `READ_SET`, `WRITE_SET`, `DO_NOT_TOUCH` cùng `INVARIANTS`.
