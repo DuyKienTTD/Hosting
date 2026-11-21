@@ -8,7 +8,6 @@ import os
 from pathlib import Path
 import re
 import sqlite3
-import subprocess
 import sys
 import types
 import urllib.request
@@ -83,8 +82,13 @@ def projected(workflow, auth_template):
                 opts["jsCode"] = left + "'<fixture-bearer>'" + right
         if node_id == "webhook-trigger" and opts.get("path") == "ttd-p0-fake-ads-audit-v1":
             opts["path"] = "<fixture-webhook>"
-        if node_id == "call-reasoner" and opts.get("url") == "http://reasoner-p0:8080/v1/reason":
-            opts["url"] = "http://fixture-bridge/v1/reason"
+        if node_id == "call-reasoner":
+            if opts.get("url") == "http://reasoner-p0:8080/v1/reason":
+                opts["url"] = "http://fixture-bridge/v1/reason"
+            for header in opts.get("headerParameters", {}).get("parameters", []):
+                if (header.get("name", "").lower() == "authorization"
+                        and re.fullmatch(r"Bearer [A-Za-z0-9_.~+/=-]+", header.get("value", ""))):
+                    header["value"] = "Bearer <fixture-bearer>"
         nodes[node_id] = item
     return {"nodes": nodes, "connections": workflow["connections"], "settings": workflow.get("settings") or {}}
 
@@ -97,17 +101,22 @@ def compare(published, public):
     deltas = {}
     for node_id in sorted(expected["nodes"].keys() & found["nodes"].keys()):
         left, right = found["nodes"][node_id], expected["nodes"][node_id]
-        fields = {key for key in left.keys() | right.keys() if left.get(key) != right.get(key)}
+        fields = {key for key in left.keys() | right.keys()
+                  if key not in left or key not in right or left[key] != right[key]}
         if fields:
             deltas[node_id] = sorted(fields & NODE_FIELDS) + (["other_field"] if fields - NODE_FIELDS else [])
     equal = expected == found
     # Never emit a digest of unmatched real arguments, code, references, or settings.
+    left = found["nodes"].get("call-reasoner", {}).get("parameters", {})
+    right = expected["nodes"]["call-reasoner"]["parameters"]
     return {"projection_equal": equal, "candidate_projection_sha256": sha(canonical(expected)),
             "published_projection_sha256": sha(canonical(expected)) if equal else None,
             "connections_equal": found["connections"] == expected["connections"],
             "entity_settings_equal": found["settings"] == expected["settings"],
             "known_missing_nodes": missing, "unexpected_node_count": len(found["nodes"].keys() - expected["nodes"].keys()),
             "node_field_deltas": deltas,
+            "known_bridge_parameter_deltas": sorted(key for key in right if key not in left or left[key] != right[key]),
+            "unknown_bridge_parameter_count": len(left.keys() - right.keys()),
             "validator_matches_public_code": "validate-callback" not in deltas and "validate-callback" not in missing,
             "candidate_has_separate_receipt_node": False}
 
