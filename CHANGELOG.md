@@ -2,6 +2,10 @@
 
 ## 2026-11-21
 
+- Ghi nhận xác nhận của chủ dự án từ Hostinger Web Terminal: H4 `STORED_NOT_MOUNTED`, key đã nhập ẩn hai lần và lưu staging theo thông báo script; không công khai key/host log; chưa mount/recreate hoặc gọi provider. Chờ phê duyệt riêng để Codex mount guard, rồi mới kiểm quyền/token count. GATE B giữ `BLOCKED_PREFLIGHT`.
+
+
+
 - ChatGPT nghiệm thu H4 tại commit `d2d00f0` bằng report/evidence và review mã `f335752`: loại bỏ Compose recreate trong giao diện, 11/11 Linux test PASS, chuẩn bị Hostinger Web Terminal owner key input và dừng ở STORED_NOT_MOUNTED. Chưa mount secret, chưa paid provider call; GATE B BLOCKED_PREFLIGHT.
 
 
