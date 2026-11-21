@@ -177,3 +177,26 @@ Với công việc nhỏ đã rõ, có thể rút ngắn nhưng **không bỏ ow
 - **Hiệu lực ngay:** tất cả agent đọc đủ, lập phạm vi đọc/ghi, kiểm diff và xác minh sau push theo quy tắc này.
 - **Có thể tự động hóa tiếp:** quy tắc GitHub ruleset/branch protection, yêu cầu PR review, status checks, CI validator kiểm metadata bất biến, uniqueness ID, links, diff xóa section, secrets, và phân quyền write-path. **Chưa coi các kiểm soát này là đã bật** nếu chưa có bằng chứng cấu hình GitHub thật; đề xuất triển khai riêng khi đủ quyền và có sự đồng ý của chủ dự án.
 - Tài liệu tham khảo: Git diff https://git-scm.com/docs/git-diff ; GitHub rulesets https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets ; GitHub PR review https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/reviewing-proposed-changes-in-a-pull-request .
+
+## 9. BẮT BUỘC: thực thi nhiệm vụ liền mạch theo kết quả (2026-11-21)
+
+Quy tắc này bổ sung mục 7–8; **không thay thế STOP, approval, bảo mật, chi phí hoặc nghiệm thu trong task/ADR**. Áp dụng cho Codex và mọi agent khác theo phạm vi công cụ/quyền đã xác minh.
+
+### 9.1. Tiếp tục theo mặc định, chịu trách nhiệm đến kết quả
+
+- Nhận một task nghĩa là theo đuổi outcome/acceptance của toàn phạm vi đã được duyệt, không chỉ từng thao tác. Agent tự phân rã, sắp thứ tự và tiếp tục các bước độc lập, hợp lệ, an toàn còn lại mà không cần chủ dự án nhắc lại.
+- Điều kiện **chưa kiểm tra** (ví dụ backup hoặc baseline) là việc phải thực hiện, không mặc nhiên là một blocker. Kiểm tra xong mới quyết định GO/STOP cho thao tác rủi ro liên quan.
+- Không đổi BLOCKED thành PASS nếu preflight còn thiếu; không recreate/deploy/dispatch trước khi mọi gate bắt buộc PASS. Cập nhật tiến độ giữa chừng không có nghĩa kết thúc nhiệm vụ.
+
+### 9.2. STOP theo ranh giới rủi ro, không STOP toàn task khi có phần an toàn còn làm được
+
+- Dừng ngay **thao tác có side effect** nếu thiếu approval, quyền, bằng chứng an toàn, phát hiện drift/bypass/secret exposure, chưa kiểm soát rollback/chi phí hoặc nguy cơ ảnh hưởng production. Tiếp tục phép đọc/kiểm tra và phần độc lập đã được phép nếu không gia tăng rủi ro.
+- Chỉ bàn giao BLOCKED khi đã thử các bước hợp lệ để tháo gỡ và vẫn tồn tại trở ngại cụ thể, hoặc khi công cụ/phiên/đường truy cập không cho tiếp tục. Nêu observed, bằng chứng, next_action, owner và ranh giới đã dừng. Không gắn nhãn lỗi kỹ thuật nếu chỉ còn việc chưa làm.
+- Khi cần chủ dự án quyết định mới, dừng đúng phạm vi chưa được phép; không suy diễn approval từ Git access hay áp lực hoàn thành.
+
+### 9.3. Phục hồi, tránh làm lại và bàn giao theo sự kiện
+
+- Được chẩn đoán và thử lại phép read-only, idempotent hoặc mock khi an toàn, có lý do và trong quyền; **không tự retry paid inference hoặc side effect chưa chứng minh idempotency**. Không chạy lại H3/H4 hoặc công việc đã PASS nếu không có change trigger theo mục 8.
+- Chỉ phát hành handoff kết thúc khi DONE/PASS, BLOCKED có blocker cụ thể, NEEDS_OWNER_DECISION hoặc INTERRUPTED_BY_ENVIRONMENT (phiên/công cụ không thể tiếp tục). Status update không phải handoff đóng task.
+- Nếu phiên bị ngắt, ghi checkpoint tối thiểu khi thật sự cần với task ID, evidence còn hiệu lực, bước chưa xong và first safe action; phiên kế tiếp tiếp tục từ điểm đó, không mở task trùng lặp.
+- Quy tắc này **không bảo đảm vận hành 24/7** hay tự khởi chạy lại phiên Codex; tính liên tục xuyên phiên cần cơ chế điều phối/runtime được kiểm chứng riêng.
