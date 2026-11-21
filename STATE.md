@@ -84,6 +84,8 @@ sensitivity: public-redacted
 
 - **Codex đã kiểm tra live metadata sau owner input:** `PRESENT`, mode `0600`, `mounted=false`; không đọc/băm/đo kích thước key và không chạy Compose. H4 owner entry ở `VERIFIED_LIVE_STORED_NOT_MOUNTED`; project/Responses/billing/token count vẫn chưa xác minh. Guard-only sandbox recreate/mount cần phê duyệt riêng; GATE B giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-21-hermes-gate-b-h4-owner-key-live-check.md).
 
+- **Chủ dự án đã phê duyệt riêng guard-only mount (2026-11-21):** cho phép Codex recreate **chỉ sandbox `guard`** với H4 overlay để mount OpenAI secret read-only, có backup/rollback, kiểm targeted six-container no-bypass, health, ports và ledger; **không** gọi provider, không mount sang service khác, không đổi production/kill switch/paid permit. [Task GATE B, mục phê duyệt guard mount](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md). `handoff_state: PREPARED_FOR_OWNER_FORWARD`, chưa Codex ACK; GATE B vẫn `BLOCKED_PREFLIGHT`.
+
 ## Việc đang chờ
 
 - [TTD-HERMES-GATE-B-GUARD-REMEDIATION-001](tasks/2026-11-21-hermes-gate-b-permit-ledger-remediation.md) đã **MOCK_INTEGRATION_PASS**: shared-lock interop, 20-process race, 14 fault cases và full mock E2E qua n8n→Hermes→guard→callback PASS. Sandbox đã rollback, production health 200/restart 0, ledger thật 1 attempt/kill switch ON và không đổi, paid calls mới 0. [Báo cáo nghiệm thu](reports/2026-11-21-hermes-gate-b-guard-remediation-results.md). Paid GATE B vẫn BLOCKED_PREFLIGHT, cần preflight live riêng.
