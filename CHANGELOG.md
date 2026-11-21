@@ -2,6 +2,10 @@
 
 ## 2026-11-21
 
+- Chủ dự án chấp thuận bước recreate **riêng sandbox guard** để mount OpenAI API secret read-only theo H4 overlay; điều kiện bắt buộc: backup/rollback, no-bypass, no-public-port, production health và ledger/kill switch bất biến; không gọi provider hoặc paid inference. Bổ sung approval vào task mẹ, không thay owner/status/approval gốc; handoff Codex còn `PREPARED_FOR_OWNER_FORWARD`.
+
+
+
 - Codex xác minh live metadata sau owner input: secret staging `PRESENT`, mode `0600`, chưa mount; không đọc/băm/đo kích thước key, không chạy Compose hoặc provider request. Guard-only sandbox recreate/mount chờ phê duyệt riêng; GATE B vẫn `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-21-hermes-gate-b-h4-owner-key-live-check.md).
 
 - Ghi nhận xác nhận của chủ dự án từ Hostinger Web Terminal: H4 `STORED_NOT_MOUNTED`, key đã nhập ẩn hai lần và lưu staging theo thông báo script; không công khai key/host log; chưa mount/recreate hoặc gọi provider. Chờ phê duyệt riêng để Codex mount guard, rồi mới kiểm quyền/token count. GATE B giữ `BLOCKED_PREFLIGHT`.
