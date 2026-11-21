@@ -187,6 +187,7 @@ def stage_sources(root, runner_commit, callback_blob):
 
 
 LEGACY_BLOBS = {
+    "mock_contract.py": "d58d0bcf89bd557c313606d5908817f45ccd0129",
     "h6_stage_a_test.py": "298e19774cbbb045558e2406bc0b2cb5a6bc5062",
     "bridge.py": "191c670c84683deadfe0107f09463aca593ba700",
     "one_shot_linux_test.py": "2530525131812b823538e5b0f27b34d3b0f9929d",
@@ -264,7 +265,7 @@ def mount_plan(root, project, cfg, before):
         need(set(item["tmpfs"]) == expected_tmpfs, "unsafe tmpfs targets")
         health = item.get("healthcheck", {}).get("test", [])
         target = {"guard": "127.0.0.1:8081/healthz", "writer": f"{IPC}/writer.sock"}.get(name)
-        need((len(health) == 4 and health[:3] == ["CMD", "python3", "-c"] and target in health[3])
+        need((len(health) == 5 and health[:4] == ["CMD", "python3", "-B", "-c"] and target in health[4])
              if target else not health, "unexpected healthcheck")
         expected = {f"/opt/ttd/{file}": ("bind", str(root / "src" / SOURCE / file)) for file in CODE[name]}
         expected.update({target: ("volume", volume) for volume, target in shares[name].items()})
