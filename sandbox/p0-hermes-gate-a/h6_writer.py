@@ -8,6 +8,7 @@ import re
 import socket
 import stat
 import struct
+import sys
 from pathlib import Path
 
 from mock_contract import encode, no_duplicate_keys, usage_from_response
@@ -140,25 +141,33 @@ def handle(conn, path):
 
 
 def serve(address, path):
-    if (os.geteuid(), os.getegid()) != (WRITER_UID, IPC_GID):
+    serve_fixture(address, path, WRITER_UID, IPC_GID, 0o750, 0o660, handle)
+
+
+def serve_fixture(address, path, uid, gid, directory_mode, socket_mode, handler):
+    if (os.geteuid(), os.getegid()) != (uid, gid):
         raise PermissionError("H6_WRITER_IDENTITY")
     if path.name != FIXTURE_PATH.name or path.parent.resolve().name != "mock-ledger" or path.is_symlink():
         raise ValueError("STAGE_A_FIXTURE_REQUIRED")
     if fixture_snapshot(path)["kill_switch"] is not True:
         raise ValueError("KILL_SWITCH_NOT_ON")
-    directory = address.parent.stat()
-    if (directory.st_uid, directory.st_gid, stat.S_IMODE(directory.st_mode)) != (WRITER_UID, IPC_GID, 0o750):
+    directory = address.parent.lstat()
+    if (not stat.S_ISDIR(directory.st_mode)
+            or (directory.st_uid, directory.st_gid, stat.S_IMODE(directory.st_mode)) != (uid, gid, directory_mode)):
         raise PermissionError("H6_IPC_DIRECTORY")
-    os.umask(0o117)  # A socket starts with mode 0660 even before listen.
-    lock_fd = os.open(address.parent / "writer.lock", os.O_WRONLY | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+    os.umask(0o777 ^ socket_mode)
+    lock_fd = os.open(address.parent / "writer.lock",
+                      os.O_WRONLY | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600)
     with os.fdopen(lock_fd, "a") as lock:
+        if not stat.S_ISREG(os.fstat(lock.fileno()).st_mode):
+            raise PermissionError("H6_IPC_WRITER_LOCK")
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         try:
             previous = address.lstat()
         except FileNotFoundError:
             pass
         else:
-            if not stat.S_ISSOCK(previous.st_mode) or previous.st_uid != WRITER_UID:
+            if not stat.S_ISSOCK(previous.st_mode) or (previous.st_uid, previous.st_gid) != (uid, gid):
                 raise PermissionError("H6_IPC_STALE_PATH")
             address.unlink()
         with socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET) as listener:
@@ -168,11 +177,18 @@ def serve(address, path):
                 conn, _ = listener.accept()
                 with conn:
                     try:
-                        handle(conn, path)
+                        handler(conn, path)
                     except OSError:
                         # Includes rejected peer, timeout and lost acknowledgement.
                         continue
 
 
 if __name__ == "__main__":
-    serve(SOCKET_PATH, FIXTURE_PATH)
+    if sys.argv[1:] == ["--b2-d-mock"]:
+        from h6_ipc_auth import serve_mock
+
+        serve_mock()
+    elif len(sys.argv) == 1:
+        serve(SOCKET_PATH, FIXTURE_PATH)
+    else:
+        raise SystemExit("unknown H6 writer mode")

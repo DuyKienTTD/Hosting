@@ -33,6 +33,12 @@ TOKEN_FILE = Path("/run/secrets/guard_service_token")
 LEDGER_PATH = Path("/opt/ttd/ledger/level2-budget.json")
 MOCK_ONE_SHOT_LEDGER = os.environ.get("TTD_MOCK_ONE_SHOT_LEDGER", "")
 H6_STAGE_A_SOCKET = os.environ.get("TTD_H6_STAGE_A_SOCKET", "")
+H6_B2_D_SOCKET = os.environ.get("TTD_H6_B2_D_SOCKET", "")
+if H6_B2_D_SOCKET:
+    from h6_ipc_auth import SOCKET_PATH as B2_D_SOCKET_PATH
+
+    if H6_STAGE_A_SOCKET or MOCK_ONE_SHOT_LEDGER or H6_B2_D_SOCKET != str(B2_D_SOCKET_PATH):
+        raise SystemExit("invalid H6 B2-D mock socket configuration")
 if H6_STAGE_A_SOCKET:
     from h6_writer import SOCKET_PATH
 
@@ -108,16 +114,20 @@ def capture_lock() -> Iterator[None]:
 
 
 def writer_call(operation, **fields):
-    from h6_writer import call
-
     try:
+        if H6_B2_D_SOCKET:
+            from h6_ipc_auth import call
+
+            return call(operation, **fields)
+        from h6_writer import call
+
         return call(H6_STAGE_A_SOCKET, operation, **fields)
     except (OSError, ValueError, RuntimeError) as error:
         raise RuntimeError("H6_WRITER_UNAVAILABLE_OR_DENIED") from error
 
 
 def ledger_summary() -> dict[str, Any]:
-    if H6_STAGE_A_SOCKET:
+    if H6_B2_D_SOCKET or H6_STAGE_A_SOCKET:
         return writer_call("snapshot")
     ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
     return {
@@ -233,7 +243,7 @@ class Handler(BaseHTTPRequestHandler):
         return hmac.compare_digest(self.headers.get("Authorization", "").encode(), expected)
 
     def settle_one_shot_mock(self, task_id, fingerprint, outcome, usage=None):
-        if H6_STAGE_A_SOCKET:
+        if H6_B2_D_SOCKET or H6_STAGE_A_SOCKET:
             writer_call("settle", task_id=task_id, fingerprint=fingerprint, outcome=outcome, usage=usage)
         else:
             settle_mock(LEDGER_PATH, task_id, fingerprint, outcome, usage)
@@ -241,7 +251,7 @@ class Handler(BaseHTTPRequestHandler):
     def run_one_shot_mock(self, body, wire, task_id, fingerprint):
         try:
             forwarded = json.loads(wire)
-            entry = None if H6_STAGE_A_SOCKET else record_capture(body, forwarded)
+            entry = None if H6_B2_D_SOCKET or H6_STAGE_A_SOCKET else record_capture(body, forwarded)
             request = urllib.request.Request(
                 MOCK_URL, data=wire, method="POST",
                 headers={"Authorization": f"Bearer {service_token()}", "Content-Type": "application/json"})
@@ -284,7 +294,11 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 ledger = ledger_summary()
                 status = 200 if ledger["kill_switch"] is True else 503
-                mode = "h6_stage_a_mock" if H6_STAGE_A_SOCKET else "mock_only"
+                mode = "mock_only"
+                if H6_B2_D_SOCKET:
+                    mode = "h6_b2_d_mock"
+                elif H6_STAGE_A_SOCKET:
+                    mode = "h6_stage_a_mock"
                 self.send_json(status, {"status": "ok" if status == 200 else "blocked", "mode": mode, "ledger": ledger})
             except Exception:
                 self.send_json(503, {"status": "unhealthy", "error": "LEDGER_UNAVAILABLE"})
@@ -321,7 +335,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             forwarded, _ = enforce(body)
-            if H6_STAGE_A_SOCKET:
+            if H6_B2_D_SOCKET or H6_STAGE_A_SOCKET:
                 task_id, key_hash = mock_scope(forwarded)
                 wire, fingerprint = freeze_stage_a(forwarded)
                 writer_call("admit", task_id=task_id, key_hash=key_hash, fingerprint=fingerprint)
@@ -338,7 +352,7 @@ class Handler(BaseHTTPRequestHandler):
         except (OSError, KeyError, TypeError, json.JSONDecodeError):
             self.send_json(503, {"error": "PERMIT_LEDGER_UNAVAILABLE"})
             return
-        if H6_STAGE_A_SOCKET or MOCK_ONE_SHOT_LEDGER:
+        if H6_B2_D_SOCKET or H6_STAGE_A_SOCKET or MOCK_ONE_SHOT_LEDGER:
             self.run_one_shot_mock(body, wire, task_id, fingerprint)
             return
         entry = record_capture(body, forwarded)

@@ -1,0 +1,96 @@
+# Standalone offline candidate. The runner creates the disposable ledger source.
+x-image: &image python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89
+x-common: &common
+  image: *image
+  pull_policy: never
+  user: "0:0"
+  network_mode: none
+  cap_drop: [ALL]
+  read_only: true
+  security_opt: [no-new-privileges:true]
+  pids_limit: 48
+x-guard: &guard ./guard.py:/opt/ttd/guard.py:ro
+x-writer: &writer ./h6_writer.py:/opt/ttd/h6_writer.py:ro
+x-auth: &auth ./h6_ipc_auth.py:/opt/ttd/h6_ipc_auth.py:ro
+x-ledger-code: &ledger-code ./one_shot.py:/opt/ttd/one_shot.py:ro
+x-contract: &contract ./mock_contract.py:/opt/ttd/mock_contract.py:ro
+x-test: &test ./h6_b2d_mock_test.py:/opt/ttd/h6_b2d_mock_test.py:ro
+x-ledger: &ledger
+  type: bind
+  source: ${TTD_H6_B2_D_FAKE_LEDGER:?use the local fixture runner}
+  target: /opt/ttd/mock-ledger
+  bind:
+    create_host_path: false
+    propagation: rprivate
+
+services:
+  init:
+    <<: *common
+    command: [python, -B, /opt/ttd/h6_b2d_mock_test.py, init]
+    volumes:
+      - *test
+      - *guard
+      - *writer
+      - *auth
+      - *ledger-code
+      - *contract
+      - *ledger
+      - ipc:/opt/ttd/h6-b2d-ipc
+      - auth:/run/h6-b2d-auth
+      - test-auth:/run/h6-b2d-test-auth
+      - guard-auth:/run/secrets
+  writer:
+    <<: *common
+    command: [python, -B, /opt/ttd/h6_writer.py, --b2-d-mock]
+    volumes:
+      - *writer
+      - *auth
+      - *ledger-code
+      - *contract
+      - *ledger
+      - ipc:/opt/ttd/h6-b2d-ipc
+      - auth:/run/h6-b2d-auth:ro
+    healthcheck:
+      test: [CMD, python, -B, -c, "import socket; s=socket.socket(socket.AF_UNIX,socket.SOCK_SEQPACKET); s.settimeout(1); s.connect('/opt/ttd/h6-b2d-ipc/writer.sock'); s.close()"]
+      interval: 1s
+      timeout: 2s
+      retries: 6
+  guard:
+    <<: *common
+    command: [python, -B, /opt/ttd/guard.py]
+    environment:
+      TTD_H6_B2_D_SOCKET: /opt/ttd/h6-b2d-ipc/writer.sock
+    volumes:
+      - *guard
+      - *writer
+      - *auth
+      - *ledger-code
+      - *contract
+      - ipc:/opt/ttd/h6-b2d-ipc:ro
+      - auth:/run/h6-b2d-auth:ro
+      - guard-auth:/run/secrets:ro
+    healthcheck:
+      test: [CMD, python, -B, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/healthz',timeout=2).close()"]
+      interval: 1s
+      timeout: 3s
+      retries: 6
+  tests:
+    <<: *common
+    command: [python, -B, /opt/ttd/h6_b2d_mock_test.py, tests]
+    volumes:
+      - *test
+      - *guard
+      - *writer
+      - *auth
+      - *ledger-code
+      - *contract
+      - ../p0-level2/adapter.py:/opt/ttd/level2-adapter.py:ro
+      - test-auth:/run/h6-b2d-auth:ro
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,mode=0700,size=16m
+
+volumes:
+  ipc:
+  auth:
+  test-auth:
+  guard-auth:

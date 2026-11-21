@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Codex tích hợp IPC HMAC hai chiều vào Guard/writer cho H6 B2-D mock-only, ký ACK theo request, kiểm Compose local và chạy hồi quy Stage A/B2-A. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-d-ipc-integration.md).
+
 - ChatGPT chấp nhận B2-C offline tại `bca741f`, xác minh HMAC hiện **chỉ ở fixture** và mở B2-D tích hợp HMAC trong mã Guard/writer, test offline/mock; không KVM2 apply/ledger thật/provider. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-c-chatgpt-review.md).
 
 - Codex hoàn tất H6 B2-C offline, kiểm writer UID 0 bỏ caps đối chiếu UID riêng/ACL, xác thực Unix socket, cạnh tranh Level 2 và crash/replay/rollback trên ledger giả. Bàn giao ChatGPT nghiệm thu. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-c-uid-model.md).

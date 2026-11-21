@@ -1,0 +1,88 @@
+{
+  "task_id": "ttd-hermes-gate-b-001",
+  "result": "H6_B2_D_CODE_MOCK_PASS",
+  "evidence_class": "VERIFIED_OFFLINE_MOCK",
+  "apply_gate": "BLOCKED_UID_OR_MOUNT",
+  "paid_gate": "BLOCKED_PREFLIGHT",
+  "observed_date_ict": "2026-11-22",
+  "approval_commit": "536632879e764befd26c5209842bf365aed49d6e",
+  "rules_task_base": "8fc3cdaeda27c7d78bdb5acc3a4bade1dba0aabf",
+  "rules_workflow_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "approval_task_blob": "6271372402512c1721003bcde9ebb3e2c18bafd1",
+  "source_blobs": {
+    "sandbox/p0-hermes-gate-a/compose.h6-b2-d-mock.yaml": "4f9ec9efbee05d09f5de7786898fb017380a1e61",
+    "sandbox/p0-hermes-gate-a/guard.py": "cd25cc3855265b3abfca4f82eb243eeaf5073f6c",
+    "sandbox/p0-hermes-gate-a/h6_b2d_mock_test.py": "2ff0387f4cac932b31928e451682a58a63d1b07d",
+    "sandbox/p0-hermes-gate-a/h6_ipc_auth.py": "6d02af798db787892a08d9ff40c1af171079b520",
+    "sandbox/p0-hermes-gate-a/h6_writer.py": "6a18b83f593289cd84fe409795e2cd1addf54c9a",
+    "sandbox/p0-hermes-gate-a/one_shot.py": "b16d1b710dd13611cb96bdf27f7ad3eed3597e90",
+    "sandbox/p0-hermes-gate-a/run_h6_b2d_mock.ps1": "16b79eef82ca601ba0ec23b1151ab8aad8c79e22",
+    "sandbox/p0-level2/adapter.py": "146bcf453821dbb0fe1b0f10b0cc4f06c9ff9c50"
+  },
+  "runtime": {
+    "engine": "Docker Desktop Linux 29.4.3",
+    "compose": "5.1.4",
+    "image_digest": "sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+    "render_scope_verified": true,
+    "actual_service_entrypoints": true,
+    "actual_guard_signed_snapshot": true,
+    "writer_guard_uid_gid": [0, 0],
+    "network_mode": "none",
+    "read_only_rootfs": true,
+    "cap_drop_all": true,
+    "no_new_privileges": true,
+    "published_ports": 0,
+    "writer_rw_mounts": ["synthetic ledger directory bind rprivate", "private IPC volume"],
+    "guard_has_ledger_mount": false,
+    "ipc_key_ro_ephemeral": true,
+    "resources_remaining": {"containers": 0, "networks": 0, "volumes": 0, "scratch_directories": 0}
+  },
+  "protocol": {
+    "version": 2,
+    "socket": "SOCK_SEQPACKET",
+    "packet_limit_bytes": 4096,
+    "exchange_deadline_seconds": 4,
+    "idle_challenge_expired": true,
+    "mock_only_opt_in": true,
+    "writer_refuses_missing_fixture_marker_or_insecure_lock": true,
+    "writer_rejects": ["wrong GID with valid key", "same UID/GID with wrong key", "reflected role proof",
+      "captured packet replay", "tampered request", "legacy version", "oversize", "duplicate keys", "nonfinite or deeply nested JSON",
+      "generic write or extra path field"],
+    "guard_rejects": ["wrong writer proof", "legacy ACK", "unsigned ACK", "tampered ACK", "other-request ACK", "unavailable writer"],
+    "configuration_rejects": ["missing key", "short key", "long key", "unsafe mode", "symlink", "writable mount",
+      "provider-key sentinel", "conflicting legacy config"],
+    "rejected_messages_leave_ledger_unchanged": true
+  },
+  "transactions": {
+    "level2_actual_adapter": true,
+    "same_lock_device_inode_contention": true,
+    "stable_lock_inode": true,
+    "ledger_replaced_old_fd_unchanged": true,
+    "both_updates_preserved": true,
+    "admission_requests": 4,
+    "signed_acks": 1,
+    "successful_http_mock_dispatches": 1,
+    "authenticated_mock_settlement": true,
+    "crash_cases": [
+      {"window": "before rename", "ack": false, "guard_http_status": 503, "loopback_stub_hits": 0, "prior_bytes_preserved": true},
+      {"window": "after file and directory fsync", "ack": false, "guard_http_status": 503, "loopback_stub_hits": 0, "inflight_preserved": true}
+    ],
+    "restart_rejects_replay": true,
+    "rollback_preserves_bytes_and_inodes": true
+  },
+  "regressions": {
+    "stage_a_mock_cases_passed": 8,
+    "b2_a_rejection_cases_passed": 14,
+    "b2_a_crash_cases_passed": 2,
+    "b1_evidence_reused": true
+  },
+  "scope_counters": {
+    "kvm2_operations": 0,
+    "real_ledger_lock_or_permit_operations": 0,
+    "provider_operations": 0,
+    "paid_requests": 0,
+    "production_operations": 0
+  },
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}

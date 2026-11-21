@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **H6 B2-D code/mock PASS (2026-11-22)** — Guard/writer dùng IPC HMAC hai chiều ở UID 0, socket B2-D riêng và khóa giả RO. Mock đã kiểm tamper, replay, Level 2, crash và rollback. ChatGPT nghiệm thu. Live apply giữ `BLOCKED_UID_OR_MOUNT`, paid giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-d-ipc-integration.md).
+
 - **H6 B2-C ChatGPT review / B2-D open (2026-11-22):** Chấp nhận `H6_B2_C_UID_MODEL_OFFLINE_PASS` trên Docker Desktop, chọn writer UID 0 bỏ caps, HMAC hai chiều, không ACL-only. **HMAC hiện chỉ nằm trong fixture**, chưa ở Guard/writer deployable. Mở `H6_B2_D_IPC_INTEGRATION_OFFLINE_AUTHORIZED` cho Codex tích hợp mã và thử mock, tuyệt đối chưa apply KVM2/ledger thật/provider/paid. Live apply `BLOCKED_UID_OR_MOUNT`; paid `BLOCKED_PREFLIGHT`. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-b2-c-chatgpt-review.md).
 
 - **H6 B2-C offline PASS (2026-11-22)** — writer UID 0 bỏ toàn bộ caps và xác thực HMAC hai chiều qua Unix socket đạt trên ledger giả. UID 23062 với ACL lỗi ở lock `fchmod` và mất quyền sau Level 2 ghi. ChatGPT nghiệm thu trước mọi quyết định apply. Live apply giữ `BLOCKED_UID_OR_MOUNT`, paid GATE B giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-c-uid-model.md).
