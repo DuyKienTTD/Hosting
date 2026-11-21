@@ -948,7 +948,7 @@ documents:
   - id: ttd-work-b2-j-idle-startup-001
     path: tasks/2026-11-22-work-b2-j-idle-startup-audit.md
     type: task
-    status: prepared
+    status: done
     authoritative_for: independent-Work-B2-J-permitless-startup-and-recovery-audit
     updated_at: 2026-11-22
     verified_at: 2026-11-22
@@ -977,6 +977,24 @@ documents:
     type: report
     status: current
     authoritative_for: H6-B2-I-offline-async-acceptance-and-B2-K-cross-service-mock-scope
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: work-b2-j-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-work-b2-j-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: Work-B2-J-design-acceptance-and-B2-L-source-mock-scope
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: work-b2-j-audit-report-2026-11-22
+    path: reports/2026-11-22-work-b2-j-idle-startup-audit.md
+    type: report
+    status: current
+    authoritative_for: independent-Work-B2-J-idle-startup-and-crash-audit
     updated_at: 2026-11-22
     verified_at: 2026-11-22
     sensitivity: public-redacted
