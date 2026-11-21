@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- Chạy one-shot Linux unit trên KVM2 với ledger copy: 20 tiến trình, đúng 1 admitted, 19 rejected, fault/replay và hai crash boundary PASS; đối chiếu live ledger 1 attempt/kill switch ON, production health 200/restart 0. Guard mock E2E và full crash matrix còn pending, 0 paid calls.
+
 - Thêm bản nháp one-shot transaction trên ledger copy cho GATE B. Local Windows thiếu `fcntl` và Docker daemon không chạy, nên mock/live chưa xác minh; dừng ở `BLOCKED_PREFLIGHT`, 0 paid calls và không đổi runtime.
 
 - Đối chiếu GATE B `BLOCKED_PREFLIGHT` (0 Hermes paid attempts mới, 0 USD phát sinh). Guard hiện thiếu one-shot permit và reserve ngân sách trên shared ledger; ledger/kill switch/production chưa xác minh live. Giao Codex task `TTD-HERMES-GATE-B-GUARD-REMEDIATION-001` để sửa và kiểm thử mock-only, không mở paid dispatch hoặc nới phạm vi.

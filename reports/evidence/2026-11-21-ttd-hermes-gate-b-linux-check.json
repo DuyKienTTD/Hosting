@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "task_id": "ttd-hermes-gate-b-guard-remediation-001",
+  "verified_at": "2026-11-21",
+  "result": "PARTIAL_LINUX_TRANSACTION_UNIT_PASS",
+  "runner": {"os": "Ubuntu 24.04.4", "kernel": "6.8.0-147-generic", "python": "3.12.3", "code_commit": "d08b7e5", "test_exit_code": 0},
+  "test": {"ledger": "disposable_copy", "multiprocess_contenders": 20, "admitted": 1, "rejected": 19, "replay_rejected": true, "fault_cases": 6, "network_dispatches": 0},
+  "crash_test": {"code_commit": "de4a98f", "exit_code": 0, "before_replace": "no_commit_then_admit", "after_replace": "consumed_and_replay_rejected", "paid_calls": 0},
+  "live_read_only": {"ledger_attempts": 1, "reserved_usd": 0.0035, "actual_usd": 0.0000496, "kill_switch": true, "gate_a_services_healthy": 4, "production_n8n_health_http": 200, "production_hermes_health_http": 200, "production_restarts": 0},
+  "remaining": {"full_crash_matrix_pass": false, "adapter_lock_interoperability_pass": false, "guard_mock_e2e_pass": false, "live_paid_preflight_pass": false},
+  "paid_calls_this_task": 0,
+  "production_changed": false
+}

@@ -62,3 +62,7 @@ Codex push mã secret-free, test report và evidence đã khử bí mật, đề
 6. Báo cáo file+evidence GitHub redacted, cập nhật task & STATE. Nếu không thể chạy trên Linux runner/KVM2 an toàn: BLOCKED_ENVIRONMENT với thông tin cụ thể về quyền/truy cập; không hạ chuẩn nghiệm thu hoặc chuyển sang paid.
 
 **Ranh giới GATE B:** phê duyệt một paid attempt theo ADR-P0-003 không cho phép bỏ qua bất kỳ bước kiểm thử nào. Remediation vẫn **0 paid calls**, kill switch global ON, không thay đổi production.
+
+## Kiểm thử Linux tiếp theo
+
+Đã có [Linux transaction unit PASS](../reports/2026-11-21-hermes-gate-b-remediation-linux-check.md) trên KVM2: 20 tiến trình, 1 admitted/19 rejected, hai crash boundary PASS, ledger copy bền vững và read-only live health/ledger PASS. Full crash matrix, adapter shared-lock interop và guard mock E2E còn thiếu; trạng thái task vẫn `blocked`. Không có paid call hoặc live permit.

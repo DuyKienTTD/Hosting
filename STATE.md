@@ -68,6 +68,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- KVM2 Linux transaction unit cho one-shot permit PASS (20 tiến trình, một admission trên ledger copy), hai crash boundary PASS, ledger live/kill switch và production health đã xác minh read-only; full crash matrix và guard mock E2E chưa PASS. GATE B vẫn BLOCKED. [Báo cáo mới](reports/2026-11-21-hermes-gate-b-remediation-linux-check.md).
+
 - Remediation permit/ledger có bản nháp mã nhưng Linux mock tests và live preflight chưa xác minh; GATE B vẫn `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-21-hermes-gate-b-permit-ledger-remediation.md).
 
 - GATE B được phê duyệt có điều kiện nhưng preflight hiện `BLOCKED_PREFLIGHT`: guard GATE A chưa có atomic one-shot permit, consume/relock trước dispatch và worst-case reservation; 0 paid Hermes attempt mới. [Báo cáo](reports/2026-11-21-hermes-gate-b-paid-results.md).
