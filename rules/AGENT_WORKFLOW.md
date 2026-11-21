@@ -60,3 +60,71 @@ sensitivity: public
 ## Mẫu lời bàn giao cực ngắn
 
 > Task: [mã]. Kết quả: [PASS/PARTIAL/BLOCKED]. Báo cáo: [URL]. Commit/PR: [URL]. Việc cần quyết định: [nếu có].
+
+
+## 7. BẮT BUỘC: điều phối dựa trên tri thức và bằng chứng trước khi giao thực thi (bổ sung 2026-11-21)
+
+**Quy tắc này áp dụng cho ChatGPT, Codex, Hermes, Hostinger Agent và mọi AI tham gia qua GitHub hoặc chuyển tiếp thủ công.** Mọi agent **phải đọc lại** `AGENTS.md`, quy tắc này, `STATE.md`, `CATALOG.yaml`, `rules/REPOSITORY_SECURITY.md`, hồ sơ năng lực của mình và task liên quan **khi bắt đầu nhiệm vụ mới**, không chỉ dựa vào chat hay trí nhớ phiên trước. Agent nhận việc phải nêu rõ commit/phiên bản quy tắc đã đọc; nếu không thể đọc, `BLOCKED_RULE_ACCESS` trước thao tác có tác động.
+
+### 7.1. ChatGPT chịu trách nhiệm tổng hợp kiến thức và nghiên cứu
+
+- **Trước khi soạn task/ra phương án**, đọc trạng thái, chứng cứ mới nhất, phạm vi quyền; đặt các câu hỏi chuyên môn **có mục đích rõ** cho Hostinger Agent (hosting/VPS/hPanel/network), Hermes (runtime/inference/tool/serialization), Codex (mã/code/test) theo thế mạnh và bằng chứng năng lực ở `agents/README.md`.
+- **Tự nghiên cứu thêm tài liệu công khai có thẩm quyền** của vendor/chủ dự án công nghệ (official docs, API reference, release notes, standards); ưu tiên phiên bản/endpoint thực tế đang dùng. Ghi URL, ngày kiểm tra, phiên bản áp dụng, điểm rút ra và khác biệt với runtime. Chỉ dùng nguồn cộng đồng như tín hiệu bổ sung; không dùng bài cũ làm bằng chứng trạng thái live.
+- **Đối chiếu chéo** câu trả lời agent + tài liệu công khai + evidence runtime; phân tách `VERIFIED_LIVE`, `VERIFIED_MOCK`, `REPORTED`, `DOCUMENTED`, `UNKNOWN`, `BLOCKED`. Báo cáo agent không mặc nhiên là sự thật live; tài liệu hãng không chứng minh credential/permission đã bật.
+- **Nếu có thể tự thu thập bằng công cụ hiện hữu thì làm trước;** nếu không có đường truy cập trực tiếp đến Hermes/Hostinger, tạo câu hỏi cụ thể và thông điệp chuyển tiếp qua kênh đã kiểm chứng. `TASK_COMMITTED` không phải `SENT`, `SENT` không phải `ACCEPTED`, `ACCEPTED` không phải `RUNNING` hay `DONE`. Không nói đã yêu cầu agent thực hiện nếu mới chỉ viết file GitHub.
+- Không tạo nhiệm vụ Codex để Codex khảo sát lại những dữ kiện Hostinger/Hermes đã có thể báo cáo. Codex cần được giao việc triển khai/kiểm thử dựa trên thông tin đầu vào đã xác minh, đồng thời vẫn được dùng suy luận kỹ thuật ở điểm khó.
+
+### 7.2. Đặc tả phải chỉ rõ cách bắt đầu, không chỉ nêu mục tiêu
+
+Một task kỹ thuật/đa agent có tác động hoặc phụ thuộc phức tạp phải trả lời rõ:
+1. **Vì sao và kết quả nào:** vấn đề, mục tiêu đo được và điều kiện DONE/PASS.
+2. **Bối cảnh chính xác:** current task ID, branch/commit, môi trường/phiên bản, file/endpoint cần xem, evidence đã PASS để tránh làm lại.
+3. **Điều kiện bắt đầu:** cần quyền gì, cần môi trường Linux/Windows nào, key/connector nào phải xác minh **không lộ giá trị**, backup/rollback, giới hạn chi phí và dữ liệu.
+4. **Bắt đầu từ đâu và làm thế nào:** bước đầu tiên cụ thể (mở file nào, đối chiếu cấu hình nào, chạy kiểm tra chỉ đọc nào), thứ tự kiểm tra phụ thuộc, phương án test offline/mock trước khi ghi live; lệnh minh họa an toàn khi hữu ích. Không hướng dẫn giả định quyền chưa có; không áp đặt cứng giải pháp triển khai nếu agent phát hiện phương án tốt hơn trong giới hạn.
+5. **Ai làm phần nào:** một owner cho từng đầu ra; Hostinger/Hermes báo cáo đầu vào trước khi Codex viết mã nếu việc đó giúp tránh mò mẫm; các agent khác làm reviewer/consultant theo khả năng thật.
+6. **Kiểm thử và điểm dừng:** positive/negative/fault cases quan trọng, cách đo, evidence/link cần giao; trường hợp STOP và điều kiện phải xin duyệt.
+7. **Bàn giao tiếp theo:** agent/người nhận, artifact URL, quyết định cần đưa ra, trạng thái đã gửi/đã nhận; không viết mơ hồ \"tiếp tục\" hoặc \"xử lý đi\".
+
+Với công việc nhỏ đã rõ, có thể rút ngắn nhưng **không bỏ owner, bước bắt đầu, nghiệm thu, giới hạn quyền và nơi nhận kết quả**.
+
+### 7.3. Chuyền bóng không được rơi: giao/nhận/hoàn thành có chứng cứ
+
+- Mỗi lượt chuyển giao có tối thiểu: `task_id`; `from_agent`; `to_agent` **một người chịu trách nhiệm chính**; `why_this_agent`; `objective`; `first_action`; `inputs_and_urls`; `constraints_and_approval`; `acceptance`; `deliverable_path`; `next_owner_or_decision`; `handoff_state`.
+- Trạng thái bàn giao: `PREPARED` (file đã tạo), `SENT` (gửi qua kênh thực có bằng chứng), `ACKNOWLEDGED` (agent nhận và xác nhận), `IN_PROGRESS`, `DONE`, `BLOCKED`, `NEEDS_OWNER_DECISION`. GitHub commit đơn thuần chỉ là `PREPARED`.
+- Agent nhận việc đọc lại quy tắc và task, đối chiếu quyền/runtime, xác nhận đầu vào đã nhận, báo `ACKNOWLEDGED` khi có kênh phản hồi. Agent giao việc theo dõi đúng kênh, không giả định agent kia chạy nền. Nếu không có kênh gửi/nhận trực tiếp, chủ dự án chuyển link và ghi rõ `PREPARED_FOR_OWNER_FORWARD`.
+- Khi `BLOCKED`, agent phải ghi **tác động, bằng chứng, owner giải quyết, first action an toàn, tiêu chí gỡ chặn**; phần độc lập đã PASS giữ nguyên. Không tạo liên tục nhiều task con cho cùng blocker nếu task hiện tại đủ phạm vi.
+- Khi `DONE`, report/link/commit, phần chưa kiểm chứng, owner kế tiếp và việc cần duyệt được ghi rõ. Không chuyển bóng ngầm hoặc tự đổi owner.
+
+### 7.4. Phân vai theo năng lực, không theo thói quen
+
+- **ChatGPT:** research chính thức + đối chiếu nguồn, tổng hợp báo cáo chuyên gia, thiết kế kiến trúc/phương án, ra đề thực thi có điểm bắt đầu, nghiệm thu và điều phối/ghi quy tắc bền vững. Không tự nhận quyền VPS hoặc phê duyệt chi phí.
+- **Hostinger Agent:** hPanel/hosting, VPS health, tài nguyên, Docker/network từ control plane, DNS/firewall/backup, khả năng và quy trình thao tác chính thức. Chỉ báo trạng thái live khi đã dùng công cụ live; đổi cấu hình theo quyền riêng.
+- **Hermes Agent:** agent runtime, session/tools, request serialization, behavior, provider compatibility và reasoning/tool analysis; phân biệt Hermes WebUI với auxiliary KVM2 và production runtime.
+- **Codex:** code review, viết mã, unit/integration/E2E, Docker Compose/config, triển khai sandbox/rollback, CI và chứng cứ kỹ thuật; không bị biến thành agent khảo sát mọi dịch vụ khi có chuyên gia phù hợp.
+- **n8n:** orchestration/scheduling/runtime job-state khi workflow đã triển khai/được bật; không phải AI chuyên môn hoặc quyền cấp phép.
+- Phân vai là **ưu tiên dựa trên khả năng đã kiểm chứng**, không độc quyền; đổi owner theo công cụ thực tế và giải thích trong handoff.
+
+### 7.5. Quy tắc mới phải được ghi ngay vào kho tri thức
+
+- Khi chủ dự án đưa ra **nguyên tắc chung, thay đổi cách phối hợp, điều kiện nghiệm thu hoặc bảo mật**, agent điều phối phải sửa `rules/AGENT_WORKFLOW.md` và/hoặc quy tắc chuyên đề tương ứng, đồng bộ `AGENTS.md`/agent profiles khi cần, `CATALOG.yaml`, `CHANGELOG.md`, entrypoint liên quan; commit/push rồi **đọc lại xác minh**. Tin nhắn chat chỉ giải thích, **không thay việc cập nhật tri thức**.
+- Ghi rõ: quy tắc mới là `APPROVED_BY_OWNER` nếu chủ dự án chỉ thị; đề xuất chưa duyệt là `PROPOSED`. Không suy diễn quy tắc mới thành quyền thao tác production/paid API.
+- Trong mọi thông điệp giao việc sau đó nhắc: \"Đọc `AGENTS.md`, `rules/AGENT_WORKFLOW.md`, `rules/REPOSITORY_SECURITY.md`, `STATE.md`, `CATALOG.yaml` và hồ sơ agent trước khi làm. Ghi commit rule đã đọc và tuân thủ quy tắc chung.\"
+- Cập nhật quy tắc nên ngắn gọn đủ vận hành, không sản xuất thêm tài liệu hành chính dư thừa. Nếu thiếu quyền GitHub, cung cấp patch chính xác + trạng thái `NOT_PUSHED`, không nói đã cập nhật.
+
+### 7.6. Ví dụ áp dụng cho GATE B (không cấp quyền mới)
+
+- **Hostinger Agent (consult, read-only):** bắt đầu từ inventory và live hPanel/VPS network; báo bridge có thể truy cập proxy Level 2 qua interface/network nào, topology cô lập đề xuất, thao tác nào đòi approval và test no-bypass. **Không sửa network/firewall/DNS**.
+- **Hermes Agent (consult, read-only):** đối chiếu chính xác runtime auxiliary và serialized Responses request/cap/token/credential requirements; mô tả cách khóa fingerprint trên bytes cuối, cái gì đã mock PASS vs còn UNKNOWN. **Không dispatch paid**.
+- **ChatGPT:** nghiên cứu Docker networking/Compose chính thức và OpenAI Responses/token-counting; đối chiếu hai report, xác định phương án và kiểm tra quyền, sau đó mới giao Codex cách bắt đầu, tests và rollback.
+- **Codex:** sau khi nhận input, sửa sandbox network/guard theo task đã có và approval hiện hành, chạy negative network tests, mock E2E và bằng chứng. Paid GATE B vẫn `BLOCKED_PREFLIGHT` cho tới khi các điều kiện ADR-P0-003 được chứng minh; không mở thêm quyền nhờ quy tắc này.
+
+## Tham khảo công khai được dùng khi cập nhật quy tắc
+
+- OpenAI Agents SDK: https://developers.openai.com/api/docs/guides/agents/sdk (agent ownership, orchestration/handoffs, guardrails).
+- OpenAI Handoffs: https://openai.github.io/openai-agents-python/handoffs/ (truyền ngữ cảnh, quyền phải kiểm tra trước side effects).
+- OpenAI Guardrails: https://openai.github.io/openai-agents-python/guardrails/ (giới hạn kiểm tra ở ranh giới agent/tool).
+- OpenAI Tracing: https://developers.openai.com/api/docs/guides/agents/integrations-observability (theo dõi tool calls, handoffs, kiểm tra).
+- Google SRE incident response: https://sre.google/workbook/incident-response/ (rõ vai trò và kênh liên lạc).
+- Google SRE managing incidents: https://sre.google/sre-book/managing-incidents/ (handoff phải rõ người nhận và xác nhận).
+
+Đây là **nguyên tắc quản trị dự án**, tham khảo từ tài liệu công khai; không có nghĩa dự án đã cài OpenAI Agents SDK hoặc Google SRE tooling.
