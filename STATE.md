@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **H6 B2-L startup-only mock PASS (2026-11-22):** 20 health qua hai cold starts không permit, ledger/lock fixture bất biến, deny admission kể cả có permit. 9/9 Linux test gồm sáu crash windows và fsync failure. ChatGPT review với B2-K. Live `NO_GO`, paid `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-l-idle-writer.md).
+
 - **H6 B2-K mock PASS (2026-11-22):** Adapter, executor và receiver có tiến trình/datastore riêng. 6/6 test đạt, một dispatch giả, callback receipt ký và phục hồi sau restart. ChatGPT review. Live `NO_GO`, paid `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-k-cross-service.md).
 
 - **Work B2-J đã nghiệm thu / Codex B2-L mở (2026-11-22):** PR [#2](https://github.com/DuyKienTTD/Hosting/pull/2) chỉ có báo cáo thiết kế, merge `0d8c0f6` và remote blob PASS; ChatGPT `WORK_B2_J_SOURCE_DESIGN_ACCEPTED`, không có fixture/runtime PASS. Chọn `H6_B2_L_WRITER_IDLE_SOURCE_MOCK_AUTHORIZED` cho Codex implement startup không permit, health IPC chỉ đọc, sáu crash windows trên ledger giả. B2-K adapter đa dịch vụ vẫn là luồng độc lập, chưa ACK mới. Không live/KVM2 apply, real ledger/permit/provider/paid; `NO_GO / BLOCKED_PREFLIGHT`. [Review](reports/2026-11-22-work-b2-j-chatgpt-review.md).

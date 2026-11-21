@@ -1,0 +1,197 @@
+{
+  "task_id": "ttd-hermes-gate-b-001",
+  "stage": "H6_B2_L",
+  "result": "B2_L_SOURCE_MOCK_PASS",
+  "observed_date_ict": "2026-11-22",
+  "approval_commit": "4a527e752744f4f41f1107dfae3cd566348fa86b",
+  "rules_task_base": "4d5b5e9a7b5e46d782dea3316b697d6f115e4ee6",
+  "approval_task_blob": "303e7507c22b270b13e5969480445f2a65b5d134",
+  "workflow_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "work_review_merge": "0d8c0f662dee4b203181cd3c0a73b69a928b1984",
+  "b2k_committed_separately": "351afa2b600fb669f5f9c525f50b2512a2bcc56e",
+  "source_blobs": {
+    "sandbox/p0-hermes-gate-a/h6_b2l_idle.py": "b994d00a550033c9ec163d90cfefd3251de57eee",
+    "sandbox/p0-hermes-gate-a/h6_b2l_idle_test.py": "42e01e50773eb476fd6d62b2fc43f23e5144475c",
+    "sandbox/p0-hermes-gate-a/h6_writer.py": "98ce2e7c6d4109b004da058c49075e4c58411f1f",
+    "sandbox/p0-hermes-gate-a/one_shot.py": "3abbf97ace9473d2f79f728792a8d7111a293f4f"
+  },
+  "runtime": {
+    "docker_context": "desktop-linux",
+    "image": "sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+    "python": "3.12.16",
+    "kernel": "6.6.114.1-microsoft-standard-WSL2",
+    "filesystem": "tmpfs for fixtures",
+    "network_mode": "none",
+    "network_interfaces": [
+      "lo"
+    ],
+    "user": [
+      0,
+      0
+    ],
+    "read_only_rootfs": true,
+    "no_new_privileges": true,
+    "capabilities_added_for_peer_negative_test_only": [
+      "SETUID",
+      "SETGID"
+    ]
+  },
+  "reproduction": {
+    "source_files": [
+      "h6_b2l_idle.py",
+      "h6_b2l_idle_test.py",
+      "h6_writer.py",
+      "h6_p0.py",
+      "h6_ipc_auth.py",
+      "h6_provider.py",
+      "one_shot.py",
+      "mock_contract.py"
+    ],
+    "mount": "Read-only copy of listed source files at /src; disposable writable tmpfs at /tmp",
+    "docker_flags": "--rm --pull never --network none --read-only --cap-drop ALL --security-opt no-new-privileges --tmpfs /tmp:rw,nosuid,nodev,noexec,mode=1777",
+    "main_command": "python -B /src/h6_b2l_idle_test.py, select all StartupTests cases except test_wrong_peer_uid_and_gid",
+    "peer_command": "Add --cap-add SETUID --cap-add SETGID, run python -B /src/h6_b2l_idle_test.py StartupTests.test_wrong_peer_uid_and_gid"
+  },
+  "suite": {
+    "passed": 9,
+    "failed": 0,
+    "tests": [
+      "permitless_restart_and_twenty_immutable_health_calls",
+      "startup_only_denies_valid_expired_and_wrong_scope_permits",
+      "missing_malformed_wrong_mode_and_replaced_paths",
+      "lock_contention_bounded_and_recovers",
+      "auth_wrong_key_domain_replay_and_missing_key",
+      "concurrent_signed_admission_single_fake_post_and_settlement_replay",
+      "six_crash_windows_and_directory_fsync_failure",
+      "live_entrypoint_remains_locked",
+      "wrong_peer_uid_and_gid"
+    ]
+  },
+  "health": {
+    "calls": 20,
+    "cold_starts": 2,
+    "attempts": 1,
+    "reserved_usd": 0.0035,
+    "actual_usd": 0,
+    "bytes_and_inode_metadata_equal": true,
+    "new_ledger_files": 0,
+    "fixture_layout": "root:root 0700/0600",
+    "mock_dispatches": 0
+  },
+  "lock_contention": {
+    "held_lock_status": "UNAVAILABLE",
+    "elapsed_ms": 202,
+    "recovery": "IDLE_NO_PERMIT"
+  },
+  "admission_only_test": {
+    "concurrent_requests": 4,
+    "valid_admit_acks": 1,
+    "fake_posts": 1,
+    "consumed_reserve_before_fake_post": true,
+    "settlement_replay_bytes_unchanged": true
+  },
+  "crash_windows": [
+    {
+      "stage": "before_rename",
+      "observed_after_crash": "ready",
+      "signed_admit_acks": 0,
+      "fake_posts": 0,
+      "new_posts_after_restart": 0,
+      "attempts": 1,
+      "reserved_usd": 0.0035,
+      "actual_usd": 0,
+      "stable_lock_inode_unchanged": true
+    },
+    {
+      "stage": "after_rename_before_fsync",
+      "observed_after_crash": "inflight",
+      "signed_admit_acks": 0,
+      "fake_posts": 0,
+      "new_posts_after_restart": 0,
+      "attempts": 2,
+      "reserved_usd": 0.007,
+      "actual_usd": 0,
+      "stable_lock_inode_unchanged": true
+    },
+    {
+      "stage": "after_fsync_before_ack",
+      "observed_after_crash": "inflight",
+      "signed_admit_acks": 0,
+      "fake_posts": 0,
+      "new_posts_after_restart": 0,
+      "attempts": 2,
+      "reserved_usd": 0.007,
+      "actual_usd": 0,
+      "stable_lock_inode_unchanged": true
+    },
+    {
+      "stage": "after_ack_before_post",
+      "observed_after_crash": "inflight",
+      "signed_admit_acks": 1,
+      "fake_posts": 0,
+      "new_posts_after_restart": 0,
+      "attempts": 2,
+      "reserved_usd": 0.007,
+      "actual_usd": 0,
+      "stable_lock_inode_unchanged": true
+    },
+    {
+      "stage": "after_post_before_settle",
+      "observed_after_crash": "inflight",
+      "signed_admit_acks": 1,
+      "fake_posts": 1,
+      "new_posts_after_restart": 0,
+      "attempts": 2,
+      "reserved_usd": 0.007,
+      "actual_usd": 0,
+      "stable_lock_inode_unchanged": true
+    },
+    {
+      "stage": "after_settle_before_ack",
+      "observed_after_crash": "usage_recorded",
+      "signed_admit_acks": 1,
+      "fake_posts": 1,
+      "new_posts_after_restart": 0,
+      "attempts": 2,
+      "reserved_usd": 0.007,
+      "actual_usd": 0.000025,
+      "stable_lock_inode_unchanged": true
+    },
+    {
+      "stage": "directory_fsync_failure",
+      "observed_after_crash": "inflight",
+      "signed_admit_acks": 0,
+      "fake_posts": 0,
+      "new_posts_after_restart": 0,
+      "attempts": 2,
+      "reserved_usd": 0.007,
+      "actual_usd": 0,
+      "stable_lock_inode_unchanged": true
+    }
+  ],
+  "regressions": {
+    "one_shot_linux": {
+      "result": "PASS",
+      "multiprocess_contenders": 20,
+      "admitted": 1,
+      "rejected": 19,
+      "fault_cases": 16
+    },
+    "b2f_rejected_ledger_inputs": "PASS"
+  },
+  "fixture_startup_only_admission_denied_with_valid_permit": true,
+  "live_entrypoint_build_locked": true,
+  "power_loss_durability": "NOT_TESTED",
+  "live_integration": "NO_GO",
+  "paid_gate_b": "BLOCKED_PREFLIGHT",
+  "scope_counters": {
+    "kvm2_operations": 0,
+    "production_mutations": 0,
+    "real_ledger_permit_or_key_accesses": 0,
+    "provider_api": 0,
+    "paid": 0,
+    "usd": 0
+  },
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}

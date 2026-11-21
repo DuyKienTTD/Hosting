@@ -60,6 +60,10 @@ def read_ledger(path: Path) -> tuple[dict, bytes]:
         if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
             raise ValueError("LEDGER_NOT_REGULAR")
         raw = stream.read(MAX_LEDGER_BYTES + 1)
+    return decode_ledger(raw), raw
+
+
+def decode_ledger(raw: bytes) -> dict:
     if len(raw) > MAX_LEDGER_BYTES:
         raise ValueError("LEDGER_TOO_LARGE")
     ledger = json.loads(raw, object_pairs_hook=unique_keys,
@@ -81,7 +85,7 @@ def read_ledger(path: Path) -> tuple[dict, bytes]:
     for day in ledger["days"].values():
         if any(value > aggregate for value, aggregate in zip(validate_budget(day), totals, strict=True)):
             raise RuntimeError("LEDGER_DAY_TOTAL_MISMATCH")
-    return ledger, raw
+    return ledger
 
 
 def validate_budget(row):

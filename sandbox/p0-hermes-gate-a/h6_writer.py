@@ -198,6 +198,10 @@ if __name__ == "__main__":
         from h6_provider import serve_live_writer
 
         serve_live_writer()
+    elif len(sys.argv) == 3 and sys.argv[1] == "--b2-l-startup-fixture":
+        from h6_b2l_idle import serve as serve_startup_fixture
+
+        serve_startup_fixture(Path(sys.argv[2]))
     elif len(sys.argv) == 1:
         serve(SOCKET_PATH, FIXTURE_PATH)
     else:

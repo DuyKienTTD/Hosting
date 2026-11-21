@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Codex hoàn tất B2-L startup-only P0 writer trên fixture root-owned, health IPC xác thực chỉ đọc và crash/restart matrix. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-l-idle-writer.md).
+
 - Codex hoàn tất B2-K cross-service mock với ba tiến trình/datastore, run-ID bền và callback/receipt xác thực. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-k-cross-service.md).
 
 - ChatGPT nghiệm thu audit Work B2-J (PR #2 merge `0d8c0f6`), phân tách permitless writer idle/health khỏi quyền admission và mở Codex B2-L source/mock (song song độc lập với B2-K). Không có KVM2/live/P0 real/provider/paid authorization. [Review](reports/2026-11-22-work-b2-j-chatgpt-review.md).
