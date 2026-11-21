@@ -1,0 +1,1091 @@
+{
+  "task_id": "ttd-hermes-gate-b-001",
+  "stage": "H6_B2_O",
+  "observed_date_ict": "2026-11-22",
+  "approval_commit": "40e672b14f310af76f39fa28afcf7eac1a76b146",
+  "rules_ack_commit": "a343f184786dc6d71d9a3ad1a22a813243202f6e",
+  "workflow_rule_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "pr_base_head": "029f80e198e21fcff3fac49038dbe2038f0eca95",
+  "source_blobs": {
+    "sandbox/p0-hermes-gate-a/h6_b2o_services.py": "77e4d140fb937291f91dcce77c29823fe41cb408",
+    "sandbox/p0-hermes-gate-a/h6_b2o_run.py": "6a5f03cc75eddd65016cb5bf51700da65d91f704"
+  },
+  "clock": "Container processes share the local Linux monotonic clock. Hermes status timestamps are adapter observations through Runs API.",
+  "budgets_s": {
+    "n8n_admission_http": 30,
+    "bridge_hermes_request_socket": 5,
+    "fake_writer_http": 4,
+    "guard_connect": 5,
+    "guard_response": 45,
+    "async_worker_observation": 60,
+    "worker_callback_http": 5
+  },
+  "candidate_http_auth_wrong_bearer": 401,
+  "not_measured": [
+    "legacy synchronous bridge 20 s poll",
+    "proxy CONNECT/TLS or 30 s idle",
+    "independent internal Hermes SDK timeout or cancellation",
+    "real H6 writer IPC/P0 ledger",
+    "live KVM2 deadline or production routing"
+  ],
+  "summary": {
+    "b2o-31": {
+      "first_cutoff": null,
+      "n8n_admission_http": 202,
+      "adapter_admission_http": 202,
+      "hermes_admission_http": 202,
+      "hermes_terminal_status": "completed",
+      "guard_http": 200,
+      "outcome": "mock_succeeded",
+      "n8n_submit_to_admission_s": 0.143447,
+      "hermes_post_to_admission_s": 0.027012,
+      "guard_connect_to_first_byte_s": 31.010868,
+      "guard_connect_to_timer_s": null,
+      "guard_connect_to_read_end_s": null,
+      "recorder_post_to_response_attempt_s": 31.000442,
+      "n8n_submit_to_receipt_commit_s": 33.025199,
+      "worker_callback_to_receipt_commit_s": 0.077342,
+      "post_receipt_late_response_connection_closed": null,
+      "worker_callback_http": 200,
+      "fake_dispatches": 1,
+      "successful_fake_settlements": 1,
+      "receipts": 1
+    },
+    "b2o-46": {
+      "first_cutoff": "guard_h6_response_timer",
+      "n8n_admission_http": 202,
+      "adapter_admission_http": 202,
+      "hermes_admission_http": 202,
+      "hermes_terminal_status": "failed",
+      "guard_http": 503,
+      "outcome": "outcome_unknown",
+      "n8n_submit_to_admission_s": 0.109784,
+      "hermes_post_to_admission_s": 0.015716,
+      "guard_connect_to_first_byte_s": null,
+      "guard_connect_to_timer_s": 45.000576,
+      "guard_connect_to_read_end_s": 45.001003,
+      "recorder_post_to_response_attempt_s": 46.000391,
+      "n8n_submit_to_receipt_commit_s": 45.424409,
+      "worker_callback_to_receipt_commit_s": 0.06771,
+      "post_receipt_late_response_connection_closed": true,
+      "worker_callback_http": 200,
+      "fake_dispatches": 1,
+      "successful_fake_settlements": 0,
+      "receipts": 1
+    }
+  },
+  "mode": "synthetic-local",
+  "pre_up_all_profiles": true,
+  "project": "ttd-b2o-local",
+  "image_refs": {
+    "hermes": "ghcr.io/hostinger/hvps-hermes-agent@sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f",
+    "n8n": "docker.n8n.io/n8nio/n8n@sha256:9a8d8dcea75667496695d7810d7e1fe018a65efb36cc499d347f3931b3957b5d",
+    "python": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89"
+  },
+  "hermes_config_sha256": "5b7b9eaa0443881a642bceaa381a25c350b151fbe6659bd012e8420c480a3e3f",
+  "n8n_base_projection_sha256": "08aa63bcfaf27f9ced2a5374ce67f4683877f615ed00dafea086f608321dde0d",
+  "network_segments": {
+    "bridge": [
+      "front",
+      "runs",
+      "binding"
+    ],
+    "driver": [
+      "front"
+    ],
+    "guard": [
+      "inference",
+      "upstream",
+      "accounting"
+    ],
+    "hermes": [
+      "runs",
+      "inference"
+    ],
+    "n8n": [
+      "front",
+      "callback"
+    ],
+    "provider": [
+      "upstream"
+    ],
+    "receipt": [
+      "binding",
+      "callback"
+    ],
+    "writer": [
+      "accounting"
+    ]
+  },
+  "fake_volumes": [
+    "bridge",
+    "hermes",
+    "n8n",
+    "provider",
+    "receipt",
+    "writer"
+  ],
+  "events": [
+    {
+      "event": "n8n_submit",
+      "mono_ns": 12982494999606,
+      "pid": 13,
+      "role": "driver",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:55.863041+00:00"
+    },
+    {
+      "event": "admission_committed",
+      "http": 202,
+      "job": "5e15c739679544cdb38132f2975186b0",
+      "mono_ns": 12982614580189,
+      "pid": 1,
+      "request_sha256": "54b8bef31acbd30648f53f2a37a55a84e61324c0e0291ce7a43c8442249c84c3",
+      "role": "bridge",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:55.982618+00:00"
+    },
+    {
+      "event": "n8n_admission",
+      "http": 202,
+      "job": "5e15c739679544cdb38132f2975186b0",
+      "mono_ns": 12982638446215,
+      "pid": 13,
+      "request_sha256": "54b8bef31acbd30648f53f2a37a55a84e61324c0e0291ce7a43c8442249c84c3",
+      "role": "driver",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:56.006486+00:00"
+    },
+    {
+      "event": "hermes_admission_start",
+      "hermes_request_sha256": "d23a240f70c8612caace07b16290ea856fa1833bdc368f20f6edb576e31082d6",
+      "mono_ns": 12982673768682,
+      "pid": 1,
+      "role": "bridge",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:56.041810+00:00"
+    },
+    {
+      "event": "hermes_admission",
+      "http": 202,
+      "mono_ns": 12982700780301,
+      "pid": 1,
+      "role": "bridge",
+      "run_id_sha256": "306ecf3f8b1adf5935e1a5885696e17b40677f61623c9a50917c26e890239469",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:56.068823+00:00"
+    },
+    {
+      "correlation_id": "corr-b2o-31",
+      "event": "binding_committed",
+      "job_id": "5e15c739679544cdb38132f2975186b0",
+      "mono_ns": 12982720539528,
+      "pid": 1,
+      "request_sha256": "54b8bef31acbd30648f53f2a37a55a84e61324c0e0291ce7a43c8442249c84c3",
+      "role": "bridge",
+      "run_id_sha256": "306ecf3f8b1adf5935e1a5885696e17b40677f61623c9a50917c26e890239469",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:56.088585+00:00"
+    },
+    {
+      "app_status": "queued",
+      "event": "hermes_status_observed",
+      "http": 200,
+      "mono_ns": 12982722457364,
+      "pid": 1,
+      "role": "bridge",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:56.090506+00:00"
+    },
+    {
+      "app_status": "running",
+      "event": "hermes_status_observed",
+      "http": 200,
+      "mono_ns": 12982878765156,
+      "pid": 1,
+      "role": "bridge",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:56.246810+00:00"
+    },
+    {
+      "event": "guard_request",
+      "mono_ns": 12984031168956,
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:57.399212+00:00"
+    },
+    {
+      "event": "reserve_committed",
+      "mono_ns": 12984051712329,
+      "pid": 1,
+      "role": "writer",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:57.419746+00:00",
+      "wire_sha256": "47bc5a3b9c78e34b7f0954da03e6ad28beeb104a1de18a218d626220a2d7b180"
+    },
+    {
+      "event": "writer_ack",
+      "http": 200,
+      "mono_ns": 12984052377436,
+      "operation": "admit",
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:57.420425+00:00"
+    },
+    {
+      "event": "transport_connect_start",
+      "mono_ns": 12984052479950,
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:57.420533+00:00"
+    },
+    {
+      "event": "transport_connected",
+      "mono_ns": 12984053034775,
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:57.421082+00:00"
+    },
+    {
+      "event": "transport_post",
+      "mono_ns": 12984053465629,
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:57.421490+00:00",
+      "wire_sha256": "47bc5a3b9c78e34b7f0954da03e6ad28beeb104a1de18a218d626220a2d7b180"
+    },
+    {
+      "event": "provider_post_committed",
+      "mono_ns": 12984061294209,
+      "pid": 1,
+      "role": "provider",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:25:57.429299+00:00",
+      "wire_sha256": "47bc5a3b9c78e34b7f0954da03e6ad28beeb104a1de18a218d626220a2d7b180"
+    },
+    {
+      "event": "provider_response_attempt",
+      "mono_ns": 13015061736166,
+      "pid": 1,
+      "role": "provider",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:26:28.426389+00:00"
+    },
+    {
+      "event": "provider_response_written",
+      "mono_ns": 13015063881680,
+      "pid": 1,
+      "role": "provider",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:26:28.428570+00:00"
+    },
+    {
+      "event": "transport_first_byte",
+      "mono_ns": 13015063903230,
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:26:28.428574+00:00"
+    },
+    {
+      "event": "writer_outcome_committed",
+      "mono_ns": 13015085991236,
+      "outcome": "usage_recorded",
+      "pid": 1,
+      "role": "writer",
+      "success_count": 1,
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:26:28.450674+00:00"
+    },
+    {
+      "event": "writer_ack",
+      "http": 200,
+      "mono_ns": 13015086743442,
+      "operation": "settle",
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:26:28.451444+00:00"
+    },
+    {
+      "event": "guard_http_response",
+      "http": 200,
+      "mono_ns": 13015086820940,
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:26:28.451527+00:00"
+    },
+    {
+      "app_status": "completed",
+      "event": "hermes_status_observed",
+      "http": 200,
+      "mono_ns": 13015428107818,
+      "pid": 1,
+      "role": "bridge",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:26:28.792795+00:00"
+    },
+    {
+      "event": "outcome_committed",
+      "mono_ns": 13015442715474,
+      "outcome": "mock_succeeded",
+      "pid": 1,
+      "role": "bridge",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:26:28.807416+00:00"
+    },
+    {
+      "event": "callback_sent",
+      "event_sha256": "347a7e29e683047b63bc8a2b2c0662a012037966427b6961426c7dbaf52149c6",
+      "mono_ns": 13015442857176,
+      "pid": 1,
+      "role": "bridge",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:26:28.807565+00:00"
+    },
+    {
+      "event": "receipt_committed",
+      "mono_ns": 13015520198828,
+      "outcome": "mock_succeeded",
+      "pid": 1,
+      "receipt_sha256": "aa5de6b87692bb2493131ff9e42f38c0c750135c89f868320a584ef75353c03a",
+      "role": "receipt",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:26:28.884898+00:00"
+    },
+    {
+      "event": "callback_ack",
+      "http": 200,
+      "mono_ns": 13015538518450,
+      "pid": 1,
+      "receipt_sha256": "aa5de6b87692bb2493131ff9e42f38c0c750135c89f868320a584ef75353c03a",
+      "role": "bridge",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:26:28.903215+00:00"
+    },
+    {
+      "event": "driver_observed_receipt",
+      "mono_ns": 13015706196367,
+      "outcome": "mock_succeeded",
+      "pid": 13,
+      "receipt_sha256": "aa5de6b87692bb2493131ff9e42f38c0c750135c89f868320a584ef75353c03a",
+      "role": "driver",
+      "task": "b2o-31",
+      "wall_utc": "2026-11-21T21:26:29.070883+00:00"
+    },
+    {
+      "event": "n8n_submit",
+      "mono_ns": 13015706383040,
+      "pid": 13,
+      "role": "driver",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:26:29.071081+00:00"
+    },
+    {
+      "event": "admission_committed",
+      "http": 202,
+      "job": "3ddf35537b3a43df9f58f27969cef622",
+      "mono_ns": 13015805691967,
+      "pid": 1,
+      "request_sha256": "47a0175bf797909c2f8b8e0719c1ad809c562705bec3f60e4093719225fbb855",
+      "role": "bridge",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:26:29.170389+00:00"
+    },
+    {
+      "event": "n8n_admission",
+      "http": 202,
+      "job": "3ddf35537b3a43df9f58f27969cef622",
+      "mono_ns": 13015816166601,
+      "pid": 13,
+      "request_sha256": "47a0175bf797909c2f8b8e0719c1ad809c562705bec3f60e4093719225fbb855",
+      "role": "driver",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:26:29.180864+00:00"
+    },
+    {
+      "event": "hermes_admission_start",
+      "hermes_request_sha256": "eaa313011d54ee9563cf0a01aba7a5c3045fe0f9d77cf76bd8ca048b3e8a4ed4",
+      "mono_ns": 13015847493965,
+      "pid": 1,
+      "role": "bridge",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:26:29.212192+00:00"
+    },
+    {
+      "event": "hermes_admission",
+      "http": 202,
+      "mono_ns": 13015863210039,
+      "pid": 1,
+      "role": "bridge",
+      "run_id_sha256": "7d30e9504f024c24cd1dbbf57e57c623128209b24d58884cf8a5ea128508b48b",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:26:29.227911+00:00"
+    },
+    {
+      "correlation_id": "corr-b2o-46",
+      "event": "binding_committed",
+      "job_id": "3ddf35537b3a43df9f58f27969cef622",
+      "mono_ns": 13015896511707,
+      "pid": 1,
+      "request_sha256": "47a0175bf797909c2f8b8e0719c1ad809c562705bec3f60e4093719225fbb855",
+      "role": "bridge",
+      "run_id_sha256": "7d30e9504f024c24cd1dbbf57e57c623128209b24d58884cf8a5ea128508b48b",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:26:29.261209+00:00"
+    },
+    {
+      "app_status": "running",
+      "event": "hermes_status_observed",
+      "http": 200,
+      "mono_ns": 13015901429514,
+      "pid": 1,
+      "role": "bridge",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:26:29.266133+00:00"
+    },
+    {
+      "event": "guard_request",
+      "mono_ns": 13015944765049,
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:26:29.309463+00:00"
+    },
+    {
+      "event": "reserve_committed",
+      "mono_ns": 13015954222179,
+      "pid": 1,
+      "role": "writer",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:26:29.318920+00:00",
+      "wire_sha256": "445ff47d4f18f186994101a53074d18d6cb996e7436268019789776e5c663b02"
+    },
+    {
+      "event": "writer_ack",
+      "http": 200,
+      "mono_ns": 13015954644224,
+      "operation": "admit",
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:26:29.319347+00:00"
+    },
+    {
+      "event": "transport_connect_start",
+      "mono_ns": 13015954731230,
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:26:29.319439+00:00"
+    },
+    {
+      "event": "transport_connected",
+      "mono_ns": 13015955118370,
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:26:29.319823+00:00"
+    },
+    {
+      "event": "transport_post",
+      "mono_ns": 13015955379793,
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:26:29.320084+00:00",
+      "wire_sha256": "445ff47d4f18f186994101a53074d18d6cb996e7436268019789776e5c663b02"
+    },
+    {
+      "event": "provider_post_committed",
+      "mono_ns": 13015962421619,
+      "pid": 1,
+      "role": "provider",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:26:29.327121+00:00",
+      "wire_sha256": "445ff47d4f18f186994101a53074d18d6cb996e7436268019789776e5c663b02"
+    },
+    {
+      "event": "guard_response_timer_fired",
+      "mono_ns": 13060955694551,
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:27:14.318188+00:00"
+    },
+    {
+      "error": "RemoteDisconnected",
+      "event": "transport_read_ended",
+      "mono_ns": 13060956121707,
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:27:14.318625+00:00"
+    },
+    {
+      "event": "writer_outcome_committed",
+      "mono_ns": 13060969521357,
+      "outcome": "outcome_unknown",
+      "pid": 1,
+      "role": "writer",
+      "success_count": 0,
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:27:14.332023+00:00"
+    },
+    {
+      "event": "writer_ack",
+      "http": 200,
+      "mono_ns": 13060970374826,
+      "operation": "settle",
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:27:14.332886+00:00"
+    },
+    {
+      "cause": "RemoteDisconnected",
+      "event": "guard_outcome_unknown",
+      "mono_ns": 13060970443973,
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:27:14.332961+00:00"
+    },
+    {
+      "event": "guard_http_response",
+      "http": 503,
+      "mono_ns": 13060970474506,
+      "pid": 1,
+      "role": "guard",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:27:14.332994+00:00"
+    },
+    {
+      "app_status": "failed",
+      "event": "hermes_status_observed",
+      "http": 200,
+      "mono_ns": 13061055224359,
+      "pid": 1,
+      "role": "bridge",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:27:14.417733+00:00"
+    },
+    {
+      "event": "outcome_committed",
+      "mono_ns": 13061062940100,
+      "outcome": "outcome_unknown",
+      "pid": 1,
+      "role": "bridge",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:27:14.425445+00:00"
+    },
+    {
+      "event": "callback_sent",
+      "event_sha256": "98c69a0b01564b589c200c025c1e15cbd376dae987e18710334f4d41883650db",
+      "mono_ns": 13061063082583,
+      "pid": 1,
+      "role": "bridge",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:27:14.425600+00:00"
+    },
+    {
+      "event": "receipt_committed",
+      "mono_ns": 13061130792117,
+      "outcome": "outcome_unknown",
+      "pid": 1,
+      "receipt_sha256": "54f73a052f79b32e0c149789fc8dc348eecdc8eaa0d8fe1b13265b10886f48ab",
+      "role": "receipt",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:27:14.493299+00:00"
+    },
+    {
+      "event": "callback_ack",
+      "http": 200,
+      "mono_ns": 13061149631641,
+      "pid": 1,
+      "receipt_sha256": "54f73a052f79b32e0c149789fc8dc348eecdc8eaa0d8fe1b13265b10886f48ab",
+      "role": "bridge",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:27:14.512137+00:00"
+    },
+    {
+      "event": "driver_observed_receipt",
+      "mono_ns": 13061263636440,
+      "outcome": "outcome_unknown",
+      "pid": 13,
+      "receipt_sha256": "54f73a052f79b32e0c149789fc8dc348eecdc8eaa0d8fe1b13265b10886f48ab",
+      "role": "driver",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:27:14.626130+00:00"
+    },
+    {
+      "event": "provider_response_attempt",
+      "mono_ns": 13061962812262,
+      "pid": 1,
+      "role": "provider",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:27:15.325282+00:00"
+    },
+    {
+      "event": "provider_response_connection_closed",
+      "mono_ns": 13061964285909,
+      "pid": 1,
+      "role": "provider",
+      "task": "b2o-46",
+      "wall_utc": "2026-11-21T21:27:15.326787+00:00"
+    }
+  ],
+  "snapshots": {
+    "bridge": [
+      {
+        "binding": {
+          "correlation_id": "corr-b2o-31",
+          "job_id": "5e15c739679544cdb38132f2975186b0",
+          "request_sha256": "54b8bef31acbd30648f53f2a37a55a84e61324c0e0291ce7a43c8442249c84c3",
+          "run_id_sha256": "306ecf3f8b1adf5935e1a5885696e17b40677f61623c9a50917c26e890239469",
+          "task_id": "b2o-31"
+        },
+        "job": "5e15c739679544cdb38132f2975186b0",
+        "outcome": "mock_succeeded",
+        "receipt": "aa5de6b87692bb2493131ff9e42f38c0c750135c89f868320a584ef75353c03a",
+        "state": "delivered",
+        "stored_run_id_sha256": "306ecf3f8b1adf5935e1a5885696e17b40677f61623c9a50917c26e890239469",
+        "task": "b2o-31"
+      },
+      {
+        "binding": {
+          "correlation_id": "corr-b2o-46",
+          "job_id": "3ddf35537b3a43df9f58f27969cef622",
+          "request_sha256": "47a0175bf797909c2f8b8e0719c1ad809c562705bec3f60e4093719225fbb855",
+          "run_id_sha256": "7d30e9504f024c24cd1dbbf57e57c623128209b24d58884cf8a5ea128508b48b",
+          "task_id": "b2o-46"
+        },
+        "job": "3ddf35537b3a43df9f58f27969cef622",
+        "outcome": "outcome_unknown",
+        "receipt": "54f73a052f79b32e0c149789fc8dc348eecdc8eaa0d8fe1b13265b10886f48ab",
+        "state": "delivered",
+        "stored_run_id_sha256": "7d30e9504f024c24cd1dbbf57e57c623128209b24d58884cf8a5ea128508b48b",
+        "task": "b2o-46"
+      }
+    ],
+    "provider": [
+      {
+        "digest": "47bc5a3b9c78e34b7f0954da03e6ad28beeb104a1de18a218d626220a2d7b180",
+        "dispatches": 1,
+        "task": "b2o-31"
+      },
+      {
+        "digest": "445ff47d4f18f186994101a53074d18d6cb996e7436268019789776e5c663b02",
+        "dispatches": 1,
+        "task": "b2o-46"
+      }
+    ],
+    "receipt": [
+      {
+        "binding": {
+          "correlation_id": "corr-b2o-31",
+          "job_id": "5e15c739679544cdb38132f2975186b0",
+          "request_sha256": "54b8bef31acbd30648f53f2a37a55a84e61324c0e0291ce7a43c8442249c84c3",
+          "run_id_sha256": "306ecf3f8b1adf5935e1a5885696e17b40677f61623c9a50917c26e890239469",
+          "task_id": "b2o-31"
+        },
+        "outcome": "mock_succeeded",
+        "receipt": {
+          "event_sha256": "347a7e29e683047b63bc8a2b2c0662a012037966427b6961426c7dbaf52149c6",
+          "job_id": "5e15c739679544cdb38132f2975186b0",
+          "run_id_sha256": "306ecf3f8b1adf5935e1a5885696e17b40677f61623c9a50917c26e890239469"
+        }
+      },
+      {
+        "binding": {
+          "correlation_id": "corr-b2o-46",
+          "job_id": "3ddf35537b3a43df9f58f27969cef622",
+          "request_sha256": "47a0175bf797909c2f8b8e0719c1ad809c562705bec3f60e4093719225fbb855",
+          "run_id_sha256": "7d30e9504f024c24cd1dbbf57e57c623128209b24d58884cf8a5ea128508b48b",
+          "task_id": "b2o-46"
+        },
+        "outcome": "outcome_unknown",
+        "receipt": {
+          "event_sha256": "98c69a0b01564b589c200c025c1e15cbd376dae987e18710334f4d41883650db",
+          "job_id": "3ddf35537b3a43df9f58f27969cef622",
+          "run_id_sha256": "7d30e9504f024c24cd1dbbf57e57c623128209b24d58884cf8a5ea128508b48b"
+        }
+      }
+    ],
+    "writer": [
+      {
+        "digest": "47bc5a3b9c78e34b7f0954da03e6ad28beeb104a1de18a218d626220a2d7b180",
+        "outcome": "usage_recorded",
+        "state": "settled",
+        "success_count": 1,
+        "task": "b2o-31"
+      },
+      {
+        "digest": "445ff47d4f18f186994101a53074d18d6cb996e7436268019789776e5c663b02",
+        "outcome": "outcome_unknown",
+        "state": "held",
+        "success_count": 0,
+        "task": "b2o-46"
+      }
+    ]
+  },
+  "verdict": "B2O_INTEGRATED_FAKE_PASS",
+  "effective_isolation_pass": true,
+  "receipts_after_restart": [
+    {
+      "binding": {
+        "correlation_id": "corr-b2o-31",
+        "job_id": "5e15c739679544cdb38132f2975186b0",
+        "request_sha256": "54b8bef31acbd30648f53f2a37a55a84e61324c0e0291ce7a43c8442249c84c3",
+        "run_id_sha256": "306ecf3f8b1adf5935e1a5885696e17b40677f61623c9a50917c26e890239469",
+        "task_id": "b2o-31"
+      },
+      "outcome": "mock_succeeded",
+      "receipt": {
+        "event_sha256": "347a7e29e683047b63bc8a2b2c0662a012037966427b6961426c7dbaf52149c6",
+        "job_id": "5e15c739679544cdb38132f2975186b0",
+        "run_id_sha256": "306ecf3f8b1adf5935e1a5885696e17b40677f61623c9a50917c26e890239469"
+      }
+    },
+    {
+      "binding": {
+        "correlation_id": "corr-b2o-46",
+        "job_id": "3ddf35537b3a43df9f58f27969cef622",
+        "request_sha256": "47a0175bf797909c2f8b8e0719c1ad809c562705bec3f60e4093719225fbb855",
+        "run_id_sha256": "7d30e9504f024c24cd1dbbf57e57c623128209b24d58884cf8a5ea128508b48b",
+        "task_id": "b2o-46"
+      },
+      "outcome": "outcome_unknown",
+      "receipt": {
+        "event_sha256": "98c69a0b01564b589c200c025c1e15cbd376dae987e18710334f4d41883650db",
+        "job_id": "3ddf35537b3a43df9f58f27969cef622",
+        "run_id_sha256": "7d30e9504f024c24cd1dbbf57e57c623128209b24d58884cf8a5ea128508b48b"
+      }
+    }
+  ],
+  "rollback_pass": true,
+  "live_integration": "NO_GO",
+  "paid_gate_b": "BLOCKED_PREFLIGHT",
+  "scope_counters": {
+    "kvm2_accesses": 0,
+    "production_accesses": 0,
+    "real_ledger_permit_key_accesses": 0,
+    "real_provider_api_calls": 0,
+    "paid_inference": 0,
+    "usd": 0
+  },
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD",
+  "next_owner": "chatgpt",
+  "redacted_compose_readback": {
+    "source": "rendered again with generated fixture values from the same source after the run",
+    "projection_sha256": "c6a27b7fcf80aa0625fe0d3465db9a3669c795ede305b1b4d798da5ac10a6670",
+    "projection": {
+      "compose_project": "ttd-b2o-local",
+      "network_internal": {
+        "accounting": true,
+        "binding": true,
+        "callback": true,
+        "front": true,
+        "inference": true,
+        "runs": true,
+        "upstream": true
+      },
+      "volumes": [
+        "bridge",
+        "hermes",
+        "n8n",
+        "provider",
+        "receipt",
+        "writer"
+      ],
+      "services": {
+        "bridge": {
+          "image": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+          "pull_policy": "never",
+          "networks": [
+            "binding",
+            "front",
+            "runs"
+          ],
+          "host_ports": 0,
+          "rootfs_ro": true,
+          "caps_dropped": [
+            "ALL"
+          ],
+          "caps_added": [],
+          "owner_label_present": true,
+          "environment_names": [
+            "B2O_ADMIT",
+            "B2O_BIND",
+            "B2O_ENGINE",
+            "B2O_EVENT_KEY",
+            "B2O_RECEIPT_KEY",
+            "B2O_WEBHOOK"
+          ],
+          "mounts": [
+            {
+              "type": "bind",
+              "source": "generated_fixture_directory",
+              "target": "/b2n-src",
+              "read_only": true
+            },
+            {
+              "type": "volume",
+              "source": "bridge",
+              "target": "/fixture-data",
+              "read_only": false
+            }
+          ]
+        },
+        "driver": {
+          "image": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+          "pull_policy": "never",
+          "networks": [
+            "front"
+          ],
+          "host_ports": 0,
+          "rootfs_ro": true,
+          "caps_dropped": [
+            "ALL"
+          ],
+          "caps_added": [],
+          "owner_label_present": true,
+          "environment_names": [
+            "B2N_ENGINE_BEARER",
+            "B2N_HTTP_BEARER",
+            "B2N_PROVIDER_BEARER",
+            "B2N_RECEIPT_BEARER",
+            "B2O_ADMIT",
+            "B2O_WEBHOOK"
+          ],
+          "mounts": [
+            {
+              "type": "bind",
+              "source": "generated_fixture_directory",
+              "target": "/b2n-src",
+              "read_only": true
+            }
+          ]
+        },
+        "guard": {
+          "image": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+          "pull_policy": "never",
+          "networks": [
+            "accounting",
+            "inference",
+            "upstream"
+          ],
+          "host_ports": 0,
+          "rootfs_ro": true,
+          "caps_dropped": [
+            "ALL"
+          ],
+          "caps_added": [],
+          "owner_label_present": true,
+          "environment_names": [
+            "B2O_GUARD",
+            "B2O_UPSTREAM",
+            "B2O_WRITER"
+          ],
+          "mounts": [
+            {
+              "type": "bind",
+              "source": "generated_fixture_directory",
+              "target": "/b2n-src",
+              "read_only": true
+            }
+          ]
+        },
+        "hermes": {
+          "image": "ghcr.io/hostinger/hvps-hermes-agent@sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f",
+          "pull_policy": "never",
+          "networks": [
+            "inference",
+            "runs"
+          ],
+          "host_ports": 0,
+          "rootfs_ro": true,
+          "caps_dropped": [
+            "ALL"
+          ],
+          "caps_added": [
+            "CHOWN",
+            "SETGID",
+            "SETUID"
+          ],
+          "owner_label_present": true,
+          "environment_names": [
+            "ALL_PROXY",
+            "API_SERVER_KEY",
+            "HERMES_HOME",
+            "HERMES_IGNORE_RULES",
+            "HOME",
+            "HTTPS_PROXY",
+            "HTTP_PROXY",
+            "NO_PROXY",
+            "OPENAI_API_KEY",
+            "OPENAI_BASE_URL",
+            "PYTHONDONTWRITEBYTECODE"
+          ],
+          "mounts": [
+            {
+              "type": "bind",
+              "source": "generated_fixture_directory",
+              "target": "/b2n-src",
+              "read_only": true
+            },
+            {
+              "type": "volume",
+              "source": "hermes",
+              "target": "/b2n-state",
+              "read_only": false
+            }
+          ]
+        },
+        "n8n": {
+          "image": "docker.n8n.io/n8nio/n8n@sha256:9a8d8dcea75667496695d7810d7e1fe018a65efb36cc499d347f3931b3957b5d",
+          "pull_policy": "never",
+          "networks": [
+            "callback",
+            "front"
+          ],
+          "host_ports": 0,
+          "rootfs_ro": true,
+          "caps_dropped": [
+            "ALL"
+          ],
+          "caps_added": [],
+          "owner_label_present": true,
+          "environment_names": [
+            "N8N_DIAGNOSTICS_ENABLED",
+            "N8N_ENCRYPTION_KEY",
+            "N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS",
+            "N8N_HIRING_BANNER_ENABLED",
+            "N8N_HOST",
+            "N8N_RUNNERS_ENABLED",
+            "N8N_SECURE_COOKIE",
+            "N8N_TEMPLATES_ENABLED",
+            "N8N_VERSION_NOTIFICATIONS_ENABLED"
+          ],
+          "mounts": [
+            {
+              "type": "bind",
+              "source": "generated_fixture_directory",
+              "target": "/b2n-src",
+              "read_only": true
+            },
+            {
+              "type": "volume",
+              "source": "n8n",
+              "target": "/home/node/.n8n",
+              "read_only": false
+            }
+          ]
+        },
+        "provider": {
+          "image": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+          "pull_policy": "never",
+          "networks": [
+            "upstream"
+          ],
+          "host_ports": 0,
+          "rootfs_ro": true,
+          "caps_dropped": [
+            "ALL"
+          ],
+          "caps_added": [],
+          "owner_label_present": true,
+          "environment_names": [
+            "B2O_UPSTREAM"
+          ],
+          "mounts": [
+            {
+              "type": "bind",
+              "source": "generated_fixture_directory",
+              "target": "/b2n-src",
+              "read_only": true
+            },
+            {
+              "type": "volume",
+              "source": "provider",
+              "target": "/fixture-data",
+              "read_only": false
+            }
+          ]
+        },
+        "receipt": {
+          "image": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+          "pull_policy": "never",
+          "networks": [
+            "binding",
+            "callback"
+          ],
+          "host_ports": 0,
+          "rootfs_ro": true,
+          "caps_dropped": [
+            "ALL"
+          ],
+          "caps_added": [],
+          "owner_label_present": true,
+          "environment_names": [
+            "B2O_BIND",
+            "B2O_EVENT_KEY",
+            "B2O_RECEIPT_KEY",
+            "B2O_RECEIVE"
+          ],
+          "mounts": [
+            {
+              "type": "bind",
+              "source": "generated_fixture_directory",
+              "target": "/b2n-src",
+              "read_only": true
+            },
+            {
+              "type": "volume",
+              "source": "receipt",
+              "target": "/fixture-data",
+              "read_only": false
+            }
+          ]
+        },
+        "writer": {
+          "image": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+          "pull_policy": "never",
+          "networks": [
+            "accounting"
+          ],
+          "host_ports": 0,
+          "rootfs_ro": true,
+          "caps_dropped": [
+            "ALL"
+          ],
+          "caps_added": [],
+          "owner_label_present": true,
+          "environment_names": [
+            "B2O_WRITER"
+          ],
+          "mounts": [
+            {
+              "type": "bind",
+              "source": "generated_fixture_directory",
+              "target": "/b2n-src",
+              "read_only": true
+            },
+            {
+              "type": "volume",
+              "source": "writer",
+              "target": "/fixture-data",
+              "read_only": false
+            }
+          ]
+        }
+      }
+    }
+  }
+}
