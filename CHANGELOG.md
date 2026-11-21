@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- ChatGPT nghiệm thu B2-I `8ded770` fixture 202/status/callback (12/12 + 4/4), mở B2-K mock cross-service với adapter/Hermes/receiver tách dữ liệu; Work B2-J vẫn chuẩn bị. Không live P0/provider/paid. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-i-chatgpt-review.md).
+
 - Codex hoàn tất H6 B2-I mock `202/status/callback` với SQLite tạm, HMAC callback và test delay, lost ACK, replay, dead-letter, unknown reserve. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-i-async-contract.md).
 
 - Phân hai luồng độc lập: Codex B2-I triển khai/test async 202/status/callback trên fixture, Work B2-J audit idle writer startup và recovery/readiness; không chỉnh cùng source, không live P0/production/provider/paid. [Task Work](tasks/2026-11-22-work-b2-j-idle-startup-audit.md) · [Task Codex](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md).
