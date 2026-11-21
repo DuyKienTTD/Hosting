@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Đối chiếu kết quả B2-N tại `a19765f`, ghi phạm vi fake runtime đã đo và đặc tả delta restart lúc run active cho Codex.
+
 - Tiếp nhận QA source B2-N của Work tại `ff2a1a9` và bổ sung tiêu chí đọc kết quả provenance trên task Work hiện có.
 
 - Review PR #4/#5, ghi blocker n8n target parity và cập nhật hai đặc tả B2-N cho Codex và Work trên các PR hiện có.
