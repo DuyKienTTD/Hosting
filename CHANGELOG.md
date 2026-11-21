@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Codex hoàn tất H6 B2-E mock cô lập trên KVM2/ext4. Kiểm pre-up, HMAC v2, Level 2, crash/replay/callback và rollback, đối chiếu pre/post GATE A, production và metadata ledger thật. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-e-kvm2-mock.md).
+
 - ChatGPT accepted H6 B2-D actual source HMAC/mock from `cf36e59` and opened B2-E standalone KVM2 authenticated mock rehearsal with strict pre-render isolation, synthetic ledger/key, rollback and no real provider/paid. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-d-chatgpt-review.md).
 
 - Codex tích hợp IPC HMAC hai chiều vào Guard/writer cho H6 B2-D mock-only, ký ACK theo request, kiểm Compose local và chạy hồi quy Stage A/B2-A. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-d-ipc-integration.md).

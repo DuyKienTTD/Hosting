@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **H6 B2-E KVM2 mock PASS (2026-11-22)** — HMAC v2, no-bypass, Level 2/ext4, 1/4 signed ACK, hai ca crash mất ACK, callback mô phỏng và rollback PASS. Inventory GATE A/production và metadata ledger thật khớp pre/post. ChatGPT nghiệm thu. Live apply giữ `BLOCKED_UID_OR_MOUNT`, paid GATE B giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-e-kvm2-mock.md).
+
 - **ChatGPT B2-D nghiệm thu / mở B2-E (2026-11-22):** `H6_B2_D_CODE_MOCK_ACCEPTED` theo source Guard/writer HMAC v2, Docker local evidence tại `cf36e59`. `H6_B2_E_KVM2_ISOLATED_AUTH_MOCK_AUTHORIZED` cho Codex dựng project mock KVM2 riêng sau full rendered Compose collision gate, chỉ ledger/khóa giả và rollback; không chạm GATE A/production/ledger/permit thật hoặc provider/paid. Handoff PREPARED, chờ Codex ACK. Live apply `BLOCKED_UID_OR_MOUNT`, paid `BLOCKED_PREFLIGHT`. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-d-chatgpt-review.md).
 
 - **H6 B2-D code/mock PASS (2026-11-22)** — Guard/writer dùng IPC HMAC hai chiều ở UID 0, socket B2-D riêng và khóa giả RO. Mock đã kiểm tamper, replay, Level 2, crash và rollback. ChatGPT nghiệm thu. Live apply giữ `BLOCKED_UID_OR_MOUNT`, paid giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-d-ipc-integration.md).
