@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Bàn giao H5 provider preflight trong task GATE B hiện có: owner Codex, ChatGPT nghiệm thu, first action KVM2, model/project/Responses, forwarded digest, input_tokens, pricing, budget, one-shot readiness; không dispatch paid trong H5; handoff chỉ PREPARED_FOR_OWNER_FORWARD.
+
 - ChatGPT nghiệm thu Guard-only mount từ report/evidence GitHub commit `7455fa3`: `GUARD_MOUNT_ACCEPTED` trong phạm vi mount; giữ paid GATE B `BLOCKED_PREFLIGHT`, không tuyên bố ChatGPT tự kiểm tra KVM2 và không phát sinh provider call.
 
 - Nghiệm thu `GUARD_MOUNT_PASS` trên KVM2. Chỉ Guard được recreate để mount credential chỉ đọc. Production health, cách ly proxy và ledger đều đạt kiểm tra sau thay đổi. Paid GATE B vẫn `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-guard-mount-results.md).
