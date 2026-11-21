@@ -62,7 +62,7 @@ sensitivity: public-redacted
 
 - [ADR-P0-002](decisions/2026-11-21-hermes-auxiliary-guard-bridge-approval-proposal.md) **GATE A APPROVED** đã được thực hiện: [TTD-HERMES-GATE-A-001](tasks/2026-11-21-hermes-auxiliary-guard-bridge-gate-a.md) hiện `complete / GATE_A_MOCK_PASS`. Bốn service sandbox private healthy, mock E2E và corrected rollback PASS; production health HTTP 200, restart/downtime 0. GATE B chưa được phê duyệt và không được thực hiện.
 
-- Đã review GATE A mock **PASS** dựa trên báo cáo/evidence GitHub; đã tạo [ADR-P0-003](decisions/2026-11-21-hermes-gate-b-single-paid-call-proposal.md) **PROPOSED**, yêu cầu phê duyệt mới cho đúng **một** Hermes Agent paid call. Giữ kill switch ON, chưa thực hiện GATE B; đề xuất dùng one-shot permit, không mở toàn cục và không tự retry paid.
+- Đã review GATE A mock **PASS** dựa trên báo cáo/evidence GitHub; đã tạo [ADR-P0-003](decisions/2026-11-21-hermes-gate-b-single-paid-call-proposal.md) **APPROVED_WITH_RESTRICTIONS (2026-11-21)** cho Codex thực hiện tối đa một Hermes Agent paid call. [Task Codex GATE B](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md) đã giao; chỉ one-shot permit khóa lại trước dispatch, global kill switch vẫn ON, không mở toàn cục và không paid retry. **Chưa có evidence thực thi GATE B.**
 
 ## Việc đang chờ
 
@@ -70,7 +70,7 @@ sensitivity: public-redacted
 - Chưa đặt n8n/Hermes sau reverse proxy HTTPS.
 - Chưa xử lý các backup Hostinger có thể chứa ứng dụng đã xóa.
 - Chưa cập nhật hệ điều hành hoặc reboot.
-- Provider E2E và GATE A mock đã có evidence. **GATE B vẫn cần phê duyệt riêng cho đúng một paid Hermes call**; không được tự đổi guard sang provider trả phí hoặc dùng adapter OpenAI trực tiếp để thay bằng chứng Hermes.
+- Provider E2E và GATE A mock đã có evidence. **GATE B đã được phê duyệt có điều kiện** cho tối đa đúng một Hermes Agent paid call; vẫn chờ Codex chạy/ghi evidence, không được tự đổi guard hay dùng adapter OpenAI trực tiếp để thay bằng chứng Hermes.
 - Chưa kết nối/xác minh Google Ads, GA4, WordPress/WooCommerce, YouTube, TikTok, Meta, Kling, HeyGen hoặc ElevenLabs.
 
 ## Tài liệu tiếp theo
