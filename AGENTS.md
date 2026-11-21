@@ -10,6 +10,16 @@ Giữ repository thành nguồn thông tin chung, ngắn gọn và đáng tin c�
 
 Mỗi tác nhân phải tham khảo [agents/README.md](agents/README.md) và hồ sơ chính mình trước khi nhận việc. Không coi **Hostinger** (nền tảng) là một AI Agent; khả năng của **Hostinger Agent** cần khảo sát riêng. Hồ sơ chỉ ghi năng lực và bằng chứng, không tự tạo quyền truy cập. Khi giao việc cho tác nhân khác, xem hồ sơ của họ và kiểm tra quyền phiên hiện tại. Nhiệm vụ khảo sát: [TTD-AGENT-CAPABILITY-SURVEY-001](tasks/2026-11-21-agent-capability-survey.md). Chủ dự án có thể chuyển tiếp câu hỏi và báo cáo giữa các tác nhân; không đòi kết nối trực tiếp giữa các agent.
 
+## Bắt buộc trước khi giao việc hoặc nhận việc
+
+**Quy tắc điều phối do chủ dự án phê duyệt ngày 2026-11-21:** [AGENT_WORKFLOW mục 7](rules/AGENT_WORKFLOW.md) có hiệu lực cho ChatGPT, Codex, Hermes, Hostinger Agent và mọi agent tham gia. **Mỗi task mới phải đọc lại** `AGENTS.md`, `rules/AGENT_WORKFLOW.md`, `rules/REPOSITORY_SECURITY.md`, `STATE.md`, `CATALOG.yaml`, hồ sơ agent và task. Ghi commit quy tắc đã đọc trong ACK/report.
+
+**Trước giao thực thi:** ChatGPT nghiên cứu nguồn công khai chính thức, đối chiếu trạng thái/bằng chứng; chủ động xin báo cáo Hostinger Agent về VPS/network/hPanel và Hermes về runtime/inference khi phù hợp, trước khi giao Codex code/test/deploy. Đặc tả phải có **bước đầu tiên cụ thể, file/endpoint/môi trường, dependency, owner duy nhất, quyền, kiểm thử/STOP, đường dẫn đầu ra và next owner**; không chỉ nói “làm đi”. Không giả định đã giao việc qua GitHub nếu agent chưa thật sự nhận.
+
+**Chuyền bóng rõ ràng:** `PREPARED → SENT → ACKNOWLEDGED → IN_PROGRESS → DONE/BLOCKED/NEEDS_OWNER_DECISION`; mỗi lượt giao nêu `from_agent, to_agent, why, first_action, inputs, limits, acceptance, artifact, next_owner`. Nếu thiếu kênh giao trực tiếp, ghi `PREPARED_FOR_OWNER_FORWARD` để chủ dự án chuyển.
+
+**Mọi quy tắc mới của chủ dự án phải được cập nhật ngay vào `rules/`, đồng bộ entrypoint, `CATALOG.yaml`, `CHANGELOG.md`, commit/push/read-back.** Lời nói trong chat không phải kho tri thức bền vững. Quy tắc mới không tự cấp thêm quyền production/paid API.
+
 ## Thứ tự đọc bắt buộc
 
 1. `README.md` — phạm vi và bản đồ repository.
