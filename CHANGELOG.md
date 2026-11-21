@@ -2,6 +2,9 @@
 
 ## 2026-11-21
 
+- Khôi phục nhiệm vụ GATE B bị H1 ghi đè nội dung/owner/status trong commit `5b8dd629`: giữ nguyên quyết định paid một attempt ở `owner: codex`, `status: blocked`, và ghi kết quả H1 read-only đã nhận từ Hostinger. Phân biệt provider OpenAI key (guard-only) với hai service-auth keys cần dùng theo vai trò. Bổ sung quy tắc tránh agent tham vấn ghi đè task mẹ. H2 Hermes chưa ACK, GATE B chưa dispatch.
+
+
 - Điều phối GATE B theo rule mục 7 sau egress isolation: xác minh report/evidence `88268989`; cập nhật task hiện có để chuẩn bị hai handoff H1/H2 Hostinger Agent và Hermes Agent sau egress isolation, ghi owner, cách bắt đầu, nguồn vendor, nghiệm thu, trạng thái PREPARED_FOR_OWNER_FORWARD; chưa gửi/ACK, chưa giao Codex thực thi, 0 paid call. Giữ GATE B BLOCKED_PREFLIGHT.
 
 
