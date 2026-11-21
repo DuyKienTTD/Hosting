@@ -621,6 +621,15 @@ documents:
     verified_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: gate-b-chatgpt-provider-and-scope-review-2026-11-22
+    path: reports/2026-11-22-gate-b-chatgpt-provider-and-scope-review.md
+    type: report
+    status: current
+    authoritative_for: chatgpt-h5-followup-review-and-no-go-paid-scope-decision
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
