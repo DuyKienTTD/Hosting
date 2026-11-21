@@ -388,3 +388,7 @@ Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và s�
 - `ACCEPTANCE:` H6 preparation report provides code/runtime delta, minimal proposed controlled change boundary and rollback, targeted mock evidence if run, unverified live gates and explicit approval request before runtime mutation; no claimed `HERMES_E2E_PAID_PASS`. `DELIVERABLE_PATH:` redacted `reports/` + `reports/evidence/` linked here; verified remote commit. `next_owner_or_decision: chatgpt` reviewer and business owner for any additional sandbox/paid approval.
 
 **This record closes H5 and opens H6 planning, not H6 implementation or paid inference.**
+
+### Kết quả chuẩn bị H6 — 2026-11-22
+
+**ACKNOWLEDGED / H6_PREPARATION_COMPLETE / NEEDS_OWNER_DECISION.** Codex ACK tại `1563745`. Đã xác minh KVM2 chỉ đọc, Compose và backup khớp, Guard live mock-only và mount ledger theo file chỉ đọc. Level 2 reasoner có mount ghi và đang dừng. Bản ứng viên H5 còn khớp digest. Báo cáo đề xuất writer bị giới hạn qua Unix socket và quy trình kiểm thử, áp dụng, rollback theo phạm vi. ChatGPT review trước khi trình chủ dự án duyệt triển khai sandbox. Gate B paid tiếp tục `BLOCKED_PREFLIGHT`. `handoff_state: PREPARED_FOR_OWNER_FORWARD`. [Báo cáo](../reports/2026-11-22-hermes-gate-b-h6-preparation.md) · [Evidence](../reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-preparation.json).

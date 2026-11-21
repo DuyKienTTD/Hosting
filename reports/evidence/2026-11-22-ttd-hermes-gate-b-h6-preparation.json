@@ -1,0 +1,50 @@
+{
+  "task_id": "ttd-hermes-gate-b-001",
+  "phase": "H6_SANDBOX_PROVIDER_ROUTE",
+  "result": "H6_PREPARATION_COMPLETE",
+  "decision": "NEEDS_OWNER_DECISION",
+  "paid_gate": "BLOCKED_PREFLIGHT",
+  "observed_date_ict": "2026-11-22",
+  "rules_and_task_base": "15637451a758ce8f7208bfae52699157ddd6d9f5",
+  "handoff_commit": "d8fdd23573e3a3b3c8f964c68d0469b9213a48fa",
+  "live_readonly": {
+    "guard_source_revision": "1953a81",
+    "guard_source_sha256": "15c51be630350077ee30b6cbeaa327d8d4d7a26792934b9244e1346129faa939",
+    "guard_and_proxy_healthy": true,
+    "compose_matches_private_backup": true,
+    "networks_match_baseline": true,
+    "guard_only_credential_mount_read_only": true,
+    "guard_ledger_bind_kind": "file",
+    "guard_ledger_read_only": true,
+    "level2_reasoner_running": false,
+    "level2_reasoner_has_write_mount": true,
+    "guard_ledger_bytes_match_baseline": true,
+    "host_ledger_historical_attempts": 1,
+    "host_ledger_live_permits": 0,
+    "host_ledger_kill_switch_on": true,
+    "production_http": [200, 200],
+    "production_restart_count": [0, 0]
+  },
+  "candidate": {
+    "sha256_matches_h5": true,
+    "bytes": 3304,
+    "mode": "0600",
+    "input_tokens_reused_from_h5": 723,
+    "max_output_tokens": 600,
+    "candidate_reserve_usd": 0.0035
+  },
+  "source_review": {
+    "current_guard_change_commit": "69dd952",
+    "repo_guard_sha256": "59fd1da33d9267d02ee15e9e1659aaa0a754a156a0ab2cd59a5edfab93879272",
+    "current_dispatch": "mock_only",
+    "shared_ledger_writer_delta": "proposed",
+    "future_transport_delta_tested": false,
+    "h3_h5_mock_evidence_reused": true
+  },
+  "provider_operations": 0,
+  "paid_attempts_delta": 0,
+  "permits_created": 0,
+  "inference_cost_usd_delta": 0,
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}
