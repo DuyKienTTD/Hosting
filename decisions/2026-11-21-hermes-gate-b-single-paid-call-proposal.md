@@ -1,17 +1,19 @@
 ---
 id: ttd-hermes-gate-b-single-paid-call-proposal-2026-11-21
 type: decision
-status: proposed
+status: approved_with_restrictions
+approved_at: 2026-11-21
+approval_scope: exactly_one_hermes_paid_attempt
 updated_at: 2026-11-21
 sensitivity: public
 decision_owner: business-owner
 related_task: ttd-hermes-gate-a-001
-paid_call_approval: false
+paid_call_approval: true
 ---
 
 # ADR-P0-003 — Đề xuất GATE B: đúng một Hermes Agent paid inference
 
-**PROPOSED / NOT APPROVED.** Không gọi OpenAI, không thay kill switch, không mở egress và không thay đổi VPS dựa trên tài liệu đề xuất này. Chỉ chủ dự án được phê duyệt GATE B riêng.
+**APPROVED WITH RESTRICTIONS — 2026-11-21.** Chủ dự án phê duyệt tối đa đúng **một** physical paid Hermes Agent call qua `gpt-6-luna`, ≤4.000 input tokens, `max_output_tokens=600`, dữ liệu giả, không tools, không paid retry, không thay production; dùng atomic **one-shot permit** tự tiêu thụ/khóa lại trước dispatch, không tắt global kill switch. Nếu không bảo đảm bất kỳ giới hạn nào phải **STOP, không gọi API**. [Task Codex thực thi](../tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md).
 
 ## Bằng chứng đã đối chiếu
 
@@ -20,7 +22,7 @@ paid_call_approval: false
 - Provider E2E bằng adapter đã PASS 1 paid call, nhưng Hermes Agent paid E2E **chưa thực hiện**.
 - Một lỗi sandbox rollback ownership được sửa và retest PASS; GATE A chưa có restart policy tự phục hồi sau VPS reboot.
 
-## Đề xuất ủy quyền riêng, chỉ có hiệu lực khi chủ dự án duyệt
+## Phạm vi ủy quyền đã được duyệt
 
 Codex được kiểm thử **đúng một** provider request có trả phí qua route:
 
@@ -46,8 +48,8 @@ Chỉ **một** fake-data task, tối đa **một physical paid attempt**. Dừn
 
 ## Trạng thái
 
-**GATE B PENDING OWNER APPROVAL.** GATE A đã PASS; proposal không tự kích hoạt Hermes paid inference.
+**GATE B APPROVED / NOT EXECUTED BY THIS RECORD.** GATE A đã PASS; chủ dự án đã cho phép Codex thực hiện đúng một lượt trong các gate được quy định. Việc cập nhật GitHub không tự kích hoạt Hermes paid inference.
 
-## Bàn giao đề xuất sau khi được duyệt
+## Bàn giao Codex sau thực thi
 
 Codex tạo `reports/2026-11-21-hermes-gate-b-paid-results.md` và evidence JSON redacted, cập nhật ADR/task/STATE/CATALOG/CHANGELOG, ghi rõ STOP/PASS và commit.
