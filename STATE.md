@@ -53,6 +53,8 @@ sensitivity: public-redacted
 - [TTD-AI-P0-INTEGRATION-001](tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md) có kết quả `PARTIAL`: private network/DNS/health PASS; inference/workflow/callback còn blocked. Xem [báo cáo P0](reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md).
 - Không thay U4S, account business, public port/firewall hoặc credential; downtime 0 và chi phí API 0.
 
+- Đã lập [ADR-P0-001](decisions/2026-11-21-p0-reasoning-integration-proposal.md) trạng thái **PROPOSED**: ưu tiên inference cô lập, webhook có xác thực cho 1 sandbox workflow, model/cost cap cần định giá rồi duyệt; chưa cấp quyền triển khai hay chi phí.
+
 ## Việc đang chờ
 
 - Chưa thực hiện hardening SSH/XRDP hoặc firewall.
