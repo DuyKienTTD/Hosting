@@ -175,3 +175,20 @@ Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và s�
 7. **Bàn giao:** ghi `PREPARED/READY_FOR_OWNER_KEY_INPUT/BLOCKED` dựa trên bằng chứng, không khẳng định đã nhập key. Hướng dẫn chính xác URL localhost/tunnel hoặc thao tác terminal chỉ công bố trong kênh phù hợp (không public URL/tokens). Tạo report/evidence redacted và commit, verify remote readback và owner/status/approval bất biến. **Next owner:** chủ dự án tự nhập key khi giao diện đã thực sự sẵn sàng; sau đó ChatGPT nghiệm thu lại preflight và Codex tiếp tục đúng task cũ.
 
 **STOP:** Không dùng API key đã xuất hiện trong chat, không yêu cầu dán key vào agent, không mở cổng công khai, không lưu secret trong Git/logs, không phát sinh phí, không retry paid. Nếu cấu hình thực tế đòi thay đổi production hoặc quyền ngoài sandbox đã duyệt, xin phê duyệt phạm vi riêng trước khi thao tác.
+
+## Kết quả H4 của Codex — 2026-11-21
+
+- **Rule ACK:** đọc đầy đủ quy tắc, trạng thái, catalog, hồ sơ Codex và task tại
+  commit `9596bf10cf7774f1954c7a4992359f17122d6acd`.
+- **H4 SANDBOX TEST PASS / READY_FOR_OWNER_KEY_INPUT.** Review mã `9596bf1`
+  phát hiện đường `compose up --force-recreate`; chưa chạy đường này và đã loại
+  bỏ tại `f335752d40c7ce88efede5bf7d743246b2423f5f` để tuân thủ phê duyệt chỉ đọc.
+- Linux 11/11 unit tests PASS; terminal fake-key smoke PASS, không echo, file
+  `0600`/root, không mount, revoke PASS và final secret absent. Compose config
+  PASS; overlay chỉ target guard read-only, không port. Production running,
+  restart 0; ledger 1 attempt/0 permit, kill switch ON; paid call/cost mới 0.
+- Interface cuối chỉ **staging secret**, không tự recreate/mount guard. Mount và
+  provider preflight vẫn cần phê duyệt riêng; GATE B giữ `BLOCKED_PREFLIGHT`.
+- `from_agent: codex`; `to_agent: chatgpt`; `handoff_state: PREPARED_FOR_OWNER_FORWARD`;
+  `next_after_review: business-owner`. [Báo cáo H4](../reports/2026-11-21-hermes-gate-b-h4-key-input-preparation.md) ·
+  [Evidence](../reports/evidence/2026-11-21-ttd-hermes-gate-b-h4.json).

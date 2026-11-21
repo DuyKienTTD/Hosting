@@ -76,7 +76,7 @@ sensitivity: public-redacted
 
 - **ChatGPT đã nghiệm thu H3 từ evidence (2026-11-21):** H3 `DONE_RECEIVED_AND_REVIEWED / MOCK_E2E_PASS`, không khẳng định đo lại trực tiếp VPS; GATE B vẫn `BLOCKED_PREFLIGHT` do guard chưa có OpenAI provider credential và chưa có provider token count theo final forwarded digest. H3 mock overlay đã rollback; không dùng SHA/3.345 bytes của mock làm paid permit. Chủ dự án là owner cấp credential qua secret mount kín; Codex chỉ thực hiện preflight targeted sau đó. [Task GATE B](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md), [H3](reports/2026-11-21-hermes-gate-b-h3-preflight.md).
 
-- **H4 chuẩn bị nhập OpenAI API Key an toàn:** chủ dự án đã đồng ý giao Codex chuẩn bị giao diện localhost/SSH tunnel hoặc terminal no-echo để tự nhập key; chỉ sandbox guard-only, không public port, không ghi secret vào Git/chat/logs, không paid dispatch. Đã bổ sung [đặc tả H4 vào task GATE B](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md). Trạng thái `PREPARED_FOR_OWNER_FORWARD`, chưa Codex ACK hay có giao diện hoạt động; GATE B `BLOCKED_PREFLIGHT`, kill switch ON.
+- **H4 nhập OpenAI API Key an toàn đã `READY_FOR_OWNER_KEY_INPUT`:** Codex đã review/sửa interface terminal no-echo, Linux fake-key test 11/11 và Compose read-only PASS. Giao diện chỉ lưu file `0600` root-only, không tự mount/recreate container; fake key đã revoke và secret cuối absent. Production restart 0, ledger 1 attempt/0 permit, kill switch ON, paid delta 0. [Báo cáo H4](reports/2026-11-21-hermes-gate-b-h4-key-input-preparation.md). Handoff `PREPARED_FOR_OWNER_FORWARD` cho ChatGPT nghiệm thu; GATE B vẫn `BLOCKED_PREFLIGHT`.
 
 ## Việc đang chờ
 

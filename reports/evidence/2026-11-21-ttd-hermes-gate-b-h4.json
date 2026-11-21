@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "task_id": "ttd-hermes-gate-b-001",
+  "handoff_id": "H4",
+  "result": "READY_FOR_OWNER_KEY_INPUT",
+  "rules_commit": "9596bf10cf7774f1954c7a4992359f17122d6acd",
+  "reviewed_initial_commit": "9596bf10cf7774f1954c7a4992359f17122d6acd",
+  "tested_source_commit": "f335752d40c7ce88efede5bf7d743246b2423f5f",
+  "verified_at": "2026-11-21",
+  "code_review": {
+    "initial_compose_mutation_path_found": true,
+    "initial_mutation_path_executed": false,
+    "final_source_has_compose_up_down_or_force_recreate": false,
+    "network_listener": false,
+    "provider_request_code": false
+  },
+  "tests": {
+    "local_unit_passed": 11,
+    "local_unit_skipped": 1,
+    "linux_unit_passed": 11,
+    "linux_unit_failed": 0,
+    "python_compile": "PASS",
+    "compose_config_exit": 0,
+    "terminal_fake_key_smoke": "PASS",
+    "fake_key_echoed": false,
+    "fake_secret_mode": "0600",
+    "fake_secret_owner": "root",
+    "fake_secret_mounted": false,
+    "fake_secret_final_present": false
+  },
+  "compose": {
+    "overlay_targets": [
+      {"service": "guard", "read_only": true}
+    ],
+    "guard_published_ports": 0,
+    "guard_networks": ["gate_provider", "gate_upstream", "gateb_guard"],
+    "base_sha256_equal_before_after": true,
+    "provider_secret_mounts_final": 0,
+    "compose_up_down_executed": false
+  },
+  "live_boundaries": {
+    "guard_network_internal": true,
+    "guard_network_members": ["guard", "provider_egress"],
+    "production_n8n_running": true,
+    "production_n8n_restart_count": 0,
+    "production_hermes_running": true,
+    "production_hermes_restart_count": 0,
+    "firewall_dns_public_port_changed": false
+  },
+  "gate_b": {
+    "status": "BLOCKED_PREFLIGHT",
+    "real_ledger_attempts": 1,
+    "real_ledger_permits": 0,
+    "global_kill_switch": true,
+    "paid_attempts_delta": 0,
+    "api_cost_delta_usd": 0,
+    "real_provider_key_stored": false,
+    "real_provider_key_mounted": false,
+    "provider_token_count_verified": false
+  },
+  "handoff": {
+    "from": "codex",
+    "to": "chatgpt",
+    "state": "PREPARED_FOR_OWNER_FORWARD",
+    "next_after_review": "business-owner"
+  }
+}

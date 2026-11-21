@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- H4 GATE B `READY_FOR_OWNER_KEY_INPUT`: review mã `9596bf1` phát hiện và loại bỏ đường Compose recreate trước khi chạy; Linux fake-key 11/11, terminal no-echo lifecycle và Compose read-only PASS. Interface cuối chỉ staging secret `0600`, không mount/recreate, không public port/provider call. Fake key đã revoke; production restart 0, ledger 1 attempt/0 permit, kill switch ON, paid delta 0. [Báo cáo H4](reports/2026-11-21-hermes-gate-b-h4-key-input-preparation.md).
+
 - Theo chỉ thị chủ dự án, đã thêm H4 vào task GATE B: Codex chuẩn bị cơ chế chủ dự án tự nhập OpenAI API Key qua giao diện kín localhost/SSH tunnel hoặc terminal không echo; guard-only secret mount, không public port, không secret trong log/Git, test fake-key trước, không phát sinh paid inference. Trạng thái mới chỉ `PREPARED_FOR_OWNER_FORWARD`.
 
 

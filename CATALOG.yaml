@@ -504,6 +504,24 @@ documents:
     updated_at: 2026-11-21
     sensitivity: public-redacted
 
+  - id: hermes-gate-b-h4-key-input-preparation-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-h4-key-input-preparation.md
+    type: report
+    status: current
+    authoritative_for: Gate-B-H4-secure-owner-key-input-preparation-and-sandbox-test
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h4-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-h4.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-Gate-B-H4-key-input-and-live-boundary-evidence
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
