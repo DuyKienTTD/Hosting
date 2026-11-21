@@ -2,6 +2,9 @@
 
 ## 2026-11-21
 
+- Tổng hợp H1 Hostinger và H2 Hermes để chuẩn bị H3 trong task GATE B hiện có: chẩn đoán replay bridge task_id vs runtime mismatch, khóa forwarded Responses digest và token-count cùng digest, yêu cầu rerun combined mock callback+one-shot trên isolated topology, guard-only OpenAI credential, không nhầm với service auth keys. H3 chuẩn bị cho Codex ở PREPARED_FOR_OWNER_FORWARD; chưa gửi/ACK, chưa paid dispatch.
+
+
 - Khôi phục nhiệm vụ GATE B bị H1 ghi đè nội dung/owner/status trong commit `5b8dd629`: giữ nguyên quyết định paid một attempt ở `owner: codex`, `status: blocked`, và ghi kết quả H1 read-only đã nhận từ Hostinger. Phân biệt provider OpenAI key (guard-only) với hai service-auth keys cần dùng theo vai trò. Bổ sung quy tắc tránh agent tham vấn ghi đè task mẹ. H2 Hermes chưa ACK, GATE B chưa dispatch.
 - Hoàn tất handoff H2 cho `TTD-HERMES-GATE-B-001`: thêm `reports/2026-11-21-gate-b-hermes-consult.md` và `reports/evidence/2026-11-21-gate-b-hermes-consult.json`, cập nhật task/STATE/CATALOG tương ứng.
 - Kết luận H2: `HERMES_RUNTIME_MISMATCH` chưa chứng minh mismatch live; bridge có thể replay lỗi cũ theo `task_id`. Canonical permit/hash phải bind vào forwarded `/v1/responses` body sau guard, và contract `POST /v1/responses/input_tokens` phải dùng cùng input surface của request inference.
