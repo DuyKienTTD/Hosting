@@ -1,7 +1,7 @@
 ---
 id: ttd-work-b2-j-idle-startup-001
 type: task
-status: prepared
+status: done
 approved_at: 2026-11-22
 updated_at: 2026-11-22
 sensitivity: public-redacted
@@ -55,3 +55,7 @@ Current Gate B `BLOCKED_PREFLIGHT`; live integration `NO_GO / BLOCKED_UID_OR_MOU
 `PASS:` one actionable, independently sourced and version-pinned startup state machine, read-only status/health semantics, exact failure/recovery table, synthetic test vectors and minimum future deployment/rollback gate, with line references and remaining uncertainties classified. Output a concise `GO/NO-GO` to ChatGPT with no production claims. Push PR, verify remote file/blob/diff. Codex B2-I continues separately.
 
 `HANDOFF:` from `chatgpt-work` to `chatgpt`, initial `PREPARED_FOR_OWNER_FORWARD` only. Work ACK must cite actual current rule/task SHA and access. ChatGPT will compare Work's recommendations to Codex B2-I results and decide the next **non-overlapping** Codex implementation step under delegated §10.
+
+## Final ChatGPT acceptance — 2026-11-22
+
+`WORK_B2_J_SOURCE_DESIGN_ACCEPTED / SOURCE_DESIGN_READY / LIVE_APPLY_READY_NO`. Independent Work report [on main](../reports/2026-11-22-work-b2-j-idle-startup-audit.md) merged in [PR #2](https://github.com/DuyKienTTD/Hosting/pull/2), commit `0d8c0f662dee4b203181cd3c0a73b69a928b1984`, exact report blob `7b84a1037cc8d0eb8af35b3f63b33aa4fbb2c639` remote verified. ChatGPT posted analytical review in PR conversation (connected account also author, GitHub self-APPROVE not allowed). Work task is `DONE` as a static audit; no fixture/live test was performed. ChatGPT authorizes Codex B2-L **source/mock only** to implement permitless writer idle/read-only health, with B2-K cross-service callback fixture kept independent. [Reviewer report](../reports/2026-11-22-work-b2-j-chatgpt-review.md). No production, real ledger/permit/provider or paid change.
