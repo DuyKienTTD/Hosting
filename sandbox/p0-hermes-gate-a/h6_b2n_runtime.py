@@ -2,6 +2,7 @@
 
 import argparse
 from copy import deepcopy
+from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
@@ -10,6 +11,7 @@ import secrets
 import shutil
 import subprocess
 import tempfile
+import time
 import uuid
 
 from h6_b2n_n8n_provenance import BASE, candidate, canonical, compare, sha
@@ -149,6 +151,44 @@ def validate(render, spec, path):
                 and data["target"] == spec["services"][role]["volumes"][1]["target"], "mount gate")
 
 
+def restart_active_hermes(cid, owner, entrypoint):
+    def inspect():
+        row, = json.loads(docker("inspect", cid))
+        require(row["Id"] == cid and row["Config"]["Labels"]["ttd.b2n.owner"] == owner
+                and row["Config"]["Labels"]["com.docker.compose.service"] == "hermes"
+                and row["Config"]["Entrypoint"] == entrypoint, "restart target outside fixture")
+        return row
+
+    def identity(row):
+        mount, = (m for m in row["Mounts"] if m["Destination"] == "/b2n-state")
+        require(mount["Type"] == "volume" and mount["RW"], "expected writable Hermes fixture volume")
+        return mount["Name"], mount["Source"], row["Image"], row["Config"]["Env"]
+
+    before = inspect()
+    require(before["State"]["Running"] and before["State"]["Pid"] > 0, "Hermes not running")
+    fault_utc = datetime.now(timezone.utc).isoformat()
+    started = time.monotonic()
+    docker("container", "kill", "--signal", "KILL", cid)
+    stopped = inspect()["State"]
+    require(not stopped["Running"] and stopped["ExitCode"] == 137 and not stopped["OOMKilled"],
+            "Hermes SIGKILL was not observed")
+    docker("container", "start", cid)
+    after = inspect()
+    old, new = before["State"], after["State"]
+    require(new["Running"] and new["Pid"] > 0 and old["Pid"] != new["Pid"]
+            and old["StartedAt"] != new["StartedAt"] and identity(before) == identity(after),
+            "Hermes restart or fixture identity not verified")
+    print("B2N_RUNTIME_ACTIVE_RESTART", json.dumps({
+        "method": "docker container kill --signal KILL; docker container start",
+        "entrypoint": "s6-setuidgid hermes /opt/hermes/.venv/bin/hermes gateway run --no-supervise --force",
+        "same_container": True, "same_datastore": True, "same_auth_environment": True, "same_image": True,
+        "fault_requested_utc": fault_utc, "exit_code": stopped["ExitCode"],
+        "stopped_utc": stopped["FinishedAt"], "started_utc": new["StartedAt"],
+        "pid_before": old["Pid"], "pid_after": new["Pid"],
+        "kill_to_start_inspect_s": round(time.monotonic() - started, 3),
+    }), flush=True)
+
+
 def run(args):
     require(args.projection == PROJECTION and compare(target_workflow(), target_workflow())[
         "candidate_projection_sha256"] == PROJECTION, "published workflow projection gate")
@@ -175,10 +215,12 @@ def run(args):
               "ports": 0, "own_volume_count": len(VOLUMES), "published_projection": PROJECTION}), flush=True)
         try:
             compose("up", "-d", "--no-build", "--pull", "never", timeout=90)
+            local_ids = {}
             for role in sorted(SERVICES):
                 cid = compose("ps", "-a", "-q", role).decode().strip()
                 require(re.fullmatch("[a-f0-9]{12,64}", cid), "local container missing")
                 row, = json.loads(docker("inspect", cid))
+                local_ids[role] = row["Id"]
                 host = row["HostConfig"]
                 mounts = {m["Destination"]: m for m in row["Mounts"] if m["Type"] != "tmpfs"}
                 private = row["NetworkSettings"]["Networks"]
@@ -192,11 +234,18 @@ def run(args):
             compose("exec", "-T", "driver", "python", "-B", "-c",
                     "assert all(r.split()[1] != '00000000' for r in open('/proc/net/route').readlines()[1:])")
             print("B2N_RUNTIME_ISOLATION_PASS", flush=True)
-            for stage in ("one", "two", "three"):
-                if stage != "one":
-                    compose("restart", "hermes" if stage == "two" else "receipt", timeout=45)
+            def drive(stage):
                 print(compose("exec", "-T", "driver", "python", "-B", "/b2n-src/h6_b2n_runtime_fixture.py",
                               stage, timeout=120).decode(), end="", flush=True)
+            if args.case == "active-restart":
+                drive("active-one")
+                restart_active_hermes(local_ids["hermes"], owner, spec["services"]["hermes"]["entrypoint"])
+                drive("active-two")
+            else:
+                for stage in ("one", "two", "three"):
+                    if stage != "one":
+                        compose("restart", "hermes" if stage == "two" else "receipt", timeout=45)
+                    drive(stage)
         except Exception:
             print(compose("logs", "--tail", "28", "hermes", "n8n", "receipt", timeout=15).decode(), flush=True)
             raise
@@ -214,4 +263,5 @@ def run(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--projection", required=True)
+    parser.add_argument("--case", choices=("full", "active-restart"), default="full")
     run(parser.parse_args())

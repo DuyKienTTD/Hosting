@@ -1,6 +1,7 @@
 """Network-internal provider recorder, receipt store and driver for B2-N."""
 
 from contextlib import closing
+from datetime import datetime, timezone
 from hashlib import sha256
 from http.client import HTTPConnection
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -74,26 +75,59 @@ class Provider(provider_mock.Handler):
             with closing(database()) as db:
                 self.send_json(200, {r["label"]: r["n"] for r in db.execute(
                     "SELECT label,count(*) AS n FROM dispatch GROUP BY label")})
+        elif self.path == "/active-observations" and self.headers.get("Authorization") == "Bearer " + ROUTE:
+            with closing(database()) as db:
+                dispatches = [r["time"] for r in db.execute("SELECT time FROM dispatch WHERE label='active'")]
+                events = dict(db.execute("SELECT event,time FROM active_event"))
+            self.send_json(200, {"dispatches": dispatches, "events": events})
         else:
             super().do_GET()
 
     def do_POST(self):  # noqa: N802
+        if self.path == "/release-active" and self.headers.get("Authorization") == "Bearer " + ROUTE:
+            if self.rfile.read(int(self.headers["Content-Length"])) != b"{}":
+                self.send_json(400, {})
+                return
+            with closing(database()) as db, db:
+                db.execute("BEGIN IMMEDIATE")
+                count, = db.execute("SELECT count(*) FROM dispatch WHERE label='active'").fetchone()
+                if count != 1 or db.execute("SELECT 1 FROM active_event").fetchone():
+                    self.send_json(409, {})
+                    return
+                db.execute("INSERT INTO active_event VALUES ('released',?)", (time.time(),))
+            self.send_json(201, {})
+            return
         if self.path != "/v1/responses" or not self.authorized():
             return super().do_POST()
         raw = self.rfile.read(int(self.headers["Content-Length"]))
-        needles = [label for label in DELAYS if ("B2N_" + label.upper()).encode() in raw]
+        needles = [label for label in (*DELAYS, "active") if ("B2N_" + label.upper()).encode() in raw]
         if len(needles) != 1:
             self.send_json(422, {"error": "unrecognized_fixture_request"})
             return
         label = needles[0]
         with closing(database()) as db, db:
             db.execute("INSERT INTO dispatch VALUES (?,?)", (label, time.time()))
-        time.sleep(DELAYS[label])
+        active = label == "active"
+        if active:
+            def released():
+                with closing(database()) as db:
+                    return db.execute("SELECT 1 FROM active_event WHERE event='released'").fetchone()
+            try:
+                wait_for(released, timeout=100)
+            except TimeoutError:
+                self.send_json(504, {"error": "fixture_release_timeout"})
+                return
+        else:
+            time.sleep(DELAYS[label])
         self.rfile = BytesIO(raw)
         try:
             super().do_POST()
+            event = "response_written"
         except (BrokenPipeError, ConnectionResetError):
-            pass
+            event = "response_connection_closed"
+        if active:
+            with closing(database()) as db, db:
+                db.execute("INSERT OR IGNORE INTO active_event VALUES (?,?)", (event, time.time()))
 
 
 class Receipt(BaseHTTPRequestHandler):
@@ -303,14 +337,107 @@ def phase_three():
                                "fake_dispatch_counts": counts(), "duplicate_receipts": 0})
 
 
+def active_observations():
+    code, body, _ = call("provider", "/active-observations", bearer=ROUTE)
+    assert code == 200
+    return body
+
+
+def utc(timestamp):
+    return datetime.fromtimestamp(timestamp, timezone.utc).isoformat()
+
+
+def active_run_status(run):
+    code, body, _ = call("hermes", "/v1/runs/" + run, bearer=ENGINE)
+    assert code == 200, code
+    return body["status"]
+
+
+def phase_active_one():
+    wait_for(lambda: call("hermes", "/health")[0] == 200)
+    started = time.monotonic()
+    (code, body, _), digest = submit("active")
+    assert code == 202 and not body.get("replayed", False)
+    run = body["run_id"]
+    wait_for(lambda: counts().get("active", 0) >= 1, timeout=15)
+    state = active_run_status(run)
+    observations = active_observations()
+    assert state == "running" and counts() == {"active": 1} and not observations["events"], (state, observations)
+    observed_at = time.time()
+    (DATA / "active.json").write_bytes(wire({"run": run, "request_sha256": digest, "started": started,
+                                           "observed_at": observed_at}))
+    report("ACTIVE_PRESTOP", {"http": code, "run_id_sha256": sha(run), "request_sha256": digest,
+                             "status": state, "dispatches": 1, "response_held": True,
+                             "dispatch_utc": utc(observations["dispatches"][0]), "observed_utc": utc(observed_at),
+                             "elapsed_from_submit_s": round(time.monotonic() - started, 3)})
+
+
+def phase_active_two():
+    wait_for(lambda: call("hermes", "/health")[0] == 200)
+    saved = json.loads((DATA / "active.json").read_bytes())
+    run = saved["run"]
+    recovered = active_run_status(run)
+    (code, body, _), digest = submit("active")
+    assert code == 202 and body["replayed"] is True and body["run_id"] == run
+    assert digest == saved["request_sha256"] and counts() == {"active": 1}
+    replayed = active_run_status(run)
+    assert recovered in ("running", "queued", "interrupted", "unknown", "failed"), recovered
+    assert replayed in ("running", "queued", "interrupted", "unknown", "failed"), replayed
+    replay_elapsed = round(time.monotonic() - saved["started"], 3)
+    receipt_event = event_for("active", run, digest, "outcome_unknown")
+
+    def callback_registered():
+        status, _, _ = callback(receipt_event, bearer="fixture-wrong")
+        if status == 404:
+            return False
+        assert status == 401, status
+        return True
+
+    wait_for(callback_registered)
+    receipt_http, receipt, _ = callback(receipt_event)
+    assert receipt_http == 200 and receipt["replayed"] is False
+    stored_at = time.time()
+    expected = [{"job": "active", "receipt": receipt["receipt"], "outcome": "outcome_unknown"}]
+    assert call("receipt", "/state", bearer=ROUTE)[1] == expected
+    assert active_observations()["events"] == {}
+    assert call("provider", "/release-active", {}, bearer=ROUTE)[0] == 201
+
+    def late_response():
+        observations = active_observations()
+        return observations if len(observations["events"]) == 2 else None
+
+    late = wait_for(late_response, timeout=10)
+    events = late["events"]
+    response_event, = events.keys() - {"released"}
+    assert stored_at <= events["released"] <= events[response_event] and len(late["dispatches"]) == 1
+    conflict, _, _ = callback(receipt_event | {"outcome": "mock_succeeded"})
+    assert conflict == 409
+    replay_http, replay_receipt, _ = callback(receipt_event)
+    assert replay_http == 200 and replay_receipt == {"receipt": receipt["receipt"], "replayed": True}
+    assert call("receipt", "/state", bearer=ROUTE)[1] == expected and counts() == {"active": 1}
+    after_late = active_run_status(run)
+    assert after_late == replayed, (replayed, after_late)
+    report("ACTIVE_RECOVERED", {"replay_http": code, "same_run_id": True, "run_id_sha256": sha(run),
+                               "request_sha256": digest, "replayed": True, "elapsed_to_replay_s": replay_elapsed,
+                               "hermes_status_after_start": recovered, "hermes_status_after_replay": replayed,
+                               "hermes_status_after_late_response": after_late, "dispatches": 1,
+                               "outcome": "outcome_unknown", "receipt": receipt["receipt"], "receipt_count": 1,
+                               "stored_utc": utc(stored_at), "provider_released_utc": utc(events["released"]),
+                               "provider_response_utc": utc(events[response_event]), "response_result": response_event,
+                               "late_callback_http": conflict, "wrong_bearer_http": 401,
+                               "same_receipt_replay_http": replay_http})
+
+
 if __name__ == "__main__":
     mode = sys.argv[1]
     if mode == "provider":
         provider_mock.token = lambda: UPSTREAM.encode()
-        initialize("CREATE TABLE IF NOT EXISTS dispatch(label TEXT NOT NULL, time REAL NOT NULL);")
+        initialize("CREATE TABLE IF NOT EXISTS dispatch(label TEXT NOT NULL, time REAL NOT NULL);"
+                   "CREATE TABLE IF NOT EXISTS active_event(event TEXT PRIMARY KEY, time REAL NOT NULL);")
         ThreadingHTTPServer(("0.0.0.0", 8082), Provider).serve_forever()
     elif mode == "receipt":
         initialize("CREATE TABLE IF NOT EXISTS jobs(job TEXT PRIMARY KEY, binding BLOB, receipt TEXT, outcome TEXT);")
         ThreadingHTTPServer(("0.0.0.0", 8083), Receipt).serve_forever()
     else:
-        {"one": phase_one, "two": phase_two, "three": phase_three}[mode]()
+        {"one": phase_one, "two": phase_two, "three": phase_three,
+         "active-one": phase_active_one, "active-two": phase_active_two}[mode]()

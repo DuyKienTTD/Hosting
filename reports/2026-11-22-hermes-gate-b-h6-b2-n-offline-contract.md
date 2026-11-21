@@ -11,7 +11,7 @@ owner: codex
 
 # H6 B2-N — Đối chiếu hợp đồng Hermes auxiliary và n8n
 
-> Phần đầu ghi mốc PR #5 tại `253a795`. Kết quả follow-up ở cuối báo cáo.
+> Kết quả hiện hành là **`B2N_ACTIVE_RESTART_FAKE_PASS`**. Phần đầu ghi mốc PR #5 tại `253a795`. Phép thử restart khi run đang chạy ở cuối báo cáo.
 
 **ACKNOWLEDGED / HERMES_SOURCE_PARITY_MATCH / BLOCKED_TARGET_PARITY.** ACK tại `08f3d18097e761311ac1aadaa524fa7ef77b438f`, scope B2-N tại `ef21231`, với AGENTS, Workflow §§7–10, security, STATE/CATALOG, hồ sơ Codex, task/ADR-P0-003, B2-H, B2-K và B2-M Codex/Work. B2-N do Codex thực thi trên branch riêng, ChatGPT nghiệm thu và tích hợp trạng thái. [Task](../tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md) · [B2-H](2026-11-22-hermes-gate-b-h6-b2-h-read-only.md) · [Work QA B2-M](2026-11-22-work-b2-m-independent-canary-qa.md).
 
@@ -63,3 +63,24 @@ Project `ttd-b2n-local` render đủ profile với image Hermes/n8n ghim, năm d
 | Rollback | Kiểm owner label của container, volume và network trước khi down, sau đó còn 0 tài nguyên project. Thư mục fixture local đã dọn. |
 
 Mốc 45 s là cutoff của driver local, chưa đo deadline hiệu lực ở Guard/Hermes trên tuyến KVM2. Ca Hermes restart ở trạng thái đã hoàn tất; chưa thử restart khi inference còn chạy. Tini có cảnh báo chuyển tín hiệu trong lượt restart. Run ID vẫn được đọc lại từ cùng volume sau khi tiến trình lên lại. n8n có truy vấn DNS catalog mặc định bị chặn trong network cô lập. Không chạy provider thật, không phát sinh chi phí và không ghi trên KVM2. `LIVE_INTEGRATION_NO_GO / BLOCKED_UID_OR_MOUNT / BLOCKED_PREFLIGHT`. Giao ChatGPT đối chiếu với Work trên PR #4, giữ kết quả ở phạm vi local fake-only.
+
+## Delta tại `6b0508e` — restart Hermes khi run đang chạy
+
+**ACKNOWLEDGED / `B2N_ACTIVE_RESTART_FAKE_PASS`.** ACK main `6b0508e840ff9c1dbe6da2cf992f1e02cc0e63aa` cho AGENTS, Workflow §§7–10, security, STATE/CATALOG, hồ sơ Codex, task và ADR-P0-003. Đối chiếu lại B2-H, report/evidence của Codex tại PR #5 `a19765f` và review Work PR #4 tại `c265340`. Dùng lại provenance n8n, các image pin và fixture B2-N. Chạy riêng ca restart đang hoạt động. [Evidence JSON](evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-n-offline-contract.json).
+
+```text
+python -X utf8 -B sandbox/p0-hermes-gate-a/h6_b2n_runtime.py --projection 08aa63bcfaf27f9ced2a5374ce67f4683877f615ed00dafea086f608321dde0d --case active-restart
+```
+
+Render đủ profile và kiểm lúc chạy trên Docker Desktop. Năm service dùng năm volume riêng và một bind chỉ đọc cho fixture. Network nội bộ, không IPv6, không host port, driver không có default route. Hermes đọc và ghi trong volume fixture `/b2n-state`. Runner so ID, image, entrypoint, mount và môi trường auth trước/sau. Chọn SIGKILL trực tiếp trên container fixture vì Tini từng báo không chuyển được tín hiệu khi restart mềm. Docker xác nhận exit 137 và PID của tiến trình init đổi từ 94385 sang 94974. [Docker kill](https://docs.docker.com/reference/cli/docker/container/kill/) · [Hermes Runs API](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server#runs-api-streaming-friendly-alternative).
+
+| Mốc UTC ngày 2026-11-21 | Quan sát |
+| --- | --- |
+| 21:12:26.826–21:12:27.002 | POST trả 202. Recorder commit chính xác một dispatch. Hermes trả `running` khi fake provider đang giữ phản hồi. Driver quan sát sau 4,177 s tính từ lúc submit. |
+| 21:12:27.197–21:12:27.554 | Docker dừng bằng SIGKILL rồi khởi động lại cùng container và datastore. Từ lúc gửi lệnh kill tới inspect sau start mất 0,672 s. |
+| Sau restart | Hermes trả `unknown` cho run cũ. Replay cùng body, Idempotency-Key và auth trả HTTP 202 với `replayed: true` và đúng run ID sau 10,686 s tính từ submit. Recorder vẫn 1. |
+| 21:12:37.920–21:12:38.124 | n8n candidate ghi một receipt `outcome_unknown` trước khi driver mở khóa phản hồi. Fake provider thử ghi lên kết nối cũ và gặp kết nối đã đóng. Hermes vẫn `unknown`. Driver gửi riêng callback thành công đến muộn, có cùng job/task/correlation/run/digest, qua n8n và nhận 409. Bearer sai nhận 401. Replay `outcome_unknown` nhận 200 với cùng receipt. SQLite vẫn đúng một receipt, recorder vẫn đúng một dispatch. |
+
+Trong fixture này, driver gọi Hermes trực tiếp và chủ động gửi callback đến n8n candidate. Lượt sau có thể nối H6 Guard và bridge vào cùng project giả, truyền run ID và request digest qua từng đoạn, ghi mốc monotonic ở admission, dispatch, deadline/unknown, callback và commit receipt. Sau đó thử phản hồi sát hoặc vượt từng budget để tìm thành phần cắt trước. Deadline xuyên tuyến và KVM2 chưa đo ở lượt này.
+
+Rollback đã kiểm owner label trước khi xóa. Còn 0 container, volume hoặc network của project. Lượt này truy cập KVM2, production, ledger/permit/key thật và provider API đều 0. Paid 0, USD 0. `LIVE_INTEGRATION_NO_GO / BLOCKED_UID_OR_MOUNT / BLOCKED_PREFLIGHT`. Giao ChatGPT nghiệm thu qua PR #5, `PREPARED_FOR_OWNER_FORWARD`.

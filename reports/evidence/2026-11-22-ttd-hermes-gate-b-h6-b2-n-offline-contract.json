@@ -1,7 +1,9 @@
 {
   "task_id": "ttd-hermes-gate-b-001",
   "stage": "H6_B2_N",
-  "result": "BLOCKED_TARGET_PARITY",
+  "current_status": "B2N_ACTIVE_RESTART_FAKE_PASS",
+  "historical_source_only_result": "BLOCKED_TARGET_PARITY",
+  "historical_source_only_commit": "253a795",
   "observed_date_ict": "2026-11-22",
   "approval_scope_commit": "ef21231",
   "ack_commit": "08f3d18097e761311ac1aadaa524fa7ef77b438f",
@@ -116,6 +118,88 @@
   "paid_gate_b": "BLOCKED_PREFLIGHT",
   "next_owner": "chatgpt",
   "handoff_state": "PREPARED_FOR_OWNER_FORWARD",
+  "active_restart": {
+    "result": "B2N_ACTIVE_RESTART_FAKE_PASS",
+    "approval_and_rules_ack_commit": "6b0508e840ff9c1dbe6da2cf992f1e02cc0e63aa",
+    "workflow_rule_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+    "pr_base_head": "a19765fa008a8fde4957689bf93954fbbb883690",
+    "command_case": "active-restart",
+    "fixture_platform": "linux/amd64 on Docker Desktop",
+    "image_digests": {
+      "hermes": "sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f",
+      "n8n": "sha256:9a8d8dcea75667496695d7810d7e1fe018a65efb36cc499d347f3931b3957b5d",
+      "python": "sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89"
+    },
+    "source_blobs": {
+      "sandbox/p0-hermes-gate-a/h6_b2n_runtime.py": "8251f562cee9ce70d8723d93a06a435172ad66aa",
+      "sandbox/p0-hermes-gate-a/h6_b2n_runtime_fixture.py": "8f87e4bbec06018353dd91fa47ef78a41ad8cfda"
+    },
+    "hermes_fixture_config_sha256": "1c13ad9e26fb2ee00c47815d920a9badb4798ae8dc05a1f7ce64c29a2e630694",
+    "reused_workflow_projection_sha256": "08aa63bcfaf27f9ced2a5374ce67f4683877f615ed00dafea086f608321dde0d",
+    "pre_up_all_profiles_validated": true,
+    "running_isolation_validated": true,
+    "host_ports": 0,
+    "network_internal_no_default_route_in_driver": true,
+    "fake_job": "active",
+    "run_id_sha256": "80abfc55374b624c9d6cf5688770857ce8555b8c0ccebef32e526bcb87d7fd8a",
+    "request_sha256": "fb272005f4930aca85e30425f6d5d6574bc8005e0e5dd97f6d5583876e3f8cd6",
+    "pre_stop": {
+      "admit_http": 202,
+      "hermes_status": "running",
+      "fake_dispatch_count": 1,
+      "response_held": true,
+      "dispatch_utc": "2026-11-21T21:12:26.826272+00:00",
+      "observed_utc": "2026-11-21T21:12:27.002070+00:00",
+      "elapsed_from_submit_s": 4.177
+    },
+    "fault": {
+      "method": "docker container kill --signal KILL; docker container start",
+      "gateway_entrypoint": "s6-setuidgid hermes /opt/hermes/.venv/bin/hermes gateway run --no-supervise --force",
+      "docker_init_pid_before": 94385,
+      "docker_init_pid_after": 94974,
+      "fault_requested_utc": "2026-11-21T21:12:27.113084+00:00",
+      "exit_code": 137,
+      "stopped_utc": "2026-11-21T21:12:27.196856192Z",
+      "started_utc": "2026-11-21T21:12:27.554312937Z",
+      "kill_to_start_inspect_s": 0.672,
+      "same_container_image_datastore_auth_environment": true
+    },
+    "recovery": {
+      "hermes_status_after_start": "unknown",
+      "hermes_status_after_replay": "unknown",
+      "hermes_status_after_late_response": "unknown",
+      "same_key_body_auth_http": 202,
+      "replayed": true,
+      "same_run_id": true,
+      "elapsed_from_submit_to_replay_s": 10.686,
+      "final_fake_dispatch_count": 1
+    },
+    "receipt_and_late_response": {
+      "driver_classification": "outcome_unknown",
+      "receipt_count": 1,
+      "receipt": "dca76075cff5cd88fb3d775203b663cdd8610a6c7fab5bcca5c639f8f7ae6bf4",
+      "stored_by_utc": "2026-11-21T21:12:37.920299+00:00",
+      "provider_released_utc": "2026-11-21T21:12:37.925396+00:00",
+      "provider_response_utc": "2026-11-21T21:12:38.124099+00:00",
+      "provider_response_result": "response_connection_closed",
+      "driver_injected_bound_late_success_callback_http": 409,
+      "wrong_bearer_http": 401,
+      "same_receipt_replay_http": 200,
+      "durable_receipt_unchanged": true
+    },
+    "rollback_pass": true,
+    "remaining_fixture_resources": 0,
+    "scope_counters": {
+      "kvm2_accesses": 0,
+      "production_accesses": 0,
+      "real_ledger_permit_key_accesses": 0,
+      "real_provider_api": 0,
+      "paid": 0,
+      "usd": 0
+    },
+    "next_owner": "chatgpt",
+    "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+  },
   "follow_up": {
     "result": "TARGET_PROJECTION_MATCH_AND_B2N_ISOLATED_FAKE_RUNTIME_PASS",
     "approval_and_ack_commit": "322a2c15be6688ec33c1b3d72336bbeee5196e05",
