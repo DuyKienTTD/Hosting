@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "task_id": "ttd-hermes-gate-b-001",
+  "handoff_id": "H3",
+  "rules_commit": "9f497608c65273f4ccf2dd9776042c8a3aa2ecf5",
+  "tested_commit": "fa320a2db83e805163e70b59689fa60aac807408",
+  "verified_at": "2026-11-21",
+  "combined_mock": {
+    "status": "VERIFIED_MOCK",
+    "exit_code": 0,
+    "fresh_task": true,
+    "task_id_sha256": "d333000e01716ff79627b72b6b4657a7f37326776d6497e12d220164cc4bc8dd",
+    "webhook_http": 200,
+    "authenticated_callback_http": 200,
+    "replay_http": 200,
+    "replayed": true,
+    "physical_mock_requests": 1,
+    "negatives_http": {"wrong_model": 422, "wrong_service_auth": 401, "changed_body": 503, "wrong_task": 503},
+    "negative_and_replay_dispatches": 0,
+    "provider_observed_permit_consumed_and_reservation": true,
+    "ledger_terminal_state": "usage_recorded",
+    "mock_usage": {"input_fixture_units": 3161, "output_fixture_units": 32, "reasoning_fixture_units": 0, "simulated_cost_usd": 0.0003321}
+  },
+  "fingerprint": {
+    "mock_forwarded_bytes": 3345,
+    "mock_forwarded_sha256": "b91dcdc70d817d8160addca43d9b81e0b298ca6bf921c18730e6c49dc2a0203a",
+    "provider_request_and_permit_digest_match": true,
+    "count_projection_fields": ["model", "input", "instructions", "reasoning"],
+    "mock_count_projection_sha256": "d0c265d9db977f01352ac0ead7a65e8f61b2bfaf7cbdd2ac52697773dd92f7b0",
+    "openai_input_tokens": null,
+    "openai_count_called": false
+  },
+  "network": {
+    "status": "VERIFIED_LIVE",
+    "guard_and_proxy_only_on_private_network_after_recreate_and_rollback": true,
+    "proxy_denied_by_alias_and_two_ipv4_addresses": ["bridge", "hermes_auxiliary", "provider_mock", "n8n_sandbox", "hermes_production", "n8n_production"],
+    "guard_to_proxy_http_after_rollback": 200,
+    "sandbox_public_port_bindings": 0,
+    "rollback_exit": 0,
+    "compose_base_bytes_unchanged": true
+  },
+  "production": {"n8n_health_http_after": 200, "hermes_health_http_after": 200, "restart_counts_before_after": [0, 0]},
+  "paid_preflight": {
+    "result": "BLOCKED_PREFLIGHT",
+    "credential": "BLOCKED_CREDENTIAL",
+    "guard_provider_scope_project_and_billing_verified": false,
+    "verified_provider_token_count": false,
+    "real_ledger_sha256_equal_before_after": true,
+    "real_ledger_attempts": 1,
+    "real_ledger_permits": 0,
+    "global_kill_switch": true,
+    "paid_attempts_delta": 0,
+    "api_cost_delta_usd": 0
+  },
+  "handoff": {"from": "codex", "to": "chatgpt", "state": "PREPARED_FOR_OWNER_FORWARD"}
+}
