@@ -2,6 +2,9 @@
 
 ## 2026-11-21
 
+- Mở rộng hồ sơ Hostinger Agent theo account inventory 2026-11-21; ghi nhận Cloud Startup/WordPress, VPS, Docker/AI, domains, email, Reach và giới hạn quyền filesystem.
+- Liên kết báo cáo `reports/2026-11-21-hostinger-account-capability-inventory.md` vào catalog, danh bạ và trạng thái chung; giữ mâu thuẫn OpenClaw vs `u4s-hermes-agent` ở trạng thái chưa xác minh.
+
 - Thêm `reports/2026-11-21-hermes-capability-survey.md`, cập nhật `agents/hermes.md`, `CATALOG.yaml` và `STATE.md` cho khảo sát bổ sung theo task `TTD-AGENT-CAPABILITY-SURVEY-001`.
 - Ghi nhận rõ khác biệt giữa Hermes WebUI session và Hermes VPS container `0.22.5`; xác minh lại GitHub write, skills/memory/session recall và giữ trạng thái BLOCKED/UNKNOWN cho inference API, n8n MCP và connector business.
 - Hoàn tất khảo sát Codex theo `TTD-AGENT-CAPABILITY-SURVEY-001`; ghi rõ runtime, local/Git/browser/hPanel/VPS permissions, n8n/Hermes evidence, background limits và approval boundaries.
