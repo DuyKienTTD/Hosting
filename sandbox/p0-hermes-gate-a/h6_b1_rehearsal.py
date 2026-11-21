@@ -247,10 +247,15 @@ def confirm_owned(root, project, mounts, complete=False):
 
 
 def verify_runtime(index, network, config, image):
+    require(set(network["Containers"]) == {index[name]["Id"] for name in ("guard", "provider-mock")},
+            "unexpected internal network membership")
     for name, container in index.items():
         spec = config["services"][name]
         host = container["HostConfig"]
         mode = "none" if name == "h6-writer" else network["Name"]
+        attached = set(container["NetworkSettings"]["Networks"] or {})
+        require(attached in (set(), {"none"}) if mode == "none" else attached == {mode},
+                f"unexpected live network attachments for {name}")
         require(container["Image"] == image["Id"] and container["Config"]["Entrypoint"] == spec["entrypoint"]
                 and container["Config"]["User"] == spec.get("user", image["Config"]["User"])
                 and container["Config"]["Healthcheck"]["Test"] == spec["healthcheck"]["test"]
@@ -336,7 +341,7 @@ def run(root):
     mounts = plan(root, project, config, before)
     require(mounts == prepared["mounts"], "reviewed mounts changed")
     image = json.loads(docker("image", "inspect", IMAGE))[0]
-    require(set(image["Config"]["Volumes"] or {}) == {"/opt/data"} and not image["Config"]["ExposedPorts"]
+    require(set(image["Config"]["Volumes"] or {}) == {"/opt/data"} and not image["Config"].get("ExposedPorts")
             and clean_environment(image["Config"]["Env"]), "unexpected pinned image defaults")
     sys.path.insert(0, str(root / "src"))
     from h6_stage_a_test import BODY
