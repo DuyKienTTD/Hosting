@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- Hoàn tất đồng bộ entrypoint README và hồ sơ ChatGPT/Codex với quy tắc Continuous Task Execution (AGENT_WORKFLOW mục 9). Phạm vi chỉ tài liệu điều phối; không thay task GATE B, approval, state VPS hoặc runtime. Phân biệt Codex REPORTED preflight với VERIFIED_LIVE bằng chứng.
+
 - Bổ sung mục 9 của AGENT_WORKFLOW về **thực thi liền mạch theo kết quả**: tiếp tục mặc định với phần việc đã được phép, không coi preflight chưa làm là blocker; STOP thao tác rủi ro khi thiếu điều kiện, handoff theo sự kiện và tái sử dụng evidence. Đồng bộ AGENTS.md/CATALOG.yaml; không cấp thêm quyền production/paid và không khẳng định runtime 24/7.
 
 - Tạo checkpoint GATE B tại điểm dừng guard mount: Codex mới đối chiếu approval/overlay từ GitHub, chưa đọc đủ rules, chưa xác minh live Compose/backup/rollback nên chưa recreate guard. Giữ nguyên H3/H4 evidence PASS và giới hạn owner phê duyệt; GATE B `BLOCKED_PREFLIGHT`. [Checkpoint](reports/2026-11-21-hermes-gate-b-guard-mount-paused-checkpoint.md).
