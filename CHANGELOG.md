@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- Chủ dự án phê duyệt **Mức 1** của ADR-P0-001: Codex được tiếp tục kỹ thuật sandbox n8n ↔ Hermes với inference runtime cô lập và một authenticated webhook, có preflight/backup/rollback. Mức 2 (provider/model, cost cap, paid inference) và thay đổi gây downtime/public production vẫn chưa được phê duyệt. Chưa có thay đổi VPS do ChatGPT thực hiện tại bước ghi nhận này.
+
 - Lập ADR-P0-001 ở trạng thái PROPOSED sau P0 network PASS/E2E BLOCKED: Hermes inference cô lập, n8n authenticated webhook, nghiên cứu provider/model và cost cap; chưa phê duyệt hay thay production.
 
 - Triển khai network-only P0 `ttd-ai-p0-sandbox` ở chế độ internal, gắn live n8n/Hermes bằng private DNS; health, negative auth và rollback preparation PASS, không restart/downtime/public port/firewall change và không gọi paid API.
