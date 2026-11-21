@@ -1,7 +1,7 @@
 ---
 id: ttd-ai-p0-level2-001
 type: task
-status: approved_to_execute
+status: blocked
 updated_at: 2026-11-21
 approved_at: 2026-11-21
 approval_level: 2
@@ -9,6 +9,7 @@ sensitivity: public
 owner: codex
 support: [hermes, hostinger-agent]
 depends_on: [ttd-ai-p0-integration-001]
+result: provider_pass_hermes_blocked_cost_control
 ---
 
 # TTD-AI-P0-LEVEL2-001 — Kiểm thử GPT-6 Luna và nghiệm thu Hermes E2E
@@ -74,3 +75,10 @@ Tạo báo cáo **riêng cho Mức 2** `reports/2026-11-21-n8n-hermes-p0-level2-
 - Cập nhật `STATE.md`, `CATALOG.yaml`, `CHANGELOG.md`, báo cáo và code (không secret). Nếu không thể push thì `NOT_PUSHED`.
 
 Không tự kết luận P0 toàn bộ complete nếu Hermes Agent E2E vẫn chưa PASS.
+
+## Kết quả thực thi
+
+- `PROVIDER_E2E_PASS`: đúng 1 live GPT-6 Luna call, 131 input + 73 output + 0 reasoning token, usage-based cost USD 0,0000496; authenticated callback/schema, replay và conflict đều PASS.
+- `HERMES_E2E_BLOCKED_COST_CONTROL`: Hermes CLI thật chưa chứng minh hard max output trước request và runtime chính không có private inference callback route; không phát sinh Hermes paid call.
+- Kill switch persistent đã bật sau test; request mới bị chặn trước provider. Production health HTTP 200, restart 0.
+- [Báo cáo Mức 2](../reports/2026-11-21-n8n-hermes-p0-level2-results.md) và [evidence JSON](../reports/evidence/2026-11-21-ttd-ai-p0-level2-001.json).

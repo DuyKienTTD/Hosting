@@ -2,6 +2,10 @@
 
 ## 2026-11-21
 
+- Hoàn tất Mức 2 Provider E2E trên sandbox: đúng 1 GPT-6 Luna call, authenticated n8n callback/schema PASS, 131 input + 73 output + 0 reasoning token, usage-based cost USD 0,0000496; replay/conflict không phát sinh call mới.
+- Thêm persistent atomic ledger, allowlist CONNECT proxy và kill switch đã bật; task mới bị chặn trước provider, không public port/firewall/DNS/production change, n8n/Hermes production restart 0.
+- Ghi `HERMES_E2E_BLOCKED_COST_CONTROL`: Hermes CLI thật chưa chứng minh hard output cap trước request và chưa có private inference callback route; không dùng Provider PASS làm bằng chứng Hermes.
+
 - Chủ dự án phê duyệt Mức 2 GPT-6 Luna: ≤5 paid calls, ≤4K input + 2K output tokens/call, hard target USD 0.05/ngày và USD 0.05 tổng P0, fake data; dừng nếu không kiểm soát được chi phí/quyền. Tạo task Codex `TTD-AI-P0-LEVEL2-001`, nghiệm thu provider E2E và Hermes Agent E2E độc lập; chưa có bằng chứng live paid inference.
 
 - Phân biệt provider E2E và Hermes Agent E2E trong [review P0 Mức 1](reports/2026-11-21-p0-level1-review-and-level2-criteria.md); GPT-6 Luna model/pricing đã đối chiếu tài liệu OpenAI, Mức 2 vẫn chưa được duyệt.

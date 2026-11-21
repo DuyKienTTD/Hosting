@@ -35,7 +35,9 @@ sensitivity: public-redacted
 - Đã xác minh n8n `2.45.7` và Hermes `0.22.5`; cả hai health/readiness PASS, 0 restart/OOM và có thể chạm nhau hai chiều qua host bridge.
 - P0 Mức 1 đã triển khai hai runtime phụ cô lập trên `ttd-ai-p0-sandbox`: n8n sandbox có đúng một authenticated webhook và reasoner deterministic mock không provider/Internet egress.
 - Structural E2E 9/9, negative auth, schema, callback, timeout/retry/idempotency và rollback/restore đều PASS. Production n8n/Hermes không restart, downtime 0, public port/firewall/DNS không đổi và paid inference call bằng 0.
-- AI reasoning thật vẫn **CHƯA KIỂM THỬ**; Mức 2 đã phê duyệt nhưng chưa có báo cáo thực thi; n8n production MCP vẫn tắt, production có 0 workflow và Hermes chính vẫn không expose inference API. [Review Mức 1/2](reports/2026-11-21-p0-level1-review-and-level2-criteria.md) phân biệt **provider E2E** (adapter gọi GPT-6 Luna) và **Hermes E2E** (n8n giao việc cho Hermes Agent thật); provider-only PASS chưa đủ nghiệm thu mục tiêu n8n↔Hermes.
+- Mức 2 đã chạy: **Provider E2E PASS** qua GPT-6 Luna với đúng 1 paid attempt, 131 input + 73 output + 0 reasoning token và usage-based cost USD 0,0000496; authenticated callback, schema, replay và kill switch đều PASS. [Báo cáo Mức 2](reports/2026-11-21-n8n-hermes-p0-level2-results.md).
+- **Hermes Agent E2E vẫn BLOCKED_COST_CONTROL**: CLI thật chưa chứng minh hard max output trước request và Hermes chính không expose private inference callback API. Provider adapter không được tính là Hermes; P0 tổng thể vẫn PARTIAL.
+- Kill switch persistent hiện bật, chặn task paid mới bằng HTTP 429; n8n production MCP vẫn tắt và production có 0 workflow.
 - Kiến trúc được khuyến nghị: n8n làm control plane, Hermes reasoning qua API private, một internal Docker network, schema/policy/approval gate và media-worker FFmpeg riêng.
 
 ## Khảo sát năng lực và phối hợp các tác nhân
@@ -51,10 +53,10 @@ sensitivity: public-redacted
 ## Định danh resource và tích hợp P0
 
 - [TTD-RESOURCE-IDENTITY-001](tasks/2026-11-21-ttdnew-resource-identity-verification.md) đã complete: U4S `ttdnew.tech` và KVM 2 là hai runtime độc lập.
-- [TTD-AI-P0-INTEGRATION-001](tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md) có kết quả `LEVEL1_PASS / PARTIAL`: sandbox workflow/callback đã PASS; real model inference còn chờ Mức 2. Xem [báo cáo P0](reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md).
-- Không thay U4S, account business, public port/firewall hoặc credential; downtime 0 và chi phí API 0.
+- [TTD-AI-P0-INTEGRATION-001](tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md) có kết quả `LEVEL1_PASS / PROVIDER_E2E_PASS / HERMES_E2E_BLOCKED`: sandbox workflow/callback và real GPT-6 Luna inference đã PASS; Hermes Agent route chưa đạt. Xem [báo cáo P0 Mức 1](reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md) và [Mức 2](reports/2026-11-21-n8n-hermes-p0-level2-results.md).
+- Không thay U4S, account business, public port/firewall hoặc production credential; downtime production 0. Paid usage Mức 2 là USD 0,0000496 theo response usage, chưa đối soát invoice.
 
-- [ADR-P0-001](decisions/2026-11-21-p0-reasoning-integration-proposal.md) đã **APPROVED_WITH_RESTRICTIONS**: Mức 1 PASS; chủ dự án phê duyệt Mức 2 chỉ cho `gpt-6-luna`, tối đa 5 calls, 4K input + 2K output/call, trần USD 0.05/ngày và USD 0.05 tổng, fake data. [Task Codex Mức 2](tasks/2026-11-21-n8n-hermes-p0-level2-real-inference.md) đã được giao, thực thi/real inference chưa xác minh.
+- [ADR-P0-001](decisions/2026-11-21-p0-reasoning-integration-proposal.md) đã **APPROVED_WITH_RESTRICTIONS**: Mức 1 PASS; Mức 2 Provider PASS trong cap; [task Mức 2](tasks/2026-11-21-n8n-hermes-p0-level2-real-inference.md) hiện `blocked` riêng ở Hermes hard cost control.
 
 ## Việc đang chờ
 
@@ -62,7 +64,7 @@ sensitivity: public-redacted
 - Chưa đặt n8n/Hermes sau reverse proxy HTTPS.
 - Chưa xử lý các backup Hostinger có thể chứa ứng dụng đã xóa.
 - Chưa cập nhật hệ điều hành hoặc reboot.
-- Đã phê duyệt **Mức 2** và giao Codex kiểm thử có kiểm soát; chờ evidence provider E2E và Hermes Agent E2E **riêng biệt**. Không gọi API nếu không bảo đảm cost cap, token limit hoặc quyền truy cập; chưa xác minh đã cấp key/mở provider egress/chạy inference. n8n MCP toàn instance không cần bật cho phương án hiện tại.
+- Provider E2E đã có evidence. Muốn tiếp tục Hermes Agent E2E cần runtime phụ có hard `max_output_tokens<=2000`, exact model, tools disabled, budget reservation trước request và authenticated callback; không được dùng adapter OpenAI trực tiếp để thay bằng chứng Hermes.
 - Chưa kết nối/xác minh Google Ads, GA4, WordPress/WooCommerce, YouTube, TikTok, Meta, Kling, HeyGen hoặc ElevenLabs.
 
 ## Tài liệu tiếp theo

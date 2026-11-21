@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "task_id": "ttd-ai-p0-level2-001",
+  "verified_at": "2026-11-21",
+  "result": "partial",
+  "provider_e2e": {
+    "status": "PASS",
+    "route": ["n8n-sandbox", "private-provider-adapter", "allowlist-connect-proxy", "openai-responses-api", "authenticated-n8n-callback"],
+    "provider": "openai",
+    "requested_model": "gpt-6-luna",
+    "response_model": "gpt-6-luna",
+    "service_tier": "default",
+    "structured_output": "json_schema",
+    "tools_enabled": false,
+    "fake_data_only": true,
+    "paid_attempts": 1,
+    "usage": {
+      "input_tokens": 131,
+      "cached_input_tokens": 0,
+      "output_tokens": 73,
+      "reasoning_tokens": 0
+    },
+    "cost_usd": {
+      "actual_usage_based": 0.0000496,
+      "reserved_worst_case": 0.0035,
+      "approved_daily_cap": 0.05,
+      "approved_total_cap": 0.05,
+      "provider_invoice_confirmed": false
+    },
+    "callback_http_status": 200,
+    "callback_schema": "pass",
+    "result_hash": "2619668a01837c789366ef581d5009f0f053db2279781374fc5eeb67baed946d",
+    "provider_response_id_hash": "e2b6af8620674547a656dc17713c986c91706b0422926b8fb31ce86c5aa35459",
+    "negative_and_replay_tests": [
+      {"case": "missing_auth", "http": 401, "result": "pass", "paid_call": false},
+      {"case": "wrong_auth", "http": 401, "result": "pass", "paid_call": false},
+      {"case": "invalid_schema", "http": 422, "result": "pass", "paid_call": false},
+      {"case": "idempotent_replay", "http": 200, "result": "pass", "additional_paid_call": false},
+      {"case": "idempotency_conflict", "http": 409, "result": "pass", "additional_paid_call": false},
+      {"case": "kill_switch_new_task", "http": 429, "error": "P0_KILL_SWITCH", "result": "pass", "additional_paid_call": false}
+    ]
+  },
+  "cost_control": {
+    "persistent_atomic_ledger": true,
+    "exclusive_file_lock": true,
+    "reservation_before_dispatch": true,
+    "automatic_provider_retry": false,
+    "max_calls": 5,
+    "max_input_tokens_per_call": 4000,
+    "approved_max_output_tokens_per_call": 2000,
+    "live_max_output_tokens": 600,
+    "concurrency_test": {"requests": 10, "admitted": 5, "blocked": 5, "reserved_usd": 0.0175},
+    "final_ledger": {"attempts": 1, "reserved_usd": 0.0035, "actual_usd": 0.0000496, "kill_switch": true}
+  },
+  "hermes_e2e": {
+    "status": "BLOCKED_COST_CONTROL",
+    "paid_attempts": 0,
+    "real_hermes_cli_present": true,
+    "private_inference_callback_api_verified": false,
+    "hard_max_output_tokens_before_request_verified": false,
+    "usage_report_available_only_after_run": true,
+    "provider_adapter_counted_as_hermes": false,
+    "stop_condition_honored": true
+  },
+  "sandbox": {
+    "auxiliary_services_healthy": true,
+    "public_ports_added": 0,
+    "private_network_internal": true,
+    "egress_proxy_only_attachment_on_egress_network": true,
+    "egress_allow_target": "api.openai.com:443",
+    "non_provider_egress_denied": true,
+    "secret_file_mode": "600",
+    "state_directory_mode": "700",
+    "secret_values_recorded": false,
+    "backup_present": true,
+    "rollback_syntax": "pass"
+  },
+  "production_safety": {
+    "n8n_readiness_http": 200,
+    "hermes_dashboard_http": 200,
+    "n8n_restart_count": 0,
+    "hermes_restart_count": 0,
+    "production_restart_or_recreate": false,
+    "production_credential_or_encryption_change": false,
+    "firewall_change": false,
+    "dns_change": false,
+    "public_port_change": false,
+    "business_connector_calls": 0
+  }
+}

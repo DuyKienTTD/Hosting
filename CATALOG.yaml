@@ -245,10 +245,28 @@ documents:
   - id: ttd-ai-p0-level2-001
     path: tasks/2026-11-21-n8n-hermes-p0-level2-real-inference.md
     type: task
-    status: approved_to_execute
+    status: blocked
     authoritative_for: codex-gpt6-luna-level2-pilot-and-dual-e2e-acceptance
     updated_at: 2026-11-21
     sensitivity: public
+
+  - id: n8n-hermes-p0-level2-results-2026-11-21
+    path: reports/2026-11-21-n8n-hermes-p0-level2-results.md
+    type: report
+    status: current
+    authoritative_for: level2-provider-e2e-pass-and-hermes-cost-control-blocker-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-ai-p0-level2-001-evidence
+    path: reports/evidence/2026-11-21-ttd-ai-p0-level2-001.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-machine-readable-evidence-for-ttd-ai-p0-level2-001
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
 
 collections:
   agents: verified agent role profiles and capability evidence
