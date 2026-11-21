@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- Chủ dự án phê duyệt Mức 2 GPT-6 Luna: ≤5 paid calls, ≤4K input + 2K output tokens/call, hard target USD 0.05/ngày và USD 0.05 tổng P0, fake data; dừng nếu không kiểm soát được chi phí/quyền. Tạo task Codex `TTD-AI-P0-LEVEL2-001`, nghiệm thu provider E2E và Hermes Agent E2E độc lập; chưa có bằng chứng live paid inference.
+
 - Phân biệt provider E2E và Hermes Agent E2E trong [review P0 Mức 1](reports/2026-11-21-p0-level1-review-and-level2-criteria.md); GPT-6 Luna model/pricing đã đối chiếu tài liệu OpenAI, Mức 2 vẫn chưa được duyệt.
 
 - Hoàn tất P0 Mức 1 trên KVM 2: triển khai n8n sandbox độc lập và reasoner mock cô lập trên internal network, đúng một authenticated webhook, structural E2E 9/9 và rollback/restore PASS.
