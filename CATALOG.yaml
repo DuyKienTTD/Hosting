@@ -175,6 +175,14 @@ documents:
     updated_at: 2026-11-21
     sensitivity: public-redacted
 
+  - id: hostinger-account-capability-inventory-2026-11-21
+    path: reports/2026-11-21-hostinger-account-capability-inventory.md
+    type: report
+    status: current
+    authoritative_for: hostinger-account-resources-and-supported-operations-as-of-2026-11-21
+    updated_at: 2026-11-21
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
