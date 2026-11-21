@@ -37,7 +37,9 @@ def main() -> None:
         assert ledger["attempts"] == adapter.MAX_CALLS
         assert ledger["reserved_usd"] == round(adapter.MAX_CALLS * adapter.RESERVE_USD_PER_ATTEMPT, 8)
         assert ledger["reserved_usd"] < adapter.TOTAL_CAP_USD
-        decision, _ = adapter.admit("task-0", "fingerprint-0")
+        existing_id = next(iter(ledger["tasks"]))
+        existing_index = existing_id.removeprefix("task-")
+        decision, _ = adapter.admit(existing_id, f"fingerprint-{existing_index}")
         assert decision == "existing"
         print(json.dumps({"suite": "p0_level2_admission", "pass": True, "admitted": results.count("admitted"), "blocked": len(results) - results.count("admitted"), "attempts": ledger["attempts"], "reserved_usd": ledger["reserved_usd"]}, separators=(",", ":")))
 
