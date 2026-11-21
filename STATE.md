@@ -70,7 +70,7 @@ sensitivity: public-redacted
 
 - [TTD-HERMES-GATE-B-GUARD-REMEDIATION-001](tasks/2026-11-21-hermes-gate-b-permit-ledger-remediation.md) đã **MOCK_INTEGRATION_PASS**: shared-lock interop, 20-process race, 14 fault cases và full mock E2E qua n8n→Hermes→guard→callback PASS. Sandbox đã rollback, production health 200/restart 0, ledger thật 1 attempt/kill switch ON và không đổi, paid calls mới 0. [Báo cáo nghiệm thu](reports/2026-11-21-hermes-gate-b-guard-remediation-results.md). Paid GATE B vẫn BLOCKED_PREFLIGHT, cần preflight live riêng.
 
-- GATE B paid execution vẫn `BLOCKED_PREFLIGHT`: cần kiểm tra lại live provider/account pricing, authorization, paid route và contract fingerprint trước bất kỳ paid attempt nào. [Báo cáo nghiệm thu mock](reports/2026-11-21-hermes-gate-b-guard-remediation-results.md).
+- GATE B paid vẫn `BLOCKED_PREFLIGHT`. Đã xác minh giá Standard và Luna được phép tại project đã xem. Fingerprint toàn bộ body và hạch toán response/timeout PASS trên mock. Live bridge vẫn truy cập được proxy Level 2, còn guard chưa có tuyến paid riêng. Quyền Responses của credential dành cho guard và số input tokens theo provider chưa được chứng minh. Ledger thật giữ 1 attempt, 0 permit, kill switch ON. Không phát sinh paid attempt hoặc chi phí. [Báo cáo kiểm tra lại](reports/2026-11-21-hermes-gate-b-preflight-recheck.md).
 
 - Chưa thực hiện hardening SSH/XRDP hoặc firewall.
 - Chưa đặt n8n/Hermes sau reverse proxy HTTPS.

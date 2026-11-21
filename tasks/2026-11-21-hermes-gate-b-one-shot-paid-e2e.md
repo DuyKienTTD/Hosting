@@ -57,3 +57,7 @@ Codex lưu `reports/2026-11-21-hermes-gate-b-paid-results.md` và JSON evidence 
 ## Kết quả preflight 2026-11-21
 
 `BLOCKED_PREFLIGHT`: guard GATE A chưa có atomic scoped one-shot permit/consume/relock và worst-case reservation. Không thực hiện paid request; xem [báo cáo](../reports/2026-11-21-hermes-gate-b-paid-results.md). Approval vẫn giới hạn tối đa một attempt sau khi toàn bộ gate được chứng minh.
+
+## Kiểm tra lại sau remediation
+
+**BLOCKED_PREFLIGHT.** Fingerprint của toàn bộ byte gửi đi và hạch toán sau response, timeout hoặc stream bị cắt đã PASS với guard và provider mock trên Linux. Live bridge chạm được proxy Level 2 cũ, guard chưa có paid route riêng và chưa xác minh quyền Responses của credential dành cho guard hoặc số input tokens của request cuối theo provider. Ledger thật giữ 1 attempt, 0 permit và kill switch ON trước/sau. Paid dispatch mới 0. [Báo cáo tổng hợp](../reports/2026-11-21-hermes-gate-b-preflight-recheck.md) · [Evidence](../reports/evidence/2026-11-21-ttd-hermes-gate-b-preflight-recheck.json).

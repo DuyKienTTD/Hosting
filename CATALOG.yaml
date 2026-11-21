@@ -424,6 +424,24 @@ documents:
     verified_at: 2026-11-21
     sensitivity: public-redacted
 
+  - id: hermes-gate-b-preflight-recheck-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-preflight-recheck.md
+    type: report
+    status: blocked
+    authoritative_for: Gate-B-current-paid-preflight-and-wire-contract-mock
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-preflight-recheck-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-preflight-recheck.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-Gate-B-live-preflight-and-mock-evidence
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria

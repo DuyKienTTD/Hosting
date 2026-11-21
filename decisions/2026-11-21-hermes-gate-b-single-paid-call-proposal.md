@@ -52,6 +52,8 @@ Chỉ **một** fake-data task, tối đa **một physical paid attempt**. Dừn
 
 Preflight thực thi ghi `BLOCKED_PREFLIGHT / 0 paid attempt`: [báo cáo](../reports/2026-11-21-hermes-gate-b-paid-results.md). Atomic one-shot permit và reservation chưa được chứng minh trên runtime hiện có; chưa có GATE B paid E2E PASS.
 
+Kiểm tra lại sau remediation vẫn **BLOCKED_PREFLIGHT**, với 0 paid attempts mới. One-shot, fingerprint toàn bộ body và hạch toán đã chạy trên mock. Live bridge truy cập được proxy Level 2, guard chưa có paid route riêng, quyền provider của guard và số token theo provider của body cuối chưa được chứng minh. [Báo cáo mới nhất](../reports/2026-11-21-hermes-gate-b-preflight-recheck.md).
+
 ## Bàn giao Codex sau thực thi
 
 Codex tạo `reports/2026-11-21-hermes-gate-b-paid-results.md` và evidence JSON redacted, cập nhật ADR/task/STATE/CATALOG/CHANGELOG, ghi rõ STOP/PASS và commit.
