@@ -303,3 +303,57 @@ Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và s�
 - **Task mẹ vẫn `status: blocked` / `GATE_B_PAID=BLOCKED_PREFLIGHT`. Mount thành công chỉ gỡ một dependency; chưa xác minh OpenAI project/key scope, Responses capability, billing/quota, giá model, canonical guard-forwarded request và provider token count gắn cùng digest; chưa có paid Hermes E2E.
 - **NEXT PHASE (độc lập, chưa thực hiện trong review):** nghiên cứu và kiểm chứng provider preflight **không phát sinh paid inference** theo ADR-P0-003. Chỉ dùng các phép kiểm tra provider nếu được phép ở phạm vi bước đó; không suy diễn approval mount bao gồm quyền gọi provider. Giữ nguyên provider mock, real ledger/permit/kill switch và production cho đến khi gate tương ứng được nghiệm thu.
 - `from_agent: codex`, `to_agent: chatgpt`, `handoff_state: DONE_RECEIVED_AND_REVIEWED`; evidence source: GitHub report/evidence, không phải ChatGPT live VPS probe.
+
+## Handoff H5 — Provider preflight sau GUARD_MOUNT_ACCEPTED (2026-11-22)
+
+**HANDOFF_SCOPE: ONLY_PROVIDER_PREFLIGHT / NO_PAID_INFERENCE.** Đây là lượt tiếp theo của `ttd-hermes-gate-b-001`, không tạo task khác. `GUARD_MOUNT_PASS` từ [báo cáo live ngày 22/11](../reports/2026-11-22-hermes-gate-b-guard-mount-results.md) và [evidence](../reports/evidence/2026-11-22-ttd-hermes-gate-b-guard-mount.json) đã được ChatGPT `DONE_RECEIVED_AND_REVIEWED`. **Paid GATE B vẫn `BLOCKED_PREFLIGHT`; không được dispatch trong H5.**
+
+### H5 — Phiếu giao nhận bắt buộc (mục 7.3)
+
+- `task_id: ttd-hermes-gate-b-001`
+- `handoff_id: H5_PROVIDER_PREFLIGHT`
+- `from_agent: chatgpt`
+- `to_agent: codex` — **owner duy nhất của đầu ra H5**, được chọn vì có năng lực đã kiểm chứng về KVM2 Web Terminal/Browser, Docker, mã Guard, ledger và tích hợp API.
+- `support: hermes` chỉ khi cần giải thích request serialization/runtime khác với [H2](../reports/2026-11-21-gate-b-hermes-consult.md); `support: hostinger-agent` chỉ khi có blocker thuộc hPanel/VPS control plane. Các agent hỗ trợ không thay owner hoặc tự thay task mẹ.
+- `objective: PROVIDER_PREFLIGHT_PASS` với chính xác model/project/scope, frozen final forwarded request + digest, provider token count, giá và budget upper bound, one-shot readiness; **0 paid inference requests**, 0 live permit và 0 thay đổi production.
+- `first_action:` trong phiên Codex có browser/terminal KVM2 đã xác thực, ACK rule commit hiện hành rồi **chỉ đọc** Guard runtime và H5 input evidence, xác minh mock upstream vẫn giữ nguyên và mount metadata Guard-only không drift; đối chiếu mã tạo forwarded request/guard enforcement, phương thức lưu permit và status của ledger trước khi gọi bất kỳ provider endpoint nào.
+- `inputs_and_urls:` task này, ADR-P0-003, H2 Hermes, H3 combined mock, H4 key prep/check, H5 Guard mount report/evidence; `sandbox/p0-hermes-gate-a/guard.py`, `sandbox/p0-hermes-gate-a/compose.yaml`, `sandbox/p0-hermes-gate-a/compose.h4-provider-secret.yaml`, live KVM2 configs đã được xác minh.
+- `handoff_state: PREPARED_FOR_OWNER_FORWARD` — mới có trong GitHub; **không tự coi là SENT hoặc ACKNOWLEDGED**. Người dùng có thể chuyển URL task vào phiên Codex; Codex ghi ACK, rule SHA và kết quả tại GitHub khi nhận.
+- `next_owner_or_decision: chatgpt` review H5 report/evidence để xác nhận `PROVIDER_PREFLIGHT_PASS` hoặc blocker; **không tự chuyển sang paid inference**. H6 paid execution chỉ sau khi reviewer đối chiếu tất cả gate và phạm vi phê duyệt hiện hành.
+
+### Trạng thái đầu vào — không làm lại nếu không có change trigger
+
+| Trạng thái | Nội dung / chứng cứ |
+| --- | --- |
+| `DONE_VERIFIED_FROM_REPORT` | Guard mount duy nhất read-only, health, 18/18 isolation, production HTTP 200/restart 0, ledger unchanged/0 permit/kill switch ON, provider calls 0; report/evidence 2026-11-22 như trên |
+| `VERIFIED_MOCK` | H3 combined callback+one-shot, mock ledger/permit, no-bypass; H4 fake-key 11/11; không rerun toàn bộ nếu route/code/topology không đổi |
+| `DOCUMENTED` | OpenAI GPT-6 Luna và Responses/input_tokens, Standard pricing qua official docs tại ngày 2026-11-22 (links dưới) |
+| `UNKNOWN_LIVE` | Provider key thuộc đúng project, quyền `/v1/responses`, billing/quota, token count của final forwarded body, trạng thái paid route thực sự dùng provider thay mock |
+| `NOT_RUN` | H5 provider probes, any paid Hermes E2E; không được suy diễn từ Guard mount PASS |
+
+### Thứ tự thực hiện và phương án thay thế
+
+1. **Không tái cấu hình mount.** Xác minh read-only: Guard-only mount metadata, runtime version và proxy, các container khác không giữ provider key; đối chiếu `guard.py` thực thi với repository. Nếu có drift thì khoanh vùng, không sửa production. Giữ mock upstream trong H5 và không restart/recreate service trừ khi được phê duyệt riêng.
+2. **Project/model/permission — least-side-effect:** đối chiếu đúng OpenAI project, API key scope từ nguồn quản trị đáng tin cậy, không đọc/echo/hash/đo kích thước key. Khi quyền API request *chỉ đọc, không sinh inference* đã được phép và phương án không tiết lộ key, có thể kiểm `GET /v1/models` hoặc model retrieval qua **Guard-only credential boundary**; kết quả model list không tự chứng minh Responses permission/billing. Nếu endpoint trả lỗi hoặc chưa chứng minh đúng project, dùng dashboard có xác thực bởi chủ dự án hoặc bằng chứng quản trị tương đương; `UNKNOWN` nếu vẫn không xác minh. Không đưa credential vào URL/CLI arguments/log/Git.
+3. **Final-forwarded digest:** xác minh request sẽ đi đúng tuyến `n8n sandbox → authenticated bridge → Hermes auxiliary → Guard → provider`; dùng mock/offline để freeze **canonical bytes của forwarded `/v1/responses` sau Guard enforcement**, có model exact `gpt-6-luna`, hard cap `max_output_tokens=600`, một turn, tools absent. Gắn digest vào config/request version và one-shot permit candidate; không dùng body `/v1/runs`, token estimate bằng bytes, hoặc fixture H3 thay thế request cuối.
+4. **Token counting:** chỉ sau khi xác minh credential/project/endpoint và tính không phát sinh paid inference của thao tác, dùng `POST /v1/responses/input_tokens` với projection đúng input-affecting fields (H2 contract), **chính Guard hoặc đường credential isolation tương đương** thực hiện; không cấp key cho Hermes/bridge/Codex/log. Ghi `input_tokens`, exact forwarded digest và phương thức đếm. Nếu không có đường gọi an toàn hoặc trạng thái phí chưa rõ, STOP provider request, hoàn thiện các bước read-only còn lại; tuyệt đối không chuyển sang `POST /v1/responses` để 'thử quyền'.
+5. **Budget/billing:** xác minh live pricing tier/project credit/quota, phép reserve upper-bound gắn `input_tokens<=4000` và `max_output_tokens=600`, tính cả reasoning output và phụ phí có thể áp dụng. Official model page tại 2026-11-22 nêu Standard rates **0,10 USD/1M input** và **0,50 USD/1M output** (mức lý thuyết 4000+600: 0,0007 USD trước các khoản khác); đây **không phải** giá được bảo đảm của project hay actual billed amount. Giữ cap P0 `<=5` attempts, `<=0.05 USD/day`, `<=0.05 USD P0 total`, `<=0.01 USD/job`; không chạm ledger để "thử" phép tính.
+6. **One-shot readiness, no dispatch:** kiểm từ mã/test mock và live read-only rằng scoped atomic permit có thể khóa exact forwarded digest và consume/relock **trước** dispatch; 0 permit live ở điểm xuất phát; không tự tạo/cấp/consume live permit trong H5. Xác minh vẫn không có direct provider bypass, không bật global kill switch OFF. Nếu source/mock route khác với ứng xử hiện tại thì cần test delta offline/mock có lý do, không tái chạy paid hoặc toàn bộ H3/H4.
+7. **Kết luận H5:** `PROVIDER_PREFLIGHT_PASS` chỉ khi tất cả điều kiện trên có evidence đầy đủ và mọi thay đổi còn lại trước paid được chỉ rõ; nếu phần nào chưa chứng minh thì `BLOCKED_<reason>` với lỗi cụ thể, các đường read-only đã thử, next owner và first safe action. PASS **không tự cấp phép dispatch**; kiểm thử paid là phase tiếp theo phải được nghiệm thu điều kiện một lần riêng.
+
+### Quyền, STOP và nghiệm thu
+
+- `WRITE_SET:` report/evidence H5 mới đã redacted trong `reports/` và `reports/evidence/`, mục kết quả bổ sung ở cuối task này, `STATE.md`/`CATALOG.yaml`/`CHANGELOG.md` nếu có thay đổi trạng thái hoặc tài liệu.
+- `DO_NOT_TOUCH:` metadata `owner/status/approval_scope/paid_inference_approval`; Compose base/overlay H4 nếu chưa được duyệt thêm; production n8n/Hermes, firewall/DNS/public port, ledger/permit/kill switch, provider key contents và tài khoản thanh toán.
+- `INVARIANTS:` Guard mount/isolation vẫn PASS; production HTTP 200/restart không tăng; ledger bytes/attempt/permit/kill-switch giữ nguyên; paid attempts=0 và USD delta=0 **trong H5**.
+- `STOP:` không xác minh đúng project, model, price/quota, canonical forwarded digest, token count/limit, one-shot admission, egress, callback, key isolation hoặc chi phí bảo thủ → **không thực hiện paid call**. Tiếp tục các phép đo an toàn còn có thể làm; nếu cần quyết định mới, `NEEDS_OWNER_DECISION` với blocker và lựa chọn rõ ràng.
+- `ACCEPTANCE:` báo cáo H5 phải có project verification method (redacted), model access result, Responses permission evidence hoặc UNKNOWN, final forwarded digest + token count, source giá + thời điểm, upper-bound reserve, ledger/permit/switch/route unchanged, 0 paid attempts và candidate plan cho H6. Không nâng historical mock thành paid-ready.
+- `HANDOFF:` Codex push **một báo cáo tổng hợp** và evidence redacted, remote readback, link commit; `from_agent: codex`, `to_agent: chatgpt`, `handoff_state: PREPARED_FOR_OWNER_FORWARD` cho reviewer. ChatGPT tiếp tục nghiệm thu H5 rồi mới lập/cho triển khai đúng bước paid H6 trong cùng task (nếu đạt điều kiện); không tự tạo task mới.
+
+### Tài liệu hãng đã kiểm tra ngày 2026-11-22
+
+- GPT-6 Luna model/spec: https://developers.openai.com/api/docs/models/gpt-6-luna
+- Standard/other tier pricing: https://developers.openai.com/api/docs/pricing
+- Model listing (không đồng nghĩa quyền project/billing): https://developers.openai.com/api/reference/resources/models/methods/list
+- Input token counting `POST /v1/responses/input_tokens`: https://developers.openai.com/api/reference/resources/responses/subresources/input_tokens/methods/count
+- Cần so sánh lại docs, entitlement và pricing **tại thời điểm đo live**, không coi documentation là live proof.
