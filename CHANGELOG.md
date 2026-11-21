@@ -2,6 +2,9 @@
 
 ## 2026-11-21
 
+- Điều phối GATE B theo rule mục 7 sau egress isolation: xác minh report/evidence `88268989`; cập nhật task hiện có để chuẩn bị hai handoff H1/H2 Hostinger Agent và Hermes Agent sau egress isolation, ghi owner, cách bắt đầu, nguồn vendor, nghiệm thu, trạng thái PREPARED_FOR_OWNER_FORWARD; chưa gửi/ACK, chưa giao Codex thực thi, 0 paid call. Giữ GATE B BLOCKED_PREFLIGHT.
+
+
 - Chủ dự án phê duyệt quy tắc điều phối mới: ChatGPT tự nghiên cứu tài liệu vendor chính thức, hỏi Hostinger/Hermes trước khi giao Codex theo đúng sở trường, đặc tả có bước bắt đầu cụ thể, nhận/giao bóng ghi owner và trạng thái ACK, mọi agent đọc lại AGENTS/workflow/security/STATE/CATALOG trước task. Đã cập nhật trực tiếp `rules/AGENT_WORKFLOW.md`, `AGENTS.md`, agent directory/profile, README, catalog; quy tắc không tự cấp thêm quyền paid/production. Nguồn tham khảo chính thức ghi trong rule.
 
 
