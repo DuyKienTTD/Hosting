@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Codex hoàn tất B2-B chỉ đọc trên KVM2, xác minh blocker DAC cho writer UID 23062 và render preview/rollback khớp phạm vi. Bàn giao ChatGPT nghiệm thu. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-b-preflight.md).
+
 - ChatGPT nghiệm thu B2-A offline từ `1caf096`/`c97fca2`, ghi nhận Level 2 thiếu parent directory fsync; mở B2-B chỉ-read trên KVM2 để khảo sát UID/mount/lock và render diff, **chưa** apply ledger thật/provider, paid GATE B vẫn BLOCKED_PREFLIGHT. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-a-chatgpt-review.md).
 
 - Codex hoàn tất H6 B2-A trên fixture P0 v1 do adapter Level 2 tạo. Kiểm lock/inode, một ACK khi có cạnh tranh, crash, replay, settlement, schema lỗi và Compose render offline. ChatGPT nghiệm thu theo §10. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-a.md).

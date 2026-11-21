@@ -738,6 +738,24 @@ documents:
     verified_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: hermes-gate-b-h6-b2-b-preflight-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-b-preflight.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-B-KVM2-read-only-UID-mount-and-rollback-preflight
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-b-preflight-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-b-preflight.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-B-metadata-DAC-and-Compose-preview-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
