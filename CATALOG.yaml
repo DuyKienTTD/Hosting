@@ -221,7 +221,7 @@ documents:
   - id: ttd-ai-p0-integration-001
     path: tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md
     type: task
-    status: blocked
+    status: in_progress
     authoritative_for: gated-n8n-hermes-p0-sandbox-implementation
     updated_at: 2026-11-21
     sensitivity: public
@@ -229,7 +229,7 @@ documents:
   - id: ttd-p0-reasoning-integration-proposal-2026-11-21
     path: decisions/2026-11-21-p0-reasoning-integration-proposal.md
     type: decision
-    status: proposed
+    status: partially_approved
     authoritative_for: pending-p0-private-inference-and-n8n-webhook-decisions
     updated_at: 2026-11-21
     sensitivity: public
