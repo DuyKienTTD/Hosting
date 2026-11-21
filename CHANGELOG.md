@@ -2,6 +2,9 @@
 
 ## 2026-11-21
 
+- Chủ dự án ban hành quy tắc tránh thao tác sai/lặp lại: đọc đủ toàn bộ tài liệu liên quan trước khi suy luận hoặc sửa; rà evidence đã PASS và chỉ rerun theo change trigger; tách dữ liệu/ownership và write-set, bảo vệ metadata task mẹ; review toàn diff, xác minh remote post-push, dừng khi output truncated hoặc quyền chưa rõ. Đã cập nhật AGENT_WORKFLOW mục 8, AGENTS, CONTRIBUTING, README, template báo cáo và CATALOG; GitHub branch protection/CI chưa được xác nhận là đã bật.
+
+
 - H3 PASS combined mock E2E trên KVM2 với callback, một dispatch và one-shot accounting trong cùng lượt. Xác nhận rollback, topology cách ly và ledger thật không đổi. Paid readiness chờ credential guard và token count theo provider. [Báo cáo](reports/2026-11-21-hermes-gate-b-h3-preflight.md).
 
 - Tổng hợp H1 Hostinger và H2 Hermes để chuẩn bị H3 trong task GATE B hiện có: chẩn đoán replay bridge task_id vs runtime mismatch, khóa forwarded Responses digest và token-count cùng digest, yêu cầu rerun combined mock callback+one-shot trên isolated topology, guard-only OpenAI credential, không nhầm với service auth keys. H3 chuẩn bị cho Codex ở PREPARED_FOR_OWNER_FORWARD; chưa gửi/ACK, chưa paid dispatch.
