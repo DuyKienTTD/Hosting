@@ -603,6 +603,24 @@ documents:
     verified_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: hermes-gate-b-h5-preflight-followup-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h5-preflight-followup.md
+    type: report
+    status: current
+    authoritative_for: h5-provider-preflight-result-and-h6-handoff
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h5-followup-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h5-followup.json
+    type: evidence
+    status: current
+    authoritative_for: h5-project-final-candidate-count-and-one-shot-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria

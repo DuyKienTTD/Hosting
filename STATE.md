@@ -92,7 +92,7 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
-- **H5 Provider preflight:** GET metadata GPT-6 Luna HTTP 200 qua Guard-only credential. H5 `BLOCKED_FINAL_REQUEST_AND_PROJECT_VERIFICATION` vì Guard live chỉ có tuyến mock Gate A và chưa có bằng chứng project, quyền Responses, billing/quota hay token count gắn final digest. Next owner là ChatGPT nghiệm thu. Paid GATE B vẫn `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h5-provider-preflight.md).
+- **H5 Provider preflight:** Codex báo `PROVIDER_PREFLIGHT_PASS` với bằng chứng quản trị project, 723 input tokens cho digest ứng viên và exact-byte one-shot trên ledger mock. ChatGPT là next owner nghiệm thu. Guard live vẫn ở chế độ mock và paid GATE B tiếp tục `BLOCKED_PREFLIGHT` chờ duyệt và xác minh tuyến H6. [Báo cáo](reports/2026-11-22-hermes-gate-b-h5-preflight-followup.md).
 
 - [TTD-HERMES-GATE-B-GUARD-REMEDIATION-001](tasks/2026-11-21-hermes-gate-b-permit-ledger-remediation.md) đã **MOCK_INTEGRATION_PASS**: shared-lock interop, 20-process race, 14 fault cases và full mock E2E qua n8n→Hermes→guard→callback PASS. Sandbox đã rollback, production health 200/restart 0, ledger thật 1 attempt/kill switch ON và không đổi, paid calls mới 0. [Báo cáo nghiệm thu](reports/2026-11-21-hermes-gate-b-guard-remediation-results.md). Paid GATE B vẫn BLOCKED_PREFLIGHT, cần preflight live riêng.
 

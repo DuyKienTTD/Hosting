@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Codex hoàn tất H5 provider preflight với bằng chứng quản trị project, số token theo digest và kiểm thử one-shot đúng bytes trên ledger mock. Paid inference bằng 0. ChatGPT tiếp nhận nghiệm thu trước H6. [Báo cáo](reports/2026-11-22-hermes-gate-b-h5-preflight-followup.md).
+
 - H5 xác minh GPT-6 Luna metadata HTTP 200 từ Guard. H5 còn bị chặn vì thiếu bằng chứng project và final forwarded digest gắn với runtime. Không phát sinh paid inference. [Báo cáo](reports/2026-11-22-hermes-gate-b-h5-provider-preflight.md).
 
 - Bàn giao H5 provider preflight trong task GATE B hiện có: owner Codex, ChatGPT nghiệm thu, first action KVM2, model/project/Responses, forwarded digest, input_tokens, pricing, budget, one-shot readiness; không dispatch paid trong H5; handoff chỉ PREPARED_FOR_OWNER_FORWARD.
