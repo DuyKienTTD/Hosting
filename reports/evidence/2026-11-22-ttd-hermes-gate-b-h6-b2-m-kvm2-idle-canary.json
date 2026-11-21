@@ -1,0 +1,199 @@
+{
+  "task_id": "ttd-hermes-gate-b-001",
+  "stage": "H6_B2_M",
+  "result": "KVM2_FAKE_IDLE_CANARY_PASS",
+  "observed_date_ict": "2026-11-22",
+  "approval_commit": "5ce7537ba39ec428293055544ddc149a6ee723c5",
+  "rules_task_base": "b6466081ad9d2b57cd907c464cb63e78df64bd4a",
+  "approval_task_blob": "191576585e819fad1b6fb13ced56ece94c0914c1",
+  "workflow_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "independent_work_index_reviewed_at": "1948568edebaaf619e62bd295790ef43d291ca5d",
+  "execution_source": {
+    "commit": "810fa360325ed9f9d04041c2a86f4b4345bb2193",
+    "runner_blob": "5675ae206599bab39574b0f74b42b78ac90d2782",
+    "runner_sha256": "fa7bcbc52bfae72618c067957863606d792c495904b3c8a3111278c767b96f18",
+    "compose_blob": "b0c3e289674d4b046b03d5f9e30d3403827cc02b",
+    "runtime_commit": "c4d540289329a3c71d4ded66f5aca248923bbdcf",
+    "runtime_blobs": {
+      "h6_b2l_idle.py": "b994d00a550033c9ec163d90cfefd3251de57eee",
+      "h6_writer.py": "98ce2e7c6d4109b004da058c49075e4c58411f1f",
+      "h6_ipc_auth.py": "afa3f761189d36e87372596f31ea8c8eca38636d",
+      "h6_p0.py": "8c0363498b180106c6220ce234dbeb614eb763b1",
+      "one_shot.py": "3abbf97ace9473d2f79f728792a8d7111a293f4f",
+      "mock_contract.py": "d58d0bcf89bd557c313606d5908817f45ccd0129"
+    },
+    "baseline_commit": "d32aff15fee7972d217e2f8c8a1f81fa5f987906",
+    "baseline_helper_blob": "dcb891284f44763480f4b6675960836fa9d2f64e"
+  },
+  "baseline": {
+    "containers": 9,
+    "networks": 11,
+    "volumes": 11,
+    "production_http": [
+      200,
+      200
+    ],
+    "level2_stopped": true,
+    "gate_a_verified_running": true,
+    "real_ledger_permissions_and_stable_lock_checks": "metadata only"
+  },
+  "pre_up": {
+    "passed": true,
+    "render_all_profiles": true,
+    "render_repeat_byte_equal": true,
+    "render_rechecked_after_staging": true,
+    "render_sha256_redacted": "a33d284eec705b8b22459952ae9f57650b137aeb0e0f4cc96b785b619a8b6543",
+    "render_hash_encoding": "Python json.dumps(sort_keys=True), with owned root and owner label replaced by the evidence placeholders",
+    "redacted_render": {
+      "name": "h6-b2-m-idle-canary",
+      "services": {
+        "writer": {
+          "profiles": [
+            "canary"
+          ],
+          "cap_drop": [
+            "ALL"
+          ],
+          "command": [],
+          "container_name": "h6-b2-m-idle-canary-writer",
+          "entrypoint": [
+            "python3",
+            "-B",
+            "/opt/b2m-src/h6_writer.py",
+            "--b2-l-startup-fixture",
+            "/tmp/h6-b2l-canary"
+          ],
+          "healthcheck": {
+            "disable": true
+          },
+          "image": "ghcr.io/hostinger/hvps-hermes-agent@sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f",
+          "labels": {
+            "ttd.h6.b2m.owner": "<owner>"
+          },
+          "mem_limit": "100663296",
+          "network_mode": "none",
+          "pids_limit": 24,
+          "pull_policy": "never",
+          "read_only": true,
+          "restart": "no",
+          "security_opt": [
+            "no-new-privileges:true"
+          ],
+          "tmpfs": [
+            "/opt/data:rw,nosuid,nodev,noexec,size=8m"
+          ],
+          "user": "0:0",
+          "volumes": [
+            {
+              "type": "bind",
+              "source": "<owned-root>/src",
+              "target": "/opt/b2m-src",
+              "read_only": true,
+              "bind": {
+                "propagation": "rprivate",
+                "create_host_path": false
+              }
+            },
+            {
+              "type": "bind",
+              "source": "<owned-root>/fixture",
+              "target": "/tmp/h6-b2l-canary",
+              "read_only": true,
+              "bind": {
+                "propagation": "rprivate",
+                "create_host_path": false
+              }
+            },
+            {
+              "type": "bind",
+              "source": "<owned-root>/fixture/ipc",
+              "target": "/tmp/h6-b2l-canary/ipc",
+              "bind": {
+                "propagation": "rprivate",
+                "create_host_path": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    "existing_names_and_mount_sources_disjoint": true,
+    "delta": {
+      "services_added": [
+        "writer"
+      ],
+      "binds": 3,
+      "new_networks": 0,
+      "named_volumes": 0,
+      "public_ports": 0,
+      "external_dependencies": 0,
+      "existing_resources_modified": 0
+    },
+    "image_config_id": "sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f",
+    "image_pull": false,
+    "local_config_validator_positive": 1,
+    "local_config_validator_negatives": 4
+  },
+  "runtime": {
+    "uid_gid": [
+      0,
+      0
+    ],
+    "capability_sets_zero": true,
+    "no_new_privileges": true,
+    "read_only_rootfs": true,
+    "network_interfaces": [
+      "lo"
+    ],
+    "fixture_filesystem": "ext4",
+    "ledger_parent_mode": "0700",
+    "ledger_and_lock_mode": "0600",
+    "fixture_key_mode": "0400",
+    "fixture_key_and_ledger_mounted_read_only": true,
+    "real_credentials_or_ledger_mounted": false
+  },
+  "tests": {
+    "startup_without_permit_count": 2,
+    "authenticated_immutable_health_calls": 20,
+    "immutable_bytes_and_device_inode_atime_mtime_ctime": true,
+    "synthetic_ledger_attempts": 1,
+    "synthetic_reserved_usd": 0.0035,
+    "wrong_key": "denied",
+    "wrong_peers_denied_after_connect": 2,
+    "contention_ms": 201.93,
+    "contention_recovered": true,
+    "missing_ledger_or_lock": "blocked",
+    "replaced_lock_inode": "blocked",
+    "valid_fake_permit_admit": "denied",
+    "fake_post_paths": 0
+  },
+  "rollback": {
+    "passed": true,
+    "project_containers_remaining": 0,
+    "fixture_removed": true,
+    "pre_post_inventory_equal": true,
+    "protected_ledger_metadata_equal": true,
+    "production_http": [
+      200,
+      200
+    ]
+  },
+  "not_verified": [
+    "host power-loss durability",
+    "real writer mount",
+    "live Hermes idempotency/deadline and actual n8n callback contract"
+  ],
+  "scope_counters": {
+    "real_ledger_lock_permit_or_key_content_accesses": 0,
+    "real_ledger_or_permit_mutations": 0,
+    "provider_api": 0,
+    "paid": 0,
+    "production_mutations": 0,
+    "usd": 0
+  },
+  "live_integration": "NO_GO",
+  "real_writer_mount": "BLOCKED_UID_OR_MOUNT",
+  "paid_gate_b": "BLOCKED_PREFLIGHT",
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}
