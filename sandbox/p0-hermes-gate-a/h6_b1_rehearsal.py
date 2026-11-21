@@ -99,7 +99,9 @@ def render(root, project):
 
 
 def plan(root, project, config, existing):
-    require(set(config) == {"name", "services", "networks"} and config["name"] == project, "extra Compose resources")
+    # Compose 5.6 keeps the known YAML extension in rendered JSON. It cannot create a resource.
+    require(set(config) - {"x-b1-image-state"} == {"name", "services", "networks"}
+            and config["name"] == project, "extra Compose resources")
     require(set(config["services"]) == SERVICES and set(config["networks"]) == {"h6_mock"}, "unexpected services")
     network = config["networks"]["h6_mock"]
     require(network.get("internal") and not network.get("external") and not network.get("enable_ipv6")
@@ -205,11 +207,14 @@ def prepare(ports):
     test.make_fixture(state_dir / writer.FIXTURE_PATH.name, digest)
     (root / "compose.env").write_text(f"TTD_H6_FIXTURE_ROOT={fixture}\n")
     config = render(root, project)
-    mounts = plan(root, project, json.loads(config), baseline(ports, project))
+    existing = baseline(ports, project)
+    mounts = plan(root, project, json.loads(config), existing)
+    (root / "baseline.json").write_text(json.dumps(existing))
     (root / "rendered.json").write_bytes(config)
     (root / "prepared.json").write_text(json.dumps({"project": project, "ports": ports, "sources": expected,
                                                     "digest": digest, "mounts": mounts}))
-    print(f"B1_RENDER_GATE_PASS project={project} sha256={checksum(config)} directory={root}", flush=True)
+    print(f"B1_RENDER_GATE_PASS project={project} sha256={checksum(config)} directory={root} "
+          f"existing_containers={len(existing['runtime'])} existing_networks={len(existing['networks'])}", flush=True)
 
 
 def selected(project):
@@ -324,6 +329,7 @@ def run(root):
     for name in (*STAGE_A_FILES, B1_OVERLAY):
         require(checksum((root / "src" / name).read_bytes()) == prepared["sources"][name], "source drift")
     before = baseline(prepared["ports"], project)
+    require(before == json.loads((root / "baseline.json").read_bytes()), "pre-apply baseline drift")
     config_bytes = render(root, project)
     require(config_bytes == (root / "rendered.json").read_bytes(), "reviewed Compose changed")
     config = json.loads(config_bytes)
@@ -383,7 +389,8 @@ def run(root):
         print("B1_MOCK_RUNTIME_PASS " + json.dumps({"render_sha256": checksum(config_bytes), "mock_dispatches": hits,
                                                     "socket": socket_info, "matrix": result["cases"],
                                                     "mock_wire_sha256": prepared["digest"],
-                                                    "writer_restart_ledger_unchanged": True}), flush=True)
+                                                    "writer_restart_ledger_unchanged": True,
+                                                    "fixture_ledger_sha256": checksum(after)}), flush=True)
     finally:
         test = [c for c in objects("container") if c["Name"] == "/" + test_name]
         for c in test:
