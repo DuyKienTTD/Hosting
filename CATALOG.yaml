@@ -72,6 +72,14 @@ documents:
     verified_at: 2026-11-21
     sensitivity: public-redacted
 
+  - id: ttd-ai-platform-audit-001
+    path: tasks/2026-11-21-n8n-hermes-integration-audit.md
+    type: task
+    status: current
+    authoritative_for: codex-n8n-hermes-integration-audit-scope
+    updated_at: 2026-11-21
+    sensitivity: public
+
 collections:
   tasks: committed work orders and acceptance criteria
   inventory: current configuration updated in place
