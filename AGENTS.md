@@ -4,6 +4,8 @@ Các hướng dẫn này áp dụng cho toàn bộ repository.
 
 ## Mục tiêu
 
+Trước khi nhận việc mới, nắm mục tiêu doanh nghiệp tại [PROJECT.md](PROJECT.md). Đặc tả và kết quả trao đổi qua GitHub theo [rules/AGENT_WORKFLOW.md](rules/AGENT_WORKFLOW.md): task được commit trước khi giao; báo cáo, bằng chứng được commit/push sau khi thực hiện; tin nhắn chỉ dẫn URL và kết quả ngắn. Dùng `tasks/` cho đặc tả và `reports/` cho kết quả. Các giới hạn nhiệm vụ là ràng buộc, còn cách triển khai là linh hoạt.
+
 Giữ repository thành nguồn thông tin chung, ngắn gọn và đáng tin cậy để tác nhân mới có thể bắt đầu làm việc mà không phải đọc toàn bộ lịch sử chat.
 
 ## Thứ tự đọc bắt buộc
