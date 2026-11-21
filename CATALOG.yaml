@@ -297,8 +297,16 @@ documents:
   - id: ttd-hermes-aux-guard-bridge-approval-proposal-2026-11-21
     path: decisions/2026-11-21-hermes-auxiliary-guard-bridge-approval-proposal.md
     type: decision
-    status: proposed
+    status: partially_approved
     authoritative_for: pending-approval-to-deploy-isolated-hermes-guard-bridge-with-mock-only
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: ttd-hermes-gate-a-001
+    path: tasks/2026-11-21-hermes-auxiliary-guard-bridge-gate-a.md
+    type: task
+    status: approved_to_execute
+    authoritative_for: Codex-sandbox-Hermes-guard-bridge-mock-only-implementation
     updated_at: 2026-11-21
     sensitivity: public
 
