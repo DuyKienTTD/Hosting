@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **Owner phê duyệt Stage B1 — KVM2 sandbox mock (2026-11-22):** Codex được dựng/kiểm thử/rollback **Compose project mock riêng**, chỉ Guard/writer/provider-mock với ledger, token, mạng và IPC giả cô lập. Bắt buộc rendered Compose + mount/network/container collision gate trước `up`; không được sửa hoặc recreate stack GATE A đang chạy, production hay ledger thật; provider operations/paid calls đều cấm. `H6_STAGE_B1_AUTHORIZED`, handoff `PREPARED_FOR_OWNER_FORWARD` chờ Codex ACK. Stage B2/C chưa duyệt, GATE B paid `BLOCKED_PREFLIGHT`. [Task](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md).
+
 - **H6 Stage A nghiệm thu (2026-11-22):** ChatGPT `H6_STAGE_A_ACCEPTED / VERIFIED_OFFLINE_MOCK` theo source `a411114` và Codex evidence `5a70e3b`. 8/8 mock PASS; chưa chạy Hermes đích hoặc KVM2 runtime, chưa ghi ledger thật/gọi provider. Stage B chỉ được xem xét sau quyết định chủ dự án, ưu tiên Stage B1 sandbox mock riêng, không gộp quyền writer ledger thật/provider. GATE B `BLOCKED_PREFLIGHT`. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-stage-a-chatgpt-review.md).
 
 - **H6 Stage A hoàn tất (2026-11-22):** Codex ACK approval `c1fe91c` và bàn giao `H6_STAGE_A_COMPLETE / VERIFIED_OFFLINE_MOCK`. Guard/writer, IPC, admission durable và overlay đã kiểm trên fixture Linux cục bộ. ChatGPT review trước khi chủ dự án quyết định Stage B. Stage B/C chưa duyệt và Gate B paid `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-stage-a.md).
