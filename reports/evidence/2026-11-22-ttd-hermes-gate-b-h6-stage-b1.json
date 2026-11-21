@@ -1,0 +1,82 @@
+{
+  "task_id": "ttd-hermes-gate-b-001",
+  "phase": "H6_STAGE_B1_KVM2_MOCK",
+  "result": "H6_STAGE_B1_PASS",
+  "paid_gate": "BLOCKED_PREFLIGHT",
+  "observed_date_ict": "2026-11-22",
+  "approval_commit": "6e5ee58c2f1d0ceec84c8effbc749de1f2e20c97",
+  "rules_task_base": "5a068eee7870044a55753cdf875a594187f64e02",
+  "stage_a_source_commit": "a411114d0b485729a57d43eaf97fd2a5226d1585",
+  "b1_runner_commit": "7a03aeb8bd04745dfb9d928efeba5ed7f931ce9f",
+  "b1_runner_sha256": "171c91e11d846577c81bf7b0e0a0ee1f781c7d5fbeda8b8ae8254b9a96c05920",
+  "b1_overlay_sha256": "5a0f2a151fa09e39fd4c5c241515e3e30a6010eb198e98c38b564006076000eb",
+  "b1_source_manifest_sha256": "9674690a5eebf4cd497fcdd9c0453acfec9cb73c9e1ef358295249f972152826",
+  "environment": {
+    "docker_engine": "29.9.2",
+    "compose": "5.6.1",
+    "pinned_image_manifest": "sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f",
+    "image_pulled_or_rebuilt": false,
+    "compose_project": "ttd-h6-b1-t_ajwp9k"
+  },
+  "pre_apply": {
+    "render_sha256": "b8648c7796f7e3c2af4eb018f117831519f6e3067bf6284e7e606877a9fa38d6",
+    "pinned_stage_a_files_verified": 10,
+    "all_profiles_checked": true,
+    "existing_containers_checked": 9,
+    "existing_networks_checked": 11,
+    "services": ["guard", "h6-writer", "provider-mock"],
+    "internal_networks": 1,
+    "bind_mounts": 13,
+    "image_data_tmpfs_mounts": 3,
+    "published_ports": 0,
+    "collisions": 0,
+    "result": "PASS"
+  },
+  "compose_runtime": {
+    "matches_render": true,
+    "socket_uid_gid_mode": "23062:23060:660",
+    "writer_network_mode": "none",
+    "negative_proxy_checks": 6,
+    "negative_proxy_checks_passed": 6,
+    "real_ledger_mounts": 0,
+    "provider_credential_mounts": 0,
+    "concurrent_requests": 8,
+    "mock_dispatches": 1,
+    "mock_wire_sha256": "92435b4ff2c2ac7a7db613371943ed671401bd0abc4d69ab4f133c7525a29627",
+    "fixture_ledger_sha256": "fa25b9b482daf454e872369514b1a97434a46621390890d42071877bffa05002",
+    "writer_restart_fixture_byte_equal": true
+  },
+  "isolated_contract_matrix": {
+    "network_mode": "none",
+    "result": "PASS",
+    "cases": [
+      {"case": "ok", "mock_dispatches": 1, "callbacks": 0},
+      {"case": "callback", "mock_dispatches": 1, "callbacks": 1},
+      {"case": "before_commit", "mock_dispatches": 0, "callbacks": 0},
+      {"case": "after_commit_before_ack", "mock_dispatches": 0, "callbacks": 0},
+      {"case": "truncated_event_stream", "mock_dispatches": 1, "callbacks": 0},
+      {"case": "short_http_body", "mock_dispatches": 1, "callbacks": 0},
+      {"case": "timeout", "mock_dispatches": 1, "callbacks": 0},
+      {"case": "redirect", "mock_dispatches": 1, "callbacks": 0}
+    ],
+    "hermes_and_n8n_simulated": true
+  },
+  "rollback": {
+    "result": "PASS",
+    "dedicated_resources_and_fixture_removed": true,
+    "staging_directories_removed": 4,
+    "preexisting_docker_baseline_equal": true,
+    "production_health_http": [200, 200],
+    "production_restart_count": [0, 0],
+    "real_ledger_byte_equal": true,
+    "real_ledger_historical_attempts": 1,
+    "live_permits": 0,
+    "kill_switch_on": true
+  },
+  "provider_operations": 0,
+  "paid_attempts": 0,
+  "real_permit_operations": 0,
+  "inference_cost_usd_delta": 0,
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}
