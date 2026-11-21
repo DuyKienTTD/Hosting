@@ -945,6 +945,15 @@ documents:
     verified_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: ttd-work-b2-j-idle-startup-001
+    path: tasks/2026-11-22-work-b2-j-idle-startup-audit.md
+    type: task
+    status: prepared
+    authoritative_for: independent-Work-B2-J-permitless-startup-and-recovery-audit
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
