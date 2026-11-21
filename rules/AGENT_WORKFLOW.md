@@ -133,3 +133,47 @@ Với công việc nhỏ đã rõ, có thể rút ngắn nhưng **không bỏ ow
 - Google SRE managing incidents: https://sre.google/sre-book/managing-incidents/ (handoff phải rõ người nhận và xác nhận).
 
 Đây là **nguyên tắc quản trị dự án**, tham khảo từ tài liệu công khai; không có nghĩa dự án đã cài OpenAI Agents SDK hoặc Google SRE tooling.
+
+## 8. BẮT BUỘC: chống thao tác sai, tránh làm lại và kiểm tra toàn vẹn tri thức (chỉ thị chủ dự án 2026-11-21)
+
+Áp dụng **ngay cho mọi agent**. Đây là kiểm soát **trước, trong và sau** thực thi, không chỉ là checklist khi viết báo cáo. Đơn giản hóa quy trình nếu tác vụ nhỏ, nhưng không miễn các ranh giới bảo toàn dữ liệu/quyền hoặc độ trung thực của bằng chứng.
+
+### 8.1. Đọc ĐỦ tài liệu trước khi kết luận — không dự đoán nội dung bị cắt
+
+- Với từng tài liệu làm căn cứ ra quyết định/đặc tả/sửa đổi: kiểm tra **đúng đường dẫn, branch, commit/SHA, kích thước hoặc giới hạn kết quả**, đọc **đủ toàn bộ phần liên quan** (đặc biệt metadata, quyền/approval, STOP, dependencies, acceptance, handoff và các phần bổ sung cuối file). **Không dựa vào đoạn preview, nội dung bị truncation, 4.000 ký tự đầu hoặc tìm kiếm snippet để suy đoán phần còn lại.**
+- Nếu công cụ trả thiếu/truncated, tiếp tục lấy các đoạn chưa đọc bằng phân trang/range/đọc tệp nguyên bản rồi đối chiếu đầu–cuối và section; nếu bất khả thi, ghi `PARTIAL_READ` cùng phần chưa đọc, **không xác nhận tài liệu đã đọc đủ**, không thực hiện thay đổi tác động vào tài liệu/phạm vi chưa hiểu.
+- Trước khi kết luận, đọc tài liệu **hiện hành và liên kết bằng chứng quyết định**; kiểm tra cả bổ sung gần nhất ở cuối task/report. Không dùng kết luận một bản cũ nếu bản mới đã supersede hoặc đã thay đổi điều kiện.
+- Trước khi cập nhật một file tồn tại: phải **đọc trọn file hiện tại**, không lấy nội dung cũ từ trí nhớ/session, không thay nội dung bằng bản tóm tắt; khi file rất lớn, đọc từng đoạn đủ bao phủ file hoặc dùng công cụ lấy toàn bộ. Không thể đọc trọn thì **không được overwrite**. Sau khi push: **đọc lại file đầy đủ hoặc xác minh nội dung bất biến bằng diff/hash/section checks**, không chỉ xem HTTP success.
+
+### 8.2. Trước mỗi task: đối chiếu công việc đã làm để không tiêu hao lại
+
+- Phải tạo **bảng trạng thái ngắn** ngay trong đặc tả (không tạo tài liệu riêng nếu không cần) phân loại: `DONE_VERIFIED`, `DONE_REPORTED`, `PARTIAL`, `FAILED`, `BLOCKED`, `NOT_RUN`, kèm **report/evidence URL, commit, môi trường, thời gian, phạm vi test**.
+- **Không yêu cầu chạy lại** phần `DONE_VERIFIED` khi cùng phiên bản mã, cấu hình, topology, dữ liệu và tiêu chí nghiệm thu. Nếu trạng thái có thể đổi theo thời gian, dùng kiểm tra **nhẹ nhất cần thiết** (health/diff/read-only) thay vì chạy lại toàn bộ suite.
+- Chỉ rerun khi **có điều kiện thay đổi có thể ảnh hưởng kết quả**, bằng chứng thiếu/không đúng phạm vi, lỗi mới, test không tái lập hoặc yêu cầu xác minh độ tươi trước thao tác rủi ro. Nêu rõ `change_trigger`, test bị ảnh hưởng, lý do, chi phí/tác động dự kiến; ưu tiên targeted tests trước full suite. Không viện dẫn \"chắc ăn\" hoặc \"kiểm tra lại tất cả\" nếu không có cơ sở.
+- Không phủ định historical PASS chỉ vì agent mới không tự chạy lại; không nâng historical PASS thành live PASS cho topology khác. Reuse evidence có **điều kiện tương đương rõ ràng**.
+- Khi xử lý BLOCKED: chỉ làm phần thiếu và phần bị ảnh hưởng theo dependency graph; tránh tạo task con/checkpoint trùng lặp nếu task mẹ vẫn đủ phạm vi.
+
+### 8.3. Thiết kế dữ liệu để khoanh vùng lỗi và giảm blast radius
+
+- Tách dữ liệu theo **trách nhiệm và vòng đời**: `tasks/` chứa đặc tả/owner/approval; `reports/` và `reports/evidence/` chứa kết quả bất biến, có nguồn/thời điểm; `STATE.md` tóm tắt hiện tại; `CATALOG.yaml` lập chỉ mục duy nhất; `rules/` là chính sách; `inventory/` là snapshot cấu hình; `runbooks/` là hướng dẫn thao tác. Không thay task mẹ bằng báo cáo agent tư vấn.
+- Mỗi artifact quan trọng có **stable ID**, owner, trạng thái, môi trường/commit/source, liên kết đến task và evidence, ranh giới `verified_at`/runtime version; dùng một **nguồn có thẩm quyền** cho mỗi sự kiện/trường, hạn chế sao chép trạng thái nhiều nơi. Bản tóm tắt phải trỏ nguồn và không tự biến thành bằng chứng.
+- Dùng **write-set/ownership contract** trong task: agent được quyền sửa chính xác những path/section/field nào; mục nào chỉ đọc; owner nào phải phê duyệt. Với H1/H2 tư vấn: chỉ tạo report/evidence và thêm mục handoff khi được phép; **không sửa metadata** `owner/status/approval_scope/paid_inference_approval` của task mẹ. Không sửa file ngoài write-set dù có quyền Git chung.
+- Chia module/test/ledger/state/secret theo boundary; thay đổi nhỏ, rollback được, có diff. Không trộn dữ liệu thử nghiệm vào ledger live; không dùng một file làm nơi vừa lưu cấu hình, vừa ghi kết quả thử nghiệm, vừa cấp quyền chi phí.
+- Mỗi lỗi cần có `component`, `environment`, `task_id/run_id` hoặc hash an toàn, `code_config_version`, `observed`, `expected`, `evidence`, `next_owner`; đủ khoanh vùng mà không công khai IP/secret/payload. Chỉ tạo mã máy-readable mới khi thực sự giúp chẩn đoán, không gia tăng hành chính.
+
+### 8.4. Trước khi sửa/push: kiểm tra thay đổi so với bản gốc
+
+- **Pre-change:** ghi base SHA/commit, danh sách path được phép sửa (`write_set`), trường/section bất biến (`invariants`), backup/rollback nếu cần. `fetch latest -> read whole -> patch minimal -> compare diff -> validate -> push -> re-fetch`; nếu base SHA stale phải refresh, merge có ý thức, **không force overwrite**.
+- **Review diff toàn bộ**, bao gồm deleted sections/metadata thay đổi, `git diff --check`, validators liên quan. Từ chối patch nếu xóa/đổi mục tiêu, owner, quyền, ngân sách, STOP, source hoặc evidence ngoài phạm vi. Với file quan trọng và diff lớn/đổi metadata: ưu tiên PR có review/CI; không khẳng định branch protection đang bật khi chưa kiểm chứng.
+- **Post-change:** đối chiếu đầy đủ file/sections trước–sau, xác minh link, metadata, references, trạng thái báo cáo, Git remote SHA, an toàn thông tin. Nếu phát hiện sai: dừng tác vụ kế tiếp, khôi phục nội dung có chọn lọc từ commit chuẩn, **không xóa lịch sử và không che lỗi**; cập nhật changelog và owner liên quan.
+- Mọi thao tác cập nhật tài liệu phải tuân thủ đồng thời `CONTRIBUTING.md`, `rules/REPOSITORY_SECURITY.md` và quy tắc này. Không coi `update_file` success hoặc test exit 0 là đã nghiệm thu đầy đủ khi chưa review invariants.
+
+### 8.5. Mẫu ranh giới bắt buộc trong đặc tả (nằm trong task, không tạo nhiều biểu mẫu)
+
+`READ_SET`: tài liệu/mã/evidence cần đọc đủ, ref/commit cụ thể. `PREVIOUSLY_VERIFIED`: các hạng mục và evidence có thể tái sử dụng. `WRITE_SET`: path, section/field được sửa. `DO_NOT_TOUCH`: production/approval/ledger/metadata hoặc dữ liệu khác. `FIRST_ACTION`: bước an toàn bắt đầu. `DEPENDENCIES`: điều kiện/công việc chuyên gia phải có trước. `TEST_DELTA`: chỉ test thay đổi và điều kiện bắt buộc, cùng lý do rerun. `INVARIANTS`: giá trị/trường phải giữ nguyên. `PASS`: phép đo/evidence. `STOP`: điểm dừng và owner xử lý. `HANDOFF`: ai nhận, kênh, trạng thái, link artifact.
+
+### 8.6. Kiểm soát bằng công cụ — phân biệt đã áp dụng và cần triển khai
+
+- **Hiệu lực ngay:** tất cả agent đọc đủ, lập phạm vi đọc/ghi, kiểm diff và xác minh sau push theo quy tắc này.
+- **Có thể tự động hóa tiếp:** quy tắc GitHub ruleset/branch protection, yêu cầu PR review, status checks, CI validator kiểm metadata bất biến, uniqueness ID, links, diff xóa section, secrets, và phân quyền write-path. **Chưa coi các kiểm soát này là đã bật** nếu chưa có bằng chứng cấu hình GitHub thật; đề xuất triển khai riêng khi đủ quyền và có sự đồng ý của chủ dự án.
+- Tài liệu tham khảo: Git diff https://git-scm.com/docs/git-diff ; GitHub rulesets https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets ; GitHub PR review https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/reviewing-proposed-changes-in-a-pull-request .
