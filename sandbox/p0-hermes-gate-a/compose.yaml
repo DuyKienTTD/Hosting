@@ -35,6 +35,7 @@ services:
     entrypoint: ["python3", "/opt/ttd/guard.py"]
     volumes:
       - ./guard.py:/opt/ttd/guard.py:ro
+      - ./one_shot.py:/opt/ttd/one_shot.py:ro
       - ./guard_contract_test.py:/opt/ttd/guard_contract_test.py:ro
       - type: bind
         source: ./secrets/guard-service-token
@@ -123,6 +124,7 @@ services:
     volumes:
       - ./bridge.py:/opt/ttd/bridge.py:ro
       - ./gate_a_test.py:/opt/ttd/gate_a_test.py:ro
+      - ./one_shot_e2e_test.py:/opt/ttd/one_shot_e2e_test.py:ro
       - type: bind
         source: ./secrets/api-server-key
         target: /run/secrets/api_server_key

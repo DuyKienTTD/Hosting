@@ -8,6 +8,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import tempfile
 import urllib.error
 import urllib.request
@@ -15,6 +16,8 @@ from contextlib import contextmanager
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Iterator
+
+from one_shot import admit as admit_one_shot
 
 
 HOST = "0.0.0.0"
@@ -25,11 +28,40 @@ STRICT_FULL_REQUEST_BYTE_BOUND = 4_000
 MAX_BODY_BYTES = 64 * 1024
 TOKEN_FILE = Path("/run/secrets/guard_service_token")
 LEDGER_PATH = Path("/opt/ttd/ledger/level2-budget.json")
+MOCK_ONE_SHOT_LEDGER = os.environ.get("TTD_MOCK_ONE_SHOT_LEDGER", "")
+if MOCK_ONE_SHOT_LEDGER:
+    LEDGER_PATH = Path(MOCK_ONE_SHOT_LEDGER)
+    if "/mock-ledger/" not in str(LEDGER_PATH) or not str(LEDGER_PATH).endswith(".json"):
+        raise SystemExit("mock one-shot requires isolated mock-ledger JSON")
 CAPTURE_DIR = Path("/opt/ttd/capture")
 CAPTURE_INDEX = CAPTURE_DIR / "capture-index.json"
 CAPTURE_LOCK = CAPTURE_DIR / "capture.lock"
 MOCK_URL = "http://gate-a-provider-mock:8082/v1/responses"
 FORBIDDEN_FIELDS = {"tools", "tool_choice", "parallel_tool_calls"}
+SCOPE_PATTERN = re.compile(r"task_id=([A-Za-z0-9._:-]+); correlation_id=([A-Za-z0-9._:-]+); channel=ads; spend=([0-9]+\.[0-9]{2}); clicks=([0-9]+)")
+
+
+def scoped_marker(value: Any) -> tuple[str, str, str]:
+    """Bind a mock permit to the bridge's fake task marker in Hermes input."""
+    matches: list[tuple[str, str, str, str]] = []
+    def visit(item: Any) -> None:
+        if isinstance(item, str):
+            matches.extend(SCOPE_PATTERN.findall(item))
+        elif isinstance(item, list):
+            for child in item:
+                visit(child)
+        elif isinstance(item, dict):
+            for child in item.values():
+                visit(child)
+    visit(value.get("input"))
+    if len(matches) != 1:
+        raise ValueError("TASK_MARKER_NOT_UNIQUE")
+    task_id, correlation_id, spend, clicks = matches[0]
+    marker = {"task_id": task_id, "correlation_id": correlation_id,
+              "channel": "ads", "spend": spend, "clicks": int(clicks)}
+    fingerprint = hashlib.sha256(canonical(marker)).hexdigest()
+    key_hash = hashlib.sha256(("gate-a-" + task_id).encode()).hexdigest()
+    return task_id, key_hash, fingerprint
 
 
 def service_token() -> str:
@@ -193,11 +225,17 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             forwarded, _ = enforce(body)
+            if MOCK_ONE_SHOT_LEDGER:
+                task_id, key_hash, fingerprint = scoped_marker(forwarded)
+                admit_one_shot(LEDGER_PATH, task_id, key_hash, fingerprint)
         except ValueError as error:
             self.send_json(422, {"error": str(error)})
             return
         except RuntimeError as error:
             self.send_json(503, {"error": str(error)})
+            return
+        except (OSError, KeyError, TypeError, json.JSONDecodeError):
+            self.send_json(503, {"error": "PERMIT_LEDGER_UNAVAILABLE"})
             return
         entry = record_capture(body, forwarded)
         request = urllib.request.Request(

@@ -1,0 +1,8 @@
+# Apply only for a bounded provider-mock rehearsal with a disposable ledger copy.
+# Never mount the real P0 ledger writable or use this override for paid routing.
+services:
+  guard:
+    environment:
+      TTD_MOCK_ONE_SHOT_LEDGER: /opt/ttd/mock-ledger/level2-budget.json
+    volumes:
+      - ./mock-ledger:/opt/ttd/mock-ledger
