@@ -95,7 +95,7 @@ khi có phê duyệt riêng; không gọi `POST /v1/responses`.
 `read_complete: true`; `base_commit: 9596bf10cf7774f1954c7a4992359f17122d6acd`;
 `write_set: sandbox H4 code + H4 task result + report/evidence + STATE/CATALOG/CHANGELOG`;
 `invariants_checked: task owner/status/approval, production, base Compose, live ledger/kill switch, no public port`;
-`remote_readback: pending final documentation commit`;
+`remote_readback: verified on origin/main at 88ede44d058934ea5c060f039d3007c72f556e62`;
 `next_owner: chatgpt`; `handoff_state: PREPARED_FOR_OWNER_FORWARD`.
 
 ## Việc còn lại
