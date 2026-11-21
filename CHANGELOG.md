@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- Lập ADR-P0-001 ở trạng thái PROPOSED sau P0 network PASS/E2E BLOCKED: Hermes inference cô lập, n8n authenticated webhook, nghiên cứu provider/model và cost cap; chưa phê duyệt hay thay production.
+
 - Triển khai network-only P0 `ttd-ai-p0-sandbox` ở chế độ internal, gắn live n8n/Hermes bằng private DNS; health, negative auth và rollback preparation PASS, không restart/downtime/public port/firewall change và không gọi paid API.
 - Ghi `PARTIAL / BLOCKED_BY_BUDGET_AND_RUNTIME`: Hermes chưa expose inference API, n8n MCP còn disabled và chưa có workflow/callback; thêm report/evidence, cập nhật task/state/catalog.
 - Đồng bộ catalog/state với kết quả định danh đã complete: `ttdnew.tech` U4S Hermes tách biệt KVM 2; thêm catalog entry cho báo cáo identity.
