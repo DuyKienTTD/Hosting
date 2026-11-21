@@ -53,7 +53,7 @@ sensitivity: public-redacted
 - [TTD-AI-P0-INTEGRATION-001](tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md) có kết quả `PARTIAL`: private network/DNS/health PASS; inference/workflow/callback còn blocked. Xem [báo cáo P0](reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md).
 - Không thay U4S, account business, public port/firewall hoặc credential; downtime 0 và chi phí API 0.
 
-- Đã lập [ADR-P0-001](decisions/2026-11-21-p0-reasoning-integration-proposal.md) trạng thái **PROPOSED**: ưu tiên inference cô lập, webhook có xác thực cho 1 sandbox workflow, model/cost cap cần định giá rồi duyệt; chưa cấp quyền triển khai hay chi phí.
+- Đã lập [ADR-P0-001](decisions/2026-11-21-p0-reasoning-integration-proposal.md) trạng thái **PARTIALLY_APPROVED (Mức 1, 2026-11-21)**: Codex được triển khai sandbox cô lập có rollback và 1 webhook có xác thực trong giới hạn không gián đoạn; model/provider, trần chi phí và paid inference (Mức 2) chưa được duyệt. Chưa có báo cáo thực thi mới sau phê duyệt.
 
 ## Việc đang chờ
 
@@ -61,7 +61,7 @@ sensitivity: public-redacted
 - Chưa đặt n8n/Hermes sau reverse proxy HTTPS.
 - Chưa xử lý các backup Hostinger có thể chứa ứng dụng đã xóa.
 - Chưa cập nhật hệ điều hành hoặc reboot.
-- Chưa phê duyệt mode Hermes inference private, provider/model + cost cap, n8n instance-level MCP hoặc authenticated webhook/workflow để chạy lại test end-to-end.
+- Đã phê duyệt **Mức 1** cho inference private cô lập và đúng một authenticated webhook sandbox có kiểm soát; vẫn chờ Codex thực hiện/kiểm thử. **Chưa phê duyệt Mức 2** gồm provider/model + cost cap và paid inference. n8n MCP toàn instance chưa được phê duyệt.
 - Chưa kết nối/xác minh Google Ads, GA4, WordPress/WooCommerce, YouTube, TikTok, Meta, Kling, HeyGen hoặc ElevenLabs.
 
 ## Tài liệu tiếp theo
