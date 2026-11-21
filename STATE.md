@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **ChatGPT review thiết kế H6 (2026-11-22):** `H6_PREPARATION_ACCEPTED / ARCHITECTURE_CONDITIONALLY_ACCEPTED`. Tách ledger writer với Unix socket phù hợp về hướng, nhưng cần ràng buộc peer auth, lock/inode, crash, thử mock và rollback. **Chưa duyệt apply/recreate Guard hoặc writer**, chưa được chạm ledger thật/permit/paid. Owner quyết định scope sandbox sau khi có patch và bằng chứng test. GATE B `BLOCKED_PREFLIGHT`. [Review](reports/2026-11-22-hermes-gate-b-h6-chatgpt-design-review.md).
+
 - **H6 chuẩn bị xong (2026-11-22):** Codex đã ACK và nộp `H6_PREPARATION_COMPLETE / NEEDS_OWNER_DECISION`. Guard live mock-only, ledger bind theo file chỉ đọc, proposal writer giới hạn chờ ChatGPT nghiệm thu và chủ dự án duyệt phạm vi triển khai sandbox. H5 đã được nghiệm thu và Gate B paid tiếp tục `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-preparation.md).
 
 - **ChatGPT nghiệm thu H5 (2026-11-22):** `H5_ACCEPTED / PROVIDER_PREFLIGHT_PASS` trong phạm vi dashboard/project, token count 723 và one-shot mock. Không nghiệm thu H6/paid route; Guard live mock-only, ledger mount RO; paid GATE B `BLOCKED_PREFLIGHT`. [Reviewer](reports/2026-11-22-gate-b-chatgpt-provider-and-scope-review.md).
