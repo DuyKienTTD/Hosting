@@ -2,6 +2,9 @@
 
 ## 2026-11-21
 
+- ChatGPT đã nghiệm thu kết quả H3 `MOCK_E2E_PASS` từ report/evidence trên GitHub và bổ sung mục nghiệm thu vào task mẹ mà không thay owner/status/approval. Paid GATE B vẫn `BLOCKED_PREFLIGHT`; credential guard và token count theo final digest chờ xác minh, không rerun bài test mock đã PASS khi không đổi điều kiện.
+
+
 - Lưu điểm tiếp tục GATE B sau H3, liên kết bằng chứng đã có và ghi điều kiện gỡ chặn. [Checkpoint](reports/2026-11-21-gate-b-h3-checkpoint.md).
 
 - Chủ dự án ban hành quy tắc tránh thao tác sai/lặp lại: đọc đủ toàn bộ tài liệu liên quan trước khi suy luận hoặc sửa; rà evidence đã PASS và chỉ rerun theo change trigger; tách dữ liệu/ownership và write-set, bảo vệ metadata task mẹ; review toàn diff, xác minh remote post-push, dừng khi output truncated hoặc quyền chưa rõ. Đã cập nhật AGENT_WORKFLOW mục 8, AGENTS, CONTRIBUTING, README, template báo cáo và CATALOG; GitHub branch protection/CI chưa được xác nhận là đã bật.
