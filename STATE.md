@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **WS-02 — Hostinger Agent:** Xác minh baseline VPS, Docker và backup qua hPanel chỉ đọc theo PR riêng. Work tiếp tục runbook/diễn tập, Codex tiếp tục B2-O. Handoff `PREPARED_FOR_OWNER_FORWARD`. [Task Hostinger](tasks/2026-11-22-hostinger-ws02-infrastructure-baseline.md).
+
 - **WS-02 — Work độc lập:** Chuẩn bị runbook giám sát/triage VPS, n8n và Hermes cùng ba ca diễn tập giả theo backlog vận hành. Đầu ra và PR riêng, độc lập B2-O. Handoff `PREPARED_FOR_OWNER_FORWARD`. [Task Work](tasks/2026-11-22-work-ws02-monitoring-and-triage.md).
 
 - **H6 B2-N/B2-O — Codex:** [`029f80e`](https://github.com/DuyKienTTD/Hosting/commit/029f80e198e21fcff3fac49038dbe2038f0eca95) chứng minh cùng run ID và một fake dispatch sau SIGKILL lúc active trong fixture local, Work đã đối chiếu bằng chứng local tại [`00f5649`](https://github.com/DuyKienTTD/Hosting/commit/00f5649) trên PR #4 và ghi rõ deadline/callback tích hợp là phạm vi B2-O. B2-O đã chuẩn bị cho Codex để đo deadline và callback tự động trên tuyến fake local có Guard/bridge/n8n. [Handoff](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md#h6-b2-o--deadline-và-callback-trên-tuyến-fake-tích-hợp).

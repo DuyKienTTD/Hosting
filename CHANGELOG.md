@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Phân vai WS-02: Hostinger Agent xác minh hiện trạng qua hPanel độc lập, Work soạn runbook và diễn tập. [Task Hostinger](tasks/2026-11-22-hostinger-ws02-infrastructure-baseline.md).
+
 - Chuẩn bị WS-02 giám sát và triage cho Work với nghiệm thu riêng, song song Codex B2-O. [Task Work](tasks/2026-11-22-work-ws02-monitoring-and-triage.md).
 
 - Nghiệm thu QA B2-N của Work tại `00f5649` trong phạm vi đã đo và chuẩn bị Work review độc lập tuyến B2-O trên PR #4.

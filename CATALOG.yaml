@@ -1096,6 +1096,14 @@ documents:
     updated_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: ttd-hostinger-ws02-infrastructure-baseline-001
+    path: tasks/2026-11-22-hostinger-ws02-infrastructure-baseline.md
+    type: task
+    status: prepared
+    authoritative_for: hostinger-ws02-read-only-infrastructure-baseline-scope
+    updated_at: 2026-11-22
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria

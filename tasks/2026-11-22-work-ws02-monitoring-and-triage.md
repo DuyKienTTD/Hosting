@@ -32,3 +32,5 @@ reviewer: chatgpt
 **DO_NOT_TOUCH / STOP.** Chỉ đọc GitHub và tài liệu công khai, diễn tập với dữ liệu giả. Không cài monitor, tạo lịch, gửi cảnh báo thật, truy cập KVM2/hPanel, gọi endpoint production, restart, restore backup, thay firewall/DNS/HTTPS, provider, khóa hay ledger. Nếu dữ liệu thiếu, ghi `UNKNOWN` và tiếp tục các phần đọc được.
 
 **HANDOFF.** `from_agent: chatgpt`, `to_agent: chatgpt-work`, `next_owner: chatgpt`, `handoff_state: PREPARED_FOR_OWNER_FORWARD`. Work push, mở PR, xác minh remote diff đúng write-set và gửi SHA. Codex tiếp tục B2-O theo task Gate B và PR #5 riêng, không phải đồng tác giả hay reviewer bắt buộc của WS-02.
+
+**Phối hợp WS-02.** [Hostinger Agent](2026-11-22-hostinger-ws02-infrastructure-baseline.md) sở hữu baseline hPanel/VPS/Docker/backup bằng PR riêng. Work sở hữu runbook và diễn tập giả. Work có thể nghiệm thu đầu ra theo audit lịch sử, ghi `UNKNOWN` cho dữ kiện live thiếu và hoàn tất trước khi có báo cáo Hostinger. ChatGPT đối chiếu hai đầu ra khi review. Codex tiếp tục B2-O.
