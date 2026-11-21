@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Tiếp nhận bảng tiêu chí provenance Work tại `c265340` và bổ sung lượt review độc lập bằng chứng runtime B2-N `a19765f` trên PR #4 hiện có.
+
 - Đối chiếu kết quả B2-N tại `a19765f`, ghi phạm vi fake runtime đã đo và đặc tả delta restart lúc run active cho Codex.
 
 - Tiếp nhận QA source B2-N của Work tại `ff2a1a9` và bổ sung tiêu chí đọc kết quả provenance trên task Work hiện có.
