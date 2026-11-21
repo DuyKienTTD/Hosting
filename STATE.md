@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **ChatGPT nghiệm thu H5 (2026-11-22):** `H5_ACCEPTED / PROVIDER_PREFLIGHT_PASS` trong phạm vi dashboard/project, token count 723 và one-shot mock. Không nghiệm thu H6/paid route; Guard live mock-only, ledger mount RO; paid GATE B `BLOCKED_PREFLIGHT`. [Reviewer](reports/2026-11-22-gate-b-chatgpt-provider-and-scope-review.md).
+
 - **ChatGPT review H5 follow-up (2026-11-22):** bằng chứng mới xác minh project/key qua dashboard và metadata an toàn, Standard/pay-as-you-go, 723 input tokens cho digest ứng viên, mock exact-byte one-shot PASS. Tuyến Guard live vẫn mock-only và ledger thật mount RO; paid GATE B `BLOCKED_PREFLIGHT`, không paid dispatch. [Review](reports/2026-11-22-gate-b-chatgpt-provider-and-scope-review.md).
 
 - **H5 Provider preflight:** Codex báo `PROVIDER_PREFLIGHT_PASS` với bằng chứng quản trị project, 723 input tokens cho digest ứng viên và exact-byte one-shot trên ledger mock. ChatGPT là next owner nghiệm thu. Guard live vẫn ở chế độ mock và paid GATE B tiếp tục `BLOCKED_PREFLIGHT` chờ duyệt và xác minh tuyến H6. [Báo cáo](reports/2026-11-22-hermes-gate-b-h5-preflight-followup.md).
