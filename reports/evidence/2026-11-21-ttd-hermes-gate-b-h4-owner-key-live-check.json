@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "task_id": "ttd-hermes-gate-b-001",
+  "handoff_id": "H4_OWNER_KEY_LIVE_CHECK",
+  "result": "VERIFIED_LIVE_STORED_NOT_MOUNTED",
+  "rules_commit": "e93cd2939fa672f3312c37a77672e6d30401d702",
+  "verified_at": "2026-11-21",
+  "secret_metadata": {
+    "present": true,
+    "mode": "0600",
+    "owner_recorded": false,
+    "size_recorded": false,
+    "digest_created": false,
+    "value_accessed": false,
+    "mounted": false,
+    "guard_only_read_only": false
+  },
+  "actions": {
+    "compose_mutation": false,
+    "provider_request": false,
+    "paid_inference": false,
+    "ledger_mutation": false,
+    "kill_switch_mutation": false,
+    "production_mutation": false,
+    "public_port_or_network_change": false
+  },
+  "evidence_reuse": {
+    "h4_sandbox_test": "reports/2026-11-21-hermes-gate-b-h4-key-input-preparation.md",
+    "h4_machine_evidence": "reports/evidence/2026-11-21-ttd-hermes-gate-b-h4.json",
+    "rerun_full_h3_h4_suites": false,
+    "reason": "no code, compose, topology, or request-fixture delta"
+  },
+  "gate_b": {
+    "status": "BLOCKED_PREFLIGHT",
+    "provider_project_scope_verified": false,
+    "provider_token_count_verified": false,
+    "guard_recreate_mount_approved": false,
+    "blocker": "SEPARATE_GUARD_ONLY_SANDBOX_RECREATE_MOUNT_APPROVAL_REQUIRED"
+  },
+  "handoff": {
+    "from": "codex",
+    "to": "business-owner",
+    "state": "NEEDS_OWNER_DECISION",
+    "decision": "approve guard-only sandbox recreate/mount or keep secret staged"
+  }
+}

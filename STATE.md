@@ -82,6 +82,8 @@ sensitivity: public-redacted
 
 - **Chủ dự án đã tự nhập API Key trong Hostinger Web Terminal:** terminal trả `STORED_NOT_MOUNTED` sau nhập hai lần qua no-echo (bằng chứng do chủ dự án cung cấp, chưa được ChatGPT kiểm chứng độc lập trên VPS). Secret chỉ ở staging, chưa mount guard; không tự restart/recreate, chưa provider token-count, GATE B vẫn `BLOCKED_PREFLIGHT`. Codex tiếp theo chỉ chuẩn bị kiểm tra read-only + kế hoạch mount và xin quyền riêng trước recreate; không làm lại H3/H4 PASS. [Task](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md).
 
+- **Codex đã kiểm tra live metadata sau owner input:** `PRESENT`, mode `0600`, `mounted=false`; không đọc/băm/đo kích thước key và không chạy Compose. H4 owner entry ở `VERIFIED_LIVE_STORED_NOT_MOUNTED`; project/Responses/billing/token count vẫn chưa xác minh. Guard-only sandbox recreate/mount cần phê duyệt riêng; GATE B giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-21-hermes-gate-b-h4-owner-key-live-check.md).
+
 ## Việc đang chờ
 
 - [TTD-HERMES-GATE-B-GUARD-REMEDIATION-001](tasks/2026-11-21-hermes-gate-b-permit-ledger-remediation.md) đã **MOCK_INTEGRATION_PASS**: shared-lock interop, 20-process race, 14 fault cases và full mock E2E qua n8n→Hermes→guard→callback PASS. Sandbox đã rollback, production health 200/restart 0, ledger thật 1 attempt/kill switch ON và không đổi, paid calls mới 0. [Báo cáo nghiệm thu](reports/2026-11-21-hermes-gate-b-guard-remediation-results.md). Paid GATE B vẫn BLOCKED_PREFLIGHT, cần preflight live riêng.
