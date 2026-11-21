@@ -62,10 +62,53 @@ def main():
         fixture(path)
         path.write_text("{bad", encoding="utf-8")
         assert "JSONDecodeError" in attempt(str(path))
+        for argument, expected in (("wrong-task", "PERMIT_UNAVAILABLE"),
+                                   ("wrong-key", "PERMIT_SCOPE_MISMATCH"),
+                                   ("wrong-fingerprint", "PERMIT_SCOPE_MISMATCH")):
+            fixture(path)
+            try:
+                one_shot.admit(path,
+                               "wrong-task" if argument == "wrong-task" else "gate-b",
+                               "wrong-key" if argument == "wrong-key" else "key-hash",
+                               "wrong-fingerprint" if argument == "wrong-fingerprint" else "request-hash", NOW)
+                raise AssertionError(argument)
+            except RuntimeError as error:
+                assert str(error) == expected
+            assert json.loads(path.read_text(encoding="utf-8"))["attempts"] == 1
+        fixture(path)
+        stale = json.loads(path.read_text(encoding="utf-8"))
+        stale["one_shot_permits"]["gate-b"]["expires_at"] = (NOW - timedelta(seconds=1)).isoformat()
+        path.write_text(json.dumps(stale), encoding="utf-8")
+        assert "PERMIT_EXPIRED" in attempt(str(path))
+        fixture(path)
+        wrong_model = json.loads(path.read_text(encoding="utf-8"))
+        wrong_model["model"] = "other-model"
+        path.write_text(json.dumps(wrong_model), encoding="utf-8")
+        assert "LEDGER_MISMATCH" in attempt(str(path))
+        fixture(path)
+        with patch.object(one_shot.fcntl, "flock", side_effect=OSError("lock failure")):
+            assert "lock failure" in attempt(str(path))
+        assert json.loads(path.read_text(encoding="utf-8"))["attempts"] == 1
+        fixture(path)
+        with patch.object(one_shot.os, "open", side_effect=PermissionError("read-only lock")):
+            assert "read-only lock" in attempt(str(path))
+        assert json.loads(path.read_text(encoding="utf-8"))["attempts"] == 1
+        fixture(path)
+        original_fsync = one_shot.os.fsync
+        fsync_count = 0
+        def fail_directory_fsync(fd):
+            nonlocal fsync_count
+            fsync_count += 1
+            if fsync_count == 2:
+                raise OSError("directory fsync failure")
+            return original_fsync(fd)
+        with patch.object(one_shot.os, "fsync", side_effect=fail_directory_fsync):
+            assert "directory fsync failure" in attempt(str(path))
+        assert "PERMIT_UNAVAILABLE" in attempt(str(path))
         print(json.dumps({"result": "PASS", "kernel": os.uname().release,
                           "multiprocess_contenders": 20, "admitted": 1,
                           "rejected": 19, "replay_rejected": True,
-                          "fault_cases": 6, "paid_calls": 0}))
+                          "fault_cases": 14, "paid_calls": 0}))
 
 
 if __name__ == "__main__":
