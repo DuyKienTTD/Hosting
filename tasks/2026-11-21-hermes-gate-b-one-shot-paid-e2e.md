@@ -471,3 +471,7 @@ Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và s�
 - `HANDOFF:` one redacted Codex report/evidence with commit+remote readback, `from_agent: codex`, `to_agent: chatgpt`, `handoff_state: PREPARED_FOR_OWNER_FORWARD` unless actually transmitted and ACKed. Do not infer continuous Codex execution from GitHub update.
 
 **Stage B2-A is authorized. Stage B2-B real-ledger mount/change, Stage B2-C provider transport and Stage C physical paid attempt are not activated by this entry.** ChatGPT can make a later scoped decision without repeatedly asking the owner, but each technical/safety gate must be proven before any side effect.
+
+### Kết quả H6 Stage B2-A — 2026-11-22
+
+**ACKNOWLEDGED / H6_B2_A_COMPLETE / VERIFIED_OFFLINE_LEDGER_COMPATIBILITY.** Codex ACK task `8d705b0`, quy tắc và task tại `da79cc9`, §10 tại `c915618`. Source `1caf096` kiểm được P0 v1 và adapter Level 2 nguyên bản trên fixture giả. Lock inode ổn định, snapshot thấy inode ledger mới, 1/4 admission ACK, 2 crash cases không ACK và 14 ca từ chối PASS. Settlement replay idempotent, giữ reserve. Render Compose offline không có thay đổi cấu hình so với B1. Stage B2-B cần chứng minh UID filesystem/quyền file và phương án rollback trước apply. GATE B paid giữ `BLOCKED_PREFLIGHT`. `next_owner: chatgpt`, `handoff_state: PREPARED_FOR_OWNER_FORWARD`. [Báo cáo](../reports/2026-11-22-hermes-gate-b-h6-b2-a.md) · [Evidence](../reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-a.json).

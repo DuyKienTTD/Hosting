@@ -1,0 +1,62 @@
+{
+  "task_id": "ttd-hermes-gate-b-001",
+  "phase": "H6_STAGE_B2_A",
+  "result": "H6_B2_A_COMPLETE",
+  "paid_gate": "BLOCKED_PREFLIGHT",
+  "observed_date_ict": "2026-11-22",
+  "handoff_commit": "8d705b0640a45645bb26b5978286170754c49311",
+  "rules_task_base": "da79cc95c7fcc274b025b338c1c00e3c81a467da",
+  "rule_10_commit": "c915618468f1bb6c8238f6a8aefd6597ca92ac1b",
+  "source_commit": "1caf0961898452a08abbecd027de552ed4e4ef3f",
+  "git_blob_content_sha256": {
+    "sandbox/p0-hermes-gate-a/h6_b2a_ledger_test.py": "000e46f44ec5b19a87ea973ef5eda8ec35d3d7070a84a655e40c212de2163972",
+    "sandbox/p0-hermes-gate-a/h6_writer.py": "81bdee36acc8d80fac6c7320209ba6d6a2dc270d9694efc9a912f2d386a1c7f8",
+    "sandbox/p0-hermes-gate-a/one_shot.py": "9fe3fd60813deefde65ad567bbeb4fc1013ea9a2f8a886951b7dabd94eb28d39",
+    "sandbox/p0-level2/adapter.py": "1150e9d6e85893091afee6fcda972649365fe1ad0d33d221f2815c8c6e0cad90"
+  },
+  "environment": {
+    "runtime": "local Docker Linux / WSL2",
+    "network_mode": "none",
+    "test_image": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+    "fixture_origin": "unmodified Level 2 adapter and generated synthetic data"
+  },
+  "interop": {
+    "schema_version": 1,
+    "same_filesystem_uid": 23062,
+    "guard_ipc_uid": 23061,
+    "level2_write_preserved": true,
+    "unknown_fields_preserved": ["root", "task", "day", "permit"],
+    "lock_contention_observed": true,
+    "lock_inode_preserved": true,
+    "snapshot_reopened_replaced_inode": true,
+    "concurrent_h6_admission_requests": 4,
+    "admission_acks": 1,
+    "known_and_unknown_settlement_idempotent": true,
+    "unknown_outcome_reserve_retained": true,
+    "wrong_peer_rejected": true,
+    "rejection_cases": 14,
+    "crash_cases": [
+      {"point": "before_fsync", "ack": false, "fixture_unchanged": true},
+      {"point": "after_durable_commit_before_ack", "ack": false, "pending_retained": true, "replay_rejected": true}
+    ]
+  },
+  "compose": {
+    "configuration_inputs_equal_to_commit": "7a03aeb8bd04745dfb9d928efeba5ed7f931ce9f",
+    "offline_render_sha256": "dcfbfd10b1f8e051efe6841a3cbe3b4372883a9d9d5930a5d967daa37d63c40a",
+    "configuration_inputs_changed": false,
+    "active_services": ["guard", "h6-writer", "provider-mock"],
+    "internal_networks": 1,
+    "writer_network_mode": "none",
+    "applied": false
+  },
+  "regressions": {"h6_stage_a_mock_cases": 8, "one_shot_linux_fault_cases": 16,
+                  "one_shot_interop": "PASS", "mock_contract": "PASS"},
+  "kvm2_operations": 0,
+  "real_ledger_or_lock_operations": 0,
+  "real_permit_operations": 0,
+  "provider_operations": 0,
+  "paid_attempts": 0,
+  "inference_cost_usd_delta": 0,
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}
