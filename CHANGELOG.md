@@ -2,6 +2,9 @@
 
 ## 2026-11-21
 
+- Tạo nhiệm vụ định danh resource `ttdnew.tech` (Hostinger Agent owner) và P0 sandbox n8n ↔ Hermes (Codex owner), có identity gate, backup/rollback, không phát sinh phí chưa duyệt.
+- P0 chưa được thực thi; ghi rõ trạng thái BLOCKED cho tới khi resource được xác minh và các điều kiện an toàn đạt.
+
 - Mở rộng hồ sơ Hostinger Agent theo account inventory 2026-11-21; ghi nhận Cloud Startup/WordPress, VPS, Docker/AI, domains, email, Reach và giới hạn quyền filesystem.
 - Liên kết báo cáo `reports/2026-11-21-hostinger-account-capability-inventory.md` vào catalog, danh bạ và trạng thái chung; giữ mâu thuẫn OpenClaw vs `u4s-hermes-agent` ở trạng thái chưa xác minh.
 
