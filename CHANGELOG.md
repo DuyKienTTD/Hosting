@@ -2,6 +2,10 @@
 
 ## 2026-11-21
 
+- Theo chỉ thị chủ dự án, đã thêm H4 vào task GATE B: Codex chuẩn bị cơ chế chủ dự án tự nhập OpenAI API Key qua giao diện kín localhost/SSH tunnel hoặc terminal không echo; guard-only secret mount, không public port, không secret trong log/Git, test fake-key trước, không phát sinh paid inference. Trạng thái mới chỉ `PREPARED_FOR_OWNER_FORWARD`.
+
+
+
 - ChatGPT đã nghiệm thu kết quả H3 `MOCK_E2E_PASS` từ report/evidence trên GitHub và bổ sung mục nghiệm thu vào task mẹ mà không thay owner/status/approval. Paid GATE B vẫn `BLOCKED_PREFLIGHT`; credential guard và token count theo final digest chờ xác minh, không rerun bài test mock đã PASS khi không đổi điều kiện.
 
 
