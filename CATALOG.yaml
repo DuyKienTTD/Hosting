@@ -540,6 +540,15 @@ documents:
     verified_at: 2026-11-21
     sensitivity: public-redacted
 
+  - id: hermes-gate-b-guard-mount-paused-checkpoint-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-guard-mount-paused-checkpoint.md
+    type: report
+    status: current
+    authoritative_for: gate-b-guard-only-mount-paused-before-vps-live-preflight
+    updated_at: 2026-11-21
+    sensitivity: public-redacted
+
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
