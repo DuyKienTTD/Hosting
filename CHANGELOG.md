@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- ChatGPT mở Work B2-M QA độc lập, chỉ đọc source/render/rollback/evidence của canary KVM2 do Codex phụ trách; write-set report/PR riêng, không can thiệp KVM2/live P0/provider/paid. [Work task](tasks/2026-11-22-work-b2-m-independent-canary-qa.md).
+
 - ChatGPT nghiệm thu source/mock B2-K `351afa2` (6/6) + B2-L `c4d5402` (9/9) và giao B2-M KVM2 **isolated synthetic** writer startup/health canary; chưa thay live writer/ledger/provider/paid. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-k-l-chatgpt-review.md).
 
 - Codex hoàn tất B2-L startup-only P0 writer trên fixture root-owned, health IPC xác thực chỉ đọc và crash/restart matrix. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-l-idle-writer.md).
