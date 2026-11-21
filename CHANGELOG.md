@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- ChatGPT nghiệm thu H6 Stage B1: `H6_STAGE_B1_ACCEPTED` theo code `7a03aeb`, evidence `afcd07e`, 8/8 KVM2 mock, 6/6 bounded no-bypass và rollback PASS; Stage B2/C chưa duyệt, paid GATE B BLOCKED_PREFLIGHT. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-stage-b1-chatgpt-review.md).
+
 - Codex hoàn tất H6 Stage B1 trên KVM2 sau khi qua cổng render và kiểm trùng tài nguyên. 8/8 ca mock, 6/6 no-bypass, rollback và đối chiếu baseline PASS. ChatGPT review, paid GATE B vẫn `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-stage-b1.md).
 
 - Chủ dự án phê duyệt **H6 Stage B1 KVM2 isolated mock**: Codex có quyền dựng và rollback một Compose project test riêng sau cổng kiểm tra rendered Compose/mount/network, chỉ dùng ledger và secrets giả; không chạm GATE A/production/ledger thật hoặc gọi provider/paid. Stage B2/C chưa duyệt. [Task](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md).
