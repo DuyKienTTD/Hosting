@@ -11,7 +11,7 @@ import struct
 from pathlib import Path
 
 from mock_contract import encode, no_duplicate_keys, usage_from_response
-from one_shot import MODEL, admit, settle_mock
+from one_shot import MODEL, admit, read_ledger, settle_mock
 
 GUARD_UID = 23061
 WRITER_UID = 23062
@@ -70,11 +70,7 @@ def call(path, operation, **fields):
 
 def fixture_snapshot(path):
     # Open the pathname each time. Atomic replacement publishes a complete snapshot.
-    with path.open("rb") as stream:
-        raw = stream.read(1024 * 1024 + 1)
-    if len(raw) > 1024 * 1024:
-        raise ValueError("H6_FIXTURE_SIZE")
-    ledger = json.loads(raw, object_pairs_hook=no_duplicate_keys)
+    ledger, raw = read_ledger(path)
     if ledger.get("h6_stage_a_fixture") is not True:
         raise ValueError("STAGE_A_FIXTURE_REQUIRED")
     summary = {key: ledger[key] for key in SUMMARY_FIELDS - {"sha256"}}

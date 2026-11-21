@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import fcntl
 import json
+import math
 import os
+import stat
 import tempfile
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -17,6 +19,9 @@ from pathlib import Path
 
 MODEL = "gpt-6-luna"
 RESERVE_USD = 0.0035
+CAPS = {"daily": 0.05, "total": 0.05, "job": 0.01}
+MAX_CALLS = 5
+MAX_LEDGER_BYTES = 1024 * 1024
 
 
 def usd(value: int | float) -> Decimal:
@@ -28,14 +33,78 @@ def usd(value: int | float) -> Decimal:
     return amount
 
 
+def unique_keys(pairs):
+    value = {}
+    for key, item in pairs:
+        if key in value:
+            raise ValueError("LEDGER_DUPLICATE_KEY")
+        value[key] = item
+    return value
+
+
+def reject_nonfinite(_):
+    raise RuntimeError("LEDGER_AMOUNT_INVALID")
+
+
+def finite_float(text):
+    value = float(text)
+    if not math.isfinite(value):
+        reject_nonfinite(text)
+    return value
+
+
+def read_ledger(path: Path) -> tuple[dict, bytes]:
+    """Read one complete v1 record from the current pathname, rejecting ambiguous JSON."""
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    with os.fdopen(fd, "rb") as stream:
+        if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+            raise ValueError("LEDGER_NOT_REGULAR")
+        raw = stream.read(MAX_LEDGER_BYTES + 1)
+    if len(raw) > MAX_LEDGER_BYTES:
+        raise ValueError("LEDGER_TOO_LARGE")
+    ledger = json.loads(raw, object_pairs_hook=unique_keys,
+                        parse_constant=reject_nonfinite, parse_float=finite_float)
+    if (not isinstance(ledger, dict) or type(ledger.get("schema_version")) is not int
+            or ledger["schema_version"] != 1 or ledger.get("model") != MODEL
+            or type(ledger.get("max_calls")) is not int or ledger["max_calls"] != MAX_CALLS):
+        raise RuntimeError("LEDGER_MISMATCH")
+    if ledger.get("caps_usd") != CAPS:
+        raise RuntimeError("CAP_MISMATCH")
+    if ledger.get("kill_switch") is not True:
+        raise RuntimeError("KILL_SWITCH_NOT_ON")
+    for key in ("tasks", "days"):
+        if not isinstance(ledger.get(key), dict) or any(not isinstance(row, dict) for row in ledger[key].values()):
+            raise RuntimeError("LEDGER_ROW_INVALID")
+    if not isinstance(ledger.get("one_shot_permits", {}), dict):
+        raise RuntimeError("LEDGER_PERMITS_INVALID")
+    totals = validate_budget(ledger)
+    for day in ledger["days"].values():
+        if any(value > aggregate for value, aggregate in zip(validate_budget(day), totals, strict=True)):
+            raise RuntimeError("LEDGER_DAY_TOTAL_MISMATCH")
+    return ledger, raw
+
+
+def validate_budget(row):
+    attempts = row.get("attempts")
+    if type(attempts) is not int or not 0 <= attempts <= MAX_CALLS:
+        raise RuntimeError("ATTEMPT_LIMIT")
+    reserved, actual = usd(row.get("reserved_usd")), usd(row.get("actual_usd"))
+    if reserved > usd(CAPS["total"]) or actual > reserved:
+        raise RuntimeError("BUDGET_CAP")
+    return attempts, reserved, actual
+
+
 @contextmanager
 def locked(path: Path):
     lock_path = path.with_suffix(path.suffix + ".lock")
-    fd = os.open(lock_path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+    fd = os.open(lock_path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600)
     try:
+        if not stat.S_ISREG(os.fstat(fd).st_mode):
+            raise ValueError("LEDGER_LOCK_NOT_REGULAR")
         os.fchmod(fd, 0o600)
         fcntl.flock(fd, fcntl.LOCK_EX)
-        yield json.loads(path.read_text(encoding="utf-8"))
+        ledger, _ = read_ledger(path)
+        yield ledger
     finally:
         os.close(fd)
 
@@ -45,7 +114,7 @@ def _durable_write(path: Path, value: dict) -> None:
     try:
         os.fchmod(fd, 0o600)
         with os.fdopen(fd, "w", encoding="utf-8") as stream:
-            json.dump(value, stream, sort_keys=True, separators=(",", ":"))
+            json.dump(value, stream, sort_keys=True, separators=(",", ":"), allow_nan=False)
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temporary, path)
@@ -71,15 +140,9 @@ def admit(path: Path, task_id: str, key_hash: str, fingerprint: str,
         if stage_a and ledger.get("h6_stage_a_fixture") is not True:
             raise RuntimeError("STAGE_A_FIXTURE_REQUIRED")
         now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
-        if ledger.get("model") != MODEL or ledger.get("max_calls") != 5:
-            raise RuntimeError("LEDGER_MISMATCH")
-        if ledger.get("kill_switch") is not True:
-            raise RuntimeError("KILL_SWITCH_NOT_ON")
-        if ledger.get("caps_usd") != {"daily": 0.05, "total": 0.05, "job": 0.01}:
-            raise RuntimeError("CAP_MISMATCH")
         permits = ledger.get("one_shot_permits", {})
         permit = permits.get(task_id)
-        if not permit or permit.get("state") != "ready":
+        if not isinstance(permit, dict) or permit.get("state") != "ready":
             raise RuntimeError("PERMIT_UNAVAILABLE")
         if len(permits) != 1 or any(row.get("one_shot") is True for row in ledger["tasks"].values()):
             raise RuntimeError("ONE_SHOT_LIMIT")
@@ -92,17 +155,14 @@ def admit(path: Path, task_id: str, key_hash: str, fingerprint: str,
         expiry = datetime.fromisoformat(permit["expires_at"])
         if expiry.tzinfo is None or now >= expiry:
             raise RuntimeError("PERMIT_EXPIRED")
-        attempts = ledger["attempts"]
-        if task_id in ledger["tasks"] or type(attempts) is not int or not 0 <= attempts < 5:
+        if task_id in ledger["tasks"] or ledger["attempts"] >= MAX_CALLS:
             raise RuntimeError("ATTEMPT_LIMIT")
         day = now.date().isoformat()
         day_state = ledger["days"].get(day, {"attempts": 0, "reserved_usd": 0.0, "actual_usd": 0.0})
         reserve = usd(RESERVE_USD)
         total = usd(ledger["reserved_usd"]) + reserve
         daily = usd(day_state["reserved_usd"]) + reserve
-        if (reserve > Decimal("0.01") or max(total, daily) > Decimal("0.05")
-                or usd(ledger["actual_usd"]) > usd(ledger["reserved_usd"])
-                or usd(day_state["actual_usd"]) > usd(day_state["reserved_usd"])):
+        if reserve > usd(CAPS["job"]) or total > usd(CAPS["total"]) or daily > usd(CAPS["daily"]):
             raise RuntimeError("BUDGET_CAP")
         permit["state"] = "consumed"
         permit["consumed_at"] = now.isoformat()
@@ -122,14 +182,21 @@ def settle_mock(path: Path, task_id: str, fingerprint: str, outcome: str,
     """Persist terminal mock evidence without counting it as provider spend."""
     if "mock-ledger" not in path.resolve().parts:
         raise RuntimeError("MOCK_LEDGER_REQUIRED")
+    if not ((outcome == "usage_recorded" and isinstance(usage, dict))
+            or (outcome == "outcome_unknown" and usage is None)):
+        raise RuntimeError("MOCK_SETTLEMENT_OUTCOME")
     with locked(path) as ledger:
         if stage_a and ledger.get("h6_stage_a_fixture") is not True:
             raise RuntimeError("STAGE_A_FIXTURE_REQUIRED")
         permit = ledger["one_shot_permits"][task_id]
         task = ledger["tasks"][task_id]
-        if (ledger["kill_switch"] is not True or permit["state"] != "consumed"
-                or permit["fingerprint"] != fingerprint or task["fingerprint"] != fingerprint):
+        if (permit["state"] != "consumed" or permit["model"] != MODEL or task.get("one_shot") is not True
+                or permit["fingerprint"] != fingerprint or task["fingerprint"] != fingerprint
+                or usd(task["reserved_usd"]) != usd(RESERVE_USD)
+                or type(task.get("attempt")) is not int or not 1 <= task["attempt"] <= ledger["attempts"]):
             raise RuntimeError("SETTLEMENT_SCOPE_MISMATCH")
+        if usd(ledger["days"][task["day"]]["reserved_usd"]) < usd(RESERVE_USD):
+            raise RuntimeError("SETTLEMENT_RESERVATION_MISSING")
         if task["state"] != "inflight":
             if task["state"] == outcome and task["mock_usage"] == usage:
                 return
