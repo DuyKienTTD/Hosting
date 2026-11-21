@@ -228,3 +228,25 @@ Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và s�
 - **ACCEPTANCE / TEST_DELTA:** metadata chứng minh secret chỉ mount ở `guard` và `read_only=true`; guard và proxy healthy; sáu container negative không thể chạm proxy qua DNS/IPv4; không public port, Compose gốc byte-identical, production health 200 và restart counts không tăng, ledger/permit/kill switch không đổi; 0 provider calls/0 USD paid delta. Lưu redacted evidence và trước/sau SHA của **Compose gốc** (không hash secret).
 - **ROLLBACK / STOP:** nếu mount, auth boundary, network, health hoặc resource invariants fail, STOP và rollback **riêng guard** về trạng thái base Compose đã backup, sau đó kiểm no-bypass/health/ledger; ghi chính xác tác động và blocker. Không tự xóa secret staged, không reset ledger. Dừng khi không thể bảo đảm isolated guard recreate.
 - **HANDOFF:** Codex push report/evidence + commit và đọc lại từ remote, phân biệt `GUARD_MOUNT_PASS` hoặc `BLOCKED/ROLLED_BACK`, `next_owner: chatgpt` nghiệm thu. Không coi mount PASS là `GATE_B_PAID_PASS`.
+
+## Điều phối tiếp theo — Guard-only mount: hoàn tất preflight (2026-11-21)
+
+**Không tạo task mới, không cấp quyền mới.** `owner: codex`; `next_owner: chatgpt` để nghiệm thu. Hostinger Agent chỉ hỗ trợ khi xuất hiện blocker hPanel/backup control plane. Tuân thủ phê duyệt owner Guard-only mount ở mục trên và ADR-P0-003; GATE B vẫn `BLOCKED_PREFLIGHT`.
+
+**READ_SET:** đọc đầy đủ `README.md`, `PROJECT.md`, `AGENTS.md`, `rules/AGENT_WORKFLOW.md` (mục 7–9), `rules/REPOSITORY_SECURITY.md`, `STATE.md`, `CATALOG.yaml`, `agents/codex.md`, task gốc/ADR-P0-003/H3/H4 báo cáo và evidence, checkpoint; xác nhận rule commit và đối chiếu runtime KVM2. Không suy diễn từ preview/truncation.
+
+**PREVIOUSLY_VERIFIED:** H3 combined mock + no-bypass/rollback, H4 11/11 Linux fake-key và live key staging `PRESENT`/mode `0600`/`mounted=false` theo evidence lịch sử. Không rerun toàn bộ khi không có `change_trigger`.
+
+**REPORTED (chủ dự án chuyển tiếp từ Codex, chưa có report/evidence mới trên GitHub):** Compose base/overlay validate, running Guard hash khớp base, apply/rollback dry-run chỉ có `guard`, Guard/proxy healthy, mạng riêng `internal` chỉ có hai container, key chưa mount. Đây không phải nghiệm thu live độc lập của ChatGPT.
+
+**PENDING / FIRST_ACTION:** Codex hoàn thành và chứng minh (1) backup cấu hình + mount metadata private, rollback readiness riêng Guard, không chạm nội dung/size/digest secret; (2) so sánh **toàn bộ** rendered Compose base+overlay với runtime thực tế, volumes/networks/ports/dependencies và dịch vụ chịu tác động; (3) baseline read-only production n8n/Hermes HTTP health/restart, Guard/proxy/network/public port và real ledger/permit/kill switch. Những bước đã PASS chỉ recheck nhẹ khi cần tính mới hoặc xuất hiện drift.
+
+**GO:** Chỉ khi tất cả preflight PASS và lệnh cụ thể/dry-run chứng minh recreate **duy nhất** sandbox `guard`, apply H4 overlay với `--no-deps`, không `compose down`; `--no-deps` riêng lẻ không thay thế được bằng chứng cô lập. Nếu chưa xác minh backup, baseline hoặc network boundary, **STOP trước recreate**, tiếp tục phép đọc hợp lệ nếu còn làm được.
+
+**POST-CHANGE ACCEPTANCE:** secret mount chỉ Guard, read-only; guard/proxy healthy; six-way DNS + IPv4 no-bypass negatives; network, public ports, Compose base, resource invariants bất biến; production HTTP 200 và restart count không tăng; real ledger/permit/kill switch không đổi; 0 provider calls/0 paid USD. FAIL → STOP, rollback **chỉ guard** theo base backup, kiểm lại các bất biến liên quan. Không gọi provider kể cả `/responses/input_tokens` trong bước mount.
+
+**WRITE_SET:** sandbox Guard mount đã duyệt, report/evidence redacted và mục kết quả trong task, STATE/CATALOG/CHANGELOG khi thực sự cần. **DO_NOT_TOUCH:** task metadata owner/status/approval, Compose base/H3/H4 source, production, DNS/firewall/public port/network, real ledger, permit/kill switch hoặc secret value. Không hash/đo secret, không đem backup/private path lên public Git.
+
+**HANDOFF:** Push redacted report và evidence, xác minh remote. Trả `GUARD_MOUNT_PASS` hoặc `BLOCKED/ROLLED_BACK` kèm blocker/owner/first safe action, `next_owner: chatgpt`; nếu phiên/công cụ ngắt, `INTERRUPTED_BY_ENVIRONMENT` có bằng chứng. Không dừng giữa quy trình chỉ vì còn phép kiểm tra được phép chưa thực hiện. Mount PASS không phải GATE_B_PAID_PASS; provider preflight là bước nghiệm thu tiếp theo riêng biệt.
+
+**Bản bổ sung là hướng dẫn điều phối, không phải xác minh mới trên KVM2 hay bằng chứng đã SENT/ACK của phiên Codex.**
