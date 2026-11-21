@@ -972,6 +972,15 @@ documents:
     verified_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: hermes-gate-b-h6-b2-i-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-i-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-I-offline-async-acceptance-and-B2-K-cross-service-mock-scope
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
