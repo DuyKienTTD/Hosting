@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **ChatGPT B2-I accepted / B2-K mở (2026-11-22):** Chấp nhận `H6_B2_I_ASYNC_CONTRACT_MOCK_PASS` theo mã/evidence Codex `8ded770`: 12/12 unit, 4/4 wall clock, 46s -> unknown 45s giữ reserve; HMAC callback/replay/restart và 8 admission -> 1 mock dispatch PASS. **Một SQLite cho hai vai trò** chưa chứng minh cross-service. Mở `H6_B2_K_CROSS_SERVICE_ADAPTER_OFFLINE_AUTHORIZED`: Codex mock adapter/Hermes/callback với lưu trữ riêng và run-ID, không KVM2 live/production/provider/paid. Work B2-J vẫn `PREPARED`; writer startup chưa đổi. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-b2-i-chatgpt-review.md).
+
 - **H6 B2-I async contract mock PASS (2026-11-22):** Fixture `202/status/callback` đạt 12/12 test và 4/4 timeline wall-clock. Ca 46 s chốt unknown ở 45 s, giữ reserve, không dispatch/settle lặp. ChatGPT review trước khi xét adapter/workflow sandbox và đối chiếu B2-J. Live `NO_GO`, paid `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-i-async-contract.md).
 
 - **Song song B2-I Codex và B2-J Work (2026-11-22):** ChatGPT theo §10 đặc tả Codex kiểm `202/status/callback` bất đồng bộ bằng fixture 5/21/31/46s với ledger/key giả, không đụng writer startup; Work [B2-J](tasks/2026-11-22-work-b2-j-idle-startup-audit.md) audit độc lập mô hình writer `IDLE_NO_PERMIT`/crash/restart/read-only health và rollback, chỉ ghi báo cáo qua PR riêng. Không chồng write-set, chưa Codex/Work ACK mới. Live `NO_GO`, ledger/permit thật và provider/paid vẫn cấm. GATE B `BLOCKED_PREFLIGHT`.
