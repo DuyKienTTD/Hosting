@@ -70,7 +70,7 @@ sensitivity: public-redacted
 
 - [TTD-HERMES-GATE-B-GUARD-REMEDIATION-001](tasks/2026-11-21-hermes-gate-b-permit-ledger-remediation.md) đã **MOCK_INTEGRATION_PASS**: shared-lock interop, 20-process race, 14 fault cases và full mock E2E qua n8n→Hermes→guard→callback PASS. Sandbox đã rollback, production health 200/restart 0, ledger thật 1 attempt/kill switch ON và không đổi, paid calls mới 0. [Báo cáo nghiệm thu](reports/2026-11-21-hermes-gate-b-guard-remediation-results.md). Paid GATE B vẫn BLOCKED_PREFLIGHT, cần preflight live riêng.
 
-- GATE B paid vẫn `BLOCKED_PREFLIGHT`. Đã xác minh giá Standard và Luna được phép tại project đã xem. Fingerprint toàn bộ body và hạch toán response/timeout PASS trên mock. Live bridge vẫn truy cập được proxy Level 2, còn guard chưa có tuyến paid riêng. Quyền Responses của credential dành cho guard và số input tokens theo provider chưa được chứng minh. Ledger thật giữ 1 attempt, 0 permit, kill switch ON. Không phát sinh paid attempt hoặc chi phí. [Báo cáo kiểm tra lại](reports/2026-11-21-hermes-gate-b-preflight-recheck.md).
+- GATE B paid vẫn `BLOCKED_PREFLIGHT`. Trên KVM2, proxy đã rời mạng dùng chung và chỉ guard truy cập được trong ma trận đã thử. Mock E2E có callback PASS trên lượt mới sau một lỗi metadata Hermes. Hạch toán và rollback kiểm chứng riêng. Guard chưa có credential provider và chưa có token count theo provider. Ledger thật giữ 1 attempt, 0 permit, kill switch ON. Paid attempt và chi phí mới đều 0. [Báo cáo hiện tại](reports/2026-11-21-hermes-gate-b-egress-isolation.md).
 
 - Chưa thực hiện hardening SSH/XRDP hoặc firewall.
 - Chưa đặt n8n/Hermes sau reverse proxy HTTPS.

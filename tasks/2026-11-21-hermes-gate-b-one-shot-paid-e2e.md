@@ -61,3 +61,7 @@ Codex lưu `reports/2026-11-21-hermes-gate-b-paid-results.md` và JSON evidence 
 ## Kiểm tra lại sau remediation
 
 **BLOCKED_PREFLIGHT.** Fingerprint của toàn bộ byte gửi đi và hạch toán sau response, timeout hoặc stream bị cắt đã PASS với guard và provider mock trên Linux. Live bridge chạm được proxy Level 2 cũ, guard chưa có paid route riêng và chưa xác minh quyền Responses của credential dành cho guard hoặc số input tokens của request cuối theo provider. Ledger thật giữ 1 attempt, 0 permit và kill switch ON trước/sau. Paid dispatch mới 0. [Báo cáo tổng hợp](../reports/2026-11-21-hermes-gate-b-preflight-recheck.md) · [Evidence](../reports/evidence/2026-11-21-ttd-hermes-gate-b-preflight-recheck.json).
+
+## Kiểm tra sau cô lập proxy
+
+Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và sáu container còn lại bị chặn trong phép thử. Mock callback, hạch toán mock riêng và rollback egress đã kiểm chứng. Task vẫn **BLOCKED_PREFLIGHT** vì thiếu credential dành cho guard đã xác minh, số tokens theo provider và một lượt mock kết hợp callback với one-shot accounting. Có một lần lỗi metadata Hermes trước callback. Paid attempts mới 0. [Báo cáo hiện tại](../reports/2026-11-21-hermes-gate-b-egress-isolation.md).

@@ -56,4 +56,6 @@ Kiểm tra lại sau remediation vẫn **BLOCKED_PREFLIGHT**, với 0 paid attem
 
 ## Bàn giao Codex sau thực thi
 
+Kiểm tra sau cô lập proxy đã xác minh quyền truy cập mạng chỉ dành cho guard trong nhóm container đã thử. Paid GATE B tiếp tục **BLOCKED_PREFLIGHT** và chưa phát sinh lượt gọi. [Kết quả live và điều kiện còn thiếu](../reports/2026-11-21-hermes-gate-b-egress-isolation.md).
+
 Codex tạo `reports/2026-11-21-hermes-gate-b-paid-results.md` và evidence JSON redacted, cập nhật ADR/task/STATE/CATALOG/CHANGELOG, ghi rõ STOP/PASS và commit.

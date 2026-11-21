@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- Cô lập proxy Level 2 trên mạng riêng với guard. Kiểm tra quyền truy cập từ sáu container, mock callback, hạch toán mock và rollback egress. Paid GATE B vẫn chờ credential và token count theo provider. [Báo cáo](reports/2026-11-21-hermes-gate-b-egress-isolation.md).
+
 - Kiểm tra lại paid GATE B. Guard mock khớp fingerprint toàn body và lưu usage hoặc trạng thái không rõ sau timeout. Dừng trước paid dispatch vì bridge chạm được proxy Level 2 và còn thiếu bằng chứng credential/cap theo provider. Ledger thật giữ nguyên và kill switch ON. [Báo cáo](reports/2026-11-21-hermes-gate-b-preflight-recheck.md).
 
 - Hoàn tất GATE B guard remediation mock trên KVM2: shared-lock interop và 14 fault cases PASS, full n8n→Hermes→guard→provider mock→callback PASS, replay không cấp thêm admission. Sandbox rollback; production health 200/restart 0; ledger thật không đổi, kill switch ON, paid calls và chi phí mới 0. Paid GATE B vẫn chờ preflight riêng.

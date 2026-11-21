@@ -442,6 +442,24 @@ documents:
     verified_at: 2026-11-21
     sensitivity: public-redacted
 
+  - id: hermes-gate-b-egress-isolation-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-egress-isolation.md
+    type: report
+    status: blocked
+    authoritative_for: Gate-B-current-egress-isolation-and-paid-preflight
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-egress-isolation-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-egress-isolation.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-Gate-B-egress-isolation-and-preflight-evidence
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria

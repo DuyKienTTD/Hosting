@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "task_id": "ttd-hermes-gate-b-001",
+  "verified_at": "2026-11-21",
+  "result": "BLOCKED_PREFLIGHT",
+  "network": {
+    "dedicated_internal_members": ["guard", "provider_proxy"],
+    "proxy_outbound_members": ["provider_proxy"],
+    "legacy_shared_network_proxy_removed": true,
+    "compose_backup_saved_and_config_validated": true,
+    "guard_proxy_health_http": 200,
+    "proxy_denied_by_dns_and_two_ipv4_interfaces": [
+      "bridge", "hermes_auxiliary", "provider_mock", "n8n_sandbox", "hermes_production", "n8n_production"
+    ],
+    "direct_provider_tcp_443_denied": ["guard", "bridge", "hermes_auxiliary", "provider_mock", "n8n_sandbox"]
+  },
+  "provider": {
+    "verified_tls_unauthenticated_metadata_http": 401,
+    "guard_provider_credential_present": false,
+    "live_project_write_scope_and_billing_verified": false,
+    "paid_attempts_delta": 0,
+    "api_cost_delta_usd": 0
+  },
+  "mock_candidate": {
+    "canonical_bytes": 3308,
+    "sha256": "6a12a6786371b683bed0229a2c95c8c222dacb1083a219f5d29a7a02810cf643",
+    "provider_input_tokens": null,
+    "paid_permit_bound": false
+  },
+  "mock_e2e": {
+    "initial_webhook_http": 500,
+    "initial_error": "HERMES_RUNTIME_MISMATCH",
+    "fresh_task_matrix_exit": 0,
+    "fresh_task_webhook_http": 200,
+    "fresh_task_callback_http": 200,
+    "fresh_task_mock_requests": 1,
+    "fresh_task_replay_extra_requests": 0,
+    "combined_one_shot_accounting_and_callback": "not_run"
+  },
+  "accounting_mock": {
+    "guard_namespace_loopback_exit": 0,
+    "complete": "usage_recorded",
+    "timeout": "outcome_unknown",
+    "truncated": "outcome_unknown",
+    "tamper_or_replay_dispatches": 0
+  },
+  "rollback": {"guard_proxy_link_revoked_and_restored": true, "mock_guard_health_during_rollback": 200},
+  "production": {"n8n_health_http_before_after": 200, "hermes_health_http_before_after": 200, "restart_counts_after": [0, 0]},
+  "real_ledger": {"attempts": 1, "reserved_usd": 0.0035, "prior_usage_estimate_usd": 0.0000496, "kill_switch": true, "permits": 0, "digest_prefix_matches_prior_baseline": true}
+}
