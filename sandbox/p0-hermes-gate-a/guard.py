@@ -32,6 +32,12 @@ MAX_BODY_BYTES = 64 * 1024
 TOKEN_FILE = Path("/run/secrets/guard_service_token")
 LEDGER_PATH = Path("/opt/ttd/ledger/level2-budget.json")
 MOCK_ONE_SHOT_LEDGER = os.environ.get("TTD_MOCK_ONE_SHOT_LEDGER", "")
+H6_STAGE_A_SOCKET = os.environ.get("TTD_H6_STAGE_A_SOCKET", "")
+if H6_STAGE_A_SOCKET:
+    from h6_writer import SOCKET_PATH
+
+    if MOCK_ONE_SHOT_LEDGER or H6_STAGE_A_SOCKET != str(SOCKET_PATH):
+        raise SystemExit("invalid H6 Stage A socket configuration")
 if MOCK_ONE_SHOT_LEDGER:
     LEDGER_PATH = Path(MOCK_ONE_SHOT_LEDGER)
     if "mock-ledger" not in LEDGER_PATH.resolve().parts or LEDGER_PATH.suffix != ".json":
@@ -101,7 +107,18 @@ def capture_lock() -> Iterator[None]:
         os.close(fd)
 
 
+def writer_call(operation, **fields):
+    from h6_writer import call
+
+    try:
+        return call(H6_STAGE_A_SOCKET, operation, **fields)
+    except (OSError, ValueError, RuntimeError) as error:
+        raise RuntimeError("H6_WRITER_UNAVAILABLE_OR_DENIED") from error
+
+
 def ledger_summary() -> dict[str, Any]:
+    if H6_STAGE_A_SOCKET:
+        return writer_call("snapshot")
     ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
     return {
         "attempts": ledger.get("attempts"),
@@ -170,6 +187,31 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
+def freeze_stage_a(forwarded):
+    body = dict(forwarded)
+    cache_key = body.pop("prompt_cache_key", "")
+    messages = body.get("input")
+    if (not isinstance(cache_key, str)
+            or body.get("reasoning", {"effort": "none"}) != {"effort": "none"}
+            or body.get("include", []) not in ([], ["reasoning.encrypted_content"])):
+        raise ValueError("H6_STAGE_A_REQUEST_POLICY")
+    if not isinstance(messages, list) or len(messages) != 1 or not isinstance(messages[0], dict):
+        raise ValueError("H6_STAGE_A_ONE_USER_TURN_REQUIRED")
+    message = messages[0]
+    if (set(message) - {"type", "role", "content"} or message.get("type", "message") != "message"
+            or message.get("role") != "user"):
+        raise ValueError("H6_STAGE_A_ONE_USER_TURN_REQUIRED")
+    content = message.get("content")
+    if not isinstance(content, str) and not (
+        isinstance(content, list) and content and all(
+            isinstance(item, dict) and set(item) == {"type", "text"}
+            and item["type"] == "input_text" and isinstance(item["text"], str) for item in content
+        )
+    ):
+        raise ValueError("H6_STAGE_A_TEXT_REQUIRED")
+    return freeze(body)
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "ttd-gate-a-inference-guard/1.0"
     sys_version = ""
@@ -190,10 +232,16 @@ class Handler(BaseHTTPRequestHandler):
         expected = f"Bearer {service_token()}".encode()
         return hmac.compare_digest(self.headers.get("Authorization", "").encode(), expected)
 
+    def settle_one_shot_mock(self, task_id, fingerprint, outcome, usage=None):
+        if H6_STAGE_A_SOCKET:
+            writer_call("settle", task_id=task_id, fingerprint=fingerprint, outcome=outcome, usage=usage)
+        else:
+            settle_mock(LEDGER_PATH, task_id, fingerprint, outcome, usage)
+
     def run_one_shot_mock(self, body, wire, task_id, fingerprint):
         try:
             forwarded = json.loads(wire)
-            entry = record_capture(body, forwarded)
+            entry = None if H6_STAGE_A_SOCKET else record_capture(body, forwarded)
             request = urllib.request.Request(
                 MOCK_URL, data=wire, method="POST",
                 headers={"Authorization": f"Bearer {service_token()}", "Content-Type": "application/json"})
@@ -203,27 +251,31 @@ class Handler(BaseHTTPRequestHandler):
                 content_type = response.headers.get_content_type()
                 if len(payload) > MAX_RESPONSE_BYTES or response.status != 200:
                     raise ValueError("MOCK_RESPONSE_OUT_OF_POLICY")
+                length = response.headers.get("Content-Length")
+                if length is not None and int(length) != len(payload):
+                    raise ValueError("MOCK_RESPONSE_TRUNCATED")
                 streaming = forwarded.get("stream") is True
                 if content_type != ("text/event-stream" if streaming else "application/json"):
                     raise ValueError("MOCK_CONTENT_TYPE_MISMATCH")
                 usage = usage_from_response(payload, streaming)
         except (OSError, ValueError, TypeError, AttributeError, KeyError, http.client.HTTPException):
             try:
-                settle_mock(LEDGER_PATH, task_id, fingerprint, "outcome_unknown")
+                self.settle_one_shot_mock(task_id, fingerprint, "outcome_unknown")
             except (OSError, RuntimeError, ValueError, KeyError, TypeError):
                 self.send_json(503, {"error": "MOCK_SETTLEMENT_FAILED"})
                 return
             self.send_json(502, {"error": "MOCK_OUTCOME_UNKNOWN"})
             return
         try:
-            settle_mock(LEDGER_PATH, task_id, fingerprint, "usage_recorded", usage)
+            self.settle_one_shot_mock(task_id, fingerprint, "usage_recorded", usage)
         except (OSError, RuntimeError, ValueError, KeyError, TypeError):
             self.send_json(503, {"error": "MOCK_SETTLEMENT_FAILED"})
             return
         self.send_response(200)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(payload)))
-        self.send_header("x-ttd-capture-sequence", str(entry["sequence"]))
+        if entry is not None:
+            self.send_header("x-ttd-capture-sequence", str(entry["sequence"]))
         self.end_headers()
         self.wfile.write(payload)
 
@@ -232,7 +284,8 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 ledger = ledger_summary()
                 status = 200 if ledger["kill_switch"] is True else 503
-                self.send_json(status, {"status": "ok" if status == 200 else "blocked", "mode": "mock_only", "ledger": ledger})
+                mode = "h6_stage_a_mock" if H6_STAGE_A_SOCKET else "mock_only"
+                self.send_json(status, {"status": "ok" if status == 200 else "blocked", "mode": mode, "ledger": ledger})
             except Exception:
                 self.send_json(503, {"status": "unhealthy", "error": "LEDGER_UNAVAILABLE"})
             return
@@ -268,7 +321,11 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             forwarded, _ = enforce(body)
-            if MOCK_ONE_SHOT_LEDGER:
+            if H6_STAGE_A_SOCKET:
+                task_id, key_hash = mock_scope(forwarded)
+                wire, fingerprint = freeze_stage_a(forwarded)
+                writer_call("admit", task_id=task_id, key_hash=key_hash, fingerprint=fingerprint)
+            elif MOCK_ONE_SHOT_LEDGER:
                 task_id, key_hash = mock_scope(forwarded)
                 wire, fingerprint = freeze(forwarded)
                 admit_one_shot(LEDGER_PATH, task_id, key_hash, fingerprint)
@@ -281,7 +338,7 @@ class Handler(BaseHTTPRequestHandler):
         except (OSError, KeyError, TypeError, json.JSONDecodeError):
             self.send_json(503, {"error": "PERMIT_LEDGER_UNAVAILABLE"})
             return
-        if MOCK_ONE_SHOT_LEDGER:
+        if H6_STAGE_A_SOCKET or MOCK_ONE_SHOT_LEDGER:
             self.run_one_shot_mock(body, wire, task_id, fingerprint)
             return
         entry = record_capture(body, forwarded)
@@ -316,6 +373,8 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    if H6_STAGE_A_SOCKET and Path("/run/secrets/openai_provider_api_key").exists():
+        raise SystemExit("H6 Stage A must run without a provider credential")
     if len(service_token()) < 32:
         raise SystemExit("guard service token missing")
     if ledger_summary()["kill_switch"] is not True:

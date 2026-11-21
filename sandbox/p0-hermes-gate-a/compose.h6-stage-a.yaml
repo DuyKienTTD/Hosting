@@ -1,0 +1,85 @@
+# Offline mock only. Render with compose.yaml, without H4 or any live overlay.
+# The fixture root is disposable. ipc and mock-ledger must already exist.
+services:
+  guard:
+    container_name: !reset null
+    user: "23061:23060"
+    depends_on:
+      h6-writer:
+        condition: service_healthy
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+      TTD_H6_STAGE_A_SOCKET: /opt/ttd/h6-ipc/writer.sock
+    volumes: !override
+      - ./guard.py:/opt/ttd/guard.py:ro
+      - ./one_shot.py:/opt/ttd/one_shot.py:ro
+      - ./mock_contract.py:/opt/ttd/mock_contract.py:ro
+      - ./h6_writer.py:/opt/ttd/h6_writer.py:ro
+      - type: bind
+        source: ${TTD_H6_FIXTURE_ROOT:?use a disposable Stage A fixture root}/guard-service-token
+        target: /run/secrets/guard_service_token
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${TTD_H6_FIXTURE_ROOT:?use a disposable Stage A fixture root}/ipc
+        target: /opt/ttd/h6-ipc
+        read_only: true
+        bind:
+          create_host_path: false
+    networks: !override
+      h6_mock:
+        aliases: [gate-a-guard]
+  h6-writer:
+    image: ghcr.io/hostinger/hvps-hermes-agent@sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f
+    pull_policy: never
+    user: "23062:23060"
+    entrypoint: ["python3", "-B", "/opt/ttd/h6_writer.py"]
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 32
+    mem_limit: 64m
+    cpus: 0.25
+    volumes:
+      - ./one_shot.py:/opt/ttd/one_shot.py:ro
+      - ./mock_contract.py:/opt/ttd/mock_contract.py:ro
+      - ./h6_writer.py:/opt/ttd/h6_writer.py:ro
+      - type: bind
+        source: ${TTD_H6_FIXTURE_ROOT:?use a disposable Stage A fixture root}/mock-ledger
+        target: /opt/ttd/mock-ledger
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${TTD_H6_FIXTURE_ROOT:?use a disposable Stage A fixture root}/ipc
+        target: /opt/ttd/h6-ipc
+        bind:
+          create_host_path: false
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - "import socket; s=socket.socket(socket.AF_UNIX,socket.SOCK_SEQPACKET); s.settimeout(1); s.connect('/opt/ttd/h6-ipc/writer.sock'); s.close()"
+      interval: 2s
+      timeout: 2s
+      retries: 10
+  provider-mock:
+    container_name: !reset null
+    volumes: !override
+      - ./provider_mock.py:/opt/ttd/provider_mock.py:ro
+      - type: bind
+        source: ${TTD_H6_FIXTURE_ROOT:?use a disposable Stage A fixture root}/guard-service-token
+        target: /run/secrets/guard_service_token
+        read_only: true
+        bind:
+          create_host_path: false
+    networks: !override
+      h6_mock:
+        aliases: [gate-a-provider-mock]
+  bridge: !reset null
+  hermes-aux: !reset null
+networks:
+  h6_mock:
+    internal: true

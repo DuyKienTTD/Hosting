@@ -60,7 +60,7 @@ def _durable_write(path: Path, value: dict) -> None:
 
 
 def admit(path: Path, task_id: str, key_hash: str, fingerprint: str,
-          now: datetime | None = None) -> str:
+          now: datetime | None = None, *, stage_a: bool = False) -> str:
     """Consume a pre-created scoped permit and reserve in one ledger commit.
 
     Permit must already be stored in ledger['one_shot_permits'][task_id] with
@@ -68,6 +68,8 @@ def admit(path: Path, task_id: str, key_hash: str, fingerprint: str,
     function never creates a permit or a ledger. The global switch stays ON.
     """
     with locked(path) as ledger:
+        if stage_a and ledger.get("h6_stage_a_fixture") is not True:
+            raise RuntimeError("STAGE_A_FIXTURE_REQUIRED")
         now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
         if ledger.get("model") != MODEL or ledger.get("max_calls") != 5:
             raise RuntimeError("LEDGER_MISMATCH")
@@ -83,6 +85,10 @@ def admit(path: Path, task_id: str, key_hash: str, fingerprint: str,
             raise RuntimeError("ONE_SHOT_LIMIT")
         if permit.get("key_hash") != key_hash or permit.get("fingerprint") != fingerprint or permit.get("model") != MODEL:
             raise RuntimeError("PERMIT_SCOPE_MISMATCH")
+        if stage_a:
+            count = permit.get("mock_input_tokens")
+            if type(count) is not int or not 0 < count <= 4_000:
+                raise RuntimeError("MOCK_INPUT_COUNT_INVALID")
         expiry = datetime.fromisoformat(permit["expires_at"])
         if expiry.tzinfo is None or now >= expiry:
             raise RuntimeError("PERMIT_EXPIRED")
@@ -112,11 +118,13 @@ def admit(path: Path, task_id: str, key_hash: str, fingerprint: str,
 
 
 def settle_mock(path: Path, task_id: str, fingerprint: str, outcome: str,
-                usage: dict | None = None) -> None:
+                usage: dict | None = None, *, stage_a: bool = False) -> None:
     """Persist terminal mock evidence without counting it as provider spend."""
     if "mock-ledger" not in path.resolve().parts:
         raise RuntimeError("MOCK_LEDGER_REQUIRED")
     with locked(path) as ledger:
+        if stage_a and ledger.get("h6_stage_a_fixture") is not True:
+            raise RuntimeError("STAGE_A_FIXTURE_REQUIRED")
         permit = ledger["one_shot_permits"][task_id]
         task = ledger["tasks"][task_id]
         if (ledger["kill_switch"] is not True or permit["state"] != "consumed"
