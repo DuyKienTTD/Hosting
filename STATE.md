@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **H6 B2-C ChatGPT review / B2-D open (2026-11-22):** Chấp nhận `H6_B2_C_UID_MODEL_OFFLINE_PASS` trên Docker Desktop, chọn writer UID 0 bỏ caps, HMAC hai chiều, không ACL-only. **HMAC hiện chỉ nằm trong fixture**, chưa ở Guard/writer deployable. Mở `H6_B2_D_IPC_INTEGRATION_OFFLINE_AUTHORIZED` cho Codex tích hợp mã và thử mock, tuyệt đối chưa apply KVM2/ledger thật/provider/paid. Live apply `BLOCKED_UID_OR_MOUNT`; paid `BLOCKED_PREFLIGHT`. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-b2-c-chatgpt-review.md).
+
 - **H6 B2-C offline PASS (2026-11-22)** — writer UID 0 bỏ toàn bộ caps và xác thực HMAC hai chiều qua Unix socket đạt trên ledger giả. UID 23062 với ACL lỗi ở lock `fchmod` và mất quyền sau Level 2 ghi. ChatGPT nghiệm thu trước mọi quyết định apply. Live apply giữ `BLOCKED_UID_OR_MOUNT`, paid GATE B giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-c-uid-model.md).
 
 - **H6 B2-B reviewed (2026-11-22):** `READ_ONLY_PREFLIGHT_ACCEPTED`, live apply `BLOCKED_UID_OR_MOUNT`: ledger/lock root:root 0600, directory 0700; writer UID 23062 cannot access. ChatGPT opens `H6_B2_C_UID_MODEL_OFFLINE_AUTHORIZED` for Codex: compare root-owned no-capabilities writer and nonroot ACL on fake root-owned ledger, test IPC peer auth and Level 2 concurrency, offline-only, no KVM2 apply, no real-ledger/permit/provider/paid/production. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-b-chatgpt-review.md).
