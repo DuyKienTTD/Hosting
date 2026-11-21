@@ -92,7 +92,7 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
-- **Owner duyệt H6 Stage A (2026-11-22):** Codex được chuẩn bị source Guard/writer, Compose overlay **trên Git** và kiểm thử offline/mock với ledger giả trong [task GATE B hiện hành](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md). `H6_STAGE_A_AUTHORIZED`; handoff `PREPARED_FOR_OWNER_FORWARD`, chưa xác nhận Codex ACK riêng cho Stage A. **Không apply KVM2**, không sửa ledger thật/permit, không gọi provider, paid inference hay production. Stage B/C vẫn chưa duyệt; GATE B `BLOCKED_PREFLIGHT`.
+- **H6 Stage A hoàn tất (2026-11-22):** Codex ACK approval `c1fe91c` và bàn giao `H6_STAGE_A_COMPLETE / VERIFIED_OFFLINE_MOCK`. Guard/writer, IPC, admission durable và overlay đã kiểm trên fixture Linux cục bộ. ChatGPT review trước khi chủ dự án quyết định Stage B. Stage B/C chưa duyệt và Gate B paid `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-stage-a.md).
 
 - **ChatGPT review thiết kế H6 (2026-11-22):** `H6_PREPARATION_ACCEPTED / ARCHITECTURE_CONDITIONALLY_ACCEPTED`. Tách ledger writer với Unix socket phù hợp về hướng, nhưng cần ràng buộc peer auth, lock/inode, crash, thử mock và rollback. **Chưa duyệt apply/recreate Guard hoặc writer**, chưa được chạm ledger thật/permit/paid. Owner quyết định scope sandbox sau khi có patch và bằng chứng test. GATE B `BLOCKED_PREFLIGHT`. [Review](reports/2026-11-22-hermes-gate-b-h6-chatgpt-design-review.md).
 

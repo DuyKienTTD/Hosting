@@ -414,3 +414,7 @@ Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và s�
 - `HANDOFF:` `from_agent: chatgpt`, `to_agent: codex`, `handoff_state: PREPARED_FOR_OWNER_FORWARD` when committed; send **this same task URL and commit SHA** to Codex through owner forwarding. Only Codex confirmation with rule/task commit and active environment establishes `ACKNOWLEDGED`. On completion Codex reports `H6_STAGE_A_COMPLETE` or specific blocker; ChatGPT reviews before owner separately decides Stage B.
 
 **Stage B sandbox application and Stage C paid dispatch are NOT approved by this entry.** No provider request, live permit, ledger mutation, container recreate or production change is authorized.
+
+### Kết quả H6 Stage A — 2026-11-22
+
+**ACKNOWLEDGED / H6_STAGE_A_COMPLETE / VERIFIED_OFFLINE_MOCK.** Codex ACK approval `c1fe91c`, quy tắc và task tại `cf72d4d`. Source `a411114` triển khai Guard/writer, IPC xác thực UID hai chiều và overlay mock. Đã kiểm exact bytes sau ACK durable, tám request đồng thời chỉ một lượt mock, crash trước/sau ghi, rollback rehearsal trên fixture, authenticated callback giả và Compose render offline. Stage A có 0 thao tác KVM2, ledger/permit thật, provider hoặc paid. Gate B paid tiếp tục `BLOCKED_PREFLIGHT`. ChatGPT review trước khi chủ dự án quyết định Stage B. `handoff_state: PREPARED_FOR_OWNER_FORWARD`. [Báo cáo](../reports/2026-11-22-hermes-gate-b-h6-stage-a.md) · [Evidence](../reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-stage-a.json).

@@ -1,0 +1,62 @@
+{
+  "task_id": "ttd-hermes-gate-b-001",
+  "phase": "H6_STAGE_A",
+  "result": "H6_STAGE_A_COMPLETE",
+  "paid_gate": "BLOCKED_PREFLIGHT",
+  "observed_date_ict": "2026-11-22",
+  "approval_commit": "c1fe91caa60904578c39b46bcb0cdeb1d5ee7319",
+  "rules_task_base": "cf72d4dc1b1d58b13a2d9c22818d5b43286cb93e",
+  "source_commit": "a411114d0b485729a57d43eaf97fd2a5226d1585",
+  "git_blob_content_sha256": {
+    "sandbox/p0-hermes-gate-a/compose.h6-stage-a.yaml": "364b3e6f3108962be4ef067a4d46eadcd9bfc924ff8012fd1bb6f9c5a3f61418",
+    "sandbox/p0-hermes-gate-a/guard.py": "1415d2e7610e527e3d8acca9fd0eecfd28741fad933824d117654be6ffe47c43",
+    "sandbox/p0-hermes-gate-a/h6_stage_a_test.py": "12789d52143097db761d6525b7933d3ceca4027f59230bb54919b299c6ae23ce",
+    "sandbox/p0-hermes-gate-a/h6_writer.py": "f48a685e62e08ff39bb4dd459ae86e419738526b5621047e19e0c9834ebe724b",
+    "sandbox/p0-hermes-gate-a/one_shot.py": "30811b3db32489439bed4996226b9928d37683b7bbe04914b6802b55161acc61"
+  },
+  "environment": {
+    "runtime": "local Docker Desktop Linux / WSL2",
+    "compose": "5.1.4",
+    "test_image": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+    "network_mode": "none",
+    "separate_ipc_container_test": "PASS",
+    "compose_offline_render": "PASS",
+    "compose_missing_fixture_root": "DENIED",
+    "compose_services_all_profiles": ["guard", "h6-writer", "provider-mock"],
+    "compose_target_runtime_started": false
+  },
+  "mock_matrix": {
+    "result": "PASS",
+    "mock_wire_sha256": "92435b4ff2c2ac7a7db613371943ed671401bd0abc4d69ab4f133c7525a29627",
+    "concurrent_requests": 8,
+    "cases": [
+      {"case": "ok", "mock_dispatches": 1, "callbacks": 0, "fixture_attempts": 2},
+      {"case": "callback", "mock_dispatches": 1, "callbacks": 1, "fixture_attempts": 2},
+      {"case": "before_commit", "mock_dispatches": 0, "callbacks": 0, "fixture_attempts": 1},
+      {"case": "after_commit_before_ack", "mock_dispatches": 0, "callbacks": 0, "fixture_attempts": 2},
+      {"case": "truncated_event_stream", "mock_dispatches": 1, "callbacks": 0, "fixture_attempts": 2},
+      {"case": "short_http_body", "mock_dispatches": 1, "callbacks": 0, "fixture_attempts": 2},
+      {"case": "timeout", "mock_dispatches": 1, "callbacks": 0, "fixture_attempts": 2},
+      {"case": "redirect", "mock_dispatches": 1, "callbacks": 0, "fixture_attempts": 2}
+    ],
+    "pre_dispatch_consume_and_reserve_observed": true,
+    "tamper_and_replay_dispatched": false,
+    "wrong_peer_and_impostor_rejected": true,
+    "lock_inode_stable_and_snapshot_current": true,
+    "ledger_preserved_on_writer_restart": true
+  },
+  "regressions": {
+    "mock_contract": "PASS",
+    "one_shot_linux": "PASS",
+    "one_shot_linux_fault_cases": 16,
+    "level2_adapter_lock_interop": "PASS"
+  },
+  "kvm2_operations": 0,
+  "live_ledger_operations": 0,
+  "live_permit_operations": 0,
+  "provider_operations": 0,
+  "paid_attempts": 0,
+  "inference_cost_usd_delta": 0,
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}

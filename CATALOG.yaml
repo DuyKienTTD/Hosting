@@ -657,6 +657,24 @@ documents:
     verified_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: hermes-gate-b-h6-stage-a-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-stage-a.md
+    type: report
+    status: current
+    authoritative_for: H6-Stage-A-implementation-mock-results-and-Stage-B-proposal
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-stage-a-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-stage-a.json
+    type: evidence
+    status: current
+    authoritative_for: H6-Stage-A-source-hashes-and-isolated-mock-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
