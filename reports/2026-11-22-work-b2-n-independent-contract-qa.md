@@ -87,3 +87,49 @@ Hai commit `c6baaaa` và `dcf6854` chỉ thêm probe provenance, blob `6365ee165
 - **Giới hạn normalization.** Tách layout fields và thay literal bearer/route theo mẫu có thể chứng minh tương đương cấu trúc. Equality sau normalization không chứng minh credential binding có hiệu lực trên runtime. `validator_matches_public_code` thực tế dựa vào delta của toàn node đã chuẩn hóa, và `candidate_has_separate_receipt_node=false` là constant của report checker. Cả hai không chứng minh branch n8n từng chạy hay receipt có thể đọc lại. Khi có JSON probe, đối chiếu explicit image identity, `projection_equal`, settings và node deltas. Đối chiếu binding/receipt chỉ bằng trace local đã cô lập. [Projection result](https://github.com/DuyKienTTD/Hosting/blob/dcf68542518797c977206536536e04f2727424d8/sandbox/p0-hermes-gate-a/h6_b2n_n8n_provenance.py#L91-L116).
 
 **Handoff.** `from_agent: chatgpt-work`, `to_agent: chatgpt`, `handoff_state: PREPARED_FOR_OWNER_FORWARD`. Update chỉ trong báo cáo PR #4. Điều kiện gỡ nhỏ nhất là provenance n8n sandbox do Codex cung cấp theo phép đọc đã duyệt, sau đó render/trace N2–N8 đã pin. Ưu tiên đối chiếu cùng run ID, recorder fake dispatch và receipt bền vững qua mất ACK/restart khi bằng chứng xuất hiện. Giữ B2-I/K/L/M theo nghiệm thu hiện có.
+
+## Work delta — Tiêu chí đọc JSON provenance n8n
+
+**ACK lượt này** tại main `41842e0838c1f3443854203ac492b787273c086e`, task blob `3e18ca4cbe71b3fc7ab28b5bd388808e040266e9`, Workflow §§7–10 blob `69ec0db902f457f06dd547dae171220331df0f5e`. Đã đối chiếu READ_SET, báo cáo Work `ff2a1a9` và probe `dcf6854`, blob `6365ee165c3d15e70ea2590aff9aa395aaa7bc2f`. **`SOURCE_QA_COMPLETE / RUNTIME_EVIDENCE_PENDING`**. Mục này hướng dẫn đọc evidence N1 khi có. N4/N8 vẫn cần trace. [Đặc tả](https://github.com/DuyKienTTD/Hosting/blob/41842e0838c1f3443854203ac492b787273c086e/tasks/2026-11-22-work-b2-n-independent-contract-qa.md) · [Probe](https://github.com/DuyKienTTD/Hosting/blob/dcf68542518797c977206536536e04f2727424d8/sandbox/p0-hermes-gate-a/h6_b2n_n8n_provenance.py#L68-L121).
+
+### Điều kiện chung
+
+Đọc `B2N_IMAGE` và `B2N_PROJECTION` **cùng một lần chạy** ghim commit probe, qua kiểm tra đúng sandbox và recheck identity cuối. `B2N_IMAGE` được in trước khi query, nên riêng dòng image chưa chứng minh đã có published snapshot. Thiếu dòng projection, có `failed`/`B2N_STOP`, hoặc chỉ có output `--candidate` thì không chốt N1. Projection cần `published_join=true`, `repeated_revision_equal=true`, `revision_fingerprint`, `sqlite_mode="ro"` và `landlock_write_fence=true`. Fingerprint nhận diện revision, không phải digest logic. Phép đo dùng nodes/connections từ history và settings từ entity, nên kết luận giới hạn ở đúng projection này. [Published query và fence](https://github.com/DuyKienTTD/Hosting/blob/dcf68542518797c977206536536e04f2727424d8/sandbox/p0-hermes-gate-a/h6_b2n_n8n_provenance.py#L151-L193) · [Thứ tự output/recheck](https://github.com/DuyKienTTD/Hosting/blob/dcf68542518797c977206536536e04f2727424d8/sandbox/p0-hermes-gate-a/h6_b2n_n8n_provenance.py#L196-L214).
+
+**JSON minh họa, toàn bộ giá trị giả.** Tên hai object đại diện cho hai dòng output. Các trường chẩn đoán không liên quan đã lược bỏ.
+
+```json
+{
+  "B2N_IMAGE": {
+    "id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "known_n8n_registry_digests": ["sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],
+    "os": "linux",
+    "arch": "amd64",
+    "installed_version": "0.0.0-example"
+  },
+  "B2N_PROJECTION": {
+    "published_join": true,
+    "repeated_revision_equal": true,
+    "revision_fingerprint": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "sqlite_mode": "ro",
+    "landlock_write_fence": true,
+    "projection_equal": true,
+    "candidate_projection_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "published_projection_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "connections_equal": true,
+    "entity_settings_equal": true,
+    "node_field_deltas": {}
+  }
+}
+```
+
+| Tình huống | Trường quyết định và verdict | Xác minh tối thiểu còn thiếu |
+| --- | --- | --- |
+| **1. Projection khớp, image ghim được** | JSON như mẫu. `projection_equal=true`, đúng published revision ổn định, image có version/platform và được chứng minh ghim được local. **Đủ để nghiệm thu N1 phần tương đương cấu trúc** nếu có bằng chứng image pin đi kèm. `published_projection_sha256` khi khớp được gán từ canonical **candidate**, nên hai hash bằng nhau là hệ quả của phép so sánh, không phải hai phép đo độc lập. | Đối chiếu repo được phép + digest, platform và image ID/version sau resolve hoặc load/pin local với sandbox. Nếu repo digest là manifest nhiều platform, xác nhận biến thể local đúng platform và image ID. N8 vẫn cần trace auth/binding/receipt. |
+| **2. Projection khớp, thiếu pin** | Thay bằng `"known_n8n_registry_digests":[]` hoặc có digest nhưng chưa chứng minh dùng được local. Probe chỉ giữ repo digest khớp mẫu registry, nên `[]` chỉ cho biết không có digest trong danh sách lọc. **`BLOCKED_TARGET_PARITY`** khi chưa có đường tái tạo image bất biến. | Chấp nhận định danh bất biến thay thế nếu có chứng cứ image đã có sẵn hoặc bundle được duyệt, load local cho đúng image ID/platform/version và cấu hình ghim đúng đối tượng đó. Image ID quan sát từ sandbox, version, tag `latest` hoặc một repo digest chưa resolve đều chưa đủ một mình. |
+| **3. Projection lệch** | Ví dụ `{"projection_equal":false,"published_projection_sha256":null,"entity_settings_equal":false,"node_field_deltas":{"call-reasoner":["parameters"]},"known_bridge_parameter_deltas":["options"]}`. **`BLOCKED_TARGET_PARITY`** cho baseline tương đương. `null` là cách probe chủ động không công bố digest published chưa khớp. | Dựa vào `connections_equal`, `entity_settings_equal`, `known_missing_nodes`, `unexpected_node_count`, `node_field_deltas`, `known_bridge_parameter_deltas` và `unknown_bridge_parameter_count` để khoanh đúng phần khác. `options` là nhóm tham số, chưa đủ để kết luận timeout thay đổi. Chỉ cần delta đã khử nhạy cảm của trường ảnh hưởng hành vi hoặc giải thích phép chuẩn hóa. Không cần export thô hay hash published không khớp. |
+| **4. Projection khớp sau chuẩn hóa bearer/route** | Ví dụ `{"projection_equal":true,"node_field_deltas":{},"known_bridge_parameter_deltas":[]}`. Chỉ xác nhận cấu trúc đã chuẩn hóa. Probe thay literal bearer của auth-router khi phần logic quanh literal khớp mẫu, thay bearer header của bridge riêng, và ánh xạ chính xác webhook path/bridge URL đã biết. Hai credential có thể khác mà vẫn cho cùng placeholder. Probe không phát trường cho biết phép thay nào đã xảy ra. | Hai delta semantic cần vẫn hiện diện trong phép so sánh: **đổi logic auth** ngoài literal → `auth-router: ["parameters"]`; **đổi bridge URL sang đích ngoài ánh xạ** → `call-reasoner: ["parameters"]` và `known_bridge_parameter_deltas: ["url"]`, nếu các phần khác giống nhau. Nếu URL đã trùng sentinel canonical, equality không phân biệt nguồn, nên kiểm đích bằng xác nhận đã khử nhạy cảm. Để nghiệm thu N8 cần trace auth hợp lệ/sai, binding đúng và receipt đã commit đọc lại sau mất ACK/restart. |
+
+`validator_matches_public_code` và `candidate_has_separate_receipt_node` chỉ hỗ trợ đọc source/projection. Chúng không chứng minh runtime đã vào nhánh validator hoặc có durable receipt. Tham chiếu Docker kiểm ngày 22/11/2026 ICT cho ghim digest và platform. [Chuẩn hóa và delta](https://github.com/DuyKienTTD/Hosting/blob/dcf68542518797c977206536536e04f2727424d8/sandbox/p0-hermes-gate-a/h6_b2n_n8n_provenance.py#L68-L121) · [Image metadata](https://github.com/DuyKienTTD/Hosting/blob/dcf68542518797c977206536536e04f2727424d8/sandbox/p0-hermes-gate-a/h6_b2n_n8n_provenance.py#L196-L214) · [Docker image digests](https://docs.docker.com/dhi/explore/security-concepts/digests/) · [docker image pull](https://docs.docker.com/reference/cli/docker/image/pull/).
+
+**Bàn giao.** `from_agent: chatgpt-work` → `to_agent: chatgpt`, `handoff_state: PREPARED_FOR_OWNER_FORWARD`. Đầu ra là tiêu chí review trên PR #4. Giữ trạng thái chờ runtime. Work chỉ đối chiếu source và ví dụ JSON giả, không chạy probe/test, truy cập KVM2 hoặc yêu cầu export thật.
