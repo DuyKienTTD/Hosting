@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Merge Work QA PR #3, nghiệm thu B2-M trong đúng cửa sổ đo và mở B2-N kiểm contract Hermes/n8n ngoại tuyến bằng fake provider. [Work QA](reports/2026-11-22-work-b2-m-independent-canary-qa.md).
+
 - ChatGPT đối chiếu source và bằng chứng Codex B2-M tại `8238bd1`, ghi điểm cần xác minh trong Work QA hiện có và xác định bước fake-provider chỉ sau nghiệm thu. [Quyết định](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md#chatgpt-review-h6-b2-m--2026-11-22).
 
 - Codex hoàn tất B2-M startup-only canary giả trên KVM2 ext4, kiểm render, 20 health bất biến, deny admission và rollback đúng inventory. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-m-kvm2-idle-canary.md).

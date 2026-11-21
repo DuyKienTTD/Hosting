@@ -1071,6 +1071,15 @@ documents:
     verified_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: ttd-work-b2-m-independent-canary-qa-report-2026-11-22
+    path: reports/2026-11-22-work-b2-m-independent-canary-qa.md
+    type: report
+    status: current
+    authoritative_for: independent-Work-B2-M-review-of-canary-security-and-rollback-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
