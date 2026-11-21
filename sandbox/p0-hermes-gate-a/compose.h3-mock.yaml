@@ -1,0 +1,18 @@
+# Apply only on top of the currently deployed Compose file.
+# All network membership is inherited and checked by the runner.
+services:
+  guard:
+    entrypoint: ["python3", "/h3/h3_mock.py", "guard"]
+    environment:
+      TTD_MOCK_ONE_SHOT_LEDGER: /opt/ttd/mock-ledger/level2-budget.json
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - ${H3_DIR:?H3_DIR required}/src:/h3:ro
+      - ${H3_DIR:?H3_DIR required}/mock-ledger:/opt/ttd/mock-ledger
+  provider-mock:
+    entrypoint: ["python3", "/h3/h3_mock.py", "provider"]
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - ${H3_DIR:?H3_DIR required}/src:/h3:ro
+      - ${H3_DIR:?H3_DIR required}/mock-ledger:/opt/ttd/mock-ledger:ro
