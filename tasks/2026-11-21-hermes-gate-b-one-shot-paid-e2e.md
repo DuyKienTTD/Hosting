@@ -65,3 +65,41 @@ Codex lưu `reports/2026-11-21-hermes-gate-b-paid-results.md` và JSON evidence 
 ## Kiểm tra sau cô lập proxy
 
 Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và sáu container còn lại bị chặn trong phép thử. Mock callback, hạch toán mock riêng và rollback egress đã kiểm chứng. Task vẫn **BLOCKED_PREFLIGHT** vì thiếu credential dành cho guard đã xác minh, số tokens theo provider và một lượt mock kết hợp callback với one-shot accounting. Có một lần lỗi metadata Hermes trước callback. Paid attempts mới 0. [Báo cáo hiện tại](../reports/2026-11-21-hermes-gate-b-egress-isolation.md).
+
+
+## Điều phối theo quy tắc chung — checkpoint sau egress isolation (2026-11-21)
+
+**Nguồn đã đọc:** [báo cáo egress](../reports/2026-11-21-hermes-gate-b-egress-isolation.md), [evidence](../reports/evidence/2026-11-21-ttd-hermes-gate-b-egress-isolation.json), commit `88268989af28243fd4bf490db199e55fda28dcfb`; [AGENTS](../AGENTS.md), [AGENT_WORKFLOW](../rules/AGENT_WORKFLOW.md), [REPOSITORY_SECURITY](../rules/REPOSITORY_SECURITY.md), [STATE](../STATE.md), [CATALOG](../CATALOG.yaml).
+
+**Current evidence:** proxy isolation PASS trên 6 negative containers, guard-to-proxy PASS, disconnect/reconnect PASS; production HTTP 200. Fresh-task mock webhook+callback PASS nhưng một lỗi `HERMES_RUNTIME_MISMATCH` vẫn chưa giải thích; one-shot settlement mới PASS riêng chứ chưa cùng n8n callback trong một run. Guard chưa có OpenAI credential; 3.308 bytes không phải provider token count; live ledger 1 attempt, 0 permits, kill switch ON. **GATE B BLOCKED_PREFLIGHT; delta paid 0; không deploy paid upstream.** Network topology mới nằm ở Compose KVM2, cần đồng bộ cấu hình vận hành/backup để không tái tạo đường cũ khi redeploy.
+
+### Handoff H1 — Hostinger Agent: xác minh hạ tầng và credential path (read-only)
+
+- `from_agent: chatgpt`; `to_agent: hostinger-agent`; `owner: hostinger-agent`; `handoff_state: PREPARED_FOR_OWNER_FORWARD` (chưa chứng minh đã gửi hoặc ACK); `why_this_agent: hPanel/VPS/backup/network/credential-mount capabilities`.
+- **BẮT BUỘC đọc quy tắc:** `AGENTS.md`, `rules/AGENT_WORKFLOW.md`, `rules/REPOSITORY_SECURITY.md`, `STATE.md`, `CATALOG.yaml`, `agents/hostinger.md` và báo cáo egress; ghi commit quy tắc đã đọc.
+- **Bắt đầu:** đọc `reports/2026-11-21-hermes-gate-b-egress-isolation.md` và `reports/evidence/2026-11-21-ttd-hermes-gate-b-egress-isolation.json`. Nếu có quyền read-only hPanel/VPS thì đối chiếu các Docker networks hiện đang gắn, route guard→proxy, 6 negative paths, publish ports, proxy outbound ACL, rollback/backup của Compose runtime. Không tiết lộ IP thật, DNS private hoặc secret lên GitHub public.
+- **Trả lời cụ thể:** (a) Docker topology cô lập hiện có survive `docker compose up/recreate` không, và cần persist/sync file nào; (b) cách mount secret least-privilege cho guard-only đúng project mà không để bridge/Hermes/n8n thấy key; (c) có thể đọc xác nhận key presence và quyền project/quota qua hPanel/API account không, nếu không đánh UNKNOWN và chuyển owner cấp key; (d) negative route test cần lặp sau redeploy là gì; (e) rollback không mất dữ liệu ledger. Không tạo key/đọc secret value/đổi network trong task khảo sát.
+- **Nghiệm thu:** report `reports/2026-11-21-gate-b-hostinger-consult.md` redacted gồm VERIFIED_LIVE/UNKNOWN, evidence, đề xuất hành động cụ thể và approval needed; commit link. `next_owner: chatgpt` tổng hợp.
+
+### Handoff H2 — Hermes Agent: runtime mismatch và exact request (read-only/mock)
+
+- `from_agent: chatgpt`; `to_agent: hermes-agent`; `owner: hermes-agent`; `handoff_state: PREPARED_FOR_OWNER_FORWARD` (chưa gửi/ACK); `why_this_agent: inference runtime, response serialization, model/tool/metadata semantics`.
+- **BẮT BUỘC đọc:** `AGENTS.md`, `rules/AGENT_WORKFLOW.md`, `rules/REPOSITORY_SECURITY.md`, `STATE.md`, `CATALOG.yaml`, `agents/hermes.md` và hai báo cáo GATE B mới nhất; ghi commit quy tắc.
+- **Bắt đầu:** đối chiếu `sandbox/p0-hermes-gate-a/bridge.py`, `guard.py`, test harness và evidence fresh-task (chỉ nếu công cụ có quyền truy cập); định vị check phát `HERMES_RUNTIME_MISMATCH`, so expected metadata trên task đầu và task mới, idempotency/task/session, model exact `gpt-6-luna` và `max_output_tokens=600`.
+- **Trả lời cụ thể:** nguyên nhân mismatch với log đã khử nhạy cảm; cách làm request deterministic từ Hermes auxiliary không đổi semantic trên retry; vị trí canonical-serialization và SHA256 của **full provider-bound request**; test nào xác nhận first task, new task, replay/callback cùng one-shot accounting; thông số request gửi `/v1/responses/input_tokens` sao cho cùng `model/instructions/input/tools` với request inference. Nếu không thấy live runtime, chỉ đánh DOCUMENTED/UNKNOWN, không báo VERIFIED_LIVE.
+- **Nghiệm thu:** report `reports/2026-11-21-gate-b-hermes-consult.md` có reproduction, fault hypothesis, patch suggestion, mock tests và link commit. `next_owner: chatgpt`. Không gọi paid inference, không mở tool/fallback.
+
+### Handoff H3 — ChatGPT phân tích và Codex thực thi (sau H1/H2)
+
+- `from_agent: hostinger-agent + hermes-agent`; `to_agent: chatgpt`; `handoff_state: WAITING_FOR_REPORTS`. ChatGPT đối chiếu hai reports, nguồn vendor bên dưới, evidence mới và phạm vi ADR-P0-003. Khi đủ dữ kiện, cập nhật **task này**, không tạo nhiệm vụ con không cần thiết.
+- `from_agent: chatgpt`; `to_agent: codex`; `handoff_state: NOT_SENT` tại checkpoint này. Codex là **owner phần code/test** sau khi được chuyển một đặc tả có cách bắt đầu cụ thể và môi trường/approval rõ. Chỉ sửa sandbox: fix metadata mismatch, persist isolated proxy topology, guard-only secret mount khi owner cho phép, chạy token count với đúng credential theo phạm vi đã duyệt, khóa count với digest request (lưu ý count endpoint và create có thể khác request shape; canonical bytes phải được kiểm chứng), chạy **một** mock E2E kết hợp callback+one-shot accounting. Không paid inference nếu chưa preflight PASS.
+- Khi preflight PASS, giữ nguyên nguyên tắc đã duyệt trong ADR-P0-003: model `gpt-6-luna`, input ≤4K billable tokens, max output 600, global kill switch ON, one-shot consumed before dispatch, ≤1 paid attempt toàn GATE B, cap P0 ≤USD 0.05, no retry/production change. **Không suy diễn việc tạo tài liệu là đã gửi lệnh tới Codex/Hermes/Hostinger.**
+
+### Tài liệu vendor tham khảo (kiểm tra 2026-11-21)
+
+- Docker bridge networking: https://docs.docker.com/engine/network/drivers/bridge/ — container cùng user-defined network có thể liên lạc, cô lập theo network membership; cần kiểm tra đường gateway/host/published ports thực tế.
+- Docker Compose networking: https://docs.docker.com/compose/how-tos/networking — thay đổi topology cần lưu cấu hình Compose của môi trường thực, kiểm tra membership sau recreate.
+- OpenAI input-token counting: https://developers.openai.com/api/docs/guides/token-counting và https://developers.openai.com/api/reference/resources/responses/subresources/input_tokens/methods/count — endpoint `POST /v1/responses/input_tokens`, không thay paid inference, đếm cả định dạng message, tools nếu có.
+- OpenAI API project/key management: https://help.openai.com/en/articles/9186755-managing-projects-in-the-api-platform và https://developers.openai.com/api/docs/guides/api-keys — service account thuộc project cụ thể; model access/role và key permissions cần xác minh, không suy ra từ dashboard model list.
+
+**Bàn giao hiện tại:** H1/H2 `PREPARED_FOR_OWNER_FORWARD`; H3 `WAITING_FOR_REPORTS`; paid GATE B `BLOCKED_PREFLIGHT`. Không ai được hiểu đây là quyền bổ sung hoặc một lệnh đã gửi tự động.
