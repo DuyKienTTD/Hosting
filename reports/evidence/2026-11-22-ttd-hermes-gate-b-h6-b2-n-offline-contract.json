@@ -115,5 +115,103 @@
   "live_integration": "NO_GO",
   "paid_gate_b": "BLOCKED_PREFLIGHT",
   "next_owner": "chatgpt",
-  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD",
+  "follow_up": {
+    "result": "TARGET_PROJECTION_MATCH_AND_B2N_ISOLATED_FAKE_RUNTIME_PASS",
+    "approval_and_ack_commit": "322a2c15be6688ec33c1b3d72336bbeee5196e05",
+    "provenance_probe_commit": "dcf68542518797c977206536536e04f2727424d8",
+    "provenance_probe_sha256": "a56e90929b11381b75d41eb7ccde0d19d0ce37e4633e6c29ff3d5ef8ec2fc359",
+    "sandbox_n8n": {
+      "installed_version": "2.45.7",
+      "platform": "linux/amd64",
+      "image_id": "sha256:9a8d8dcea75667496695d7810d7e1fe018a65efb36cc499d347f3931b3957b5d",
+      "repo_digest": "sha256:9a8d8dcea75667496695d7810d7e1fe018a65efb36cc499d347f3931b3957b5d",
+      "identity_checks": ["exact container name", "compose project", "compose service", "container/image/PID/start time and installed version rechecked"],
+      "published_revision_fingerprint": "a96860fa32efe5a3fa5bee7b9d72c9296765de9523f4bb2a63a52c6f0e428c95",
+      "published_revision_read_twice_equal": true,
+      "published_projection_sha256": "08aa63bcfaf27f9ced2a5374ce67f4683877f615ed00dafea086f608321dde0d",
+      "local_candidate_projection_sha256": "08aa63bcfaf27f9ced2a5374ce67f4683877f615ed00dafea086f608321dde0d",
+      "projection_equal": true,
+      "connections_equal": true,
+      "entity_settings_equal": true,
+      "node_field_deltas": {},
+      "validator_matches_public_code": true,
+      "baseline_has_no_separate_receipt_node": true,
+      "sqlite_read_only_with_landlock_fence": true,
+      "raw_exported": false
+    },
+    "local_runtime": {
+      "source_blobs": {
+        "sandbox/p0-hermes-gate-a/h6_b2n_runtime.py": "1610315929ee38cc46d0b18d525bcb6b77b2dfe2",
+        "sandbox/p0-hermes-gate-a/h6_b2n_runtime_fixture.py": "489d480c7a0124fff4c03a40a43b9792c07a0bce"
+      },
+      "pre_up_all_profiles_validated": true,
+      "running_isolation_validated": true,
+      "no_host_ports": true,
+      "network_internal_no_default_route_in_driver": true,
+      "scope": "exact pinned Hermes/n8n images, redacted-equivalent baseline workflow with local stub route, separately modified candidate callback branch, synthetic provider",
+      "baseline_callback": {
+        "fixture_receipts": 0,
+        "same_callback_accepted_twice": true,
+        "wrong_bearer_http": 401
+      },
+      "lost_ack": {
+        "fake_dispatches": 1,
+        "http": 202,
+        "replayed_before_restart": true,
+        "request_sha256": "9f267d01ec8e0233626d1ecd186bce24c7744c4bcb341dc03c098bca6bcbd0d0",
+        "run_id_sha256": "d58c62b52ecfa02de6466de13e16aebe77108d8662f31c8a2267f7b07b13f483"
+      },
+      "restart": {
+        "original_run_completed_before_restart": true,
+        "same_run_id": true,
+        "http": 202,
+        "different_binding_http": 409,
+        "fake_dispatches": 1
+      },
+      "deadline_cases": [
+        {
+          "case": "medium",
+          "provider_sleep_s": 31,
+          "elapsed_since_recorder_seen_s": 31.412,
+          "hermes_terminal_at_cutoff": "completed",
+          "candidate_outcome": "mock_succeeded",
+          "fake_dispatches": 1,
+          "durable_receipts": 1,
+          "receipt_ack_lost": true,
+          "wrong_auth_http": 401,
+          "wrong_binding_http": 409
+        },
+        {
+          "case": "slow",
+          "provider_sleep_s": 46,
+          "elapsed_since_recorder_seen_s": 45.197,
+          "hermes_terminal_at_cutoff": null,
+          "candidate_outcome": "outcome_unknown",
+          "fake_dispatches": 1,
+          "durable_receipts": 1,
+          "receipt_ack_lost": false,
+          "wrong_auth_http": 401,
+          "wrong_binding_http": 409
+        }
+      ],
+      "receipt_restart": {
+        "matched_persisted_receipts": 2,
+        "conflicting_replay_http": 409,
+        "duplicate_receipts": 0,
+        "fake_dispatch_counts": {"lost": 1, "medium": 1, "slow": 1}
+      },
+      "rollback_pass": true,
+      "not_verified": ["inflight Hermes restart", "effective live Guard/Hermes deadline", "live callback or paid traffic"]
+    },
+    "scope_counters": {
+      "kvm2_mutations": 0,
+      "kvm2_webhook_calls": 0,
+      "production_mutations": 0,
+      "real_ledger_permit_key_accesses": 0,
+      "real_provider_api": 0,
+      "paid": 0,
+      "usd": 0
+    }
+  }
 }

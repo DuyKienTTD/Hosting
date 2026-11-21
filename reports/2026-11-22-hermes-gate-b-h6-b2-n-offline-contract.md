@@ -11,6 +11,8 @@ owner: codex
 
 # H6 B2-N — Đối chiếu hợp đồng Hermes auxiliary và n8n
 
+> Phần đầu ghi mốc PR #5 tại `253a795`. Kết quả follow-up ở cuối báo cáo.
+
 **ACKNOWLEDGED / HERMES_SOURCE_PARITY_MATCH / BLOCKED_TARGET_PARITY.** ACK tại `08f3d18097e761311ac1aadaa524fa7ef77b438f`, scope B2-N tại `ef21231`, với AGENTS, Workflow §§7–10, security, STATE/CATALOG, hồ sơ Codex, task/ADR-P0-003, B2-H, B2-K và B2-M Codex/Work. B2-N do Codex thực thi trên branch riêng, ChatGPT nghiệm thu và tích hợp trạng thái. [Task](../tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md) · [B2-H](2026-11-22-hermes-gate-b-h6-b2-h-read-only.md) · [Work QA B2-M](2026-11-22-work-b2-m-independent-canary-qa.md).
 
 ## Đã đối chiếu
@@ -35,3 +37,29 @@ owner: codex
 4. Cleanup chỉ project và datastore local thuộc B2-N. Nếu ACK/kết cục chưa rõ, giữ trace đã khử định danh để đối soát, không phát lại inference. Đợt source-check đã dọn thư mục trích tạm. Image ghim được lưu ở cache Docker local để tái sử dụng.
 
 `LIVE_INTEGRATION_NO_GO / BLOCKED_UID_OR_MOUNT / BLOCKED_PREFLIGHT`. 0 thao tác KVM2, 0 production, 0 provider API, 0 real ledger/permit/key, 0 paid, USD 0. `next_owner: chatgpt`, `handoff_state: PREPARED_FOR_OWNER_FORWARD` để đối chiếu với Work QA.
+
+## Follow-up tại `322a2c1` — provenance đã xác minh
+
+**ACKNOWLEDGED / TARGET_PROJECTION_MATCH.** Theo đặc tả follow-up, dùng phiên Web Terminal đã có quyền và chạy probe ghim `dcf6854` trong bộ nhớ. Xác định đúng container qua tên, project và service trước khi lấy image ID, repo digest, platform và version từ package cài đặt. Chọn revision đang publish theo `activeVersionId → workflow_history` trong child có Landlock chặn ghi, SQLite `mode=ro` và `query_only`. Đọc hai lần khớp, rồi kiểm lại ID/image/PID/start time và version container. Không gọi webhook KVM2 hoặc đọc bảng credentials/executions. [Probe](../sandbox/p0-hermes-gate-a/h6_b2n_n8n_provenance.py).
+
+- n8n sandbox **2.45.7**, linux/amd64, image ID và repo digest đều `sha256:9a8d8dcea75667496695d7810d7e1fe018a65efb36cc499d347f3931b3957b5d`. Đây là phép đo trực tiếp riêng trên sandbox.
+- Fingerprint revision `a96860fa32efe5a3fa5bee7b9d72c9296765de9523f4bb2a63a52c6f0e428c95`. Digest projection chuẩn hóa của bản publish và candidate Git cùng là `08aa63bcfaf27f9ced2a5374ce67f4683877f615ed00dafea086f608321dde0d`. So toàn bộ tham số node và wiring, kể cả node type/version, auth, response mode, timeout/retry và code validator. So settings lấy từ workflow entity riêng. Bỏ vị trí, ghi chú UI và webhook ID. Chỉ thay literal bearer ở hai vị trí đã biết và host/path đã biết bằng placeholder. Phép đo đầu còn chênh tham số HTTP node. Probe mới xác nhận chênh lệch biến mất khi thay riêng bearer literal của HTTP node bằng placeholder. Không xuất workflow thô, bearer hoặc giá trị tham số khác nhau.
+
+### Môi trường local
+
+Project `ttd-b2n-local` render đủ profile với image Hermes/n8n ghim, năm dịch vụ và năm volume riêng. Chỉ bind RO thư mục fixture tự tạo. Rootfs RO, internal network không IPv6, không port host, driver không có default route. Verify Docker inspect so với render trước request. Hermes init chuẩn bị home riêng với CHOWN/SETUID/SETGID rồi chuyển sang user Hermes. Hai workflow n8n dùng cùng build. Baseline giữ auth/validator của revision đã so, đổi route chỉ tới fixture. Candidate chuyển riêng nhánh callback qua receipt service, giữ bearer của webhook và có bearer thứ hai trên đường nội bộ tới receipt. Receipt đối chiếu job/task/correlation/run/digest với binding đã ghi trước, commit trên SQLite riêng rồi mới trả ACK. Fake provider chỉ chạy trong project và có recorder riêng. [Runner](../sandbox/p0-hermes-gate-a/h6_b2n_runtime.py) · [Fixture](../sandbox/p0-hermes-gate-a/h6_b2n_runtime_fixture.py).
+
+### Kết quả runtime local
+
+**`B2N_ISOLATED_FAKE_RUNTIME_PASS` cho các ca đã chạy.** Dùng `python -X utf8 -B sandbox/p0-hermes-gate-a/h6_b2n_runtime.py --projection <digest>` với digest đã đo ở trên.
+
+| Ca | Quan sát |
+| --- | --- |
+| Baseline n8n | Bearer sai trả 401. Hai lần gửi cùng callback mock hợp lệ đều được ACK qua workflow gốc; receipt store riêng có 0 bản ghi. |
+| Mất ACK, restart Hermes | Client gửi POST rồi đóng kết nối trước khi đọc response. Recorder thấy đúng một dispatch. Replay trước restart trả 202 và run ID. Sau khi run hoàn tất và restart Hermes với cùng volume, cùng binding vẫn trả 202 và cùng run ID. Cùng key với body khác trả 409; recorder vẫn 1. |
+| Fake provider chậm trong budget | Ca delay 31 s hoàn tất ở **31,412 s**, tính từ khi driver thấy recorder. Candidate ghi một receipt trước khi client timeout lúc chờ ACK. Từ chối bearer sai 401 và digest sai 409. Recorder 1. |
+| Fake provider vượt budget | Ca delay 46 s chưa terminal khi driver chạm cutoff, ghi `outcome_unknown` ở **45,197 s**. Một receipt và một dispatch. Bearer sai trả 401, digest sai trả 409. |
+| Restart receipt receiver và replay | Hai receipt đọc lại khớp chính xác qua n8n. Event đổi outcome bị 409. Có đúng hai receipt và recorder giữ **1/1/1** cho ba ca. |
+| Rollback | Kiểm owner label của container, volume và network trước khi down, sau đó còn 0 tài nguyên project. Thư mục fixture local đã dọn. |
+
+Mốc 45 s là cutoff của driver local, chưa đo deadline hiệu lực ở Guard/Hermes trên tuyến KVM2. Ca Hermes restart ở trạng thái đã hoàn tất; chưa thử restart khi inference còn chạy. Tini có cảnh báo chuyển tín hiệu trong lượt restart. Run ID vẫn được đọc lại từ cùng volume sau khi tiến trình lên lại. n8n có truy vấn DNS catalog mặc định bị chặn trong network cô lập. Không chạy provider thật, không phát sinh chi phí và không ghi trên KVM2. `LIVE_INTEGRATION_NO_GO / BLOCKED_UID_OR_MOUNT / BLOCKED_PREFLIGHT`. Giao ChatGPT đối chiếu với Work trên PR #4, giữ kết quả ở phạm vi local fake-only.
