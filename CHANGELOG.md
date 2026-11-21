@@ -2,6 +2,10 @@
 
 ## 2026-11-21
 
+- Hoàn tất `TTD-HERMES-E2E-HARD-CAP-001` ở chế độ read-only/offline: xác minh Hermes `0.22.5`, exact-model/no-tools serialization và kết luận CLI/config upstream không đủ hard output cap.
+- Thêm offline guard contract rehearsal PASS cho kill switch, validation-before-reservation, idempotency và 10-way concurrency dùng bản sao shared ledger; paid call mới 0, production change 0.
+- Đề xuất Hermes auxiliary nguyên bản + private pre-dispatch guard + authenticated bridge/callback ở trạng thái `GO_FOR_SEPARATE_IMPLEMENTATION_APPROVAL`; Hermes E2E vẫn `BLOCKED_COST_CONTROL` cho tới khi mock/full-input/no-bypass và paid-test riêng được duyệt.
+
 - Đối chiếu Provider E2E PASS (1 call, USD 0.0000496 theo usage, chưa đối soát hóa đơn) và Hermes Agent E2E `BLOCKED_COST_CONTROL`. Tạo `TTD-HERMES-E2E-HARD-CAP-001` để Codex khảo sát read-only cơ chế hard output cap trước request và shared budget gate; chưa cấp quyền triển khai thêm hoặc paid inference.
 
 - Hoàn tất Mức 2 Provider E2E trên sandbox: đúng 1 GPT-6 Luna call, authenticated n8n callback/schema PASS, 131 input + 73 output + 0 reasoning token, usage-based cost USD 0,0000496; replay/conflict không phát sinh call mới.

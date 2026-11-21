@@ -1,7 +1,7 @@
 ---
 id: ttd-hermes-e2e-hard-cap-001
 type: task
-status: ready_for_read_only_feasibility
+status: complete
 updated_at: 2026-11-21
 sensitivity: public
 owner: codex
@@ -9,6 +9,7 @@ support: [hermes, hostinger-agent]
 depends_on: [ttd-ai-p0-level2-001]
 implementation_approval: pending
 paid_inference_approval: pending_new_gate
+result: go_for_separate_implementation_approval
 ---
 
 # TTD-HERMES-E2E-HARD-CAP-001 — Chứng minh hard token cap trong Hermes Agent thực
@@ -53,3 +54,12 @@ Một tài liệu **feasibility + kế hoạch triển khai có chốt kỹ thu�
 ## Bàn giao
 
 Tạo `reports/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md` (hoặc ngày thực tế), cập nhật catalog/state/changelog khi có bằng chứng mới và push commit. Chỉ ghi metadata đã khử bí mật trên GitHub public.
+
+## Kết quả 2026-11-21
+
+- Feasibility hoàn tất ở chế độ read-only/offline, paid call mới bằng 0, kill switch không đổi và production không đổi.
+- Cấu hình/CLI upstream đơn thuần là **NO-GO** vì không expose hard output cap; transport programmatic có thể serialize `max_output_tokens=600` nhưng không đủ làm gate độc lập.
+- Phương án đề nghị phê duyệt riêng: Hermes auxiliary nguyên bản + private inference guard dùng chung ledger P0 + authenticated bridge/callback. Guard là điểm giữ provider credential/egress duy nhất.
+- Offline contract rehearsal PASS: exact model, no-tools, kill switch, validation-before-reservation, idempotency và 10-way concurrency từ ledger copy có 1 attempt.
+- Hermes E2E chưa PASS; còn chờ approval triển khai, mock capture full request ≤4K, chứng minh no-bypass và approval riêng cho một paid Hermes call.
+- [Báo cáo](../reports/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md) · [Evidence](../reports/evidence/2026-11-21-ttd-hermes-e2e-hard-cap-001.json)

@@ -271,10 +271,28 @@ documents:
   - id: ttd-hermes-e2e-hard-cap-001
     path: tasks/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md
     type: task
-    status: ready_for_read_only_feasibility
+    status: complete
     authoritative_for: Hermes-agent-hard-output-token-cap-and-shared-cost-gate-feasibility
     updated_at: 2026-11-21
     sensitivity: public
+
+  - id: hermes-agent-e2e-hard-cap-feasibility-2026-11-21
+    path: reports/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md
+    type: report
+    status: complete
+    authoritative_for: Hermes-agent-hard-cap-feasibility-and-separate-implementation-approval-plan-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-e2e-hard-cap-001-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-e2e-hard-cap-001.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-machine-readable-evidence-for-ttd-hermes-e2e-hard-cap-001
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
 
 collections:
   agents: verified agent role profiles and capability evidence

@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "task_id": "ttd-hermes-e2e-hard-cap-001",
+  "verified_at": "2026-11-21",
+  "result": "go_for_separate_implementation_approval",
+  "scope": {
+    "mode": "read_only_and_offline_only",
+    "network_provider_calls": 0,
+    "paid_calls": 0,
+    "kill_switch_changed": false,
+    "production_changes": false
+  },
+  "runtime_identity": {
+    "status": "VERIFIED_READ_ONLY",
+    "hermes_version": "0.22.5",
+    "upstream_commit": "bf0203a794a07aac3ff764972ab9087baa4e4f4e",
+    "image_family": "ghcr.io/hostinger/hvps-hermes-agent",
+    "image_digest": "sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f",
+    "entrypoint": "/entrypoint.sh",
+    "cli_path": "/usr/local/bin/hermes",
+    "container_restarts": 0
+  },
+  "hard_output_cap": {
+    "supported_cli_or_config": "BLOCKED",
+    "cli_has_output_cap_option": false,
+    "legacy_config_read_by_upstream": false,
+    "responses_transport_programmatic_serialization": "VERIFIED_OFFLINE_LIVE_IMAGE",
+    "serialized_model": "gpt-6-luna",
+    "serialized_max_output_tokens": 600,
+    "serialized_tools_field_present": false,
+    "live_pre_dispatch_guard": "PLANNED_NOT_DEPLOYED"
+  },
+  "tools_off": {
+    "status": "VERIFIED_OFFLINE_LIVE_IMAGE",
+    "profile_contract": {"platform_toolsets": {"cli": []}},
+    "resolved_toolsets": 0,
+    "resolved_tool_definitions": 0
+  },
+  "offline_guard_rehearsal": {
+    "status": "PASS",
+    "script_sha256": "ca3558a9ba9ced415e698510ec84a3c8b9e4df868579f47c3a287ba3608476fd",
+    "network_calls": 0,
+    "paid_calls": 0,
+    "stress_repetitions": 100,
+    "starting_ledger": {
+      "attempts": 1,
+      "reserved_usd": 0.0035,
+      "actual_usd": 0.0000496,
+      "kill_switch": true
+    },
+    "kill_switch_blocks_without_mutation": true,
+    "invalid_requests_block_before_reservation": 5,
+    "idempotent_replay_single_reservation": true,
+    "concurrency_copy_with_kill_switch_false": {
+      "requests": 10,
+      "admitted": 4,
+      "blocked": 6,
+      "final_attempts": 5,
+      "final_reserved_usd": 0.0175
+    }
+  },
+  "callback": {
+    "hermes_api_bearer_auth_supported_upstream": true,
+    "runs_idempotency_supported_upstream": true,
+    "private_bridge_to_existing_authenticated_n8n_webhook": "PLANNED_NOT_DEPLOYED"
+  },
+  "remaining_blockers": [
+    "separate implementation approval",
+    "full serialized Hermes request must pass the 4000 input-token bound using a provider mock",
+    "private network must prove Hermes has no direct provider egress",
+    "real shared Level 2 ledger integration and authenticated callback need offline rehearsal",
+    "separate approval is required before any kill-switch transition or paid Hermes call"
+  ],
+  "recommended_approach": "stock_auxiliary_hermes_plus_private_pre_dispatch_guard_and_authenticated_bridge",
+  "hermes_e2e_status": "BLOCKED_COST_CONTROL",
+  "production_safety": {
+    "runtime_restart_or_recreate": false,
+    "provider_credential_change": false,
+    "firewall_change": false,
+    "dns_change": false,
+    "public_port_change": false,
+    "business_data_used": false
+  }
+}

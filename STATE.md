@@ -36,7 +36,7 @@ sensitivity: public-redacted
 - P0 Mức 1 đã triển khai hai runtime phụ cô lập trên `ttd-ai-p0-sandbox`: n8n sandbox có đúng một authenticated webhook và reasoner deterministic mock không provider/Internet egress.
 - Structural E2E 9/9, negative auth, schema, callback, timeout/retry/idempotency và rollback/restore đều PASS. Production n8n/Hermes không restart, downtime 0, public port/firewall/DNS không đổi và paid inference call bằng 0.
 - Mức 2 đã chạy: **Provider E2E PASS** qua GPT-6 Luna với đúng 1 paid attempt, 131 input + 73 output + 0 reasoning token và usage-based cost USD 0,0000496; authenticated callback, schema, replay và kill switch đều PASS. [Báo cáo Mức 2](reports/2026-11-21-n8n-hermes-p0-level2-results.md).
-- **Hermes Agent E2E vẫn BLOCKED_COST_CONTROL**: CLI thật chưa chứng minh hard max output trước request và Hermes chính không expose private inference callback API. Provider adapter không được tính là Hermes; P0 tổng thể vẫn PARTIAL.
+- **Hermes Agent E2E vẫn BLOCKED_COST_CONTROL**, nhưng khảo sát hard-cap đã complete: cấu hình/CLI upstream đơn thuần là NO-GO; phương án khả thi nhất là Hermes auxiliary nguyên bản sau private pre-dispatch guard dùng cùng ledger P0, cùng authenticated bridge/callback. Offline contract rehearsal đã PASS exact model, cap 600, no-tools, kill switch, idempotency và concurrency; chưa triển khai hoặc paid test. [Báo cáo feasibility](reports/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md).
 - Kill switch persistent hiện bật, chặn task paid mới bằng HTTP 429; n8n production MCP vẫn tắt và production có 0 workflow.
 - Kiến trúc được khuyến nghị: n8n làm control plane, Hermes reasoning qua API private, một internal Docker network, schema/policy/approval gate và media-worker FFmpeg riêng.
 
@@ -58,7 +58,7 @@ sensitivity: public-redacted
 
 - [ADR-P0-001](decisions/2026-11-21-p0-reasoning-integration-proposal.md) đã **APPROVED_WITH_RESTRICTIONS**: Mức 1 PASS; Mức 2 Provider PASS trong cap; [task Mức 2](tasks/2026-11-21-n8n-hermes-p0-level2-real-inference.md) hiện `blocked` riêng ở Hermes hard cost control.
 
-- Đã tạo [TTD-HERMES-E2E-HARD-CAP-001](tasks/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md) giao Codex **khảo sát feasibility chỉ-đọc** cho Hermes Agent thật: hard output cap trước request, exact model, tools-off, shared atomic cost ledger và authenticated callback. **Chưa phê duyệt triển khai runtime phụ mới, thay egress hoặc gọi AI thêm**. Kill switch theo báo cáo vẫn bật.
+- [TTD-HERMES-E2E-HARD-CAP-001](tasks/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md) đã complete ở chế độ read-only/offline với kết luận `GO_FOR_SEPARATE_IMPLEMENTATION_APPROVAL`. Đề nghị Hermes auxiliary + private inference guard + authenticated bridge; **chưa phê duyệt triển khai runtime phụ, thay egress, tạo secret mới, mở kill switch hoặc gọi AI thêm**. Kill switch vẫn bật.
 
 ## Việc đang chờ
 
@@ -66,7 +66,7 @@ sensitivity: public-redacted
 - Chưa đặt n8n/Hermes sau reverse proxy HTTPS.
 - Chưa xử lý các backup Hostinger có thể chứa ứng dụng đã xóa.
 - Chưa cập nhật hệ điều hành hoặc reboot.
-- Provider E2E đã có evidence. Muốn tiếp tục Hermes Agent E2E cần runtime phụ có hard `max_output_tokens<=2000`, exact model, tools disabled, budget reservation trước request và authenticated callback; không được dùng adapter OpenAI trực tiếp để thay bằng chứng Hermes.
+- Provider E2E đã có evidence. Muốn tiếp tục Hermes Agent E2E cần phê duyệt triển khai guard/bridge/runtime phụ, mock capture full serialized Hermes request ≤4K, chứng minh không có direct egress/bypass và chỉ sau đó phê duyệt riêng một paid call; không được dùng adapter OpenAI trực tiếp để thay bằng chứng Hermes.
 - Chưa kết nối/xác minh Google Ads, GA4, WordPress/WooCommerce, YouTube, TikTok, Meta, Kling, HeyGen hoặc ElevenLabs.
 
 ## Tài liệu tiếp theo
