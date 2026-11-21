@@ -2,6 +2,9 @@
 
 ## 2026-11-21
 
+- Chủ dự án phê duyệt quy tắc điều phối mới: ChatGPT tự nghiên cứu tài liệu vendor chính thức, hỏi Hostinger/Hermes trước khi giao Codex theo đúng sở trường, đặc tả có bước bắt đầu cụ thể, nhận/giao bóng ghi owner và trạng thái ACK, mọi agent đọc lại AGENTS/workflow/security/STATE/CATALOG trước task. Đã cập nhật trực tiếp `rules/AGENT_WORKFLOW.md`, `AGENTS.md`, agent directory/profile, README, catalog; quy tắc không tự cấp thêm quyền paid/production. Nguồn tham khảo chính thức ghi trong rule.
+
+
 - Cô lập proxy Level 2 trên mạng riêng với guard. Kiểm tra quyền truy cập từ sáu container, mock callback, hạch toán mock và rollback egress. Paid GATE B vẫn chờ credential và token count theo provider. [Báo cáo](reports/2026-11-21-hermes-gate-b-egress-isolation.md).
 
 - Kiểm tra lại paid GATE B. Guard mock khớp fingerprint toàn body và lưu usage hoặc trạng thái không rõ sau timeout. Dừng trước paid dispatch vì bridge chạm được proxy Level 2 và còn thiếu bằng chứng credential/cap theo provider. Ledger thật giữ nguyên và kill switch ON. [Báo cáo](reports/2026-11-21-hermes-gate-b-preflight-recheck.md).
