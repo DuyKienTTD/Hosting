@@ -328,6 +328,14 @@ documents:
     verified_at: 2026-11-21
     sensitivity: public-redacted
 
+  - id: ttd-hermes-gate-b-single-paid-call-proposal-2026-11-21
+    path: decisions/2026-11-21-hermes-gate-b-single-paid-call-proposal.md
+    type: decision
+    status: proposed
+    authoritative_for: pending-owner-approval-of-one-hermes-real-provider-paid-call
+    updated_at: 2026-11-21
+    sensitivity: public
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
