@@ -289,3 +289,7 @@ Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và s�
 ## Kết quả phiên Guard-only mount — 2026-11-22
 
 **BLOCKED / INTERRUPTED_BY_ENVIRONMENT.** Codex nhận chỉ thị `cc88484` và đối chiếu quy tắc tại `ba3ad2b`. Computer Use dừng ở cửa sổ Web Terminal vì không xác minh được URL. Phiên chưa có đích SSH KVM2 đã xác minh và Docker chỉ có context local. Đã kiểm chứng bản render local chỉ thêm một bind mount read-only vào Guard. Việc xác minh runtime và mount còn chờ đường truy cập KVM2. [Báo cáo và bằng chứng](../reports/2026-11-22-hermes-gate-b-guard-mount-access-result.md).
+
+## Nghiệm thu Guard-only mount — 2026-11-22
+
+**GUARD_MOUNT_PASS.** Đã khôi phục truy cập KVM2 qua tab Chrome và chỉ recreate sandbox `guard`. Xác nhận mount chỉ đọc duy nhất ở Guard, proxy/Guard healthy, production HTTP 200/restart 0, 18/18 phép thử cách ly sau recreate đạt và ledger khớp từng byte. Paid GATE B vẫn `BLOCKED_PREFLIGHT`. `next_owner: chatgpt` nghiệm thu. [Báo cáo](../reports/2026-11-22-hermes-gate-b-guard-mount-results.md) · [Evidence](../reports/evidence/2026-11-22-ttd-hermes-gate-b-guard-mount.json).

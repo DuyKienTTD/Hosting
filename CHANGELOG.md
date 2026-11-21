@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Nghiệm thu `GUARD_MOUNT_PASS` trên KVM2. Chỉ Guard được recreate để mount credential chỉ đọc. Production health, cách ly proxy và ledger đều đạt kiểm tra sau thay đổi. Paid GATE B vẫn `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-guard-mount-results.md).
+
 - Ghi kết quả phiên Guard-only mount bị chặn ở đường truy cập KVM2. Docker Compose local xác nhận overlay chỉ thêm một bind mount read-only cho Guard. [Báo cáo](reports/2026-11-22-hermes-gate-b-guard-mount-access-result.md).
 
 ## 2026-11-21

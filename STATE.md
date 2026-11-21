@@ -2,7 +2,7 @@
 id: current-state
 type: state
 status: current
-updated_at: 2026-11-21
+updated_at: 2026-11-22
 verified_at: 2026-11-21
 sensitivity: public-redacted
 ---
@@ -87,6 +87,8 @@ sensitivity: public-redacted
 - **Chủ dự án đã phê duyệt riêng guard-only mount (2026-11-21):** cho phép Codex recreate **chỉ sandbox `guard`** với H4 overlay để mount OpenAI secret read-only, có backup/rollback, kiểm targeted six-container no-bypass, health, ports và ledger; **không** gọi provider, không mount sang service khác, không đổi production/kill switch/paid permit. [Task GATE B, mục phê duyệt guard mount](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md). `handoff_state: PREPARED_FOR_OWNER_FORWARD`, chưa Codex ACK; GATE B vẫn `BLOCKED_PREFLIGHT`.
 
 - **Checkpoint GATE B — mount Guard vẫn chưa thực hiện:** Codex báo đã đọc approval ở `0e564e0` và đối chiếu overlay H4 từ repo, nhưng dừng trước recreate do chưa đọc xong rules mới và chưa kiểm tra live Compose/backup/rollback. Không có runtime change hay provider call; không có nghiệm thu mount. Chủ dự án đã phê duyệt guard-only mount, approval vẫn có hiệu lực trong phạm vi cũ; Codex phải hoàn tất preflight chỉ đọc trước khi thao tác. GATE B `BLOCKED_PREFLIGHT`. [Checkpoint](reports/2026-11-21-hermes-gate-b-guard-mount-paused-checkpoint.md).
+
+- **2026-11-22 — Guard-only mount `GUARD_MOUNT_PASS`:** Kết nối lại KVM2 qua Chrome và recreate đúng sandbox Guard với mount chỉ đọc. Guard/proxy healthy, 18/18 phép thử cách ly sau recreate đạt, production HTTP 200/restart 0 và ledger khớp từng byte. Paid GATE B vẫn `BLOCKED_PREFLIGHT` cho đến bước provider preflight riêng. [Báo cáo](reports/2026-11-22-hermes-gate-b-guard-mount-results.md).
 
 ## Việc đang chờ
 
