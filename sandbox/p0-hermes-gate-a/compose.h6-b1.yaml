@@ -1,0 +1,15 @@
+# Prevent the pinned Hermes base image's VOLUME from creating anonymous state.
+# This is disposable RAM for the isolated B1 rehearsal.
+x-b1-image-state: &b1-image-state
+  type: tmpfs
+  target: /opt/data
+  tmpfs:
+    size: 8388608
+
+services:
+  guard:
+    volumes: [*b1-image-state]
+  h6-writer:
+    volumes: [*b1-image-state]
+  provider-mock:
+    volumes: [*b1-image-state]

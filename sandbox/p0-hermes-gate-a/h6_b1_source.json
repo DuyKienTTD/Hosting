@@ -1,0 +1,12 @@
+{
+  "bridge.py": "acef33a87e227a8170ec61174e5dc70fb12e6fc385c52f852995bef7296d522a",
+  "compose.h6-stage-a.yaml": "364b3e6f3108962be4ef067a4d46eadcd9bfc924ff8012fd1bb6f9c5a3f61418",
+  "compose.yaml": "98d85f5df5f693db58188d2a1c09de3e5adedd2b82be06fb1a695f6eab83a637",
+  "guard.py": "1415d2e7610e527e3d8acca9fd0eecfd28741fad933824d117654be6ffe47c43",
+  "h6_stage_a_test.py": "12789d52143097db761d6525b7933d3ceca4027f59230bb54919b299c6ae23ce",
+  "h6_writer.py": "f48a685e62e08ff39bb4dd459ae86e419738526b5621047e19e0c9834ebe724b",
+  "mock_contract.py": "df7abfba03d2bfcb9ef9202f3cd07a8471c4d7b6babf0a8b37b4c309f3310fe2",
+  "one_shot.py": "30811b3db32489439bed4996226b9928d37683b7bbe04914b6802b55161acc61",
+  "one_shot_linux_test.py": "891f88b5f5299320b7df2c6d500f53f27c63e18198ef8c586990088d967088e1",
+  "provider_mock.py": "1e56e83ec9963a41e05a6ac849df2ab0371daab4aaa438e11fd01daf57d2f5d7"
+}
