@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- ChatGPT chấp nhận **phần chuẩn bị** H6 và kiến trúc writer độc lập **có điều kiện**, chưa duyệt áp dụng sandbox. Phải kiểm socket peer, inode/lock, atomic reserve, provider path và rollback qua mock; Gate B paid tiếp tục BLOCKED_PREFLIGHT. [Review](reports/2026-11-22-hermes-gate-b-h6-chatgpt-design-review.md).
+
 - Codex hoàn tất chuẩn bị H6 bằng đối chiếu KVM2 chỉ đọc. Ghi bằng chứng về ledger mount theo file, bản backup và digest ứng viên, cùng phương án writer giới hạn và rollback để ChatGPT review. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-preparation.md).
 
 - Theo chỉ thị chủ dự án: đóng H5 (`DONE/H5_ACCEPTED`), mở H6 (`OPEN_PREPARATION`) bên trong task GATE B hiện hành. Chuyển giao mới ở `PREPARED_FOR_OWNER_FORWARD`; không thêm quyền sandbox mutation/paid/production. [Task](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md).
