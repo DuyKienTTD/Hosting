@@ -78,3 +78,35 @@ Tôi không phải là một tiến trình Hermes, n8n worker, SSH shell thườ
 ## Độ tin cậy của hồ sơ
 
 Hồ sơ này chỉ ghi năng lực đã quan sát hoặc có công cụ hỗ trợ thực tế đến ngày 2026-11-21. Mọi năng lực chưa có bằng chứng trực tiếp phải được đánh dấu `UNKNOWN`, `BLOCKED` hoặc `PLANNED` trong task/report tương ứng.
+
+
+## Kiểm kê mở rộng tài khoản — bổ sung 2026-11-21
+
+Xem [báo cáo inventory dịch vụ và chức năng](../reports/2026-11-21-hostinger-account-capability-inventory.md). Nguồn này phân biệt `VERIFIED` qua công cụ tài khoản, `DOCUMENTED` theo tài liệu sản phẩm, `APPROVAL_REQUIRED` và `BLOCKED_OR_UNKNOWN`.
+
+### VERIFIED về danh mục tài nguyên tài khoản
+
+- Một **Cloud Startup Hosting** với WordPress chính: `wroughtiron.shop`, `qtcty.com`, `thuanthanhdat.com`, `nepdong.com`, cùng `staging.wroughtiron.shop`; `thuanthanhdat.com.vn` là loại site khác chưa phân loại đầy đủ; `nepdong.top` dùng AI Builder Manual mode.
+- `wroughtiron.shop` và `qtcty.com` có CDN bật tại điểm khảo sát; Cloud plan có addon Daily Backup, **không đồng nghĩa VPS đã bật daily backup**.
+- VPS KVM 2 và Docker Manager đã tồn tại; 2 bản backup VPS, lịch 7 ngày; chưa có Hostinger firewall group gắn với VPS tại điểm khảo sát.
+- Một resource Docker Hosting/AI automation liên quan `ttdnew.tech`; **metadata sản phẩm là OpenClaw còn runtime trả `u4s-hermes-agent`**, cần xác minh chính xác identity, không gộp với Hermes Docker trên KVM 2.
+- Bốn Hostinger Email services `nepdong.com`, `nepdong.top`, `qtcty.com`, `thuanthanhdat.com`; một Reach 1000 gắn `wroughtiron.shop`; Hostinger Agent/Hagents và GitHub integration có mặt.
+
+### DOCUMENTED / quyền thay đổi tùy công cụ và từng account
+
+- Website/WordPress/WooCommerce/AI Builder: site inventory, posts/pages/media/plugins/themes/settings, PHP/SSL/CDN/DB/backup, chẩn đoán lỗi và quy trình khôi phục khi đúng công cụ được expose.
+- VPS: tài nguyên, SSH reachability, firewall/backup/snapshot, Docker Manager/Compose/logs, lệnh chẩn đoán allowlisted; thao tác đổi hạ tầng chỉ khi có approval và rollback.
+- Domain/DNS/SSL: nameserver, các bản ghi và routing; email: mailbox, alias, forwarding, DNS SPF/DKIM/DMARC, deliverability; Hostinger Reach: campaign/contacts/sending domain theo phạm vi gói.
+- Các chức năng này là **khả năng hỗ trợ**, không chứng minh đã đọc/ghi được từng website hay đã chạy mọi operation.
+
+### BLOCKED / UNKNOWN
+
+- Filesystem private hosting account (`/home/...`, File Manager) không có công cụ đọc trực tiếp được xác nhận trong lần khảo sát.
+- Private Hermes inference API, n8n MCP/workflow E2E và quyền đọc bí mật không được xác nhận.
+- Resource Docker/AI trên `ttdnew.tech` cần điều tra riêng: không kết luận OpenClaw/Hermes từ metadata mâu thuẫn.
+
+### Phân vai bổ sung
+
+Hostinger Agent là **owner ưu tiên cho kiểm kê và hỗ trợ vận hành tài khoản Hostinger**: Cloud Hosting, WordPress/site hosting, DNS/domain/email, VPS backup/firewall/health, trạng thái Docker Hosting và runbook/rollback. **Codex** ưu tiên sửa code, tích hợp API, Docker network và hệ thống tùy biến; **Hermes** ưu tiên reasoning/nội dung/tool investigation; **n8n** điều phối vận hành định kỳ sau khi được triển khai. Chủ dự án phê duyệt các hành động nhạy cảm.
+
+Những dữ kiện này là snapshot 2026-11-21; không suy diễn tài nguyên vẫn không thay đổi ở những ngày sau.
