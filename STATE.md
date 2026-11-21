@@ -62,6 +62,8 @@ sensitivity: public-redacted
 
 - [ADR-P0-002](decisions/2026-11-21-hermes-auxiliary-guard-bridge-approval-proposal.md) **GATE A APPROVED** đã được thực hiện: [TTD-HERMES-GATE-A-001](tasks/2026-11-21-hermes-auxiliary-guard-bridge-gate-a.md) hiện `complete / GATE_A_MOCK_PASS`. Bốn service sandbox private healthy, mock E2E và corrected rollback PASS; production health HTTP 200, restart/downtime 0. GATE B chưa được phê duyệt và không được thực hiện.
 
+- Đã review GATE A mock **PASS** dựa trên báo cáo/evidence GitHub; đã tạo [ADR-P0-003](decisions/2026-11-21-hermes-gate-b-single-paid-call-proposal.md) **PROPOSED**, yêu cầu phê duyệt mới cho đúng **một** Hermes Agent paid call. Giữ kill switch ON, chưa thực hiện GATE B; đề xuất dùng one-shot permit, không mở toàn cục và không tự retry paid.
+
 ## Việc đang chờ
 
 - Chưa thực hiện hardening SSH/XRDP hoặc firewall.
