@@ -134,6 +134,15 @@ documents:
     verified_at: 2026-11-21
     sensitivity: public-redacted
 
+  - id: codex-repository-readiness-ack-2026-11-21
+    path: reports/2026-11-21-codex-repository-readiness-ack.md
+    type: report
+    status: complete
+    authoritative_for: codex-repository-documentation-readiness-ack-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
   - id: hostinger-agent-capability-survey-2026-11-21
     path: reports/2026-11-21-hostinger-agent-capability-survey.md
     type: report

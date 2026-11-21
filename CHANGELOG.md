@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- Codex hoàn tất onboarding tại commit `30ccdfa`: đọc đầy đủ entrypoint, quy tắc, hồ sơ, toàn bộ tài liệu/evidence được catalog chỉ mục và các Markdown ngoài archive; ghi ACK sẵn sàng nhận task nhưng chưa tự bắt đầu GATE B hoặc thay đổi runtime. Repository validator PASS 137 tracked files.
+
 - Mở rộng đặc tả Guard-only mount trong task GATE B hiện có theo chỉ đạo owner: Codex phải thử các đường kiểm tra an toàn thay thế (Web Terminal, HTTP từ container, permit theo schema thực tế, Compose-vs-inspect) trước khi handoff BLOCKED; không nới approval hoặc bỏ qua safety gate.
 
 - Bổ sung phần điều phối vào task GATE B hiện có: hoàn tất backup, rendered Compose và production/ledger baseline trước Guard-only mount. Chỉ ghi REPORTED cho cập nhật Codex chưa có evidence GitHub; giữ nguyên owner/status/approval và các gate an toàn.
