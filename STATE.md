@@ -35,7 +35,7 @@ sensitivity: public-redacted
 - Đã xác minh n8n `2.45.7` và Hermes `0.22.5`; cả hai health/readiness PASS, 0 restart/OOM và có thể chạm nhau hai chiều qua host bridge.
 - P0 Mức 1 đã triển khai hai runtime phụ cô lập trên `ttd-ai-p0-sandbox`: n8n sandbox có đúng một authenticated webhook và reasoner deterministic mock không provider/Internet egress.
 - Structural E2E 9/9, negative auth, schema, callback, timeout/retry/idempotency và rollback/restore đều PASS. Production n8n/Hermes không restart, downtime 0, public port/firewall/DNS không đổi và paid inference call bằng 0.
-- AI reasoning thật vẫn `AWAITING_LEVEL2_APPROVAL`; n8n production MCP vẫn tắt, production có 0 workflow và Hermes chính vẫn không expose inference API. [Review Mức 1/2](reports/2026-11-21-p0-level1-review-and-level2-criteria.md) phân biệt **provider E2E** (adapter gọi GPT-6 Luna) và **Hermes E2E** (n8n giao việc cho Hermes Agent thật); provider-only PASS chưa đủ nghiệm thu mục tiêu n8n↔Hermes.
+- AI reasoning thật vẫn **CHƯA KIỂM THỬ**; Mức 2 đã phê duyệt nhưng chưa có báo cáo thực thi; n8n production MCP vẫn tắt, production có 0 workflow và Hermes chính vẫn không expose inference API. [Review Mức 1/2](reports/2026-11-21-p0-level1-review-and-level2-criteria.md) phân biệt **provider E2E** (adapter gọi GPT-6 Luna) và **Hermes E2E** (n8n giao việc cho Hermes Agent thật); provider-only PASS chưa đủ nghiệm thu mục tiêu n8n↔Hermes.
 - Kiến trúc được khuyến nghị: n8n làm control plane, Hermes reasoning qua API private, một internal Docker network, schema/policy/approval gate và media-worker FFmpeg riêng.
 
 ## Khảo sát năng lực và phối hợp các tác nhân
@@ -54,7 +54,7 @@ sensitivity: public-redacted
 - [TTD-AI-P0-INTEGRATION-001](tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md) có kết quả `LEVEL1_PASS / PARTIAL`: sandbox workflow/callback đã PASS; real model inference còn chờ Mức 2. Xem [báo cáo P0](reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md).
 - Không thay U4S, account business, public port/firewall hoặc credential; downtime 0 và chi phí API 0.
 
-- [ADR-P0-001](decisions/2026-11-21-p0-reasoning-integration-proposal.md) vẫn **PARTIALLY_APPROVED**: Mức 1 đã thực thi; model/provider, trần chi phí và paid inference (Mức 2) chưa được duyệt.
+- [ADR-P0-001](decisions/2026-11-21-p0-reasoning-integration-proposal.md) đã **APPROVED_WITH_RESTRICTIONS**: Mức 1 PASS; chủ dự án phê duyệt Mức 2 chỉ cho `gpt-6-luna`, tối đa 5 calls, 4K input + 2K output/call, trần USD 0.05/ngày và USD 0.05 tổng, fake data. [Task Codex Mức 2](tasks/2026-11-21-n8n-hermes-p0-level2-real-inference.md) đã được giao, thực thi/real inference chưa xác minh.
 
 ## Việc đang chờ
 
@@ -62,7 +62,7 @@ sensitivity: public-redacted
 - Chưa đặt n8n/Hermes sau reverse proxy HTTPS.
 - Chưa xử lý các backup Hostinger có thể chứa ứng dụng đã xóa.
 - Chưa cập nhật hệ điều hành hoặc reboot.
-- Chờ phê duyệt **Mức 2**: đề xuất GPT-6 Luna, tối đa 5 fake-data calls, cap USD 0.05/ngày và USD 0.05 tổng P0. Chưa cấp key/mở provider egress/chạy paid inference. n8n MCP toàn instance không cần bật cho phương án hiện tại.
+- Đã phê duyệt **Mức 2** và giao Codex kiểm thử có kiểm soát; chờ evidence provider E2E và Hermes Agent E2E **riêng biệt**. Không gọi API nếu không bảo đảm cost cap, token limit hoặc quyền truy cập; chưa xác minh đã cấp key/mở provider egress/chạy inference. n8n MCP toàn instance không cần bật cho phương án hiện tại.
 - Chưa kết nối/xác minh Google Ads, GA4, WordPress/WooCommerce, YouTube, TikTok, Meta, Kling, HeyGen hoặc ElevenLabs.
 
 ## Tài liệu tiếp theo
