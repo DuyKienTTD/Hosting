@@ -111,7 +111,12 @@ Với công việc nhỏ đã rõ, có thể rút ngắn nhưng **không bỏ ow
 - Trong mọi thông điệp giao việc sau đó nhắc: \"Đọc `AGENTS.md`, `rules/AGENT_WORKFLOW.md`, `rules/REPOSITORY_SECURITY.md`, `STATE.md`, `CATALOG.yaml` và hồ sơ agent trước khi làm. Ghi commit rule đã đọc và tuân thủ quy tắc chung.\"
 - Cập nhật quy tắc nên ngắn gọn đủ vận hành, không sản xuất thêm tài liệu hành chính dư thừa. Nếu thiếu quyền GitHub, cung cấp patch chính xác + trạng thái `NOT_PUSHED`, không nói đã cập nhật.
 
-### 7.6. Ví dụ áp dụng cho GATE B (không cấp quyền mới)
+### 7.6. Không ghi đè task chính khi bàn giao tham vấn
+
+- **Không ghi đè task chính khi bàn giao tham vấn (H1/H2).** Agent tư vấn chỉ tạo report/evidence riêng và bổ sung link/status handoff vào mục phù hợp, không tự đổi owner, status, approval scope hoặc thay toàn bộ nội dung task mẹ. Chỉ chủ dự án hoặc owner được ủy quyền mới thay đổi các trường quyền hoặc đóng task mẹ; các nhiệm vụ paid vẫn BLOCKED cho tới nghiệm thu theo gate.
+- Trước khi `update_file`, phải fetch phiên bản mới và review diff để không xóa mục tiêu, điều kiện an toàn hay kết quả agent khác. Nếu xảy ra overwrite, phục hồi nội dung task mẹ từ commit xác minh được, giữ report lịch sử và ghi rõ sửa đổi trong changelog.
+
+### 7.7. Ví dụ áp dụng cho GATE B (không cấp quyền mới)
 
 - **Hostinger Agent (consult, read-only):** bắt đầu từ inventory và live hPanel/VPS network; báo bridge có thể truy cập proxy Level 2 qua interface/network nào, topology cô lập đề xuất, thao tác nào đòi approval và test no-bypass. **Không sửa network/firewall/DNS**.
 - **Hermes Agent (consult, read-only):** đối chiếu chính xác runtime auxiliary và serialized Responses request/cap/token/credential requirements; mô tả cách khóa fingerprint trên bytes cuối, cái gì đã mock PASS vs còn UNKNOWN. **Không dispatch paid**.
