@@ -909,6 +909,24 @@ documents:
     verified_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: hermes-gate-b-h6-b2-h-read-only-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-h-read-only.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-H-KVM2-read-only-readiness-and-Compose-proposal
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-h-read-only-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-h-read-only.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-H-verified-metadata-render-diff-and-blockers
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria

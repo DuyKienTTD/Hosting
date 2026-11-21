@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Codex hoàn tất H6 B2-H read-only trên KVM2, đối chiếu H4, UID/mount/proxy, Compose preview và workflow n8n đang publish. Live integration NO-GO do deadline/callback và writer mount chưa duyệt. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-h-read-only.md).
+
 - Chủ dự án yêu cầu tăng cường ChatGPT Work; ChatGPT giao luồng Work audit độc lập B2-H song song Codex, có write set riêng, chỉ đọc, không làm thay đổi KVM2/ledger/provider/paid. [Work task](tasks/2026-11-22-work-independent-b2-h-assurance.md).
 
 - ChatGPT accepted H6 B2-G `c3c233a` KVM2 fake TLS/rollback (13 scenarios) and opened B2-H read-only real integration readiness; no live ledger mount/provider/paid authorization. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-g-chatgpt-review.md).
