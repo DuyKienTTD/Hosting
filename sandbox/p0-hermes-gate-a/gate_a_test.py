@@ -42,6 +42,7 @@ def count() -> int:
 
 def payload(task_id: str, *, simulate: str | None = None, spend: int = 25) -> dict:
     value = {
+        "phase": "start",
         "task_id": task_id,
         "correlation_id": "corr-" + task_id,
         "input": {"channel": "ads", "spend": spend, "clicks": 7},

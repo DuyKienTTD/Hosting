@@ -129,7 +129,10 @@ def run_hermes(task_id: str, correlation_id: str, input_data: dict[str, Any], si
         state = run.get("status")
         if state == "completed":
             runtime = run.get("runtime") or {}
-            if runtime.get("model") != MODEL or runtime.get("provider") != "openai-api":
+            requested = runtime.get("requested") or {}
+            if requested.get("model") != MODEL or requested.get("provider") != "openai-api":
+                raise RuntimeError("HERMES_RUNTIME_MISMATCH")
+            if runtime.get("model") not in (None, "", MODEL) or runtime.get("provider") not in (None, "", "openai-api"):
                 raise RuntimeError("HERMES_RUNTIME_MISMATCH")
             try:
                 result = json.loads(run.get("output") or "")
@@ -141,7 +144,15 @@ def run_hermes(task_id: str, correlation_id: str, input_data: dict[str, Any], si
                 "run_id_hash": hashlib.sha256(run_id.encode()).hexdigest(),
                 "result": result,
                 "usage": run.get("usage") or {},
-                "runtime": runtime,
+                "runtime": {
+                    "model": MODEL,
+                    "provider": "openai-api",
+                    "requested": requested,
+                    "api_server_served_model": runtime.get("model") or None,
+                    "api_server_served_provider": runtime.get("provider") or None,
+                    "route_source": runtime.get("route_source"),
+                    "guard_enforced": True,
+                },
             }
         if state in {"failed", "cancelled", "interrupted"}:
             raise RuntimeError("HERMES_RUN_" + str(state).upper())
