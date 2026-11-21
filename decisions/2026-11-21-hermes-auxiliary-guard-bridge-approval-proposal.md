@@ -1,7 +1,9 @@
 ---
 id: ttd-hermes-aux-guard-bridge-approval-proposal-2026-11-21
 type: decision
-status: proposed
+status: partially_approved
+approved_scope: gate-a-mock-only
+approved_at: 2026-11-21
 updated_at: 2026-11-21
 sensitivity: public
 decision_owner: business-owner
@@ -10,7 +12,7 @@ related_task: ttd-hermes-e2e-hard-cap-001
 
 # ADR-P0-002 — Đề xuất phê duyệt triển khai Hermes phụ, guard và bridge (KHÔNG PAID CALL)
 
-**TRẠNG THÁI: PROPOSED — CHƯA ĐƯỢC CHỦ DỰ ÁN PHÊ DUYỆT.** Tài liệu này không tự cấp quyền triển khai trên VPS.
+**TRẠNG THÁI: GATE A ĐÃ ĐƯỢC CHỦ DỰ ÁN PHÊ DUYỆT (2026-11-21).** Cho phép Codex triển khai Hermes phụ, inference guard, authenticated bridge/callback và hai service secrets trên sandbox KVM2; **chỉ provider mock, giữ kill switch ON, 0 paid calls, không thay production**. **GATE B chưa được phê duyệt.** Xem [nhiệm vụ thực thi Bước A](../tasks/2026-11-21-hermes-auxiliary-guard-bridge-gate-a.md).
 
 ## Cơ sở bằng chứng
 
@@ -19,9 +21,9 @@ related_task: ttd-hermes-e2e-hard-cap-001
 - Offline guard contract/rehearsal 100/100 PASS; mô phỏng concurrent requests từ **bản sao ledger** có 1 attempt: nhận 4, từ chối 6. Đây **không phải** evidence của live full Hermes request hoặc Hermes E2E.
 - Production n8n/Hermes chưa đổi; kill switch vẫn bật. Provider E2E đã PASS 1 paid call USD 0.0000496 theo usage (chưa đối soát hóa đơn). Hermes E2E vẫn `BLOCKED_COST_CONTROL`.
 
-## Phạm vi triển khai có thể xin phê duyệt — GATE A
+## Phạm vi được phê duyệt — GATE A
 
-Chỉ được làm sau khi chủ dự án phê duyệt rõ ràng:
+Chủ dự án đã phê duyệt rõ ràng phạm vi bên dưới ngày 2026-11-21:
 
 1. Trên **KVM2 sandbox hiện có**, chuẩn bị và chạy **một Hermes auxiliary runtime nguyên bản** pin image digest/commit đã xác minh, state riêng, không mount production state/credentials/data/memory/skills.
 2. Một **private inference guard** là đường duy nhất đến OpenAI Responses API; không có đường provider egress trực tiếp cho Hermes hoặc bridge. Guard phải enforce trước dispatch: `gpt-6-luna`, `max_output_tokens=600` (không >2.000), input ≤4.000 billable tokens, không tools/tool choice, ≤1 turn, không auxiliary/recursive calls, không fallback model, không auto retry có thể bypass.
@@ -41,7 +43,7 @@ Chỉ được làm sau khi chủ dự án phê duyệt rõ ràng:
 
 ## Vai trò
 
-**Codex:** owner triển khai kỹ thuật nếu GATE A được duyệt. **Hermes:** hỗ trợ kiểm chứng agent, tool/profile/schema. **Hostinger Agent:** kiểm tra backup/runtime boundary/health. **ChatGPT:** đối chiếu evidence và nghiệm thu báo cáo theo yêu cầu. **Chủ dự án:** duyệt GATE A; sau mock PASS mới quyết định GATE B.
+**Codex:** owner triển khai kỹ thuật GATE A đã được duyệt. **Hermes:** hỗ trợ kiểm chứng agent, tool/profile/schema. **Hostinger Agent:** kiểm tra backup/runtime boundary/health. **ChatGPT:** đối chiếu evidence và nghiệm thu báo cáo theo yêu cầu. **Chủ dự án:** đã duyệt GATE A; sau mock PASS mới quyết định GATE B.
 
 ## Acceptance GATE A
 
@@ -50,4 +52,4 @@ Chỉ được làm sau khi chủ dự án phê duyệt rõ ràng:
 - Mock E2E `n8n → Hermes auxiliary → guard provider mock → n8n authenticated callback` PASS. Không gộp mock E2E với paid Hermes E2E.
 - Rollback/restore và production health PASS; paid calls thêm = 0, chi phí thêm = 0; evidence redacted, report+commit GitHub.
 
-**Chỉ sau đó** lập phiếu xin phê duyệt GATE B cho một paid Hermes call. Không đánh dấu P0 complete khi chỉ GATE A PASS.
+**Chỉ sau đó** lập phiếu xin phê duyệt GATE B cho một paid Hermes call. Không đánh dấu P0 complete khi chỉ GATE A PASS. Phê duyệt GATE A không phải bằng chứng tác vụ đã được thực thi.
