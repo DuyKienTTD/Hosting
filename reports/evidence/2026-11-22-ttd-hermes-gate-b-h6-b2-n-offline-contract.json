@@ -1,0 +1,119 @@
+{
+  "task_id": "ttd-hermes-gate-b-001",
+  "stage": "H6_B2_N",
+  "result": "BLOCKED_TARGET_PARITY",
+  "observed_date_ict": "2026-11-22",
+  "approval_scope_commit": "ef21231",
+  "ack_commit": "08f3d18097e761311ac1aadaa524fa7ef77b438f",
+  "task_blob": "d0c7f7516d3402de35c8d80bf944f566bac45cd5",
+  "workflow_rule_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "source_check_blob": "d73665195fa412c7b443a013a51fb04d7b3a1ff1",
+  "b2h_evidence_commit": "71fdd40a363bfc70ebbb618352118eef9d925215",
+  "b2k_prior_mock_commit": "351afa2b600fb669f5f9c525f50b2512a2bcc56e",
+  "target_hermes": {
+    "image_digest": "sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f",
+    "platform": "linux/amd64",
+    "oci_image_version_label": "bba80c6",
+    "oci_image_revision_label": "bba80c6deeeab0297f704066220f11a005a1ab71",
+    "source_parity": "THREE_B2H_SOURCE_HASHES_MATCH",
+    "extraction": "BuildKit COPY from pinned image into FROM scratch, network none for build steps, no RUN, no image entrypoint",
+    "extracted_paths": [
+      "/opt/hermes/run_agent.py",
+      "/opt/hermes/gateway/platforms/api_server.py",
+      "/opt/hermes/gateway/platforms/api_server_openai_routes.py",
+      "/opt/hermes/gateway/platforms/api_server_runs.py"
+    ],
+    "reproduce": "Copy each listed path to its basename in a scratch export, then python -B sandbox/p0-hermes-gate-a/h6_b2n_source_check.py --image-sources <export-directory>"
+  },
+  "target_n8n": {
+    "published_active_revision_observed_in_b2h": true,
+    "sandbox_image_digest_verified": false,
+    "sandbox_version_verified": false,
+    "published_revision_id_or_digest_present_in_evidence": false,
+    "sanitized_published_workflow_export_available": false,
+    "public_seed_and_transform_available": true,
+    "public_candidate_parity_to_published_revision": "UNKNOWN",
+    "reasoner_http_timeout_ms_from_b2h": 30000,
+    "retry_enabled_from_b2h": false,
+    "validator_from_b2h": "mock success with paid=false"
+  },
+  "source_observations": {
+    "bridge_source_matches_b2h": true,
+    "bridge_runs_create_and_poll": true,
+    "public_n8n_candidate": {
+      "workflow_id": "ttdP0FakeAdsV1",
+      "public_candidate_sha256": "c9a93f9f7795c4ef232ef2621584079341d461f53e5d26e1376e282800e553f0",
+      "validator_sha256": "2eb8e8e51e10dab0ffd1602e3729eb0124efd2ab4d7de6065661f151ae772cad",
+      "reasoner_timeout_ms": 30000,
+      "retry": false,
+      "checks": {
+        "mock_success_accepted": true,
+        "missing_bearer_rejected_by_router": true,
+        "wrong_bearer_rejected_by_router": true,
+        "placeholder_bearer_accepted_by_router": true,
+        "paid_success_rejected": true,
+        "unknown_outcome_rejected": true,
+        "malformed_hash_rejected": true,
+        "well_shaped_unbound_hash_accepted": true,
+        "different_task_correlation_and_run_accepted": true,
+        "reexecuted_validator_accepts_same_shape": true
+      }
+    },
+    "hermes_image_sources": {
+      "sha256": {
+        "hermes_agent": "33c7195fc6efa9122f1a6700d416fd283f9634712189af3fd72feb01bcea054f",
+        "hermes_gateway": "71ac56c28683aa6b935a432b58e5bfe3753492363ef2cf9f8853b121d0e8214f",
+        "hermes_gateway_routes": "3da2a6483c0d9fd85422ce229859e6a43532d9360758db48f54876e95c0da9f3"
+      },
+      "matching_b2h": {
+        "hermes_agent": true,
+        "hermes_gateway": true,
+        "hermes_gateway_routes": true
+      },
+      "run_idempotency_source_symbols": [
+        "_run_idempotency_scope",
+        "_run_idempotent"
+      ],
+      "runs_module": {
+        "sha256": "a9c3b02e51407ca30fc948753149984c0ec75dcc047763cf75a356c1baaba466",
+        "has_b2h_hash": false,
+        "lookup_before_reserve_before_launch": true,
+        "handler_lines": {
+          "lookup": 770,
+          "reserve": 811,
+          "launch": 847,
+          "replay_or_conflict": 508
+        }
+      }
+    },
+    "execution": "source-only; no Hermes, n8n or fake-provider process"
+  },
+  "configured_deadlines_s": {
+    "bridge_poll": 20,
+    "n8n_http": 30,
+    "guard_response_budget": 45,
+    "proxy_idle": 30,
+    "hermes_source_fallback": 1800
+  },
+  "runtime_tests": {
+    "project_up": false,
+    "reason": "Missing n8n sandbox runtime identity and published workflow parity",
+    "lost_ack": "NOT_RUN",
+    "restart_preserves_run_id": "NOT_RUN",
+    "deadline_measurement": "NOT_RUN",
+    "authenticated_callback_and_nonduplicating_replay": "NOT_RUN",
+    "fake_provider_dispatch_count": null
+  },
+  "scope_counters": {
+    "kvm2_operations": 0,
+    "production_mutations": 0,
+    "real_ledger_permit_key_accesses": 0,
+    "real_provider_api": 0,
+    "paid": 0,
+    "usd": 0
+  },
+  "live_integration": "NO_GO",
+  "paid_gate_b": "BLOCKED_PREFLIGHT",
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}
