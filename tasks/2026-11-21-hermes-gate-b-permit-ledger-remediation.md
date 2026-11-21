@@ -66,3 +66,17 @@ Codex push mã secret-free, test report và evidence đã khử bí mật, đề
 ## Kiểm thử Linux tiếp theo
 
 Đã có [Linux transaction unit PASS](../reports/2026-11-21-hermes-gate-b-remediation-linux-check.md) trên KVM2: 20 tiến trình, 1 admitted/19 rejected, hai crash boundary PASS, ledger copy bền vững và read-only live health/ledger PASS. Full crash matrix, adapter shared-lock interop và guard mock E2E còn thiếu; trạng thái task vẫn `blocked`. Không có paid call hoặc live permit.
+
+## Tiếp tục trên chính task này — sau Linux unit PASS
+
+Bằng chứng mới: [Linux check](../reports/2026-11-21-hermes-gate-b-remediation-linux-check.md) / [evidence](../reports/evidence/2026-11-21-ttd-hermes-gate-b-linux-check.json), commit `c0f3e50b1821e87d9edb5c7a39c8600f8a7aee27`. **BLOCKER_ENVIRONMENT RESOLVED; LINUX_TRANSACTION_UNIT_PASS; GUARD_MOCK_E2E_PENDING.** Các câu trước đây nói Linux test chưa chạy chỉ là lịch sử. Ledger live được xác minh read-only là 1 attempt, USD 0.0035 reserved, USD 0.0000496 usage estimate, kill switch ON; n8n/Hermes production HTTP 200, restart 0 (thời điểm báo cáo 2026-11-21).
+
+**Hãy tiếp tục hoàn thiện trong task hiện có, không lập thêm nhiệm vụ con và không dừng chỉ để bàn giao từng test.** Codex chủ động chọn cách triển khai Linux hiệu quả trong phạm vi sandbox/mock đã cấp quyền, lặp sửa–kiểm thử cho đến nghiệm thu hoặc blocker thật sự cần chủ dự án xử lý. Ưu tiên:
+
+1. Hoàn thiện các fault/crash cases có rủi ro double dispatch hoặc ledger corruption, xác nhận fail-closed và đúng thứ tự durable commit trước request.
+2. Test liên tiến trình **shared-lock interoperability** với adapter Level 2 trên **ledger copy duy nhất**, không tạo lost updates, không cấp hai admission hoặc phá baseline. Review file ownership, atomic replace và `fsync`.
+3. Tích hợp `one_shot.py` vào **guard sandbox trỏ provider mock**, không cấp paid API credential hoặc tạo paid permit. Kiểm thử full n8n → Hermes → guard → provider mock → authenticated callback, duplicate/replay/timeout/concurrency, no-bypass và phí mới 0.
+4. Backup/rollback và pre/post production health khi cần thay sandbox; shared ledger thật phải được bảo vệ. Phân biệt rõ test ledger copy và live read-only; không ghi permit hoặc reservation giả vào ledger thật.
+5. Push **một** báo cáo nghiệm thu tổng hợp với evidence redacted: `MOCK_INTEGRATION_PASS` hay `BLOCKED` kèm nguyên nhân còn lại. Không coi unit PASS là paid readiness; GATE B paid attempt vẫn chờ preflight live toàn bộ theo ADR-P0-003.
+
+**Không gọi API trả phí trong remediation, không đổi production, giữ kill switch ON.**
