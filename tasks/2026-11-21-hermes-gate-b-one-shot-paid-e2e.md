@@ -293,3 +293,13 @@ Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và s�
 ## Nghiệm thu Guard-only mount — 2026-11-22
 
 **GUARD_MOUNT_PASS.** Đã khôi phục truy cập KVM2 qua tab Chrome và chỉ recreate sandbox `guard`. Xác nhận mount chỉ đọc duy nhất ở Guard, proxy/Guard healthy, production HTTP 200/restart 0, 18/18 phép thử cách ly sau recreate đạt và ledger khớp từng byte. Paid GATE B vẫn `BLOCKED_PREFLIGHT`. `next_owner: chatgpt` nghiệm thu. [Báo cáo](../reports/2026-11-22-hermes-gate-b-guard-mount-results.md) · [Evidence](../reports/evidence/2026-11-22-ttd-hermes-gate-b-guard-mount.json).
+
+## ChatGPT nghiệm thu Guard-only mount — 2026-11-22
+
+**REVIEWED_FROM_GITHUB_REPORT_AND_EVIDENCE / GUARD_MOUNT_ACCEPTED.** ChatGPT đã đọc đủ [report](../reports/2026-11-22-hermes-gate-b-guard-mount-results.md), [evidence](../reports/evidence/2026-11-22-ttd-hermes-gate-b-guard-mount.json), commit `7455fa3d519daf810f891a9d4ec07f7fd9b47160` và đối chiếu với Guard-only acceptance của task. Kết quả được **chấp nhận trong phạm vi Guard-only mount**, trên cơ sở phép đo KVM2 do Codex ghi nhận; ChatGPT **không tự tái thực hiện kiểm tra trên VPS**.
+
+- PASS được chứng minh trong evidence: `recreated_services=["guard"]`, provider key mount duy nhất tại Guard và read-only; Guard/proxy healthy; DNS 6/6 và IPv4 12/12 negative checks trước/sau; production n8n/Hermes HTTP `200→200` và restart `0→0`; network/container/ports/resource/Compose bất biến theo acceptance; real ledger bytes unchanged, 1 historical attempt, `one_shot_permits=0`, global kill switch ON; mount-phase provider requests=0, paid cost delta=0.
+- Chênh lệch lịch sử `BLOCKED/INTERRUPTED_BY_ENVIRONMENT` trước đó đã được giải quyết bằng khôi phục Web Terminal và phép kiểm tra live; **không mở lại Guard mount** nếu không có change trigger.
+- **Task mẹ vẫn `status: blocked` / `GATE_B_PAID=BLOCKED_PREFLIGHT`. Mount thành công chỉ gỡ một dependency; chưa xác minh OpenAI project/key scope, Responses capability, billing/quota, giá model, canonical guard-forwarded request và provider token count gắn cùng digest; chưa có paid Hermes E2E.
+- **NEXT PHASE (độc lập, chưa thực hiện trong review):** nghiên cứu và kiểm chứng provider preflight **không phát sinh paid inference** theo ADR-P0-003. Chỉ dùng các phép kiểm tra provider nếu được phép ở phạm vi bước đó; không suy diễn approval mount bao gồm quyền gọi provider. Giữ nguyên provider mock, real ledger/permit/kill switch và production cho đến khi gate tương ứng được nghiệm thu.
+- `from_agent: codex`, `to_agent: chatgpt`, `handoff_state: DONE_RECEIVED_AND_REVIEWED`; evidence source: GitHub report/evidence, không phải ChatGPT live VPS probe.
