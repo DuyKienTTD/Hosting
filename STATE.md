@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **QA độc lập Work B2-H đã nghiệm thu và merge (2026-11-22):** Báo cáo [Work](reports/2026-11-22-work-b2-h-assurance.md) qua PR [#1](https://github.com/DuyKienTTD/Hosting/pull/1), merge `3e9ccc8`; ChatGPT review nhất quán Codex: `LIVE_INTEGRATION_NO_GO`. Hai blocker là **writer start yêu cầu permit ready** và **bridge/n8n deadline + callback mock-only**. B2-I mock callback đã mở; kiểm startup idle trên ledger giả được bổ sung như cổng kỹ thuật riêng, không áp dụng KVM2/ledger thật. GitHub không cho self-APPROVE PR; reviewer kết luận bằng comment. GATE B paid `BLOCKED_PREFLIGHT`.
+
 - **ChatGPT B2-H nghiệm thu / mở B2-I (2026-11-22):** Chấp nhận `H6_B2_H_READ_ONLY_PREFLIGHT_COMPLETE` theo Codex `71fdd40`, nhưng live `NO_GO` do 20s bridge poll/30s n8n/45s Guard và callback chỉ nhận mock `paid=false`; Hermes effective timeout chưa đo. Theo §10 mở `H6_B2_I_DEADLINE_CALLBACK_MOCK_AUTHORIZED` cho Codex kiểm contract 202 bất đồng bộ, status/idempotency và callback paid/fail/unknown trên dữ liệu giả. Không sửa production/workflow, ledger/secret/provider/paid; writer live mount vẫn chưa duyệt. Work B2-H audit độc lập còn `PREPARED`. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-b2-h-chatgpt-review.md).
 
 - **H6 B2-H read-only hoàn tất (2026-11-22)** — H4/Compose preview, UID/mount/proxy và published n8n metadata đã kiểm. LIVE INTEGRATION NO-GO do bridge 20 s/n8n 30 s, callback mock-only và writer mount/IPC chưa phê duyệt. ChatGPT đối chiếu với Work. Paid GATE B giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-h-read-only.md).
