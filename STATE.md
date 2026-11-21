@@ -64,6 +64,8 @@ sensitivity: public-redacted
 
 - Đã review GATE A mock **PASS** dựa trên báo cáo/evidence GitHub; đã tạo [ADR-P0-003](decisions/2026-11-21-hermes-gate-b-single-paid-call-proposal.md) **APPROVED_WITH_RESTRICTIONS (2026-11-21)** cho Codex thực hiện tối đa một Hermes Agent paid call. [Task Codex GATE B](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md) đã giao; chỉ one-shot permit khóa lại trước dispatch, global kill switch vẫn ON, không mở toàn cục và không paid retry. **Chưa có evidence thực thi GATE B.**
 
+- GATE B preflight ghi **BLOCKED_PREFLIGHT**: guard chưa có atomic one-shot permit hoặc shared-ledger reservation. Theo evidence từ kiểm tra repository, Hermes paid attempts mới 0, chi phí mới 0; **ledger/kill switch/production chưa được xác minh live ở phiên này**. Đã tạo [TTD-HERMES-GATE-B-GUARD-REMEDIATION-001](tasks/2026-11-21-hermes-gate-b-permit-ledger-remediation.md) cho Codex thực hiện sửa và thử nghiệm **mock-only**, không gọi paid inference và không đổi production. GATE B paid execution tiếp tục BLOCKED đến khi preflight live PASS.
+
 ## Việc đang chờ
 
 - GATE B được phê duyệt có điều kiện nhưng preflight hiện `BLOCKED_PREFLIGHT`: guard GATE A chưa có atomic one-shot permit, consume/relock trước dispatch và worst-case reservation; 0 paid Hermes attempt mới. [Báo cáo](reports/2026-11-21-hermes-gate-b-paid-results.md).
