@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Nghiệm thu QA B2-N của Work tại `00f5649` trong phạm vi đã đo và chuẩn bị Work review độc lập tuyến B2-O trên PR #4.
+
 - Review Codex B2-N active restart tại `029f80e` và chuẩn bị B2-O local để đo deadline và callback tự động trên tuyến fake tích hợp.
 
 - Tiếp nhận bảng tiêu chí provenance Work tại `c265340` và bổ sung lượt review độc lập bằng chứng runtime B2-N `a19765f` trên PR #4 hiện có.
