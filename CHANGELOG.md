@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- ChatGPT read-only source/entitlement/scope review: H5 follow-up verified project/key metadata, billing and 723 candidate input tokens; live Guard remains mock-only and real ledger RO; paid NO_GO. [Review](reports/2026-11-22-gate-b-chatgpt-provider-and-scope-review.md).
+
 - Codex hoàn tất H5 provider preflight với bằng chứng quản trị project, số token theo digest và kiểm thử one-shot đúng bytes trên ledger mock. Paid inference bằng 0. ChatGPT tiếp nhận nghiệm thu trước H6. [Báo cáo](reports/2026-11-22-hermes-gate-b-h5-preflight-followup.md).
 
 - H5 xác minh GPT-6 Luna metadata HTTP 200 từ Guard. H5 còn bị chặn vì thiếu bằng chứng project và final forwarded digest gắn với runtime. Không phát sinh paid inference. [Báo cáo](reports/2026-11-22-hermes-gate-b-h5-provider-preflight.md).
