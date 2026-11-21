@@ -58,6 +58,8 @@ sensitivity: public-redacted
 
 - [ADR-P0-001](decisions/2026-11-21-p0-reasoning-integration-proposal.md) đã **APPROVED_WITH_RESTRICTIONS**: Mức 1 PASS; Mức 2 Provider PASS trong cap; [task Mức 2](tasks/2026-11-21-n8n-hermes-p0-level2-real-inference.md) hiện `blocked` riêng ở Hermes hard cost control.
 
+- Đã tạo [TTD-HERMES-E2E-HARD-CAP-001](tasks/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md) giao Codex **khảo sát feasibility chỉ-đọc** cho Hermes Agent thật: hard output cap trước request, exact model, tools-off, shared atomic cost ledger và authenticated callback. **Chưa phê duyệt triển khai runtime phụ mới, thay egress hoặc gọi AI thêm**. Kill switch theo báo cáo vẫn bật.
+
 ## Việc đang chờ
 
 - Chưa thực hiện hardening SSH/XRDP hoặc firewall.
