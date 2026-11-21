@@ -1,14 +1,14 @@
 ---
 id: ttd-ai-p0-integration-001
 type: task
-status: blocked
-approval_level: 1
+status: in_progress
+approval_level: 2
 updated_at: 2026-11-21
 sensitivity: public
 owner: codex
 support: [hostinger-agent, hermes]
 depends_on: [ttd-resource-identity-001]
-execution_result: level1_pass_level2_pending
+execution_result: level1_pass_level2_approved_not_yet_verified
 ---
 
 # TTD-AI-P0-INTEGRATION-001 — Tích hợp sandbox n8n ↔ Hermes (sau xác minh resource)
@@ -65,7 +65,7 @@ Tạo `reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md` hoặc file ngà
 
 ## Phê duyệt Mức 1 — 2026-11-21
 
-Chủ dự án phê duyệt tiếp tục P0 theo [ADR-P0-001](../decisions/2026-11-21-p0-reasoning-integration-proposal.md), **chỉ trong sandbox cô lập**. Codex được khảo sát kỹ thuật, chuẩn bị và triển khai runtime phụ/adapter private (nếu compatibility, backup, resource/cost isolation và rollback đều đạt) và **một authenticated webhook workflow giả lập**. Không thay image/container Hermes chính, không bật MCP instance-wide, không mở public endpoint/đổi firewall/DNS, không chạm U4S `ttdnew.tech` và không sửa business account. Nếu thay đổi ảnh hưởng production, restart/recreate hoặc downtime, **dừng xin approval riêng**. Việc chọn provider/model, trần chi phí và mọi paid inference call thuộc Mức 2 **chưa được phê duyệt**. Có thể kiểm thử HTTP/auth/schema và mock reasoning miễn phí; tuyệt đối không đánh dấu E2E real reasoning PASS bằng mock.
+Chủ dự án phê duyệt tiếp tục P0 theo [ADR-P0-001](../decisions/2026-11-21-p0-reasoning-integration-proposal.md), **chỉ trong sandbox cô lập**. Codex được khảo sát kỹ thuật, chuẩn bị và triển khai runtime phụ/adapter private (nếu compatibility, backup, resource/cost isolation và rollback đều đạt) và **một authenticated webhook workflow giả lập**. Không thay image/container Hermes chính, không bật MCP instance-wide, không mở public endpoint/đổi firewall/DNS, không chạm U4S `ttdnew.tech` và không sửa business account. Nếu thay đổi ảnh hưởng production, restart/recreate hoặc downtime, **dừng xin approval riêng**. Việc chọn provider/model, trần chi phí và mọi paid inference call thuộc Mức 2 **chưa được phê duyệt tại thời điểm Mức 1**; xem phê duyệt Mức 2 mới nhất trong task riêng. Có thể kiểm thử HTTP/auth/schema và mock reasoning miễn phí; tuyệt đối không đánh dấu E2E real reasoning PASS bằng mock.
 
 ### Bàn giao tiếp theo của Codex
 
@@ -85,10 +85,10 @@ Chủ dự án phê duyệt tiếp tục P0 theo [ADR-P0-001](../decisions/2026-
 - [x] Triển khai instance `ttd-p0-n8n-sandbox` độc lập với production, khóa mã hóa và data directory riêng; không thay `N8N_ENCRYPTION_KEY` hoặc volume production.
 - [x] Tạo đúng một workflow `fake-ads-audit-v1` có bearer auth, input/output schema, callback, timeout, retry và idempotency.
 - [x] Bộ test cấu trúc E2E 9/9 PASS; backup/rollback/restore rehearsal PASS; production health và restart count không đổi.
-- [ ] E2E **AI reasoning thật**: **BLOCKED_BY_LEVEL2_APPROVAL**; không gọi provider, không phát sinh API fee và không tạo PASS giả.
+- [ ] E2E **AI reasoning thật**: **APPROVED_LEVEL2_PENDING_EXECUTION**; không gọi provider, không phát sinh API fee và không tạo PASS giả.
 
 ## Trạng thái chặn
 
-Mức 1 đã hoàn tất. Nhiệm vụ tổng thể giữ `blocked` vì acceptance còn yêu cầu model inference thật. Chủ dự án cần phê duyệt provider/model và hạn mức tiền Mức 2 trước khi cấp API key, mở egress cho runtime phụ hoặc chạy bất kỳ paid inference call nào. Không cần restart/recreate production để đi tiếp theo phương án hiện tại.
+Mức 1 đã hoàn tất. **Chủ dự án phê duyệt Mức 2 ngày 2026-11-21**: `gpt-6-luna`, tối đa 5 calls, 4K input + 2K output tokens/call, trần USD 0.05/ngày và USD 0.05 tổng P0, chỉ fake data, dừng khi không kiểm soát được chi phí/quyền. Codex thực hiện theo [TTD-AI-P0-LEVEL2-001](2026-11-21-n8n-hermes-p0-level2-real-inference.md). Trạng thái in_progress chỉ là **đã giao việc**, không có nghĩa real E2E đã PASS. Không restart/recreate production.
 
 Kết quả chi tiết: [báo cáo P0](../reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md) và [evidence JSON](../reports/evidence/2026-11-21-ttd-ai-p0-integration-001.json).
