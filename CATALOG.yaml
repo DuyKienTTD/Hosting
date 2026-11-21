@@ -5,6 +5,8 @@ default_language: vi
 
 entrypoints:
   read_first: README.md
+  project_charter: PROJECT.md
+  task_handoff_rules: rules/AGENT_WORKFLOW.md
   current_state: STATE.md
   agent_rules: AGENTS.md
   contribution_workflow: CONTRIBUTING.md
@@ -53,7 +55,16 @@ documents:
     updated_at: 2026-11-21
     sensitivity: public
 
+  - id: shared-agent-workflow
+    path: rules/AGENT_WORKFLOW.md
+    type: rule
+    status: current
+    authoritative_for: task-handoff-and-multi-agent-collaboration
+    updated_at: 2026-11-21
+    sensitivity: public
+
 collections:
+  tasks: committed work orders and acceptance criteria
   inventory: current configuration updated in place
   reports: dated evidence and historical assessments
   knowledge: durable explanations and lessons
