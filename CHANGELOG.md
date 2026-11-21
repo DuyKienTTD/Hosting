@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Chủ dự án phê duyệt **H6 Stage B1 KVM2 isolated mock**: Codex có quyền dựng và rollback một Compose project test riêng sau cổng kiểm tra rendered Compose/mount/network, chỉ dùng ledger và secrets giả; không chạm GATE A/production/ledger thật hoặc gọi provider/paid. Stage B2/C chưa duyệt. [Task](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md).
+
 - ChatGPT review source `a411114` + evidence `5a70e3b`: **H6_STAGE_A_ACCEPTED** (8/8 isolated mock supported), không chứng minh Hermes/KVM2/provider E2E; Stage B chưa duyệt, paid GATE B BLOCKED_PREFLIGHT. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-stage-a-chatgpt-review.md).
 
 - Hoàn tất H6 Stage A với Guard/writer mock, IPC xác thực hai chiều, Compose overlay và kiểm thử offline trên ledger giả. Gate B paid giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-stage-a.md).
