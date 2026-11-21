@@ -1,3 +1,11 @@
+---
+id: repository-security-rules
+type: rule
+status: current
+updated_at: 2026-11-21
+sensitivity: public
+---
+
 # Quy tắc an toàn repository
 
 Repository `DuyKienTTD/Hosting` là công khai.

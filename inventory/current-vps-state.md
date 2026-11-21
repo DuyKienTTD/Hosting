@@ -1,3 +1,13 @@
+---
+id: current-vps-inventory
+type: inventory
+status: current
+updated_at: 2026-11-21
+verified_at: 2026-11-21
+sensitivity: public-redacted
+source: live-hostinger-hpanel-and-root-terminal
+---
+
 # Kiểm kê VPS hiện tại
 
 Ngày kiểm kê: **2026-11-21**

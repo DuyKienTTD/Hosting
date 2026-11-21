@@ -1,0 +1,66 @@
+schema_version: 1
+updated_at: 2026-11-21
+repository_visibility: public
+default_language: vi
+
+entrypoints:
+  read_first: README.md
+  current_state: STATE.md
+  agent_rules: AGENTS.md
+  contribution_workflow: CONTRIBUTING.md
+  change_history: CHANGELOG.md
+
+documents:
+  - id: current-vps-inventory
+    path: inventory/current-vps-state.md
+    type: inventory
+    status: current
+    authoritative_for: current-vps-configuration
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: vps-security-review-2026-11-21
+    path: reports/2026-11-21-vps-security-review.md
+    type: report
+    status: current
+    authoritative_for: security-findings-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: repository-security-rules
+    path: rules/REPOSITORY_SECURITY.md
+    type: rule
+    status: current
+    authoritative_for: public-repository-safety
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: safe-vps-audit-script
+    path: scripts/vps-audit-safe.sh
+    type: script
+    status: current
+    authoritative_for: repeatable-read-only-vps-audit
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: repository-validator
+    path: scripts/validate-repository.ps1
+    type: script
+    status: current
+    authoritative_for: repository-structure-and-safety-validation
+    updated_at: 2026-11-21
+    sensitivity: public
+
+collections:
+  inventory: current configuration updated in place
+  reports: dated evidence and historical assessments
+  knowledge: durable explanations and lessons
+  runbooks: step-by-step operational procedures
+  decisions: architecture decision records
+  references: external sources and citations
+  rules: mandatory repository and operating policies
+  scripts: reviewed automation and audit tools
+  templates: required starting points for new documents
+  archive: superseded material kept only for history

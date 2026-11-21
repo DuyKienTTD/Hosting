@@ -1,3 +1,13 @@
+---
+id: vps-security-review-2026-11-21
+type: report
+status: current
+updated_at: 2026-11-21
+verified_at: 2026-11-21
+sensitivity: public-redacted
+source: current-vps-inventory
+---
+
 # Đánh giá bảo mật VPS — 2026-11-21
 
 Đây là báo cáo quan sát, chưa tự động thay đổi cấu hình máy chủ.

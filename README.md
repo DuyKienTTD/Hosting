@@ -1,6 +1,16 @@
 # Hosting
 
-Kho lưu trữ tài liệu vận hành, checkpoint và tri thức cho hạ tầng Hosting/VPS.
+Nguồn tri thức chung cho hạ tầng Hosting/VPS: trạng thái hiện tại, kiểm kê, báo cáo, quy tắc, runbook, quyết định và tài liệu tham khảo.
+
+## Đọc nhanh cho tác nhân
+
+1. Đọc [STATE.md](STATE.md) để biết trạng thái và rủi ro hiện tại.
+2. Đọc [CATALOG.yaml](CATALOG.yaml) để tìm tài liệu có thẩm quyền.
+3. Chỉ mở tài liệu chi tiết liên quan đến nhiệm vụ.
+4. Trước khi thay đổi hạ tầng, xác minh lại dữ liệu có thể đã thay đổi trên hệ thống trực tiếp.
+5. Sau khi hoàn tất, cập nhật tài liệu theo [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Quy tắc dành cho tác nhân nằm trong [AGENTS.md](AGENTS.md).
 
 ## Trạng thái hiện tại
 
@@ -8,15 +18,30 @@ Kho lưu trữ tài liệu vận hành, checkpoint và tri thức cho hạ tần
 - Hệ điều hành: Ubuntu 24.04.4 LTS.
 - Tài nguyên: 2 vCPU, 8 GB RAM, 100 GB SSD, 8 TB băng thông/tháng.
 - Ứng dụng đang chạy: n8n và Hermes Agent qua Docker Compose.
-- Ứng dụng `CHUNG_KHOAN_PRO` và Alibaba OneTalk đã bị xóa khỏi VPS ngày 2026-11-21.
+- `CHUNG_KHOAN_PRO` và Alibaba OneTalk đã bị xóa khỏi VPS ngày 2026-11-21.
 
-## Tài liệu
+## Tài liệu có thẩm quyền
 
-- [Kiểm kê VPS hiện tại](inventory/VPS_CURRENT_STATE.md)
-- [Đánh giá bảo mật](inventory/SECURITY_REVIEW_2026-11-21.md)
+- [Kiểm kê VPS hiện tại](inventory/current-vps-state.md)
+- [Đánh giá bảo mật ngày 2026-11-21](reports/2026-11-21-vps-security-review.md)
 - [Quy tắc an toàn repository](rules/REPOSITORY_SECURITY.md)
 - [Script kiểm kê an toàn](scripts/vps-audit-safe.sh)
 - [Lịch sử cập nhật](CHANGELOG.md)
+
+## Cấu trúc
+
+| Thư mục | Mục đích |
+|---|---|
+| `inventory/` | Trạng thái và cấu hình hiện tại, được cập nhật tại chỗ |
+| `reports/` | Báo cáo có ngày, audit, sự cố và checkpoint lịch sử |
+| `knowledge/` | Kiến thức bền vững, giải thích hệ thống và bài học |
+| `runbooks/` | Quy trình vận hành có thể thực hiện từng bước |
+| `decisions/` | Quyết định kiến trúc theo dạng ADR |
+| `references/` | Liên kết và tài liệu tham khảo bên ngoài |
+| `rules/` | Chính sách và giới hạn bắt buộc |
+| `scripts/` | Công cụ kiểm tra hoặc tự động hóa an toàn |
+| `templates/` | Mẫu thống nhất cho tài liệu mới |
+| `archive/` | Tài liệu hết hiệu lực nhưng cần giữ lịch sử |
 
 ## Lưu ý bảo mật
 
