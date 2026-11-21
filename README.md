@@ -4,6 +4,7 @@ Nguồn tri thức chung cho hạ tầng Hosting/VPS: trạng thái hiện tại
 
 **Mục tiêu nền tảng AI Automation:** [PROJECT.md](PROJECT.md) — media, quảng cáo, SEO, website, mạng xã hội và báo cáo.  
 **Danh bạ vai trò/năng lực các tác nhân:** [agents/README.md](agents/README.md) — ChatGPT, Codex, Hermes, Hostinger và n8n.  
+**Quy tắc mới về nghiên cứu, phân vai, handoff có xác nhận và cập nhật tri thức:** [AGENT_WORKFLOW mục 7](rules/AGENT_WORKFLOW.md). Mọi AI phải đọc lại quy tắc trước task; không coi GitHub commit là đã thực sự gửi việc.  
 **Quy ước giao việc và bàn giao tài liệu qua Git:** [rules/AGENT_WORKFLOW.md](rules/AGENT_WORKFLOW.md).
 
 ## Đọc nhanh cho tác nhân
