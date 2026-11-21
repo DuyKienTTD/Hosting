@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- Đối chiếu GATE A Hermes auxiliary+guard+bridge mock PASS với evidence và commit `ab319ee`; cập nhật đề xuất ADR-P0-003 (PROPOSED), chỉ cho một Hermes Agent paid call nếu chủ dự án phê duyệt riêng, có one-shot permit/atomic ledger/kill-switch, không đổi production. Chưa thực hiện GATE B.
+
 - Hoàn tất `TTD-HERMES-GATE-A-001`: triển khai Hermes auxiliary, private guard, authenticated bridge và provider mock trên internal sandbox; exact model, cap 600, full request ≤4K, no-tools/no-bypass, auth, fault/idempotency/concurrency và mock E2E đều PASS.
 - Phát hiện ownership workflow trong rollback rehearsal đầu, sửa script và chạy lại corrected rollback/restore PASS; redeploy smoke PASS. Production n8n/Hermes HTTP 200, restart/downtime 0; kill switch/ledger không đổi, paid calls và chi phí mới bằng 0.
 - Ghi trạng thái `GATE_A_MOCK_PASS / GO_FOR_GATE_B_APPROVAL`; GATE B không được thực hiện và vẫn cần phê duyệt riêng cho đúng một paid Hermes call.
