@@ -7,6 +7,7 @@ sensitivity: public
 owner: codex
 support: [hostinger-agent, hermes]
 depends_on: [ttd-resource-identity-001]
+execution_result: partial
 ---
 
 # TTD-AI-P0-INTEGRATION-001 — Tích hợp sandbox n8n ↔ Hermes (sau xác minh resource)
@@ -60,3 +61,16 @@ Nếu chưa được phép call inference, báo **PARTIAL** và tách riêng ph�
 ## Bàn giao
 
 Tạo `reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md` hoặc file ngày thực tế; ghi lại thao tác thực hiện vs đề xuất, schema, evidence kết nối, test matrix, downtime (nếu có), chi phí thực tế, thay đổi cấu hình đã redacted và rollback. Cập nhật `STATE.md`, `CATALOG.yaml`, `CHANGELOG.md`; push GitHub, trả URL report và commit. Không đưa secret, private endpoint, IP, tài khoản đăng nhập vào repo public.
+
+## Tiến độ thực thi 2026-11-21
+
+- [x] `GATE-ID` PASS; target là KVM 2, không phải U4S `ttdnew.tech`.
+- [x] Pre-change health, restart count, disk, network conflict và admin access được kiểm tra live.
+- [x] Tạo `ttd-ai-p0-sandbox` với `internal=true`; gắn n8n/Hermes bằng service alias, không restart hoặc đổi public port/firewall.
+- [x] Private DNS hai chiều, negative auth, n8n health, n8n MCP state và post-change health được test.
+- [x] Backup config cần thiết, checksum và rollback script đã chuẩn bị.
+- [ ] Hermes private inference: **BLOCKED_BY_RUNTIME_AND_BUDGET**.
+- [ ] Một n8n workflow có auth/schema/callback: **BLOCKED_BY_MCP/WORKFLOW**.
+- [ ] E2E reasoning thật: chưa chạy; không tạo PASS giả, không phát sinh API fee.
+
+Kết quả chi tiết: [báo cáo P0](../reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md) và [evidence JSON](../reports/evidence/2026-11-21-ttd-ai-p0-integration-001.json).

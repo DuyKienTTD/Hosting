@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "task_id": "ttd-ai-p0-integration-001",
+  "verified_at": "2026-11-21",
+  "result": "partial",
+  "blocking_state": "BLOCKED_BY_BUDGET_AND_RUNTIME",
+  "target": {
+    "environment": "verified-kvm2",
+    "resource_identity_gate": "pass",
+    "excluded_resource": "ttdnew.tech-u4s",
+    "identity_report": "reports/2026-11-21-ttdnew-resource-identity-verification.md"
+  },
+  "pre_change": {
+    "n8n_running": true,
+    "hermes_running": true,
+    "n8n_restart_count": 0,
+    "hermes_restart_count": 0,
+    "n8n_internal_health_status": 200,
+    "hermes_internal_health_status": 200,
+    "p0_network_preexisted": false,
+    "disk_available_gib_approx": 85
+  },
+  "change": {
+    "network": "ttd-ai-p0-sandbox",
+    "driver": "bridge",
+    "internal": true,
+    "scope": "local",
+    "attached_container_count": 2,
+    "n8n_alias": "n8n-p0",
+    "hermes_alias": "hermes-p0",
+    "container_restart_or_recreate": false,
+    "public_port_change": false,
+    "firewall_change": false,
+    "dns_change": false,
+    "credential_change": false,
+    "u4s_change": false,
+    "downtime_seconds": 0
+  },
+  "tests": [
+    {
+      "id": "P0-N2H-DNS-001",
+      "direction": "n8n-to-hermes",
+      "transport": "private-service-dns",
+      "observed_status": 302,
+      "meaning": "dashboard-login-redirect-and-private-transport-reachable",
+      "result": "pass"
+    },
+    {
+      "id": "P0-N2H-AUTH-NEG-001",
+      "direction": "n8n-to-hermes",
+      "transport": "private-service-dns",
+      "observed_status": 401,
+      "meaning": "protected-api-rejects-missing-auth",
+      "result": "pass"
+    },
+    {
+      "id": "P0-N2H-INFERENCE-001",
+      "direction": "n8n-to-hermes",
+      "transport": "private-service-dns",
+      "observed_status": 302,
+      "meaning": "candidate-v1-models-routes-to-dashboard-not-inference-api",
+      "result": "blocked"
+    },
+    {
+      "id": "P0-H2N-HEALTH-001",
+      "direction": "hermes-to-n8n",
+      "transport": "private-service-dns",
+      "observed_status": 200,
+      "meaning": "n8n-health-reachable",
+      "result": "pass"
+    },
+    {
+      "id": "P0-H2N-MCP-001",
+      "direction": "hermes-to-n8n",
+      "transport": "private-service-dns",
+      "observed_status": 404,
+      "meaning": "n8n-instance-mcp-disabled",
+      "result": "blocked"
+    }
+  ],
+  "post_change": {
+    "n8n_readiness_status": 200,
+    "hermes_dashboard_follow_status": 200,
+    "n8n_restart_count": 0,
+    "hermes_restart_count": 0,
+    "critical_log_matches_in_check_window": 0,
+    "rollback_script_syntax": "pass",
+    "backup_checksum": "pass"
+  },
+  "cost_and_business_safety": {
+    "paid_inference_calls": 0,
+    "business_connectors_used": 0,
+    "content_published": false,
+    "production_firewall_or_port_changes": 0
+  },
+  "unmet_acceptance": [
+    "private-real-agent-reasoning",
+    "exactly-one-authenticated-n8n-workflow",
+    "hermes-to-n8n-callback-with-json-schema",
+    "timeout-invalid-json-retry-idempotency-e2e"
+  ],
+  "approvals_needed": [
+    "hermes-private-inference-mode",
+    "provider-model-and-cost-cap",
+    "n8n-mcp-or-authenticated-webhook-mode",
+    "maintenance-window-if-restart-required"
+  ]
+}

@@ -33,7 +33,8 @@ sensitivity: public-redacted
 - Đã chuẩn hóa giao nhiệm vụ qua `tasks/`, kết quả qua `reports/`; [quy tắc](rules/AGENT_WORKFLOW.md).
 - Đã hoàn tất [TTD-AI-PLATFORM-AUDIT-001](tasks/2026-11-21-n8n-hermes-integration-audit.md); xem [báo cáo live n8n ↔ Hermes](reports/2026-11-21-n8n-hermes-integration-audit.md).
 - Đã xác minh n8n `2.45.7` và Hermes `0.22.5`; cả hai health/readiness PASS, 0 restart/OOM và có thể chạm nhau hai chiều qua host bridge.
-- n8n → Hermes dashboard auth PASS; Hermes → n8n readiness PASS. Tuy nhiên, n8n MCP đang tắt, n8n có 0 workflow/0 execution và Hermes chưa expose agent inference API nên end-to-end vẫn `BLOCKED`.
+- P0 đã tạo internal bridge `ttd-ai-p0-sandbox` và gắn live n8n/Hermes bằng service DNS private; negative auth, n8n readiness, post-health và rollback preparation PASS, không restart/downtime/public port/firewall change.
+- E2E reasoning vẫn `BLOCKED_BY_BUDGET_AND_RUNTIME`: n8n MCP đang tắt, chưa có workflow/callback và Hermes chưa expose agent inference API; không có paid inference call.
 - Kiến trúc được khuyến nghị: n8n làm control plane, Hermes reasoning qua API private, một internal Docker network, schema/policy/approval gate và media-worker FFmpeg riêng.
 
 ## Khảo sát năng lực và phối hợp các tác nhân
@@ -43,14 +44,14 @@ sensitivity: public-redacted
 - Codex đã hoàn tất [capability survey](reports/2026-11-21-codex-capability-survey.md): local code/Git/browser/hPanel/VPS audit VERIFIED; local Docker daemon, marketing connectors, persistent execution và exact model còn BLOCKED/UNKNOWN theo session.
 - Hermes đã hoàn tất [capability survey](reports/2026-11-21-hermes-capability-survey.md): GitHub write, skills/memory/session recall và WebUI tool surface VERIFIED; inference API, n8n MCP và connector business còn BLOCKED/UNKNOWN.
 - Hostinger Agent đã hoàn tất [capability survey](reports/2026-11-21-hostinger-agent-capability-survey.md) với phạm vi hPanel/provider tools và các approval boundary.
-- **Hostinger Account Inventory** đã được bổ sung tại [reports/2026-11-21-hostinger-account-capability-inventory.md](reports/2026-11-21-hostinger-account-capability-inventory.md): Cloud Startup (4 WordPress chính + staging, Builder/other site), VPS KVM 2, email, domain, Reach và resource Docker/AI. Phân biệt công cụ hỗ trợ với quyền truy cập thực tế; resource `ttdnew.tech` có metadata OpenClaw nhưng runtime `u4s-hermes-agent` chưa được định danh.
+- **Hostinger Account Inventory** đã được bổ sung tại [reports/2026-11-21-hostinger-account-capability-inventory.md](reports/2026-11-21-hostinger-account-capability-inventory.md): Cloud Startup (4 WordPress chính + staging, Builder/other site), VPS KVM 2, email, domain, Reach và resource Docker/AI. Báo cáo identity mới nhất xác nhận `ttdnew.tech` là U4S Hermes runtime tách biệt với Hermes trên KVM 2; OpenClaw chỉ là metadata plan không khớp runtime.
 - Ba phần bổ sung của [TTD-AGENT-CAPABILITY-SURVEY-001](tasks/2026-11-21-agent-capability-survey.md) đã có báo cáo; quyền vẫn phải xác minh lại theo từng phiên/task.
 
-## Nhiệm vụ mới: định danh resource rồi tích hợp P0
+## Định danh resource và tích hợp P0
 
-- Đã tạo [TTD-RESOURCE-IDENTITY-001](tasks/2026-11-21-ttdnew-resource-identity-verification.md), owner Hostinger Agent; xác minh thực thể `ttdnew.tech`, phân biệt OpenClaw metadata và `u4s-hermes-agent`, so sánh với Hermes trên KVM 2. Chưa có kết quả live mới.
-- Đã tạo [TTD-AI-P0-INTEGRATION-001](tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md), owner Codex; status BLOCKED cho tới khi identity gate PASS và pre-change safety gate đạt. Cho phép chuẩn bị/test sandbox tối thiểu trong giới hạn, không cấp quyền cắt public port hay chi trả API chưa duyệt.
-- Người dùng chuyển tiếp đường dẫn nhiệm vụ giữa Hostinger Agent, Codex và Hermes; chưa có thay đổi production nào từ ChatGPT trong lượt này.
+- [TTD-RESOURCE-IDENTITY-001](tasks/2026-11-21-ttdnew-resource-identity-verification.md) đã complete: U4S `ttdnew.tech` và KVM 2 là hai runtime độc lập.
+- [TTD-AI-P0-INTEGRATION-001](tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md) có kết quả `PARTIAL`: private network/DNS/health PASS; inference/workflow/callback còn blocked. Xem [báo cáo P0](reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md).
+- Không thay U4S, account business, public port/firewall hoặc credential; downtime 0 và chi phí API 0.
 
 ## Việc đang chờ
 
@@ -58,7 +59,7 @@ sensitivity: public-redacted
 - Chưa đặt n8n/Hermes sau reverse proxy HTTPS.
 - Chưa xử lý các backup Hostinger có thể chứa ứng dụng đã xóa.
 - Chưa cập nhật hệ điều hành hoặc reboot.
-- Chưa phê duyệt bật Hermes API server internal-only, n8n instance-level MCP hoặc workflow sandbox để chạy lại test end-to-end.
+- Chưa phê duyệt mode Hermes inference private, provider/model + cost cap, n8n instance-level MCP hoặc authenticated webhook/workflow để chạy lại test end-to-end.
 - Chưa kết nối/xác minh Google Ads, GA4, WordPress/WooCommerce, YouTube, TikTok, Meta, Kling, HeyGen hoặc ElevenLabs.
 
 ## Tài liệu tiếp theo

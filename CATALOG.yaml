@@ -82,6 +82,24 @@ documents:
     verified_at: 2026-11-21
     sensitivity: public-redacted
 
+  - id: n8n-hermes-p0-sandbox-integration-2026-11-21
+    path: reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md
+    type: report
+    status: current
+    authoritative_for: n8n-hermes-p0-private-network-and-e2e-blockers-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-ai-p0-integration-001-evidence
+    path: reports/evidence/2026-11-21-ttd-ai-p0-integration-001.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-machine-readable-evidence-for-ttd-ai-p0-integration-001
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
   - id: ttd-ai-platform-audit-001-evidence
     path: reports/evidence/2026-11-21-ttd-ai-platform-audit-001.json
     type: evidence
@@ -186,10 +204,19 @@ documents:
   - id: ttd-resource-identity-001
     path: tasks/2026-11-21-ttdnew-resource-identity-verification.md
     type: task
-    status: current
+    status: complete
     authoritative_for: ttdnew-docker-hosting-resource-identification
     updated_at: 2026-11-21
     sensitivity: public
+
+  - id: ttdnew-resource-identity-verification-2026-11-21
+    path: reports/2026-11-21-ttdnew-resource-identity-verification.md
+    type: report
+    status: complete
+    authoritative_for: ttdnew-u4s-and-kvm2-resource-identity-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
 
   - id: ttd-ai-p0-integration-001
     path: tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md

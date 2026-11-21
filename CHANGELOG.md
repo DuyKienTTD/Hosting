@@ -2,6 +2,10 @@
 
 ## 2026-11-21
 
+- Triển khai network-only P0 `ttd-ai-p0-sandbox` ở chế độ internal, gắn live n8n/Hermes bằng private DNS; health, negative auth và rollback preparation PASS, không restart/downtime/public port/firewall change và không gọi paid API.
+- Ghi `PARTIAL / BLOCKED_BY_BUDGET_AND_RUNTIME`: Hermes chưa expose inference API, n8n MCP còn disabled và chưa có workflow/callback; thêm report/evidence, cập nhật task/state/catalog.
+- Đồng bộ catalog/state với kết quả định danh đã complete: `ttdnew.tech` U4S Hermes tách biệt KVM 2; thêm catalog entry cho báo cáo identity.
+
 - Tạo nhiệm vụ định danh resource `ttdnew.tech` (Hostinger Agent owner) và P0 sandbox n8n ↔ Hermes (Codex owner), có identity gate, backup/rollback, không phát sinh phí chưa duyệt.
 - P0 chưa được thực thi; ghi rõ trạng thái BLOCKED cho tới khi resource được xác minh và các điều kiện an toàn đạt.
 
