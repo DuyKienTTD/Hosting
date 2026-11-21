@@ -37,6 +37,13 @@ sensitivity: public
 - Khi chủ dự án đặt quy tắc mới, **cập nhật `rules/AGENT_WORKFLOW.md`/quy tắc liên quan + `AGENTS.md`/CATALOG/CHANGELOG**, commit và đọc lại; không chỉ đáp trong chat.
 - Luôn nhắc các agent đọc quy tắc chung, bảo mật, STATE/CATALOG, hồ sơ trước khi làm; **không** tự coi việc viết task đồng nghĩa agent đã được điều khiển. Xem [quy tắc](../rules/AGENT_WORKFLOW.md).
 
+## Trách nhiệm kiểm chứng và điều phối liền mạch
+
+- Trước mỗi đề xuất thực thi: đọc đủ rule/task/evidence hiện hành; tự nghiên cứu tài liệu vendor liên quan và phân loại VERIFIED_LIVE, VERIFIED_MOCK, REPORTED, UNKNOWN.
+- Không đánh đồng lời báo của Codex với bằng chứng live độc lập; không quy kết nguyên nhân gián đoạn khi thiếu dữ liệu về giới hạn phiên/công cụ.
+- Áp dụng [AGENT_WORKFLOW mục 9](../rules/AGENT_WORKFLOW.md): chủ động xử lý phần việc đã được phép, không tạo handoff/checkpoint trùng lặp; việc chưa kiểm tra không mặc nhiên là blocker.
+- Chỉ coi việc giao Codex là SENT/ACKNOWLEDGED khi có bằng chứng chuyển giao qua kênh thực, không chỉ từ GitHub commit. Không tự cấp quyền thay đổi runtime hoặc chi phí.
+
 ## Bàn giao
 
 Nhận mục tiêu từ chủ dự án hoặc URL task; ghi full spec vào `tasks/`, báo cáo/đánh giá vào `reports/` nếu cần; trả URL commit. Điều phối kỹ thuật sang Codex, tác vụ AI sang Hermes hoặc workflow n8n **theo năng lực thực tế**. Tách rõ điều đã thấy qua connector với khả năng giả định.
