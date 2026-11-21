@@ -92,7 +92,7 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
-- **H6 B2-N — kiểm contract ngoại tuyến:** Codex chuẩn bị đối chiếu build Hermes auxiliary và callback n8n mục tiêu bằng fake provider trên project local riêng. Delta là run-ID/idempotency qua mất ACK/restart, deadline thực tế và callback xác thực. Handoff `PREPARED_FOR_OWNER_FORWARD`. [Task Gate B](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md#chatgpt-nghiệm-thu-b2-m-và-mở-b2-n--2026-11-22).
+- **H6 B2-N — hai luồng song song:** Codex thực thi contract Hermes/n8n với fake provider trên project local riêng. ChatGPT Work lập ma trận QA độc lập, bổ sung đối chiếu diff và trace khi Codex giao evidence. Kết quả sẽ giao qua hai PR riêng. Cả hai handoff ở `PREPARED_FOR_OWNER_FORWARD`. [Codex](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md#handoff-song-song-h6-b2-n) · [Work](tasks/2026-11-22-work-b2-n-independent-contract-qa.md).
 
 - **H6 B2-M — canary giả KVM2 đã nghiệm thu có giới hạn:** Hai lần startup, 20 health, rollback theo Codex evidence, xác nhận bằng Work QA [PR #3](https://github.com/DuyKienTTD/Hosting/pull/3). Đã đo bytes ledger giả và metadata ledger/lock trong cửa sổ sau start đầu qua restart. Live `NO_GO`, writer mount `BLOCKED_UID_OR_MOUNT`, paid `BLOCKED_PREFLIGHT`. [Work QA](reports/2026-11-22-work-b2-m-independent-canary-qa.md) · [Codex](reports/2026-11-22-hermes-gate-b-h6-b2-m-kvm2-idle-canary.md).
 

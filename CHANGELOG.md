@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Chuẩn bị hai luồng H6 B2-N song song, Codex kiểm contract local bằng fake provider và Work QA độc lập qua PR riêng. [Phân công](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md#handoff-song-song-h6-b2-n).
+
 - Merge Work QA PR #3, nghiệm thu B2-M trong đúng cửa sổ đo và mở B2-N kiểm contract Hermes/n8n ngoại tuyến bằng fake provider. [Work QA](reports/2026-11-22-work-b2-m-independent-canary-qa.md).
 
 - ChatGPT đối chiếu source và bằng chứng Codex B2-M tại `8238bd1`, ghi điểm cần xác minh trong Work QA hiện có và xác định bước fake-provider chỉ sau nghiệm thu. [Quyết định](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md#chatgpt-review-h6-b2-m--2026-11-22).
