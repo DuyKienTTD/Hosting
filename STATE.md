@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **ChatGPT nghiệm thu B2-K/B2-L / mở B2-M (2026-11-22):** `H6_B2_K_CROSS_SERVICE_MOCK_ACCEPTED` (6/6 ba process/SQLite riêng, fake callback recovery) và `H6_B2_L_SOURCE_MOCK_ACCEPTED` (9/9 Linux fixture, hai idle starts, 20 health bất biến, crash no redispatch) theo `351afa2`/`c4d5402`. **Chưa chứng minh live writer** hoặc mất điện/ext4. Theo §10 mở `H6_B2_M_KVM2_ISOLATED_STARTUP_CANARY_AUTHORIZED`: canary KVM2 chỉ mock ledger/key/root-only riêng, render/no-bypass và rollback, không liên quan GATE A/production/real P0. `LIVE_NO_GO / BLOCKED_UID_OR_MOUNT / GATE_B_PAID_BLOCKED_PREFLIGHT`. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-k-l-chatgpt-review.md).
+
 - **H6 B2-L startup-only mock PASS (2026-11-22):** 20 health qua hai cold starts không permit, ledger/lock fixture bất biến, deny admission kể cả có permit. 9/9 Linux test gồm sáu crash windows và fsync failure. ChatGPT review với B2-K. Live `NO_GO`, paid `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-l-idle-writer.md).
 
 - **H6 B2-K mock PASS (2026-11-22):** Adapter, executor và receiver có tiến trình/datastore riêng. 6/6 test đạt, một dispatch giả, callback receipt ký và phục hồi sau restart. ChatGPT review. Live `NO_GO`, paid `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-k-cross-service.md).
