@@ -192,3 +192,11 @@ Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và s�
 - `from_agent: codex`; `to_agent: chatgpt`; `handoff_state: PREPARED_FOR_OWNER_FORWARD`;
   `next_after_review: business-owner`. [Báo cáo H4](../reports/2026-11-21-hermes-gate-b-h4-key-input-preparation.md) ·
   [Evidence](../reports/evidence/2026-11-21-ttd-hermes-gate-b-h4.json).
+
+## ChatGPT nghiệm thu H4 — giao diện sẵn sàng cho chủ dự án nhập key (2026-11-21)
+
+- `handoff: H4`; `from_agent: codex`; `to_agent: chatgpt`; `handoff_state: DONE_RECEIVED_AND_REVIEWED`; `h4_status: READY_FOR_OWNER_KEY_INPUT`; **GATE B chính: BLOCKED_PREFLIGHT**.
+- Đã đọc [báo cáo H4](../reports/2026-11-21-hermes-gate-b-h4-key-input-preparation.md), [evidence](../reports/evidence/2026-11-21-ttd-hermes-gate-b-h4.json) và mã `owner_key_input.py` tại commit `f335752d40c7ce88efede5bf7d743246b2423f5f`. Review kết quả từ GitHub, **không tự tuyên bố đã chạy lại VPS**.
+- **VERIFIED_FROM_REPORT_AND_CODE:** đã loại bỏ compose recreate khỏi interface; script chỉ gọi `docker compose config --quiet`, không mở listener, không gọi provider, nhập hai lần bằng getpass, lưu staging file owner root/mode 0600. H4 Linux 11/11 PASS; fake secret đã revoke; production restart 0; paid delta 0, ledger thật không thay đổi, kill switch ON.
+- **NEXT_OWNER: business-owner** tự đăng nhập Hostinger Web Terminal đúng VPS, chạy `cd /root/ttd-hermes-gate-a && ./owner_key_input.py install`; tự nhập key hai lần tại prompt ẩn, xác nhận `PROJECT` và `INSTALL`, **dừng khi `STORED_NOT_MOUNTED`**. Không gửi API key qua chat/GitHub hoặc log/screenshot. `PROJECT` chỉ là literal confirmation, chưa chứng minh key thuộc đúng project.
+- **STOP:** chưa mount secret và chưa xác minh quyền OpenAI/billing/token count; không chạy `docker compose up/down`, không cấp permit, không gọi inference trả phí. Guard recreate/mount cần approval riêng và preflight token-count/budget sau đó. Task mẹ `owner: codex`, `status: blocked`, hạn mức approval gốc bất biến.
