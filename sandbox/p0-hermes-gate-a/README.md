@@ -24,3 +24,17 @@ Safety properties:
 sandbox workflow and starts the previous sandbox reasoner. It does not touch
 production. Mock PASS is not paid Hermes E2E evidence and does not authorize
 GATE B.
+
+## One-shot mock rehearsal
+
+Use `compose.mock-one-shot.yaml` with a disposable ledger copy. Pass that copy
+and the reviewed fake Hermes request JSON to `prepare_mock_permit.py`. Review
+the request before staging the permit. Any change to the final bytes, including
+dynamic Hermes request fields, requires a new rehearsal. Run
+`python3 mock_contract_test.py` on Linux to verify the guard and mock over
+loopback. The test uses temporary state and does not need Docker or secrets.
+
+The mock ledger keeps the reservation after a response or a timeout. Validated
+usage is recorded for comparison with the pricing formula. Incomplete transport
+leaves the outcome unknown and the permit consumed. The 4,000-byte mock limit
+does not measure provider formatting tokens.

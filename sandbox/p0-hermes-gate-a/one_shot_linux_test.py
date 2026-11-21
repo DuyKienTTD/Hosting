@@ -105,10 +105,21 @@ def main():
         with patch.object(one_shot.os, "fsync", side_effect=fail_directory_fsync):
             assert "directory fsync failure" in attempt(str(path))
         assert "PERMIT_UNAVAILABLE" in attempt(str(path))
+        fixture(path)
+        multiple = json.loads(path.read_bytes())
+        multiple["one_shot_permits"]["second-task"] = multiple["one_shot_permits"]["gate-b"]
+        path.write_text(json.dumps(multiple), encoding="utf-8")
+        assert "ONE_SHOT_LIMIT" in attempt(str(path))
+        assert json.loads(path.read_bytes())["attempts"] == 1
+        fixture(path)
+        invalid = json.loads(path.read_bytes())
+        invalid["reserved_usd"] = float("nan")
+        path.write_text(json.dumps(invalid), encoding="utf-8")
+        assert "LEDGER_AMOUNT_INVALID" in attempt(str(path))
         print(json.dumps({"result": "PASS", "kernel": os.uname().release,
                           "multiprocess_contenders": 20, "admitted": 1,
                           "rejected": 19, "replay_rejected": True,
-                          "fault_cases": 14, "paid_calls": 0}))
+                          "fault_cases": 16, "paid_calls": 0}))
 
 
 if __name__ == "__main__":

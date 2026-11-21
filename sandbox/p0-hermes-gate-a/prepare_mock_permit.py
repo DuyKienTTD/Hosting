@@ -1,35 +1,33 @@
-"""Add one scoped permit to a disposable ledger COPY, never the real ledger."""
+"""Stage a disposable ledger permit from an already reviewed fake Hermes body."""
 import hashlib
 import json
-import os
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from guard import mock_scope
+from mock_contract import freeze, no_duplicate_keys
+from one_shot import MODEL, _durable_write, locked
+
 
 def main() -> None:
-    path = Path(sys.argv[1]).resolve()
-    if "/mock-ledger/" not in str(path):
+    ledger_path, reviewed_fixture = map(Path, sys.argv[1:])
+    path = ledger_path.resolve(strict=True)
+    if "mock-ledger" not in path.parts or path.suffix != ".json":
         raise SystemExit("refusing non-mock ledger path")
-    task_id, correlation_id = sys.argv[2:4]
-    spend, clicks = float(sys.argv[4]), int(sys.argv[5])
-    marker = {"task_id": task_id, "correlation_id": correlation_id,
-              "channel": "ads", "spend": f"{spend:.2f}", "clicks": clicks}
-    canonical = json.dumps(marker, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode("ascii")
-    data = json.loads(path.read_text(encoding="utf-8"))
-    if data.get("kill_switch") is not True or "one_shot_permits" in data:
-        raise SystemExit("mock ledger not fresh or kill switch not ON")
-    data["one_shot_permits"] = {task_id: {
-        "state": "ready", "model": "gpt-6-luna",
-        "key_hash": hashlib.sha256(("gate-a-" + task_id).encode()).hexdigest(),
-        "fingerprint": hashlib.sha256(canonical).hexdigest(),
-        "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat()}}
-    temporary = path.with_name(path.name + ".new")
-    temporary.write_text(json.dumps(data, sort_keys=True, separators=(",", ":")), encoding="utf-8")
-    os.chmod(temporary, 0o600)
-    os.replace(temporary, path)
+    body = json.loads(reviewed_fixture.read_bytes(), object_pairs_hook=no_duplicate_keys)
+    task_id, key_hash = mock_scope(body)
+    _, fingerprint = freeze(body)
+    with locked(path) as data:
+        if data.get("kill_switch") is not True or "one_shot_permits" in data:
+            raise SystemExit("mock ledger not fresh or kill switch not ON")
+        data["one_shot_permits"] = {task_id: {
+            "state": "ready", "model": MODEL, "key_hash": key_hash, "fingerprint": fingerprint,
+            "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat()}}
+        _durable_write(path, data)
     print(json.dumps({"prepared": True, "ledger": "mock_copy", "kill_switch": True,
-                      "attempts": data["attempts"], "task_id_hash": hashlib.sha256(task_id.encode()).hexdigest()}))
+                      "attempts": data["attempts"], "task_id_hash": hashlib.sha256(task_id.encode()).hexdigest(),
+                      "forwarded_sha256": fingerprint}))
 
 
 if __name__ == "__main__":

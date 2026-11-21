@@ -36,6 +36,7 @@ services:
     volumes:
       - ./guard.py:/opt/ttd/guard.py:ro
       - ./one_shot.py:/opt/ttd/one_shot.py:ro
+      - ./mock_contract.py:/opt/ttd/mock_contract.py:ro
       - ./guard_contract_test.py:/opt/ttd/guard_contract_test.py:ro
       - type: bind
         source: ./secrets/guard-service-token

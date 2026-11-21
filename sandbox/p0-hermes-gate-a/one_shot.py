@@ -10,11 +10,34 @@ import fcntl
 import json
 import os
 import tempfile
+from contextlib import contextmanager
 from datetime import datetime, timezone
+from decimal import Decimal
 from pathlib import Path
 
 MODEL = "gpt-6-luna"
 RESERVE_USD = 0.0035
+
+
+def usd(value: int | float) -> Decimal:
+    if type(value) not in (int, float):
+        raise RuntimeError("LEDGER_AMOUNT_INVALID")
+    amount = Decimal(str(value))
+    if not amount.is_finite() or amount < 0:
+        raise RuntimeError("LEDGER_AMOUNT_INVALID")
+    return amount
+
+
+@contextmanager
+def locked(path: Path):
+    lock_path = path.with_suffix(path.suffix + ".lock")
+    fd = os.open(lock_path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+    try:
+        os.fchmod(fd, 0o600)
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        yield json.loads(path.read_text(encoding="utf-8"))
+    finally:
+        os.close(fd)
 
 
 def _durable_write(path: Path, value: dict) -> None:
@@ -44,43 +67,64 @@ def admit(path: Path, task_id: str, key_hash: str, fingerprint: str,
     key_hash, fingerprint, model, expires_at (UTC ISO), state='ready'. This
     function never creates a permit or a ledger. The global switch stays ON.
     """
-    now = now or datetime.now(timezone.utc)
-    lock_path = path.with_suffix(path.suffix + ".lock")
-    fd = os.open(lock_path, os.O_RDWR | os.O_CREAT, 0o600)
-    try:
-        os.fchmod(fd, 0o600)
-        fcntl.flock(fd, fcntl.LOCK_EX)
-        ledger = json.loads(path.read_text(encoding="utf-8"))
+    with locked(path) as ledger:
+        now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
         if ledger.get("model") != MODEL or ledger.get("max_calls") != 5:
             raise RuntimeError("LEDGER_MISMATCH")
         if ledger.get("kill_switch") is not True:
             raise RuntimeError("KILL_SWITCH_NOT_ON")
         if ledger.get("caps_usd") != {"daily": 0.05, "total": 0.05, "job": 0.01}:
             raise RuntimeError("CAP_MISMATCH")
-        permit = ledger.get("one_shot_permits", {}).get(task_id)
+        permits = ledger.get("one_shot_permits", {})
+        permit = permits.get(task_id)
         if not permit or permit.get("state") != "ready":
             raise RuntimeError("PERMIT_UNAVAILABLE")
+        if len(permits) != 1 or any(row.get("one_shot") is True for row in ledger["tasks"].values()):
+            raise RuntimeError("ONE_SHOT_LIMIT")
         if permit.get("key_hash") != key_hash or permit.get("fingerprint") != fingerprint or permit.get("model") != MODEL:
             raise RuntimeError("PERMIT_SCOPE_MISMATCH")
         expiry = datetime.fromisoformat(permit["expires_at"])
         if expiry.tzinfo is None or now >= expiry:
             raise RuntimeError("PERMIT_EXPIRED")
-        if task_id in ledger["tasks"] or int(ledger["attempts"]) >= 5:
+        attempts = ledger["attempts"]
+        if task_id in ledger["tasks"] or type(attempts) is not int or not 0 <= attempts < 5:
             raise RuntimeError("ATTEMPT_LIMIT")
         day = now.date().isoformat()
         day_state = ledger["days"].get(day, {"attempts": 0, "reserved_usd": 0.0, "actual_usd": 0.0})
-        if RESERVE_USD > 0.01 or float(ledger["reserved_usd"]) + RESERVE_USD > 0.05 or float(day_state["reserved_usd"]) + RESERVE_USD > 0.05:
+        reserve = usd(RESERVE_USD)
+        total = usd(ledger["reserved_usd"]) + reserve
+        daily = usd(day_state["reserved_usd"]) + reserve
+        if (reserve > Decimal("0.01") or max(total, daily) > Decimal("0.05")
+                or usd(ledger["actual_usd"]) > usd(ledger["reserved_usd"])
+                or usd(day_state["actual_usd"]) > usd(day_state["reserved_usd"])):
             raise RuntimeError("BUDGET_CAP")
         permit["state"] = "consumed"
         permit["consumed_at"] = now.isoformat()
         ledger["attempts"] += 1
-        ledger["reserved_usd"] = round(float(ledger["reserved_usd"]) + RESERVE_USD, 8)
+        ledger["reserved_usd"] = float(total)
         day_state["attempts"] += 1
-        day_state["reserved_usd"] = round(float(day_state["reserved_usd"]) + RESERVE_USD, 8)
+        day_state["reserved_usd"] = float(daily)
         ledger["days"][day] = day_state
-        ledger["tasks"][task_id] = {"fingerprint": fingerprint, "state": "inflight", "attempt": ledger["attempts"], "reserved_usd": RESERVE_USD, "day": day}
+        ledger["tasks"][task_id] = {"fingerprint": fingerprint, "state": "inflight", "one_shot": True,
+                                     "attempt": ledger["attempts"], "reserved_usd": RESERVE_USD, "day": day}
         _durable_write(path, ledger)
         return "admitted"
-    finally:
-        fcntl.flock(fd, fcntl.LOCK_UN)
-        os.close(fd)
+
+
+def settle_mock(path: Path, task_id: str, fingerprint: str, outcome: str,
+                usage: dict | None = None) -> None:
+    """Persist terminal mock evidence without counting it as provider spend."""
+    if "mock-ledger" not in path.resolve().parts:
+        raise RuntimeError("MOCK_LEDGER_REQUIRED")
+    with locked(path) as ledger:
+        permit = ledger["one_shot_permits"][task_id]
+        task = ledger["tasks"][task_id]
+        if (ledger["kill_switch"] is not True or permit["state"] != "consumed"
+                or permit["fingerprint"] != fingerprint or task["fingerprint"] != fingerprint):
+            raise RuntimeError("SETTLEMENT_SCOPE_MISMATCH")
+        if task["state"] != "inflight":
+            if task["state"] == outcome and task["mock_usage"] == usage:
+                return
+            raise RuntimeError("SETTLEMENT_ALREADY_RECORDED")
+        task.update(state=outcome, mock_usage=usage)
+        _durable_write(path, ledger)

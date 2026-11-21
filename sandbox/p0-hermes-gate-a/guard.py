@@ -6,6 +6,7 @@ from __future__ import annotations
 import fcntl
 import hashlib
 import hmac
+import http.client
 import json
 import os
 import re
@@ -18,6 +19,8 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from one_shot import admit as admit_one_shot
+from one_shot import settle_mock
+from mock_contract import MAX_RESPONSE_BYTES, freeze, no_duplicate_keys, usage_from_response
 
 
 HOST = "0.0.0.0"
@@ -31,18 +34,19 @@ LEDGER_PATH = Path("/opt/ttd/ledger/level2-budget.json")
 MOCK_ONE_SHOT_LEDGER = os.environ.get("TTD_MOCK_ONE_SHOT_LEDGER", "")
 if MOCK_ONE_SHOT_LEDGER:
     LEDGER_PATH = Path(MOCK_ONE_SHOT_LEDGER)
-    if "/mock-ledger/" not in str(LEDGER_PATH) or not str(LEDGER_PATH).endswith(".json"):
+    if "mock-ledger" not in LEDGER_PATH.resolve().parts or LEDGER_PATH.suffix != ".json":
         raise SystemExit("mock one-shot requires isolated mock-ledger JSON")
 CAPTURE_DIR = Path("/opt/ttd/capture")
 CAPTURE_INDEX = CAPTURE_DIR / "capture-index.json"
 CAPTURE_LOCK = CAPTURE_DIR / "capture.lock"
 MOCK_URL = "http://gate-a-provider-mock:8082/v1/responses"
+MOCK_TIMEOUT = 10
 FORBIDDEN_FIELDS = {"tools", "tool_choice", "parallel_tool_calls"}
 SCOPE_PATTERN = re.compile(r"task_id=([A-Za-z0-9._:-]+); correlation_id=([A-Za-z0-9._:-]+); channel=ads; spend=([0-9]+\.[0-9]{2}); clicks=([0-9]+)")
 
 
-def scoped_marker(value: Any) -> tuple[str, str, str]:
-    """Bind a mock permit to the bridge's fake task marker in Hermes input."""
+def mock_scope(value: Any) -> tuple[str, str]:
+    """Extract the fake task ID used to look up the pre-staged mock permit."""
     matches: list[tuple[str, str, str, str]] = []
     def visit(item: Any) -> None:
         if isinstance(item, str):
@@ -56,12 +60,9 @@ def scoped_marker(value: Any) -> tuple[str, str, str]:
     visit(value.get("input"))
     if len(matches) != 1:
         raise ValueError("TASK_MARKER_NOT_UNIQUE")
-    task_id, correlation_id, spend, clicks = matches[0]
-    marker = {"task_id": task_id, "correlation_id": correlation_id,
-              "channel": "ads", "spend": spend, "clicks": int(clicks)}
-    fingerprint = hashlib.sha256(canonical(marker)).hexdigest()
+    task_id = matches[0][0]
     key_hash = hashlib.sha256(("gate-a-" + task_id).encode()).hexdigest()
-    return task_id, key_hash, fingerprint
+    return task_id, key_hash
 
 
 def service_token() -> str:
@@ -148,7 +149,7 @@ def enforce(body: dict[str, Any]) -> tuple[dict[str, Any], int]:
     if any(field in body for field in FORBIDDEN_FIELDS):
         raise ValueError("TOOLS_NOT_ALLOWED")
     requested_cap = body.get("max_output_tokens")
-    if requested_cap is not None and (not isinstance(requested_cap, int) or requested_cap > HARD_OUTPUT_CAP):
+    if requested_cap is not None and (type(requested_cap) is not int or not 1 <= requested_cap <= HARD_OUTPUT_CAP):
         raise ValueError("OUTPUT_CAP_NOT_ALLOWED")
     ledger = ledger_summary()
     if ledger["kill_switch"] is not True:
@@ -162,6 +163,11 @@ def enforce(body: dict[str, Any]) -> tuple[dict[str, Any], int]:
     if full_bytes > STRICT_FULL_REQUEST_BYTE_BOUND:
         raise ValueError("INPUT_BOUND_EXCEEDED")
     return forwarded, full_bytes
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -183,6 +189,43 @@ class Handler(BaseHTTPRequestHandler):
     def authorized(self) -> bool:
         expected = f"Bearer {service_token()}".encode()
         return hmac.compare_digest(self.headers.get("Authorization", "").encode(), expected)
+
+    def run_one_shot_mock(self, body, wire, task_id, fingerprint):
+        try:
+            forwarded = json.loads(wire)
+            entry = record_capture(body, forwarded)
+            request = urllib.request.Request(
+                MOCK_URL, data=wire, method="POST",
+                headers={"Authorization": f"Bearer {service_token()}", "Content-Type": "application/json"})
+            opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+            with opener.open(request, timeout=MOCK_TIMEOUT) as response:
+                payload = response.read(MAX_RESPONSE_BYTES + 1)
+                content_type = response.headers.get_content_type()
+                if len(payload) > MAX_RESPONSE_BYTES or response.status != 200:
+                    raise ValueError("MOCK_RESPONSE_OUT_OF_POLICY")
+                streaming = forwarded.get("stream") is True
+                if content_type != ("text/event-stream" if streaming else "application/json"):
+                    raise ValueError("MOCK_CONTENT_TYPE_MISMATCH")
+                usage = usage_from_response(payload, streaming)
+        except (OSError, ValueError, TypeError, AttributeError, KeyError, http.client.HTTPException):
+            try:
+                settle_mock(LEDGER_PATH, task_id, fingerprint, "outcome_unknown")
+            except (OSError, RuntimeError, ValueError, KeyError, TypeError):
+                self.send_json(503, {"error": "MOCK_SETTLEMENT_FAILED"})
+                return
+            self.send_json(502, {"error": "MOCK_OUTCOME_UNKNOWN"})
+            return
+        try:
+            settle_mock(LEDGER_PATH, task_id, fingerprint, "usage_recorded", usage)
+        except (OSError, RuntimeError, ValueError, KeyError, TypeError):
+            self.send_json(503, {"error": "MOCK_SETTLEMENT_FAILED"})
+            return
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(payload)))
+        self.send_header("x-ttd-capture-sequence", str(entry["sequence"]))
+        self.end_headers()
+        self.wfile.write(payload)
 
     def do_GET(self) -> None:  # noqa: N802
         if self.path == "/healthz":
@@ -217,7 +260,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(413, {"error": "BODY_SIZE"})
             return
         try:
-            body = json.loads(self.rfile.read(length))
+            body = json.loads(self.rfile.read(length), object_pairs_hook=no_duplicate_keys)
             if not isinstance(body, dict):
                 raise ValueError
         except (ValueError, json.JSONDecodeError, UnicodeDecodeError):
@@ -226,7 +269,8 @@ class Handler(BaseHTTPRequestHandler):
         try:
             forwarded, _ = enforce(body)
             if MOCK_ONE_SHOT_LEDGER:
-                task_id, key_hash, fingerprint = scoped_marker(forwarded)
+                task_id, key_hash = mock_scope(forwarded)
+                wire, fingerprint = freeze(forwarded)
                 admit_one_shot(LEDGER_PATH, task_id, key_hash, fingerprint)
         except ValueError as error:
             self.send_json(422, {"error": str(error)})
@@ -236,6 +280,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         except (OSError, KeyError, TypeError, json.JSONDecodeError):
             self.send_json(503, {"error": "PERMIT_LEDGER_UNAVAILABLE"})
+            return
+        if MOCK_ONE_SHOT_LEDGER:
+            self.run_one_shot_mock(body, wire, task_id, fingerprint)
             return
         entry = record_capture(body, forwarded)
         request = urllib.request.Request(

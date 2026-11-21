@@ -98,6 +98,7 @@ class Handler(BaseHTTPRequestHandler):
             "created_at": int(time.time()),
             "status": "completed",
             "model": MODEL,
+            "service_tier": body.get("service_tier", "default"),
             "output": [
                 {
                     "id": "msg_mock",
