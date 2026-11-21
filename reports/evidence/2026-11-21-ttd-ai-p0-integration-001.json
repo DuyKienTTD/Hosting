@@ -1,108 +1,108 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "task_id": "ttd-ai-p0-integration-001",
   "verified_at": "2026-11-21",
   "result": "partial",
-  "blocking_state": "BLOCKED_BY_BUDGET_AND_RUNTIME",
+  "level1_result": "pass",
+  "blocking_state": "AWAITING_LEVEL2_APPROVAL",
   "target": {
     "environment": "verified-kvm2",
     "resource_identity_gate": "pass",
-    "excluded_resource": "ttdnew.tech-u4s",
-    "identity_report": "reports/2026-11-21-ttdnew-resource-identity-verification.md"
+    "excluded_resource": "ttdnew.tech-u4s"
   },
-  "pre_change": {
-    "n8n_running": true,
-    "hermes_running": true,
-    "n8n_restart_count": 0,
-    "hermes_restart_count": 0,
-    "n8n_internal_health_status": 200,
-    "hermes_internal_health_status": 200,
-    "p0_network_preexisted": false,
-    "disk_available_gib_approx": 85
-  },
-  "change": {
-    "network": "ttd-ai-p0-sandbox",
-    "driver": "bridge",
-    "internal": true,
-    "scope": "local",
-    "attached_container_count": 2,
-    "n8n_alias": "n8n-p0",
-    "hermes_alias": "hermes-p0",
-    "container_restart_or_recreate": false,
+  "production_safety": {
+    "n8n_health_before_after": "pass",
+    "hermes_health_before_after": "pass",
+    "n8n_restart_count_after": 0,
+    "hermes_restart_count_after": 0,
+    "production_restart_or_recreate": false,
     "public_port_change": false,
     "firewall_change": false,
     "dns_change": false,
-    "credential_change": false,
-    "u4s_change": false,
+    "production_credential_or_encryption_change": false,
+    "business_connector_calls": 0,
+    "paid_inference_calls": 0,
     "downtime_seconds": 0
   },
-  "tests": [
-    {
-      "id": "P0-N2H-DNS-001",
-      "direction": "n8n-to-hermes",
-      "transport": "private-service-dns",
-      "observed_status": 302,
-      "meaning": "dashboard-login-redirect-and-private-transport-reachable",
-      "result": "pass"
+  "sandbox": {
+    "network": {
+      "driver": "bridge",
+      "internal": true,
+      "public_ports": 0,
+      "internet_egress_probe_blocked": true
     },
-    {
-      "id": "P0-N2H-AUTH-NEG-001",
-      "direction": "n8n-to-hermes",
-      "transport": "private-service-dns",
-      "observed_status": 401,
-      "meaning": "protected-api-rejects-missing-auth",
-      "result": "pass"
+    "reasoner": {
+      "mode": "mock",
+      "provider_configured": false,
+      "health": "healthy",
+      "restart_count": 0,
+      "cpu_limit": 0.25,
+      "memory_mib": 384,
+      "pid_limit": 64,
+      "read_only_root": true,
+      "capabilities_dropped": "all"
     },
-    {
-      "id": "P0-N2H-INFERENCE-001",
-      "direction": "n8n-to-hermes",
-      "transport": "private-service-dns",
-      "observed_status": 302,
-      "meaning": "candidate-v1-models-routes-to-dashboard-not-inference-api",
-      "result": "blocked"
+    "n8n": {
+      "data_scope": "independent",
+      "encryption_scope": "independent",
+      "health": "healthy",
+      "restart_count": 0,
+      "cpu_limit": 0.5,
+      "memory_mib": 768,
+      "pid_limit": 128,
+      "workflow_count": 1,
+      "workflow": "fake-ads-audit-v1",
+      "instance_mcp_enabled": false
     },
-    {
-      "id": "P0-H2N-HEALTH-001",
-      "direction": "hermes-to-n8n",
-      "transport": "private-service-dns",
-      "observed_status": 200,
-      "meaning": "n8n-health-reachable",
-      "result": "pass"
-    },
-    {
-      "id": "P0-H2N-MCP-001",
-      "direction": "hermes-to-n8n",
-      "transport": "private-service-dns",
-      "observed_status": 404,
-      "meaning": "n8n-instance-mcp-disabled",
-      "result": "blocked"
+    "secrets": {
+      "generated_with_cryptographic_rng": true,
+      "dedicated_bearer_token": true,
+      "dedicated_sandbox_encryption_key": true,
+      "secret_file_mode": "600",
+      "directory_mode": "700",
+      "secret_values_recorded": false,
+      "production_n8n_key_changed": false
     }
-  ],
-  "post_change": {
-    "n8n_readiness_status": 200,
-    "hermes_dashboard_follow_status": 200,
-    "n8n_restart_count": 0,
-    "hermes_restart_count": 0,
-    "critical_log_matches_in_check_window": 0,
-    "rollback_script_syntax": "pass",
-    "backup_checksum": "pass"
   },
-  "cost_and_business_safety": {
-    "paid_inference_calls": 0,
-    "business_connectors_used": 0,
-    "content_published": false,
-    "production_firewall_or_port_changes": 0
+  "e2e_suite": {
+    "name": "p0_level1_e2e",
+    "mode": "structural_mock_no_provider",
+    "passed": 9,
+    "failed": 0,
+    "cases": [
+      {"id": "missing_auth", "http": 401, "elapsed_ms": 318, "result": "pass"},
+      {"id": "wrong_auth", "http": 401, "elapsed_ms": 304, "result": "pass"},
+      {"id": "invalid_input_schema", "http": 422, "elapsed_ms": 510, "result": "pass"},
+      {"id": "valid_e2e_callback", "http": 200, "elapsed_ms": 905, "result": "pass"},
+      {"id": "idempotent_replay", "http": 200, "elapsed_ms": 469, "result": "pass"},
+      {"id": "idempotency_conflict", "http": 409, "elapsed_ms": 2, "result": "pass"},
+      {"id": "invalid_output_rejected", "http": 502, "elapsed_ms": 317, "result": "pass"},
+      {"id": "timeout_retry_deduplicated", "http": 200, "elapsed_ms": 3114, "result": "pass"},
+      {"id": "timeout_callback_completed_once", "http": 200, "elapsed_ms": 2, "result": "pass"}
+    ]
+  },
+  "rollback": {
+    "backup_present": true,
+    "script_root_only": true,
+    "stop_rehearsal": "pass",
+    "production_health_during_rehearsal": "pass",
+    "restore_rehearsal": "pass",
+    "final_auxiliary_health": "healthy"
   },
   "unmet_acceptance": [
-    "private-real-agent-reasoning",
-    "exactly-one-authenticated-n8n-workflow",
-    "hermes-to-n8n-callback-with-json-schema",
-    "timeout-invalid-json-retry-idempotency-e2e"
+    "real-model-inference-through-private-runtime"
   ],
-  "approvals_needed": [
-    "hermes-private-inference-mode",
-    "provider-model-and-cost-cap",
-    "n8n-mcp-or-authenticated-webhook-mode",
-    "maintenance-window-if-restart-required"
-  ]
+  "approval_needed": {
+    "level": 2,
+    "decision": "provider-model-and-cost-cap",
+    "recommended_model": "openai-gpt-6-luna",
+    "recommended_limits": {
+      "max_calls": 5,
+      "max_input_tokens_per_call": 4000,
+      "max_output_tokens_per_call": 2000,
+      "max_usd_per_job": 0.01,
+      "max_usd_per_day": 0.05,
+      "max_usd_total_p0": 0.05
+    }
+  }
 }

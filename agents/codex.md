@@ -26,6 +26,7 @@ sensitivity: public-redacted
 - Browser/Computer Use trên Windows; đọc hPanel đang đăng nhập trong current session, có confirmation gate cho action nhạy cảm.
 - Audit VPS read-only qua Hostinger Web Terminal; kiểm kê Docker/image/network/storage/resource.
 - Debug live n8n `2.45.7` và Hermes dashboard `0.22.5`; xác định health, auth, network và blocker MCP/inference/E2E.
+- Triển khai P0 Level 1 cô lập: n8n sandbox, authenticated webhook, mock adapter, schema/callback/retry/idempotency, resource limits và rollback/restore; structural E2E 9/9 PASS mà không tác động production.
 - Tải/đối chiếu official docs, dùng skills, tạo report/evidence đã redaction và cập nhật state/catalog/changelog.
 
 Nguồn: [Codex capability survey](../reports/2026-11-21-codex-capability-survey.md), [live audit](../reports/2026-11-21-n8n-hermes-integration-audit.md) và [evidence](../reports/evidence/2026-11-21-ttd-ai-platform-audit-001.json).
@@ -44,7 +45,7 @@ Nguồn: [Codex capability survey](../reports/2026-11-21-codex-capability-survey
 - Local Docker CLI có nhưng Docker Desktop daemon không chạy: `BLOCKED_LOCAL_DAEMON`.
 - GitHub CLI bị precedence bởi `GITHUB_TOKEN` không hợp lệ; Git HTTPS vẫn VERIFIED. Không dựa vào `gh` cho đến khi có task dọn cấu hình.
 - 0 MCP resources/templates được expose; không có marketing/website/media connector trong phiên.
-- n8n MCP disabled, Hermes inference API chưa expose và n8n có 0 workflow: E2E `BLOCKED`.
+- n8n production MCP disabled, Hermes chính chưa expose inference API và production có 0 workflow; real-model E2E vẫn chờ Mức 2 dù structural sandbox E2E đã PASS.
 - Google Ads/GA4, WordPress/WooCommerce, YouTube/TikTok/Meta, Kling/HeyGen/ElevenLabs API scopes và credentials: `BLOCKED/UNKNOWN`.
 - Durable memory ngoài chat/Git, model/cost/quota và execution 24/7 khi app đóng: `UNKNOWN`.
 - Không có quyền tự sửa production chỉ vì từng đọc root Web Terminal.
@@ -81,6 +82,6 @@ Nguồn: [Codex capability survey](../reports/2026-11-21-codex-capability-survey
 
 ## Ba phép thử tiếp theo đề xuất
 
-1. Fake-data n8n↔Hermes E2E trong sandbox sau approval P0.
+1. Real-model fake-data E2E trong sandbox sau approval provider/model và cost cap Mức 2.
 2. Branch/PR + repository validator/secret-scan CI smoke test.
 3. Direct SSH read-only bằng user least-privilege, đối chiếu inventory với hPanel.

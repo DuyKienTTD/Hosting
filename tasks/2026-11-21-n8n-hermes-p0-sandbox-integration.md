@@ -1,14 +1,14 @@
 ---
 id: ttd-ai-p0-integration-001
 type: task
-status: in_progress
+status: blocked
 approval_level: 1
 updated_at: 2026-11-21
 sensitivity: public
 owner: codex
 support: [hostinger-agent, hermes]
 depends_on: [ttd-resource-identity-001]
-execution_result: partial
+execution_result: level1_pass_level2_pending
 ---
 
 # TTD-AI-P0-INTEGRATION-001 — Tích hợp sandbox n8n ↔ Hermes (sau xác minh resource)
@@ -81,8 +81,14 @@ Chủ dự án phê duyệt tiếp tục P0 theo [ADR-P0-001](../decisions/2026-
 - [x] Tạo `ttd-ai-p0-sandbox` với `internal=true`; gắn n8n/Hermes bằng service alias, không restart hoặc đổi public port/firewall.
 - [x] Private DNS hai chiều, negative auth, n8n health, n8n MCP state và post-change health được test.
 - [x] Backup config cần thiết, checksum và rollback script đã chuẩn bị.
-- [ ] Hermes private inference: **BLOCKED_BY_RUNTIME_AND_BUDGET**.
-- [ ] Một n8n workflow có auth/schema/callback: **BLOCKED_BY_MCP/WORKFLOW**.
-- [ ] E2E reasoning thật: chưa chạy; không tạo PASS giả, không phát sinh API fee.
+- [x] Triển khai runtime phụ cô lập `ttd-p0-reasoner` ở chế độ mock, không provider, không Internet egress, có CPU/RAM/PID limits và healthcheck.
+- [x] Triển khai instance `ttd-p0-n8n-sandbox` độc lập với production, khóa mã hóa và data directory riêng; không thay `N8N_ENCRYPTION_KEY` hoặc volume production.
+- [x] Tạo đúng một workflow `fake-ads-audit-v1` có bearer auth, input/output schema, callback, timeout, retry và idempotency.
+- [x] Bộ test cấu trúc E2E 9/9 PASS; backup/rollback/restore rehearsal PASS; production health và restart count không đổi.
+- [ ] E2E **AI reasoning thật**: **BLOCKED_BY_LEVEL2_APPROVAL**; không gọi provider, không phát sinh API fee và không tạo PASS giả.
+
+## Trạng thái chặn
+
+Mức 1 đã hoàn tất. Nhiệm vụ tổng thể giữ `blocked` vì acceptance còn yêu cầu model inference thật. Chủ dự án cần phê duyệt provider/model và hạn mức tiền Mức 2 trước khi cấp API key, mở egress cho runtime phụ hoặc chạy bất kỳ paid inference call nào. Không cần restart/recreate production để đi tiếp theo phương án hiện tại.
 
 Kết quả chi tiết: [báo cáo P0](../reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md) và [evidence JSON](../reports/evidence/2026-11-21-ttd-ai-p0-integration-001.json).

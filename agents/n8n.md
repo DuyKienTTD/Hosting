@@ -13,8 +13,8 @@ sensitivity: public-redacted
 ## VERIFIED theo [audit](../reports/2026-11-21-n8n-hermes-integration-audit.md)
 
 - n8n `2.45.7`, health/readiness 200, Docker container healthy, 0 restart/OOM tại điểm đo.
-- **0 workflow, 0 execution**; instance-level MCP tắt.
-- Network đến Hermes dashboard theo public host bridge PASS, **chưa có** service DNS nội bộ và chưa gọi AI inference.
+- Production: **0 workflow**, instance-level MCP tắt; health/readiness 200 và restart count 0.
+- P0 Level 1: instance sandbox độc lập có đúng một authenticated webhook; private service DNS, schema/callback/retry/idempotency structural E2E 9/9 PASS. Không gọi AI provider.
 - Có 1 credential nhưng loại/quyền chưa kiểm tra; không kết luận các platform đã connected.
 
 ## PLANNED

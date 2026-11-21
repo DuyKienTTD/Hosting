@@ -20,15 +20,15 @@ Mục tiêu dài hạn là chu trình `nhận mục tiêu -> lập kế hoạch 
 - Hostinger VPS KVM 2 ở Kuala Lumpur; Ubuntu 24.04.4 LTS, 2 vCPU, 8 GB RAM, 100 GB SSD.
 - n8n và Hermes Agent **đã cài và đang chạy qua Docker Compose tại thời điểm kiểm kê**. Không cài lại trước khi kiểm tra.
 - Docker, PostgreSQL, Nginx cùng các dịch vụ hệ thống: đọc chi tiết trong [kiểm kê VPS](inventory/current-vps-state.md).
-- Hai container có Docker networks tách biệt. Audit live đã chứng minh network hai chiều qua host bridge, nhưng chưa có service discovery nội bộ hoặc luồng AI end-to-end production-ready.
+- Hai service production vẫn ở Docker networks riêng. P0 đã bổ sung bridge internal và hai runtime sandbox có private service discovery; chưa có luồng AI model end-to-end production-ready.
 - Có tồn đọng hardening VPS; đọc [đánh giá bảo mật](reports/2026-11-21-vps-security-review.md). Chưa tự ý thực hiện thay đổi production.
 
 ## Chúng ta đang ở đâu?
 
 - **Đã có:** hạ tầng VPS, bản kiểm kê, quy tắc an toàn, hệ thống tri thức GitHub, n8n `2.45.7`, Hermes `0.22.5` và [kiểm toán live hai chiều](reports/2026-11-21-n8n-hermes-integration-audit.md).
-- **Đã xác minh:** hai runtime độc lập khỏe; network/auth n8n → Hermes dashboard và Hermes → n8n readiness hoạt động.
-- **Chưa hoàn tất:** Hermes inference API chưa expose; n8n MCP đang tắt; n8n có 0 workflow; chưa có luồng AI end-to-end, monitoring hoặc connector marketing đã test.
-- **Công việc kỹ thuật ưu tiên kế tiếp:** phê duyệt P0 sandbox change window để tạo internal network, bật Hermes API private, bật n8n MCP cho một workflow giả lập và chạy lại test end-to-end.
+- **Đã xác minh:** hai runtime production độc lập khỏe; P0 Mức 1 có runtime phụ cô lập và đúng một authenticated n8n sandbox workflow; structural E2E 9/9 và rollback/restore PASS.
+- **Chưa hoàn tất:** real AI inference, monitoring dài hạn và connector marketing; Hermes chính chưa expose inference API, n8n production MCP vẫn tắt và production có 0 workflow.
+- **Công việc kỹ thuật ưu tiên kế tiếp:** chủ dự án chọn provider/model và cost cap Mức 2; sau đó chạy tối đa một batch fake-data real-inference nhỏ trong cùng sandbox.
 - Đây là định hướng; **chưa phải phê duyệt** để sửa cấu hình VPS, quảng cáo, website, publish video hay phát sinh chi phí.
 
 ## Phân vai và cách phối hợp

@@ -1,0 +1,81 @@
+name: ttd-p0-level1
+
+services:
+  reasoner:
+    image: ghcr.io/hostinger/hvps-hermes-agent:latest
+    pull_policy: never
+    container_name: ttd-p0-reasoner
+    entrypoint: ["/opt/hermes/.venv/bin/python", "/opt/ttd/adapter.py"]
+    env_file:
+      - adapter.env
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+      P0_MODE: mock
+      P0_PORT: "8080"
+      P0_CALLBACK_URL: http://n8n-p0-sandbox:5678/webhook/ttd-p0-fake-ads-audit-v1
+    volumes:
+      - ./adapter.py:/opt/ttd/adapter.py:ro
+    networks:
+      p0_private:
+        aliases: [reasoner-p0]
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 384m
+    cpus: 0.25
+    healthcheck:
+      test: ["CMD", "/opt/hermes/.venv/bin/python", "-c", "import urllib.request; raise SystemExit(0 if urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=2).status == 200 else 1)"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  n8n-sandbox:
+    image: docker.n8n.io/n8nio/n8n:latest
+    pull_policy: never
+    container_name: ttd-p0-n8n-sandbox
+    env_file:
+      - n8n.env
+    environment:
+      N8N_USER_FOLDER: /home/node/.n8n
+      N8N_HOST: n8n-p0-sandbox
+      N8N_PORT: "5678"
+      N8N_PROTOCOL: http
+      N8N_SECURE_COOKIE: "false"
+      WEBHOOK_URL: http://n8n-p0-sandbox:5678/
+      N8N_EDITOR_BASE_URL: http://n8n-p0-sandbox:5678/
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+      N8N_TEMPLATES_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+      N8N_HIRING_BANNER_ENABLED: "false"
+      N8N_LOG_LEVEL: warn
+      N8N_RUNNERS_ENABLED: "true"
+      EXECUTIONS_DATA_PRUNE: "true"
+      EXECUTIONS_DATA_MAX_AGE: "24"
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+    networks:
+      p0_private:
+        aliases: [n8n-p0-sandbox]
+    restart: unless-stopped
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 768m
+    cpus: 0.5
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 30s
+
+networks:
+  p0_private:
+    external: true
+    name: ttd-ai-p0-sandbox

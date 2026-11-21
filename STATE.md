@@ -33,8 +33,9 @@ sensitivity: public-redacted
 - Đã chuẩn hóa giao nhiệm vụ qua `tasks/`, kết quả qua `reports/`; [quy tắc](rules/AGENT_WORKFLOW.md).
 - Đã hoàn tất [TTD-AI-PLATFORM-AUDIT-001](tasks/2026-11-21-n8n-hermes-integration-audit.md); xem [báo cáo live n8n ↔ Hermes](reports/2026-11-21-n8n-hermes-integration-audit.md).
 - Đã xác minh n8n `2.45.7` và Hermes `0.22.5`; cả hai health/readiness PASS, 0 restart/OOM và có thể chạm nhau hai chiều qua host bridge.
-- P0 đã tạo internal bridge `ttd-ai-p0-sandbox` và gắn live n8n/Hermes bằng service DNS private; negative auth, n8n readiness, post-health và rollback preparation PASS, không restart/downtime/public port/firewall change.
-- E2E reasoning vẫn `BLOCKED_BY_BUDGET_AND_RUNTIME`: n8n MCP đang tắt, chưa có workflow/callback và Hermes chưa expose agent inference API; không có paid inference call.
+- P0 Mức 1 đã triển khai hai runtime phụ cô lập trên `ttd-ai-p0-sandbox`: n8n sandbox có đúng một authenticated webhook và reasoner deterministic mock không provider/Internet egress.
+- Structural E2E 9/9, negative auth, schema, callback, timeout/retry/idempotency và rollback/restore đều PASS. Production n8n/Hermes không restart, downtime 0, public port/firewall/DNS không đổi và paid inference call bằng 0.
+- AI reasoning thật vẫn `AWAITING_LEVEL2_APPROVAL`; n8n production MCP vẫn tắt, production có 0 workflow và Hermes chính vẫn không expose inference API.
 - Kiến trúc được khuyến nghị: n8n làm control plane, Hermes reasoning qua API private, một internal Docker network, schema/policy/approval gate và media-worker FFmpeg riêng.
 
 ## Khảo sát năng lực và phối hợp các tác nhân
@@ -50,10 +51,10 @@ sensitivity: public-redacted
 ## Định danh resource và tích hợp P0
 
 - [TTD-RESOURCE-IDENTITY-001](tasks/2026-11-21-ttdnew-resource-identity-verification.md) đã complete: U4S `ttdnew.tech` và KVM 2 là hai runtime độc lập.
-- [TTD-AI-P0-INTEGRATION-001](tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md) có kết quả `PARTIAL`: private network/DNS/health PASS; inference/workflow/callback còn blocked. Xem [báo cáo P0](reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md).
+- [TTD-AI-P0-INTEGRATION-001](tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md) có kết quả `LEVEL1_PASS / PARTIAL`: sandbox workflow/callback đã PASS; real model inference còn chờ Mức 2. Xem [báo cáo P0](reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md).
 - Không thay U4S, account business, public port/firewall hoặc credential; downtime 0 và chi phí API 0.
 
-- Đã lập [ADR-P0-001](decisions/2026-11-21-p0-reasoning-integration-proposal.md) trạng thái **PARTIALLY_APPROVED (Mức 1, 2026-11-21)**: Codex được triển khai sandbox cô lập có rollback và 1 webhook có xác thực trong giới hạn không gián đoạn; model/provider, trần chi phí và paid inference (Mức 2) chưa được duyệt. Chưa có báo cáo thực thi mới sau phê duyệt.
+- [ADR-P0-001](decisions/2026-11-21-p0-reasoning-integration-proposal.md) vẫn **PARTIALLY_APPROVED**: Mức 1 đã thực thi; model/provider, trần chi phí và paid inference (Mức 2) chưa được duyệt.
 
 ## Việc đang chờ
 
@@ -61,7 +62,7 @@ sensitivity: public-redacted
 - Chưa đặt n8n/Hermes sau reverse proxy HTTPS.
 - Chưa xử lý các backup Hostinger có thể chứa ứng dụng đã xóa.
 - Chưa cập nhật hệ điều hành hoặc reboot.
-- Đã phê duyệt **Mức 1** cho inference private cô lập và đúng một authenticated webhook sandbox có kiểm soát; vẫn chờ Codex thực hiện/kiểm thử. **Chưa phê duyệt Mức 2** gồm provider/model + cost cap và paid inference. n8n MCP toàn instance chưa được phê duyệt.
+- Chờ phê duyệt **Mức 2**: đề xuất GPT-6 Luna, tối đa 5 fake-data calls, cap USD 0.05/ngày và USD 0.05 tổng P0. Chưa cấp key/mở provider egress/chạy paid inference. n8n MCP toàn instance không cần bật cho phương án hiện tại.
 - Chưa kết nối/xác minh Google Ads, GA4, WordPress/WooCommerce, YouTube, TikTok, Meta, Kling, HeyGen hoặc ElevenLabs.
 
 ## Tài liệu tiếp theo

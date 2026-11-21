@@ -18,7 +18,7 @@ related_task: ttd-ai-p0-integration-001
 
 - [P0 integration report](../reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md) và [JSON evidence](../reports/evidence/2026-11-21-ttd-ai-p0-integration-001.json): private Docker bridge `ttd-ai-p0-sandbox`, service DNS hai chiều, health/auth PASS, không restart/downtime.
 - Hermes container Hostinger `0.22.5` chỉ phục vụ dashboard/control plane; `/v1/models` rơi về login/dashboard. Không có inference API đã kiểm chứng.
-- n8n instance-level MCP disabled và n8n chưa có workflow. E2E vẫn BLOCKED.
+- n8n production vẫn giữ MCP disabled và 0 workflow. Mức 1 đã bổ sung một instance n8n sandbox độc lập với đúng một webhook workflow; đây không phải thay đổi production.
 - [Identity report](../reports/2026-11-21-ttdnew-resource-identity-verification.md): `ttdnew.tech` U4S Hermes độc lập với KVM 2; không đụng vào U4S trong P0.
 
 ## Phương án được khuyến nghị
@@ -45,6 +45,13 @@ related_task: ttd-ai-p0-integration-001
 - **D3:** Chọn provider/model và hạn mức chi phí **sau khi có bảng giá/ước tính**. Chưa có approval cho paid inference.
 - **D4:** Mọi thay đổi cần restart/downtime/đụng public network đòi approval maintenance riêng.
 
+## Kết quả thực thi Mức 1
+
+- **D1 EXECUTED:** runtime phụ cô lập chạy deterministic mock, không provider và không Internet egress; có resource limits, healthcheck, root filesystem read-only và rollback riêng. Hermes chính không thay đổi.
+- **D2 EXECUTED:** đúng một authenticated webhook `fake-ads-audit-v1` chạy trên n8n sandbox có data directory và khóa mã hóa độc lập; structural E2E 9/9 PASS.
+- Backup/rollback/restore rehearsal PASS; n8n và Hermes production vẫn healthy, restart count 0, downtime 0.
+- **D3 vẫn PENDING:** real inference chưa chạy, phí thực tế bằng 0. Bảng provider/model và cost cap nằm trong báo cáo P0.
+
 ## Phân vai
 
 - Codex: owner kỹ thuật, nghiên cứu feasibility, bản vá và kế hoạch triển khai.
@@ -52,4 +59,4 @@ related_task: ttd-ai-p0-integration-001
 - Hostinger Agent: xác minh VPS/U4S boundaries, backup và change impact.
 - Chủ dự án: quyết định các gate D1-D4.
 
-**Trạng thái:** PARTIALLY_APPROVED — chỉ Mức 1. Đây là bản ghi phê duyệt, không phải bằng chứng Codex đã thực hiện bước tiếp theo. Mức 2 và maintenance change vẫn chờ quyết định.
+**Trạng thái:** PARTIALLY_APPROVED — Mức 1 đã thực thi và kiểm thử; Mức 2 và maintenance change vẫn chờ quyết định.

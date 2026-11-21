@@ -67,6 +67,7 @@ Mạng Docker:
 - `docker0`: `172.17.0.0/16`, hiện không hoạt động.
 - `hermes-agent-l7fe_default`: bridge `172.18.0.0/16`.
 - `n8n-nbqy_default`: bridge `172.19.0.0/16`.
+- `ttd-ai-p0-sandbox`: internal bridge cho P0; không publish port và không có Internet egress. Hai production container và hai auxiliary container cùng attach để service discovery private; production bridge cũ vẫn giữ nguyên.
 
 UFW đang bật với chính sách mặc định:
 
@@ -90,7 +91,7 @@ Ghi chú:
 | Docker Engine | 29.9.2 |
 | Storage driver | overlayfs |
 | Cgroup driver | systemd |
-| Containers | 2, đều đang chạy |
+| Containers | 4, gồm 2 production và 2 P0 auxiliary; đều đang chạy tại điểm kiểm tra cuối |
 | Images | 2 |
 | Dung lượng image | 6.9 GB |
 | Dung lượng container writable layer | khoảng 50 MB |
@@ -117,6 +118,8 @@ Ghi chú:
 | Restart/OOM | 0 / false |
 | App state | health/readiness 200; 0 workflow; 1 credential; 0 execution; MCP disabled |
 
+Ghi chú: các số liệu trên là **n8n production**. P0 Level 1 có thêm `ttd-p0-n8n-sandbox`, data directory và encryption key riêng, đúng một workflow `fake-ads-audit-v1`, không public port; limit 0.5 CPU, 768 MiB RAM và 128 PID. Health cuối `healthy`.
+
 Tên biến môi trường được phát hiện, không lưu giá trị: `GENERIC_TIMEZONE`, `N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS`, `N8N_RELEASE_TYPE`, `N8N_RUNNERS_ENABLED`, `N8N_SECURE_COOKIE`, `NODE_ENV`, `TZ`, `WEBHOOK_URL` và các biến runtime chuẩn.
 
 ### Hermes Agent
@@ -139,6 +142,8 @@ Tên biến môi trường được phát hiện, không lưu giá trị: `GENER
 | Sử dụng lúc kiểm tra | khoảng 0.57% CPU, 435.9 MiB RAM, 39 PID |
 | Restart/OOM | 0 / false |
 | App state | dashboard health 200; 0 cron job/session; webhook disabled; chưa expose agent `/v1/*` API |
+
+P0 Level 1 không thay Hermes production. Auxiliary `ttd-p0-reasoner` dùng image đã cache chỉ làm vỏ runtime cho deterministic mock adapter, không phải Hermes real inference: không provider, không Internet egress, read-only root, drop all capabilities; limit 0.25 CPU, 384 MiB RAM và 64 PID. Health cuối `healthy`.
 
 Tên biến môi trường nhạy cảm tồn tại nhưng giá trị không được ghi lại: `ADMIN_PASSWORD`, `ADMIN_USERNAME`, `DASHBOARD_AUTH_SECRET`, `OXYLABS_AI_STUDIO_API_KEY`; ngoài ra có các biến runtime và cấu hình Hermes.
 
@@ -166,6 +171,16 @@ Kiểm thử live ngày 2026-11-21 xác nhận:
 - Vì n8n không có workflow/execution và hai tính năng trên chưa bật, luồng AI end-to-end vẫn `BLOCKED`.
 
 Chi tiết và latency nằm trong [báo cáo kiểm toán tích hợp](../reports/2026-11-21-n8n-hermes-integration-audit.md).
+
+### P0 Level 1 sandbox — cập nhật 2026-11-21
+
+- Đã triển khai `ttd-p0-n8n-sandbox` và `ttd-p0-reasoner` trên internal bridge; không public port, firewall hoặc DNS change.
+- Hai secret persistent riêng của sandbox được sinh bằng CSPRNG và lưu root-only; không thay encryption key/credential/volume production.
+- Đúng một authenticated webhook workflow; structural E2E 9/9 và rollback/restore PASS.
+- Production n8n/Hermes health PASS, restart count 0, downtime 0 trong toàn bộ change/rehearsal.
+- Real model inference chưa chạy; paid call 0; trạng thái `AWAITING_LEVEL2_APPROVAL`.
+
+Chi tiết hiện hành và bằng chứng đã khử bí mật: [P0 Level 1 report](../reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md).
 
 ## 4. Web, TLS và cơ sở dữ liệu
 
@@ -267,4 +282,4 @@ Dung lượng dữ liệu hệ thống khác:
 
 ## 10. Kết luận
 
-VPS hiện chủ yếu dùng cho hai Docker workload: n8n và Hermes Agent. Máy còn nhiều dung lượng đĩa và RAM, nhưng cần ưu tiên siết SSH/XRDP, giới hạn cổng Docker, bổ sung firewall cấp Hostinger, cập nhật 90 gói và khởi động lại có kế hoạch. Chi tiết ưu tiên nằm trong báo cáo bảo mật đi kèm.
+VPS hiện có hai workload production n8n/Hermes và hai auxiliary workload P0 được giới hạn tài nguyên. Máy còn dung lượng đĩa và RAM, nhưng cần ưu tiên siết SSH/XRDP, giới hạn cổng Docker, bổ sung firewall cấp Hostinger, cập nhật 90 gói và khởi động lại có kế hoạch. Chi tiết ưu tiên nằm trong báo cáo bảo mật đi kèm.

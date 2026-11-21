@@ -2,6 +2,10 @@
 
 ## 2026-11-21
 
+- Hoàn tất P0 Mức 1 trên KVM 2: triển khai n8n sandbox độc lập và reasoner mock cô lập trên internal network, đúng một authenticated webhook, structural E2E 9/9 và rollback/restore PASS.
+- Xác minh không restart/downtime production, không public port/firewall/DNS/business change và không paid inference; cập nhật task thành `blocked` chỉ vì real reasoning còn chờ phê duyệt Mức 2.
+- Thêm mã triển khai secret-free trong `sandbox/p0-level1`, cập nhật report/evidence/inventory/state/catalog và bảng provider/model cùng đề xuất cap USD 0.05 cho P0 Mức 2.
+
 - Chủ dự án phê duyệt **Mức 1** của ADR-P0-001: Codex được tiếp tục kỹ thuật sandbox n8n ↔ Hermes với inference runtime cô lập và một authenticated webhook, có preflight/backup/rollback. Mức 2 (provider/model, cost cap, paid inference) và thay đổi gây downtime/public production vẫn chưa được phê duyệt. Chưa có thay đổi VPS do ChatGPT thực hiện tại bước ghi nhận này.
 
 - Lập ADR-P0-001 ở trạng thái PROPOSED sau P0 network PASS/E2E BLOCKED: Hermes inference cô lập, n8n authenticated webhook, nghiên cứu provider/model và cost cap; chưa phê duyệt hay thay production.

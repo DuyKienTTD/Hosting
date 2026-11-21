@@ -1,0 +1,218 @@
+[
+  {
+    "id": "ttdP0FakeAdsV1",
+    "name": "fake-ads-audit-v1",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "ttd-p0-fake-ads-audit-v1",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "webhook-trigger",
+        "name": "Private Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [-900, 0],
+        "webhookId": "bfcd94a5-90cc-4a62-b664-a6d305760e83"
+      },
+      {
+        "parameters": {
+          "jsCode": "const req = $input.first().json;\nconst headers = req.headers ?? {};\nconst body = req.body ?? {};\nconst expected = '__P0_TOKEN__';\nconst authorization = String(headers.authorization ?? '');\nconst authorized = authorization === `Bearer ${expected}`;\nreturn [{ json: { authorized, phase: body.phase ?? 'start', body } }];"
+        },
+        "id": "auth-router",
+        "name": "Auth Router",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [-680, 0]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+            "conditions": [
+              {
+                "id": "auth-condition",
+                "leftValue": "={{ $json.authorized }}",
+                "rightValue": true,
+                "operator": {"type": "boolean", "operation": "true", "singleValue": true}
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "is-authorized",
+        "name": "Authorized?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [-460, 0]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "{\"status\":\"unauthorized\",\"error\":\"P0_AUTH_REJECTED\"}",
+          "options": {"responseCode": 401}
+        },
+        "id": "respond-unauthorized",
+        "name": "Respond Unauthorized",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [-240, 180]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+            "conditions": [
+              {
+                "id": "callback-condition",
+                "leftValue": "={{ $json.phase }}",
+                "rightValue": "callback",
+                "operator": {"type": "string", "operation": "equals"}
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "is-callback",
+        "name": "Callback Phase?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [-240, -40]
+      },
+      {
+        "parameters": {
+          "jsCode": "const b = $json.body ?? {};\nconst valid = b.phase === 'callback' && typeof b.task_id === 'string' && typeof b.correlation_id === 'string' && b.status === 'mock_succeeded' && typeof b.result_hash === 'string' && /^[a-f0-9]{64}$/.test(b.result_hash) && b.result && Array.isArray(b.result.signals) && Array.isArray(b.result.recommendations) && b.inference?.mode === 'mock' && b.inference?.paid === false;\nreturn [{ json: { valid, response: valid ? { ack: true, task_id: b.task_id, correlation_id: b.correlation_id, status: b.status, result_hash: b.result_hash, schema_valid: true } : { ack: false, status: 'invalid_callback', error: 'P0_OUTPUT_SCHEMA', schema_valid: false } } }];"
+        },
+        "id": "validate-callback",
+        "name": "Validate Callback Schema",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [0, -180]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json.response }}",
+          "options": {"responseCode": "={{ $json.valid ? 200 : 422 }}"}
+        },
+        "id": "respond-callback",
+        "name": "Respond Callback",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [240, -180]
+      },
+      {
+        "parameters": {
+          "jsCode": "const b = $json.body ?? {};\nconst input = b.input ?? {};\nconst valid = b.phase === 'start' && typeof b.task_id === 'string' && b.task_id.length >= 3 && typeof b.correlation_id === 'string' && b.correlation_id.length >= 3 && input.channel === 'ads' && typeof input.spend === 'number' && input.spend >= 0 && Number.isInteger(input.clicks) && input.clicks >= 0;\nreturn [{ json: { valid, response: valid ? null : { status: 'invalid_request', error: 'P0_FAKE_ADS_SCHEMA' }, request: valid ? { task_id: b.task_id, correlation_id: b.correlation_id, input, simulate: b.simulate ?? null } : null } }];"
+        },
+        "id": "validate-start",
+        "name": "Validate Fake Ads Input",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [0, 80]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+            "conditions": [
+              {
+                "id": "input-condition",
+                "leftValue": "={{ $json.valid }}",
+                "rightValue": true,
+                "operator": {"type": "boolean", "operation": "true", "singleValue": true}
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "is-valid-input",
+        "name": "Valid Input?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [240, 80]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json.response }}",
+          "options": {"responseCode": 422}
+        },
+        "id": "respond-invalid-input",
+        "name": "Respond Invalid Input",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [480, 220]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://reasoner-p0:8080/v1/reason",
+          "sendHeaders": true,
+          "headerParameters": {"parameters": [{"name": "Authorization", "value": "Bearer __P0_TOKEN__"}]},
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json.request) }}",
+          "options": {"timeout": 2500}
+        },
+        "id": "call-reasoner",
+        "name": "Call Isolated Reasoner",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [480, 20],
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 100
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {"responseCode": 200}
+        },
+        "id": "respond-start",
+        "name": "Respond Start",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [720, 20]
+      }
+    ],
+    "connections": {
+      "Private Webhook": {"main": [[{"node": "Auth Router", "type": "main", "index": 0}]]},
+      "Auth Router": {"main": [[{"node": "Authorized?", "type": "main", "index": 0}]]},
+      "Authorized?": {
+        "main": [
+          [{"node": "Callback Phase?", "type": "main", "index": 0}],
+          [{"node": "Respond Unauthorized", "type": "main", "index": 0}]
+        ]
+      },
+      "Callback Phase?": {
+        "main": [
+          [{"node": "Validate Callback Schema", "type": "main", "index": 0}],
+          [{"node": "Validate Fake Ads Input", "type": "main", "index": 0}]
+        ]
+      },
+      "Validate Callback Schema": {"main": [[{"node": "Respond Callback", "type": "main", "index": 0}]]},
+      "Validate Fake Ads Input": {"main": [[{"node": "Valid Input?", "type": "main", "index": 0}]]},
+      "Valid Input?": {
+        "main": [
+          [{"node": "Call Isolated Reasoner", "type": "main", "index": 0}],
+          [{"node": "Respond Invalid Input", "type": "main", "index": 0}]
+        ]
+      },
+      "Call Isolated Reasoner": {"main": [[{"node": "Respond Start", "type": "main", "index": 0}]]}
+    },
+    "settings": {"executionOrder": "v1", "saveExecutionProgress": true},
+    "staticData": null,
+    "pinData": {},
+    "versionId": "f1750c35-e3be-46a9-a76d-11e330adf401",
+    "meta": {"templateCredsSetupCompleted": true},
+    "tags": []
+  }
+]

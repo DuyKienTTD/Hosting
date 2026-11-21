@@ -28,7 +28,7 @@ sensitivity: public-redacted
 ## BLOCKED / NOT YET PROVEN
 
 - Hermes **chưa expose live agent inference API** từ Hostinger dashboard image trong audit; API upstream theo docs ≠ API của instance hiện hữu.
-- n8n instance-level MCP đang disabled; chưa có workflow, chưa có execution và chưa có luồng Hermes ↔ n8n E2E thành công.
+- n8n production MCP đang disabled và production có 0 workflow. P0 đã có structural E2E qua runtime phụ mock, nhưng đây không chứng minh Hermes chính làm real inference.
 - Không có connector/account production-ready nào cho Google Ads, GA4, WordPress/WooCommerce, YouTube, TikTok, Meta, Kling, HeyGen hoặc ElevenLabs được xác minh trong phiên khảo sát Hermes.
 - Chưa chứng minh background execution 24/7, self-healing, budget controls và rollback cho business actions.
 

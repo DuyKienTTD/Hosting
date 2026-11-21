@@ -6,138 +6,112 @@ result: partial
 updated_at: 2026-11-21
 verified_at: 2026-11-21
 sensitivity: public-redacted
-source: live-hostinger-terminal-tests,repository-identity-report,agent-capability-reports
+source: live-hostinger-terminal-tests,repository-identity-report,official-provider-pricing
 task: ttd-ai-p0-integration-001
 ---
 
-# P0 sandbox n8n ↔ Hermes — kết quả triển khai 2026-11-21
+# P0 sandbox n8n ↔ Hermes — kết quả Mức 1
 
-## Tóm tắt
+## Kết luận
 
-Kết quả tổng thể: **PARTIAL / BLOCKED_BY_BUDGET_AND_RUNTIME**.
+**MỨC 1 PASS / TOÀN BỘ P0 PARTIAL / AWAITING_LEVEL2_APPROVAL.**
 
-Đã triển khai một Docker bridge riêng `ttd-ai-p0-sandbox` với `internal=true`, gắn live đúng hai container n8n và Hermes trên KVM 2. Hai dịch vụ phân giải nhau bằng DNS service alias và trao đổi trực tiếp trên mạng private, không đi qua host-published port. Không restart/recreate container, không đổi firewall, public port, DNS, credential hay resource U4S `ttdnew.tech`; downtime bằng 0 và số lần restart vẫn bằng 0.
+Trên đúng KVM 2 đã xác minh, Codex đã triển khai hai service phụ `ttd-p0-n8n-sandbox` và `ttd-p0-reasoner` trên bridge `ttd-ai-p0-sandbox` có `internal=true`. Không service nào publish host port. n8n và Hermes production không bị restart/recreate, health trước/sau đều PASS và downtime bằng 0.
 
-Luồng AI E2E thật **chưa chạy**. Image Hermes hiện tại vẫn chỉ expose dashboard/control API; đường `/v1/models` private redirect về dashboard thay vì trả API inference. n8n MCP vẫn disabled và không có workflow sandbox đang hoạt động. Mặt khác, provider/model và trần chi phí chưa được phê duyệt. Theo GATE-COST, không gọi model và không tạo PASS giả.
+Đúng một workflow `fake-ads-audit-v1` đã chạy với bearer auth, schema validation, callback, timeout/retry và idempotency. Bộ test structural E2E 9/9 PASS và rollback/restore rehearsal PASS. Runtime reasoning hiện là deterministic mock, không gọi model; vì vậy **không phải bằng chứng AI reasoning thật**. Acceptance cuối vẫn bị chặn bởi phê duyệt Mức 2 cho provider/model và cost cap.
 
-Bằng chứng máy đọc đã khử định danh: [TTD-AI-P0-INTEGRATION-001 evidence](evidence/2026-11-21-ttd-ai-p0-integration-001.json).
+Bằng chứng máy đọc: [JSON đã khử bí mật](evidence/2026-11-21-ttd-ai-p0-integration-001.json). [Mã triển khai công khai](../sandbox/p0-level1/README.md) không chứa giá trị bí mật.
 
-## Gate trước thay đổi
+## Safety gate và bí mật
 
-| Gate | Kết quả | Bằng chứng |
-|---|---|---|
-| `GATE-ID` | **PASS** | Báo cáo định danh mới nhất xác nhận `ttdnew.tech` là U4S Hermes riêng; KVM 2 là target P0 độc lập, không có bằng chứng dùng chung container/volume/backend |
-| `GATE-CHANGE` | **PASS cho thay đổi network-only** | Hai container running, restart 0, health nội bộ 200; network P0 chưa tồn tại; còn khoảng 85 GB đĩa; rollback không cần restart |
-| `GATE-COST` | **BLOCKED cho inference** | Runtime có dấu hiệu provider credential được cấu hình nhưng không có model, đơn giá hoặc hạn mức đã duyệt; số API call tính phí thực tế bằng 0 |
+| Điều kiện | Kết quả |
+|---|---|
+| Identity: đúng KVM 2, không đụng U4S `ttdnew.tech` | **PASS** |
+| Pre/post production health; restart count | **PASS / 0** |
+| Backup và rollback trước thay đổi | **PASS** |
+| Bearer token sinh bằng CSPRNG, file `600`, thư mục `700` | **PASS** |
+| Khóa mã hóa sandbox sinh riêng, file `600`, data directory riêng | **PASS** |
+| Không thay khóa/credential/volume của n8n production | **PASS** |
+| Secret không xuất hiện trong chat, Git, report, test output hoặc application log | **PASS** |
+| Public port, firewall, DNS, Hermes chính, business account | **KHÔNG ĐỔI** |
+| Paid inference/API call | **0** |
 
-Compose/config Hermes được sao lưu trong thư mục chỉ root trên VPS; checksum backup PASS. Docker label của n8n trỏ tới một compose path hiện không còn trên filesystem, nên không sửa/recreate compose n8n. Dữ liệu n8n không bị thay đổi, vì vậy không tạo bản sao dữ liệu không cần thiết. Rollback script đã được tạo, đặt quyền root-only và kiểm tra cú pháp PASS.
+Giá trị secret không được ghi lại. Repository chỉ chứa placeholder `__P0_TOKEN__`; token thật chỉ được thay trong runtime copy root-only trên VPS. n8n sandbox dùng data directory và encryption scope riêng, nên không tác động cơ chế mã hóa hiện hữu của production.
 
-Một helper container Alpine read-only, `--rm`, được dùng để xác nhận volume n8n có SQLite và dung lượng khoảng 6.5 MB; không có container/service helper tồn tại sau phép thử. Image cache không được coi là thành phần P0.
-
-## Thay đổi đã thực hiện
-
-1. Tạo network `ttd-ai-p0-sandbox`:
-   - driver `bridge`
-   - `internal=true`
-   - scope local
-   - label task/sandbox để nhận dạng
-2. Gắn n8n với alias `n8n-p0`.
-3. Gắn Hermes với alias `hermes-p0`.
-4. Giữ nguyên hai bridge Compose cũ để không cắt admin access hoặc gây downtime.
-
-Không có public port mới. Các host-published port cũ chưa được thay đổi vì việc thu hẹp bề mặt public là change batch khác cần đường truy cập thay thế và phê duyệt riêng.
-
-## Topology sau thay đổi
+## Kiến trúc đã triển khai
 
 ```text
-n8n container -------- ttd-ai-p0-sandbox (internal bridge) -------- Hermes container
-   |                                                                  |
-bridge Compose cũ                                             bridge Compose cũ
-   |                                                                  |
-admin access hiện hữu                                         admin access hiện hữu
+Internet: không route vào sandbox; network không có egress
+
+ttd-p0-n8n-sandbox
+  └─ đúng 1 authenticated webhook
+       └─ private HTTP → ttd-p0-reasoner (mock only)
+                              └─ authenticated callback → workflow sandbox
+
+n8n production ─┐
+Hermes production ├─ vẫn healthy; không restart/recreate/config change
+U4S ttdnew.tech ─┘
 ```
 
-Service-to-service P0 dùng alias private. Public/host port chỉ được probe để xác nhận admin access sau thay đổi, không được dùng cho bài test private hai chiều.
-
-## Ma trận kiểm thử live
-
-| Test ID | Phép thử | Kết quả | Trạng thái |
-|---|---|---:|---|
-| `P0-ID-001` | U4S `ttdnew.tech` tách biệt KVM 2 | xác nhận theo báo cáo identity mới nhất | **PASS** |
-| `P0-NET-001` | Network private tồn tại và có đúng hai container | `internal=true`, 2 attachment | **PASS** |
-| `P0-N2H-DNS-001` | n8n gọi Hermes bằng alias private | HTTP 302 về login, chứng minh DNS/transport hoạt động | **PASS** |
-| `P0-N2H-AUTH-NEG-001` | n8n gọi API Hermes bảo vệ khi thiếu auth | HTTP 401 | **PASS** |
-| `P0-N2H-INFERENCE-001` | n8n gọi candidate `/v1/models` private | HTTP 302 về dashboard, không phải inference API | **BLOCKED** |
-| `P0-H2N-HEALTH-001` | Hermes gọi n8n health bằng alias private | HTTP 200 | **PASS** |
-| `P0-H2N-MCP-001` | Hermes gọi n8n MCP bằng alias private | HTTP 404, MCP disabled | **BLOCKED** |
-| `P0-POST-HEALTH-001` | n8n readiness sau thay đổi | HTTP 200 | **PASS** |
-| `P0-POST-HEALTH-002` | Hermes dashboard sau thay đổi, follow redirect | HTTP 200 | **PASS** |
-| `P0-POST-RUNTIME-001` | restart/critical log sau thay đổi | restart 0; không có match fatal/panic/OOM trong cửa sổ kiểm tra | **PASS** |
-
-HTTP 302 ở root Hermes là hành vi dashboard yêu cầu login, không phải lỗi transport. HTTP 401 xác nhận lớp auth chặn request thiếu credential. Không truyền admin credential Hermes sang n8n vì credential đó không được dùng làm inference service token.
-
-## E2E và schema dự kiến
-
-Không có execution `n8n → Hermes reasoning thật → n8n callback` trong lần này. Hai blocker độc lập:
-
-1. Hermes Hostinger image không expose private agent inference API; `/v1/*` rơi về dashboard.
-2. n8n instance-level MCP vẫn disabled và chưa có đúng một workflow sandbox có auth.
-
-Schema đề xuất cho lần test sau:
-
-```json
-{
-  "task_id": "p0-fake-ads-001",
-  "correlation_id": "generated-per-run",
-  "input": {"channel": "ads", "spend": 100, "clicks": 10},
-  "status": "succeeded|failed|blocked",
-  "timings_ms": {"total": 0, "reasoning": 0, "callback": 0},
-  "result": {
-    "summary": "string",
-    "signals": ["string"],
-    "recommendations": ["string"]
-  },
-  "result_hash": "sha256",
-  "error": null
-}
-```
-
-Test kế tiếp phải có token service riêng, validation input/output, timeout, invalid JSON, retry hữu hạn và idempotency theo `task_id`; không dùng admin dashboard cookie cho inference.
-
-## Rollback
-
-Rollback đã chuẩn bị trên VPS và không phụ thuộc compose:
-
-1. Disconnect n8n khỏi đúng network `ttd-ai-p0-sandbox`.
-2. Disconnect Hermes khỏi đúng network đó.
-3. Xóa network khi không còn attachment.
-4. Kiểm tra lại readiness/dashboard và restart count.
-
-Script đã qua `sh -n`; backup config Hermes đã qua checksum. Chưa thực thi rollback vì thay đổi đang healthy và là nền cần thiết cho lần P0 tiếp theo.
-
-## Phối hợp tác nhân
-
-- **Hostinger Agent:** dùng báo cáo identity và account inventory đã push làm bằng chứng có thẩm quyền cho resource boundary, backup/firewall và phạm vi hPanel; không lặp lại các probe identity đã đủ bằng chứng.
-- **Hermes:** dùng capability profile/report mới nhất để chốt rằng WebUI reasoning khác với VPS dashboard runtime, inference API và n8n MCP chưa được chứng minh. Không gọi Hermes/LLM để tránh phí chưa duyệt.
-- **Codex:** thực hiện live preflight, network change, negative auth, private DNS hai chiều, post-health, rollback preparation và tài liệu hóa.
-
-Không gửi tin nhắn đại diện, không tạo account/key, không thay quyền và không dùng connector business.
-
-## Đối chiếu acceptance
-
-| Tiêu chí | Kết quả |
+| Service phụ | Isolation và limit |
 |---|---|
-| Identity đúng target | **PASS** |
-| n8n/Hermes healthy, admin access duy trì | **PASS** |
-| Private DNS và auth enforcement | **PASS** |
-| n8n gọi agent reasoning thật private | **BLOCKED_BY_RUNTIME_AND_BUDGET** |
-| Hermes gọi đúng một workflow n8n | **BLOCKED_BY_MCP/WORKFLOW** |
-| Error/rollback/post-health | **PARTIAL PASS**: negative auth/MCP, rollback chuẩn bị, health PASS; chưa test timeout/invalid JSON/retry của E2E |
-| Không thay business account/publish/phí | **PASS** |
+| `ttd-p0-reasoner` | internal network; không egress; read-only root; drop all capabilities; no-new-privileges; 0.25 CPU; 384 MiB; 64 PID |
+| `ttd-p0-n8n-sandbox` | data/key riêng; internal network; không public port; drop all capabilities; no-new-privileges; 0.5 CPU; 768 MiB; 128 PID |
 
-## Quyết định cần phê duyệt
+Health cuối: cả hai auxiliary service `healthy`. Probe Internet từ reasoner bị chặn đúng thiết kế. n8n production trả health/readiness 200; Hermes production trả các health endpoint 200; restart count của hai service chính vẫn bằng 0.
 
-1. Chọn cách cung cấp Hermes inference private: bật upstream API server trên runtime phụ/adapter cô lập, hay dùng image khác đã pin digest; không thay image chính trong P0 hiện tại.
-2. Chọn provider/model và trần chi phí theo job/ngày; cho phép đúng một fake-data inference call sau khi biết giá.
-3. Cho phép bật n8n MCP và expose đúng một workflow `fake-ads-audit-v1`, hoặc chọn authenticated webhook/REST; cần maintenance plan nếu thay đổi yêu cầu restart.
-4. Sau E2E PASS, quyết định có chuyển cấu hình network vào Compose để tồn tại qua recreate. Hiện network attachment live sẽ mất nếu container bị recreate.
+## Test matrix Mức 1
+
+| Case | Kỳ vọng | Kết quả | Thời gian quan sát |
+|---|---|---|---:|
+| Thiếu bearer token | 401 | **PASS** | 318 ms |
+| Sai bearer token | 401 | **PASS** | 304 ms |
+| Input sai schema | 422 | **PASS** | 510 ms |
+| Request hợp lệ → callback schema hợp lệ | 200 | **PASS** | 905 ms |
+| Replay cùng task/input | cached, không callback lần hai | **PASS** | 469 ms |
+| Cùng task, input khác | 409 | **PASS** | 2 ms |
+| Callback output sai schema | reasoner nhận 502 | **PASS** | 317 ms |
+| Timeout làm n8n retry | retry được deduplicate | **PASS** | 3,114 ms |
+| Hoàn tất sau timeout | đúng một callback, replay cached | **PASS** | 2 ms |
+
+Khi phát hiện khả năng retry trùng callback, adapter được sửa để ghi trạng thái `inflight` trước delay/callback. Chỉ container phụ reasoner được recreate; không service production nào bị tác động. Một thử nghiệm import dùng tùy chọn CLI không được image hỗ trợ đã fail safe; workflow sau đó được import và publish bằng lệnh tương thích.
+
+## Backup, rollback và restore
+
+- Baseline, source/config sandbox và rollback script được đặt trong thư mục root-only trên VPS.
+- Rollback dừng đúng hai auxiliary containers, không xóa dữ liệu và không chạm production.
+- Diễn tập rollback thực tế PASS: hai service phụ dừng; n8n/Hermes production tiếp tục chạy, restart count 0.
+- Restore bằng Compose PASS; cả hai service phụ trở lại `healthy`. n8n sandbox cần khoảng nửa phút để qua healthcheck sau startup.
+
+## Provider/model và đề xuất Mức 2
+
+Giá standard text tại thời điểm khảo sát, tính theo mỗi một triệu đơn vị văn bản đầu vào/đầu ra.
+
+| Provider/model | Input | Output | Ghi chú |
+|---|---:|---:|---|
+| [OpenAI GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna) | USD 0.10 | USD 0.50 | Structured outputs, function calling và MCP được tài liệu chính thức liệt kê |
+| [Anthropic Claude Haiku 5.5](https://www.anthropic.com/claude-haiku-5-5) | USD 0.10 | USD 0.50 | Mức này áp dụng prompt không quá 100K token |
+| [Google Gemini 3.1 Flash-Lite](https://ai.google.dev/gemini-api/docs/pricing) | USD 0.25 | USD 1.50 | Free tier có điều khoản dữ liệu khác paid tier; không dùng dữ liệu kinh doanh trước khi review |
+
+Đề xuất kỹ thuật: **GPT-6 Luna** làm ứng viên đầu tiên do giá thấp và hỗ trợ structured outputs; Claude Haiku 5.5 là phương án tương đương về đơn giá. Với tối đa 4K input + 2K output, chi phí ước tính của hai model này là USD 0.0014/call; 5 call là USD 0.007. Gemini 3.1 Flash-Lite tương ứng khoảng USD 0.004/call; 5 call là USD 0.02.
+
+Đề xuất approval Mức 2:
+
+- tối đa 5 fake-data calls;
+- tối đa 4K input và 2K output mỗi call;
+- hard cap USD 0.01/job;
+- cap USD 0.05/ngày và USD 0.05 tổng cho P0;
+- không grounding, web search, media generation hoặc tool tính phí;
+- dừng ngay khi chạm cap, schema fail hoặc provider trả lỗi billing/quota;
+- API key chỉ lưu root-only trên VPS, không commit; chỉ khi phê duyệt mới mở egress cho đúng provider endpoint.
+
+## Acceptance và blocker
+
+| Tiêu chí | Trạng thái |
+|---|---|
+| Identity, isolation, auth, schema, callback, retry/idempotency | **PASS** |
+| Backup/rollback/restore; production health | **PASS** |
+| Không phí, không public/network/business mutation | **PASS** |
+| AI reasoning thật qua private runtime | **BLOCKED_BY_LEVEL2_APPROVAL** |
+
+Quyết định còn cần chủ dự án: phê duyệt **GPT-6 Luna + cap đề xuất** (hoặc chọn model khác trong bảng). Sau approval, Codex có thể thay mock provider client trong runtime phụ, cấp egress allowlist tối thiểu và chạy cùng bộ test; không cần thay Hermes chính hoặc restart production theo thiết kế hiện tại.
