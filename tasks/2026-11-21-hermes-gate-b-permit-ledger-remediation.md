@@ -49,3 +49,16 @@ Codex push mã secret-free, test report và evidence đã khử bí mật, đề
 ## Kết quả phiên này
 
 `CODE_DRAFT / MOCK_NOT_VERIFIED / BLOCKED`: có [module one-shot](../sandbox/p0-hermes-gate-a/one_shot.py), nhưng Linux mock test và live preflight chưa chạy được. Không có paid call hoặc live mutation. Xem [báo cáo](../reports/2026-11-21-hermes-gate-b-permit-ledger-remediation.md).
+
+## Hướng khắc phục blocker môi trường — yêu cầu tiếp theo (2026-11-21)
+
+**Chỉ mock/offline, không paid dispatch.** Ưu tiên sử dụng Linux native trên **KVM2 sandbox có sẵn** để chạy test với Python 3 và `fcntl`; nếu không được quyền vào KVM2, dùng runner Linux tách biệt chỉ với ledger copy và provider mock. **Không cần Docker Desktop Windows để chạy unit test `one_shot_test.py`**. Không tự cài mới daemon, nâng quyền, hoặc restart production để chữa lỗi môi trường.
+
+1. Chạy `one_shot_test.py` trên Linux với **disposable ledger copy**. Ghi rõ kernel/distro/Python, commit, exit code, kết quả. Không chỉnh shared ledger thật; không tạo permit live.
+2. **Bổ sung test `multiprocessing` / subprocess (≥10 tiến trình)** chia sẻ cùng file ledger và lock inode, vì bản nháp mới chỉ dùng `ThreadPoolExecutor`. Chứng minh đúng một admitted, mọi đối thủ rejected; restart/process crash không thể reuse.
+3. Thử fault injection: kill giữa validate/commit/dispatch, `os.replace` và directory `fsync` failure, stale permit TTL, lock acquisition/read-only failure, wrong model/key/fingerprint, malformed ledger và over budget; reject fail-closed, không bao giờ phát physical mock call khi transaction chưa durable.
+4. **Code-review đặc biệt**: xác minh schema/locking thực sự tương thích với `sandbox/p0-level2/adapter.py`; cả hai phải dùng cùng `<ledger>.lock` và không có lost update. Tính reserve worst-case theo giá live được xác minh ở một preflight riêng; dùng Decimal hoặc integer micro-USD thay float nếu thay đổi cần thiết, xác minh mọi trạng thái accounting.
+5. **Không tích hợp guard vào paid upstream** cho tới khi các test trên PASS. Nếu mock chạy tốt: tích hợp guard vào **provider mock** và chạy sandbox E2E, kiểm tra private network/no-bypass, permissions của ledger mount, backup/rollback, production pre/post health. Ghi riêng unit PASS, mock E2E PASS và live preflight UNKNOWN/BLOCKED.
+6. Báo cáo file+evidence GitHub redacted, cập nhật task & STATE. Nếu không thể chạy trên Linux runner/KVM2 an toàn: BLOCKED_ENVIRONMENT với thông tin cụ thể về quyền/truy cập; không hạ chuẩn nghiệm thu hoặc chuyển sang paid.
+
+**Ranh giới GATE B:** phê duyệt một paid attempt theo ADR-P0-003 không cho phép bỏ qua bất kỳ bước kiểm thử nào. Remediation vẫn **0 paid calls**, kill switch global ON, không thay đổi production.
