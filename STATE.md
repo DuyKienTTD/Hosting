@@ -36,6 +36,12 @@ sensitivity: public-redacted
 - n8n → Hermes dashboard auth PASS; Hermes → n8n readiness PASS. Tuy nhiên, n8n MCP đang tắt, n8n có 0 workflow/0 execution và Hermes chưa expose agent inference API nên end-to-end vẫn `BLOCKED`.
 - Kiến trúc được khuyến nghị: n8n làm control plane, Hermes reasoning qua API private, một internal Docker network, schema/policy/approval gate và media-worker FFmpeg riêng.
 
+## Khảo sát năng lực và phối hợp các tác nhân
+
+- Đã thiết lập [agents/README.md](agents/README.md) và hồ sơ ChatGPT, Codex, Hermes, Hostinger, n8n dựa trên báo cáo, GitHub connector và quan sát hPanel.
+- ChatGPT đã xác minh GitHub read/write và có thể đọc tab Hostinger. Codex có audit live và GitHub push. Hermes có self-assessment và các giới hạn API/MCP đã biết. Hostinger hPanel có quản trị VPS/Docker/backup; **khả năng thao tác của Hostinger Agent chưa được kiểm thử trực tiếp**.
+- Đã tạo [TTD-AGENT-CAPABILITY-SURVEY-001](tasks/2026-11-21-agent-capability-survey.md) để từng bên tự xác minh phần còn thiếu. Chủ dự án chuyển tiếp câu hỏi và kết quả; chưa có báo cáo khảo sát bổ sung từ Codex/Hostinger Agent.
+
 ## Việc đang chờ
 
 - Chưa thực hiện hardening SSH/XRDP hoặc firewall.
