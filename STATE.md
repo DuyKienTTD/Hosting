@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **H5 CLOSED / H6 OPEN (2026-11-22):** H5 `DONE/H5_ACCEPTED/PROVIDER_PREFLIGHT_PASS`; H6 `OPEN_PREPARATION` trong [task GATE B hiện hành](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md). Codex là owner kỹ thuật, handoff `PREPARED_FOR_OWNER_FORWARD` (chưa SENT/ACK). Chỉ read-only/offline/mock; chưa cho phép Guard recreate, sửa real ledger/permit hoặc paid call. GATE B `BLOCKED_PREFLIGHT`.
+
 - **ChatGPT nghiệm thu H5 (2026-11-22):** `H5_ACCEPTED / PROVIDER_PREFLIGHT_PASS` trong phạm vi dashboard/project, token count 723 và one-shot mock. Không nghiệm thu H6/paid route; Guard live mock-only, ledger mount RO; paid GATE B `BLOCKED_PREFLIGHT`. [Reviewer](reports/2026-11-22-gate-b-chatgpt-provider-and-scope-review.md).
 
 - **ChatGPT review H5 follow-up (2026-11-22):** bằng chứng mới xác minh project/key qua dashboard và metadata an toàn, Standard/pay-as-you-go, 723 input tokens cho digest ứng viên, mock exact-byte one-shot PASS. Tuyến Guard live vẫn mock-only và ledger thật mount RO; paid GATE B `BLOCKED_PREFLIGHT`, không paid dispatch. [Review](reports/2026-11-22-gate-b-chatgpt-provider-and-scope-review.md).
