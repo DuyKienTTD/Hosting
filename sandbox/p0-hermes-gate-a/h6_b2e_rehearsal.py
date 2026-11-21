@@ -53,7 +53,7 @@ def inspect_fields(kind, ids, fields):
     if not ids:
         return []
     template = "\t".join(
-        "{{if .State.Health}}{{json .State.Health.Status}}{{else}}null{{end}}" if field == "Health"
+        '{{with index .State "Health"}}{{json .Status}}{{else}}null{{end}}' if field == "Health"
         else "{{json ." + field + "}}" for field in fields)
     return [dict(zip(fields, map(json.loads, line.split("\t")), strict=True))
             for line in docker(kind, "inspect", "--format", template, *ids).decode().splitlines()]
@@ -394,9 +394,9 @@ def remove_owned(root, project, before):
     print("PASS B2E rollback: zero owned resources; GATE A and production unchanged; HTTP 200/200; real ledger/lock metadata unchanged", flush=True)
 
 
-def run(commit, callback_blob):
+def run(commit, callback_blob, mode="run"):
     need(os.geteuid() == 0 and re.fullmatch(r"[0-9a-f]{40}", commit)
-         and re.fullmatch(r"[0-9a-f]{40}", callback_blob), "KVM2 runner inputs")
+         and re.fullmatch(r"[0-9a-f]{40}", callback_blob) and mode in ("run", "plan"), "KVM2 runner inputs")
     before = baseline()
     verify_h4(before)
     print("PASS B2E baseline: real root:root 0700/0600 without ACL; Level 2 stopped; production HTTP 200/200", flush=True)
@@ -415,6 +415,8 @@ def run(commit, callback_blob):
              and render == compose(root, project, file, "config", "--format", "json"), "pre-up render or inventory drift")
         print(f"PASS B2E PRE_UP: 4 services, 4 private volumes, 0 networks, 0 collisions; render sha256={hashlib.sha256(render).hexdigest()}",
               flush=True)
+        if mode == "plan":
+            return
         compose(root, project, file, "run", "--rm", "--no-deps", "-T", "init", output=False)
         compose(root, project, file, "up", "-d", "--wait", "--no-deps", "writer", output=False)
         compose(root, project, file, "up", "-d", "--wait", "--no-deps", "guard", output=False)
