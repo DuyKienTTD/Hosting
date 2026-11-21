@@ -1,8 +1,8 @@
 ---
 id: ttd-p0-reasoning-integration-proposal-2026-11-21
 type: decision
-status: partially_approved
-approval_level: 1
+status: approved_with_restrictions
+approval_level: 2
 approved_at: 2026-11-21
 updated_at: 2026-11-21
 sensitivity: public
@@ -12,7 +12,7 @@ related_task: ttd-ai-p0-integration-001
 
 # ADR-P0-001 — Đề xuất hoàn tất n8n ↔ Hermes E2E
 
-**ĐÃ PHÊ DUYỆT MỨC 1 (2026-11-21).** Chủ dự án cho phép Codex tiếp tục khảo sát tương thích, chuẩn bị và triển khai kỹ thuật sandbox cô lập tối thiểu, có backup/rollback và xác minh hậu thay đổi. **Mức 2 CHƯA phê duyệt:** không gọi model/API trả phí, chưa chọn provider/model hoặc cost cap. Không được thay Hermes image/container chính, thay public port/firewall/DNS, tác động U4S `ttdnew.tech`, tự tạo downtime hay thay business accounts. Nếu cần restart/recreate production, thay credential hiện có hoặc mở quyền mạng ngoài sandbox, dừng xin phê duyệt riêng.
+**ĐÃ PHÊ DUYỆT MỨC 1 VÀ MỨC 2 (2026-11-21), CÓ GIỚI HẠN.** Chủ dự án cho phép Codex tiếp tục sandbox cô lập, với **GPT-6 Luna** (`gpt-6-luna`) tối đa **5 lượt**, mỗi lượt **≤ 4.000 input tokens** và **≤ 2.000 output tokens**, trần **0,05 USD/ngày** và **0,05 USD tổng toàn P0**, dùng **dữ liệu giả**. Phải DỪNG nếu không chứng minh được kiểm soát chi phí, model ID, credential hay quyền truy cập. Không được thay Hermes image/container chính, thay public port/firewall/DNS, tác động U4S `ttdnew.tech`, tự tạo downtime hay thay business accounts. Nếu cần restart/recreate production, thay credential hiện có hoặc mở quyền mạng ngoài sandbox, dừng xin phê duyệt riêng.
 
 ## Bằng chứng
 
@@ -34,7 +34,7 @@ related_task: ttd-ai-p0-integration-001
 
 - **D1 APPROVED — Level 1:** nghiên cứu rồi có thể triển khai runtime inference phụ/adapter **cô lập** nếu preflight compatibility, giới hạn tài nguyên, service authentication, backup/rollback và khả năng không gián đoạn được chứng minh; không thay container Hermes chính.
 - **D2 APPROVED — Level 1:** triển khai đúng **một authenticated webhook sandbox** với dữ liệu giả, không public mới và không bật instance-wide MCP; thực hiện schema/negative auth/dry-run tests khi có thể.
-- **D3 PENDING — Level 2:** chỉ lập bảng provider/model/đơn giá và đề xuất giới hạn theo job/ngày, không sử dụng API inference trả phí hoặc làm lộ secret. Phải xin chủ dự án duyệt mức tiền cụ thể trước inference thật.
+- **D3 APPROVED — Level 2 (2026-11-21):** chỉ `gpt-6-luna`, ≤5 calls tính cả retry, ≤4K input và ≤2K output tokens/call, trần ≤USD 0.05/ngày và ≤USD 0.05 toàn P0, fake data; paid calls chỉ sau khi kiểm chứng preflight model/price/cost control, key/egress bảo mật. Không tự chuyển model, nâng cap hoặc gọi công cụ tính phí.
 - **D4 PENDING:** mọi thao tác có khả năng gây restart/downtime, thay public exposure hay đụng production business services cần phê duyệt riêng.
 - Mọi bước cần điều kiện kỹ thuật chưa đáp ứng được ghi BLOCKED; không diễn giải phê duyệt Mức 1 là quyền vượt qua security gate.
 
@@ -42,7 +42,7 @@ related_task: ttd-ai-p0-integration-001
 
 - **D1:** Đồng ý định hướng inference private **cô lập** (không thay Hermes chính), nhưng chỉ sau Codex chứng minh compatibility, backup và rollback.
 - **D2:** Đồng ý **authenticated webhook** cho một workflow sandbox trước; MCP để giai đoạn tiếp theo nếu cần.
-- **D3:** Chọn provider/model và hạn mức chi phí **sau khi có bảng giá/ước tính**. Chưa có approval cho paid inference.
+- **D3:** Đã duyệt `gpt-6-luna` và giới hạn Mức 2 nêu trên. Nếu model ID, giá, quyền truy cập hoặc bộ kiểm soát chi phí không xác minh được, không được gọi API.
 - **D4:** Mọi thay đổi cần restart/downtime/đụng public network đòi approval maintenance riêng.
 
 ## Kết quả thực thi Mức 1
@@ -50,7 +50,7 @@ related_task: ttd-ai-p0-integration-001
 - **D1 EXECUTED:** runtime phụ cô lập chạy deterministic mock, không provider và không Internet egress; có resource limits, healthcheck, root filesystem read-only và rollback riêng. Hermes chính không thay đổi.
 - **D2 EXECUTED:** đúng một authenticated webhook `fake-ads-audit-v1` chạy trên n8n sandbox có data directory và khóa mã hóa độc lập; structural E2E 9/9 PASS.
 - Backup/rollback/restore rehearsal PASS; n8n và Hermes production vẫn healthy, restart count 0, downtime 0.
-- **D3 vẫn PENDING:** real inference chưa chạy, phí thực tế bằng 0. Bảng provider/model và cost cap nằm trong báo cáo P0.
+- **D3 APPROVED sau khi Mức 1 hoàn tất:** chủ dự án đã cấp giới hạn paid pilot Mức 2; chưa có bằng chứng đã chạy real inference sau phê duyệt. Bảng provider/model và giá tham chiếu nằm trong báo cáo P0.
 
 ## Phân vai
 
@@ -59,4 +59,4 @@ related_task: ttd-ai-p0-integration-001
 - Hostinger Agent: xác minh VPS/U4S boundaries, backup và change impact.
 - Chủ dự án: quyết định các gate D1-D4.
 
-**Trạng thái:** PARTIALLY_APPROVED — Mức 1 đã thực thi và kiểm thử; Mức 2 và maintenance change vẫn chờ quyết định.
+**Trạng thái:** APPROVED_WITH_RESTRICTIONS — Mức 1 đã PASS; Mức 2 được phê duyệt **để Codex thực hiện** theo [task riêng](../tasks/2026-11-21-n8n-hermes-p0-level2-real-inference.md), chưa có bằng chứng real inference đã chạy. Các thay đổi production/maintenance vẫn cần phê duyệt riêng.
