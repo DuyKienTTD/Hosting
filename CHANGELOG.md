@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- ChatGPT reviewed `b670a65` H6 B2-F source/mock (13/13 Codex PASS) and opened B2-G on KVM2 with isolated synthetic CONNECT/TLS proxy/provider, cert negative tests and rollback; no real ledger/provider or paid. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-f-chatgpt-review.md).
+
 - Codex hoàn tất H6 B2-F source/mock cho Guard provider transport bị khóa, IPC P0 v1, reserve bền vững, exact bytes, settlement và callback mô phỏng. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-f-source-mock.md).
 
 - ChatGPT accepts `H6_B2_E_KVM2_MOCK_PASS` and `ROLLBACK_PASS` from `e4269f0`, opens B2-F disabled-by-default real path implementation in source+fake-ledger/provider offline mocks only; KVM2 real ledger/paid remain blocked. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-e-chatgpt-review.md).
