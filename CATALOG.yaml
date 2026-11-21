@@ -9,6 +9,7 @@ entrypoints:
   task_handoff_rules: rules/AGENT_WORKFLOW.md
   current_state: STATE.md
   agent_rules: AGENTS.md
+  agent_capability_directory: agents/README.md
   contribution_workflow: CONTRIBUTING.md
   change_history: CHANGELOG.md
 
@@ -98,7 +99,56 @@ documents:
     updated_at: 2026-11-21
     sensitivity: public
 
+  - id: agent-capability-survey-001
+    path: tasks/2026-11-21-agent-capability-survey.md
+    type: task
+    status: current
+    authoritative_for: capability-validation-questions-to-codex-hermes-hostinger-agent
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: agent-chatgpt
+    path: agents/chatgpt.md
+    type: knowledge
+    status: current
+    authoritative_for: chatgpt-role-capabilities
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: agent-codex
+    path: agents/codex.md
+    type: knowledge
+    status: current
+    authoritative_for: codex-role-capabilities
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: agent-hermes
+    path: agents/hermes.md
+    type: knowledge
+    status: current
+    authoritative_for: hermes-role-capabilities
+    updated_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: component-hostinger
+    path: agents/hostinger.md
+    type: knowledge
+    status: current
+    authoritative_for: hostinger-and-hostinger-agent-capabilities
+    updated_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: component-n8n
+    path: agents/n8n.md
+    type: knowledge
+    status: current
+    authoritative_for: n8n-workflow-engine-capabilities
+    updated_at: 2026-11-21
+    sensitivity: public-redacted
+
 collections:
+  agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
   inventory: current configuration updated in place
   reports: dated evidence and historical assessments
