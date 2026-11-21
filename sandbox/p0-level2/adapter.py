@@ -75,6 +75,7 @@ def new_ledger() -> dict[str, Any]:
         "attempts": 0,
         "reserved_usd": 0.0,
         "actual_usd": 0.0,
+        "kill_switch": False,
         "days": {},
         "tasks": {},
     }
@@ -124,6 +125,8 @@ def admit(task_id: str, fingerprint: str) -> tuple[str, dict[str, Any]]:
             if task.get("fingerprint") != fingerprint:
                 return "conflict", task
             return "existing", task
+        if ledger.get("kill_switch") is True:
+            raise RuntimeError("P0_KILL_SWITCH")
         day = utc_day()
         day_state = ledger["days"].setdefault(day, {"attempts": 0, "reserved_usd": 0.0, "actual_usd": 0.0})
         projected_total = float(ledger["reserved_usd"]) + RESERVE_USD_PER_ATTEMPT
@@ -282,7 +285,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             with locked_ledger() as ledger:
-                summary = {"attempts": ledger["attempts"], "reserved_usd": ledger["reserved_usd"], "actual_usd": ledger["actual_usd"]}
+                summary = {"attempts": ledger["attempts"], "reserved_usd": ledger["reserved_usd"], "actual_usd": ledger["actual_usd"], "kill_switch": ledger.get("kill_switch", False)}
             self._json(200, {"status": "ok", "mode": MODE, "paid_inference": True, "provider_configured": True, "model": MODEL, "budget": summary})
         except Exception:
             self._json(503, {"status": "unhealthy", "error": "P0_LEDGER_UNAVAILABLE"})

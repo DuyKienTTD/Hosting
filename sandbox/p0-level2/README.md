@@ -17,6 +17,8 @@ claim to be Hermes Agent E2E.
   stricter 600-token output limit and reserves USD 0.0035 before dispatch.
 - There is no automatic provider retry. A repeated `task_id` is served from the
   persistent task record and cannot create another paid call.
+- `budget_control.py stop` atomically blocks every new paid task while allowing
+  read-only replay of evidence already stored in the ledger.
 - The API key and bearer token are runtime-only values in a root-owned env file.
   This repository contains no secret value.
 

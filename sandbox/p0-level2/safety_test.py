@@ -41,6 +41,14 @@ def main() -> None:
         existing_index = existing_id.removeprefix("task-")
         decision, _ = adapter.admit(existing_id, f"fingerprint-{existing_index}")
         assert decision == "existing"
+        with adapter.locked_ledger() as stopped:
+            stopped["kill_switch"] = True
+        try:
+            adapter.admit("task-after-stop", "fingerprint-after-stop")
+        except RuntimeError as error:
+            assert str(error) == "P0_KILL_SWITCH"
+        else:
+            raise AssertionError("kill switch admitted a new task")
         print(json.dumps({"suite": "p0_level2_admission", "pass": True, "admitted": results.count("admitted"), "blocked": len(results) - results.count("admitted"), "attempts": ledger["attempts"], "reserved_usd": ledger["reserved_usd"]}, separators=(",", ":")))
 
 
