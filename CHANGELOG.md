@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- Phân biệt provider E2E và Hermes Agent E2E trong [review P0 Mức 1](reports/2026-11-21-p0-level1-review-and-level2-criteria.md); GPT-6 Luna model/pricing đã đối chiếu tài liệu OpenAI, Mức 2 vẫn chưa được duyệt.
+
 - Hoàn tất P0 Mức 1 trên KVM 2: triển khai n8n sandbox độc lập và reasoner mock cô lập trên internal network, đúng một authenticated webhook, structural E2E 9/9 và rollback/restore PASS.
 - Xác minh không restart/downtime production, không public port/firewall/DNS/business change và không paid inference; cập nhật task thành `blocked` chỉ vì real reasoning còn chờ phê duyệt Mức 2.
 - Thêm mã triển khai secret-free trong `sandbox/p0-level1`, cập nhật report/evidence/inventory/state/catalog và bảng provider/model cùng đề xuất cap USD 0.05 cho P0 Mức 2.
