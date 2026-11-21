@@ -3,6 +3,7 @@
 Nguồn tri thức chung cho hạ tầng Hosting/VPS: trạng thái hiện tại, kiểm kê, báo cáo, quy tắc, runbook, quyết định và tài liệu tham khảo.
 
 **Mục tiêu nền tảng AI Automation:** [PROJECT.md](PROJECT.md) — media, quảng cáo, SEO, website, mạng xã hội và báo cáo.  
+**Danh bạ vai trò/năng lực các tác nhân:** [agents/README.md](agents/README.md) — ChatGPT, Codex, Hermes, Hostinger và n8n.  
 **Quy ước giao việc và bàn giao tài liệu qua Git:** [rules/AGENT_WORKFLOW.md](rules/AGENT_WORKFLOW.md).
 
 ## Đọc nhanh cho tác nhân
@@ -36,6 +37,7 @@ Quy tắc dành cho tác nhân nằm trong [AGENTS.md](AGENTS.md).
 | Thư mục | Mục đích |
 |---|---|
 | `inventory/` | Trạng thái và cấu hình hiện tại, được cập nhật tại chỗ |
+| `agents/` | Hồ sơ vai trò, khả năng đã thử, giới hạn và cách bàn giao giữa các tác nhân |
 | `tasks/` | Đặc tả công việc, phạm vi và nghiệm thu cho từng tác nhân |
 | `reports/` | Báo cáo có ngày, audit, sự cố và checkpoint lịch sử |
 | `knowledge/` | Kiến thức bền vững, giải thích hệ thống và bài học |
