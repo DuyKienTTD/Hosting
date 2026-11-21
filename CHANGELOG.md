@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- Chủ dự án phê duyệt GATE B theo ADR-P0-003: Codex được thực hiện tối đa một paid Hermes Agent call qua `gpt-6-luna`, ≤4K input và max_output_tokens=600, fake data, shared P0 USD 0.05 cap, không tools/retry/production change; one-shot permit phải tự tiêu thụ và khóa lại trước dispatch, global kill switch luôn ON. Tạo task `TTD-HERMES-GATE-B-001`; chưa có evidence paid Hermes E2E mới.
+
 - Đối chiếu GATE A Hermes auxiliary+guard+bridge mock PASS với evidence và commit `ab319ee`; cập nhật đề xuất ADR-P0-003 (PROPOSED), chỉ cho một Hermes Agent paid call nếu chủ dự án phê duyệt riêng, có one-shot permit/atomic ledger/kill-switch, không đổi production. Chưa thực hiện GATE B.
 
 - Hoàn tất `TTD-HERMES-GATE-A-001`: triển khai Hermes auxiliary, private guard, authenticated bridge và provider mock trên internal sandbox; exact model, cap 600, full request ≤4K, no-tools/no-bypass, auth, fault/idempotency/concurrency và mock E2E đều PASS.
