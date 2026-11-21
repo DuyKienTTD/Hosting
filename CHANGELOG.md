@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Theo chỉ thị chủ dự án: đóng H5 (`DONE/H5_ACCEPTED`), mở H6 (`OPEN_PREPARATION`) bên trong task GATE B hiện hành. Chuyển giao mới ở `PREPARED_FOR_OWNER_FORWARD`; không thêm quyền sandbox mutation/paid/production. [Task](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md).
+
 - ChatGPT chính thức nghiệm thu H5 `H5_ACCEPTED / PROVIDER_PREFLIGHT_PASS` theo commit `1d9a604`, giới hạn vào quyền quản trị, token count và mock; H6 paid path chưa nghiệm thu, GATE B `BLOCKED_PREFLIGHT`. [Reviewer](reports/2026-11-22-gate-b-chatgpt-provider-and-scope-review.md).
 
 - ChatGPT read-only source/entitlement/scope review: H5 follow-up verified project/key metadata, billing and 723 candidate input tokens; live Guard remains mock-only and real ledger RO; paid NO_GO. [Review](reports/2026-11-22-gate-b-chatgpt-provider-and-scope-review.md).
