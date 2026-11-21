@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Tiếp nhận QA source B2-N của Work tại `ff2a1a9` và bổ sung tiêu chí đọc kết quả provenance trên task Work hiện có.
+
 - Review PR #4/#5, ghi blocker n8n target parity và cập nhật hai đặc tả B2-N cho Codex và Work trên các PR hiện có.
 
 - Chuẩn bị hai luồng H6 B2-N song song, Codex kiểm contract local bằng fake provider và Work QA độc lập qua PR riêng. [Phân công](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md#handoff-song-song-h6-b2-n).

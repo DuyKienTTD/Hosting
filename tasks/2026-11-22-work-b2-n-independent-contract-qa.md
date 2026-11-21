@@ -45,3 +45,20 @@ depends_on: [ttd-hermes-gate-b-001]
 - **Khi PR #5 bổ sung.** Đối chiếu chính xác commit mới, projection/delta và nếu có, render/trace. Chỉ chuyển N1 khỏi blocked khi đủ image/version sandbox và bằng chứng parity; revision ID một mình chưa đáp ứng. Với N4/N8, yêu cầu cùng run ID và recorder delta qua restart, receipt gắn binding đã commit và đọc lại sau mất ACK/restart. Phân biệt baseline target-equivalent với phần sửa candidate local. HTTP 200 chỉ là một phần bằng chứng.
 - **ACCEPTANCE / STOP.** Ghi từng hàng có source/observed/expected/evidence và điểm dừng. Nếu thiếu provenance, kết luận `SOURCE_QA_COMPLETE / RUNTIME_EVIDENCE_PENDING` và chỉ rõ N1 vẫn blocked. Khi có trace, kết luận `GO_FOR_CHATGPT_REVIEW` hoặc `NO_GO` cho chất lượng evidence theo commit đã audit. Thiếu một phép đo cụ thể thì yêu cầu đúng delta, giữ B2-I/K/L/M đã nghiệm thu.
 - **WRITE_SET / HANDOFF.** Cập nhật báo cáo và evidence tùy chọn theo write-set ở trên, trên chính PR #4. Work chỉ đọc GitHub và nguồn công khai, phạm vi KVM2 vẫn ngoài nhiệm vụ Work. Push, remote readback, bàn giao SHA/PR cho ChatGPT. `from_agent: chatgpt`, `to_agent: chatgpt-work`, `next_owner: chatgpt`, `handoff_state: PREPARED_FOR_OWNER_FORWARD` cho lượt bổ sung. ACK cũ chỉ áp dụng cho lượt ma trận ban đầu.
+
+### Work delta — tiêu chí đọc kết quả provenance
+
+**Quyết định review.** Tiếp nhận [QA Work `ff2a1a9`](https://github.com/DuyKienTTD/Hosting/blob/ff2a1a97c075df4a49887678e7f4fe7b89e42ab9/reports/2026-11-22-work-b2-n-independent-contract-qa.md) cho phạm vi source. Ma trận N1–N8 đã hoàn tất; N1 còn `BLOCKED_TARGET_PARITY`, trace B2-N `NOT_RUN`. Change trigger của lượt này là probe mới ở [`dcf6854`](https://github.com/DuyKienTTD/Hosting/blob/dcf68542518797c977206536536e04f2727424d8/sandbox/p0-hermes-gate-a/h6_b2n_n8n_provenance.py) chuẩn hóa một số giá trị và trả JSON so sánh. Work có thể chuẩn bị quy tắc diễn giải JSON trước khi có kết quả chạy. Tái sử dụng ma trận đã nộp.
+
+**FIRST_ACTION / READ_SET.** Fetch main, ACK SHA và bộ tài liệu ở READ_SET trên. Mở mục “Delta source tại `dcf6854`” trong báo cáo Work. Đọc `projected()`, `compare()` và phần phát JSON của probe ghim để xác định trường nào là điều kiện nghiệm thu và trường nào chỉ hỗ trợ chẩn đoán.
+
+**Đầu ra nghiệm thu.** Thêm một bảng ngắn vào chính báo cáo PR #4 với JSON giả tối giản trên giấy, trường quyết định, verdict và phép xác minh nhỏ nhất còn thiếu. Bao phủ bốn tình huống:
+
+| Tình huống | Kết luận cần phân biệt |
+| --- | --- |
+| Projection khớp và danh tính image đủ | Có thể đủ cho N1 phần cấu trúc nếu published revision ổn định và image local pin được. Auth có hiệu lực, binding và receipt vẫn cần trace N8. |
+| Projection khớp nhưng repo digest rỗng hoặc thiếu bằng chứng pin | Kiểm xem có định danh bất biến thay thế và chứng minh tái tạo đúng image local hay không. Nếu thiếu, giữ N1 blocked. |
+| Projection không khớp | Dựa vào loại delta đã khử nhạy cảm để chỉ ra node/settings/connections cần chứng minh. Không cần digest của dữ liệu published chưa khớp hoặc export thô. |
+| Projection khớp sau thay bearer/route bằng mẫu | Chỉ ra cặp semantic thay đổi bắt buộc phải xuất hiện trong delta, chẳng hạn đổi logic auth hoặc đích ngoài mẫu. Nêu ranh giới giữa tương đương cấu trúc và xác thực callback thực thi. |
+
+**WRITE_SET / STOP / HANDOFF.** Work chỉ thêm mục vào báo cáo hiện có trên [PR #4](https://github.com/DuyKienTTD/Hosting/pull/4). Không tạo task hoặc PR mới, chạy probe/test, truy cập KVM2 hay yêu cầu export thật. Đầu ra là tiêu chí review; giữ `SOURCE_QA_COMPLETE / RUNTIME_EVIDENCE_PENDING`. Nếu có evidence mới trong lúc làm, dẫn commit và để ChatGPT quyết định lượt review runtime. Work push, đọc lại diff/commit remote và bàn giao cho ChatGPT. `from_agent: chatgpt`, `to_agent: chatgpt-work`, `next_owner: chatgpt`, `handoff_state: PREPARED_FOR_OWNER_FORWARD`. Lượt này không giao thêm đầu việc Codex.
