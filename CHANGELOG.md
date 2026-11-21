@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- ChatGPT chính thức nghiệm thu H5 `H5_ACCEPTED / PROVIDER_PREFLIGHT_PASS` theo commit `1d9a604`, giới hạn vào quyền quản trị, token count và mock; H6 paid path chưa nghiệm thu, GATE B `BLOCKED_PREFLIGHT`. [Reviewer](reports/2026-11-22-gate-b-chatgpt-provider-and-scope-review.md).
+
 - ChatGPT read-only source/entitlement/scope review: H5 follow-up verified project/key metadata, billing and 723 candidate input tokens; live Guard remains mock-only and real ledger RO; paid NO_GO. [Review](reports/2026-11-22-gate-b-chatgpt-provider-and-scope-review.md).
 
 - Codex hoàn tất H5 provider preflight với bằng chứng quản trị project, số token theo digest và kiểm thử one-shot đúng bytes trên ledger mock. Paid inference bằng 0. ChatGPT tiếp nhận nghiệm thu trước H6. [Báo cáo](reports/2026-11-22-hermes-gate-b-h5-preflight-followup.md).
