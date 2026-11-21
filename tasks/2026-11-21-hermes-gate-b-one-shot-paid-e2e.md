@@ -250,3 +250,38 @@ Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và s�
 **HANDOFF:** Push redacted report và evidence, xác minh remote. Trả `GUARD_MOUNT_PASS` hoặc `BLOCKED/ROLLED_BACK` kèm blocker/owner/first safe action, `next_owner: chatgpt`; nếu phiên/công cụ ngắt, `INTERRUPTED_BY_ENVIRONMENT` có bằng chứng. Không dừng giữa quy trình chỉ vì còn phép kiểm tra được phép chưa thực hiện. Mount PASS không phải GATE_B_PAID_PASS; provider preflight là bước nghiệm thu tiếp theo riêng biệt.
 
 **Bản bổ sung là hướng dẫn điều phối, không phải xác minh mới trên KVM2 hay bằng chứng đã SENT/ACK của phiên Codex.**
+
+## Codex execution directive — alternative-first, outcome-owned Guard mount (2026-11-21)
+
+**OWNER DIRECTIVE / phạm vi hiện hành.** Chủ dự án yêu cầu Codex dùng mọi **biện pháp hợp lệ, an toàn, có quyền và kiểm chứng được** để hoàn thành `GUARD_MOUNT_PASS`, thay vì dừng giữa chừng sau một lần kiểm tra thất bại. Đây là hướng dẫn thực thi mạnh hơn về **tính chủ động**, **không** là quyền vượt safety gate, vượt phạm vi Guard-only, thử credential trái phép, restart production hoặc dispatch paid provider. Không có bảo đảm tuyệt đối về việc vượt qua gián đoạn do quyền/phiên/công cụ; khi thực sự không thể tiếp tục phải chứng minh rõ nguyên nhân.
+
+### Bối cảnh tại thời điểm giao
+
+- `DONE_VERIFIED` theo report/evidence GitHub: H3 mock combined E2E, no-bypass và rollback; H4 Linux fake-key 11/11, key staging từng được kiểm tra `PRESENT`, mode `0600`, `mounted=false`. Đây là bằng chứng tại thời điểm đo; không biến thành trạng thái live mới.
+- `DONE_REPORTED` qua chủ dự án từ Codex sau đó: KVM2 Web Terminal truy cập lại được; backup Compose base+overlay đã byte-compare PASS; rendered diff chỉ thêm một Guard read-only bind mount; production containers `Running=true`/restart `0`; ledger `attempts=1`, `kill_switch=true`. Không coi đây là chứng minh đầy đủ HTTP health, permit hoặc mọi runtime invariant.
+- `PARTIAL/NOT_RUN`: HTTP health production, actual one-shot permit state và đầy đủ Compose-vs-running-container properties chưa được đo/đối chiếu đến mức nghiệm thu; mount chưa áp dụng. **Không đặt lại các phần PASS nếu không có drift/change trigger.**
+- `READ_SET`: toàn bộ nguồn bắt buộc tại mục điều phối ngay trước; `WRITE_SET/DO_NOT_TOUCH/INVARIANTS` và STOP tại mục phê duyệt Guard-only vẫn giữ nguyên.
+
+### Tổ chức thực thi — tiếp tục thay vì handoff giữa các phép đo
+
+**FIRST_ACTION:** Trong cùng phiên đang có quyền, ưu tiên hoàn tất ba phép đo còn thiếu; không đợi một chỉ thị người dùng sau mỗi phép đo. Giữ một bảng kết quả nội bộ PASS/FAIL/UNKNOWN có nguồn và thời điểm; báo tiến độ không đồng nghĩa bàn giao task.
+
+| Việc chưa đủ chứng cứ | Đường chính được phép | Khi đường chính thất bại | PASS tối thiểu |
+| --- | --- | --- | --- |
+| Truy cập KVM2 | Codex dùng Browser/Computer Use trong phiên Hostinger đã xác thực và Web Terminal hiện có | Tab đóng → mở Web Terminal mới qua hPanel đã đăng nhập; nếu SSH local không xác thực thì **không thử credential đoán mò**; kiểm tra lại đường Web Terminal hoặc chuyển **yêu cầu chẩn đoán read-only cụ thể** cho Hostinger Agent nếu kênh agent thực sự khả dụng | Có terminal phiên hiện tại, đúng môi trường; không đổi SSH/firewall |
+| HTTP health production | Dùng endpoint health đã được kiểm chứng trong audit trước đó qua lệnh read-only từ máy chủ KVM2 | Nếu host-side request không truy cập: kiểm cấu hình/listener/network và thực hiện HTTP GET từ **bên trong container tương ứng** hoặc network namespace hợp lệ bằng công cụ sẵn có; đọc Docker health/status để chẩn đoán nhưng **không thay HTTP 200 bằng Running/healthy** | HTTP status 200 thật từ n8n và Hermes; ghi nguồn/method + pre/post; restart không tăng |
+| State ledger/one-shot permit | Chỉ đọc datastore/metadata đang được Guard dùng; đối chiếu schema và implementation có thật trước khi kết luận | Nếu không có trường top-level `permits`, kiểm chính xác nơi lưu permit theo mã/contract và live state (có thể ở nested records hoặc file khác); kiểm hành vi kiểm permit bằng **mock/offline hoặc read-only** khi khả thi; không tạo/consume/reset permit thật để kiểm | Chứng minh số permit còn hiệu lực và điều kiện chống dispatch theo thiết kế, ledger/killswitch trước–sau bất biến; `attempts=1` riêng lẻ **không chứng minh permit=0** |
+| Rendered Compose ↔ running Guard | So sánh `docker compose config` base/overlay và `docker inspect` Guard/network/mount/service labels/config relevant; đối chiếu tên container thực từ `docker ps` | Nếu hash cấu hình do Compose không phản ánh toàn bộ mount/resource, kiểm trực tiếp metadata Mounts/HostConfig/Networks/Ports/read-only/volumes, dùng identity và thuộc tính **thực** thay vì phỏng đoán tên; dry-run apply/rollback lại **chỉ khi có delta** | Chứng minh chỉ Guard sẽ thay đổi, không service khác, network/public ports/ledger giữ nguyên |
+| Backup và rollback | Dùng bản backup Compose đã byte-compare PASS và metadata Guard hiện hành; xác minh vị trí private, ownership và rollback command đã dry-run | Nếu không đủ bằng chứng khôi phục Guard, xác minh backup theo đúng phạm vi; không tạo snapshot hoặc rollback toàn VPS chỉ để thỏa preflight | Có rollback riêng Guard đã kiểm tra, secret không bị đọc/log |
+
+**Quy tắc xử lý lỗi:** Với từng nhánh, Codex tự phân loại `BAD_PATH_OR_NAME`, `TRANSIENT_SESSION`, `NETWORK_REACHABILITY`, `MISSING_TOOL`, `PERMISSION_DENIED`, `RUNTIME_DRIFT`, `SAFETY_FAIL`. Sửa sai tên/path/URL, mở lại phiên đã đăng nhập, chuyển phương pháp read-only hoặc sử dụng công cụ khác **đã có quyền**. Không dùng retry vô hạn cùng một phương pháp, không dò tìm khóa/password, không phá auth/network isolation. Khi có thể hoàn thành phần khác an toàn, tiếp tục phần đó.
+
+### Cổng quyết định và kết thúc
+
+1. **GO để mount** chỉ khi cả HTTP production baseline, actual permit/ledger baseline, rendered-to-runtime boundary, backup/rollback và tất cả yêu cầu tại approval cũ **đồng thời PASS**. Nếu một mục còn UNKNOWN, chỉ dừng hành động recreate, **không** dừng các nhánh kiểm tra an toàn còn có thể làm.
+2. Codex tự áp dụng **duy nhất** Guard-only H4 read-only overlay theo scope đã phê duyệt và dry-run xác minh, không `compose down`, không thay service/container khác. Không gọi provider, kể cả token counting; không thay permits/kill switch/ledger.
+3. Chạy targeted post-mount checks theo acceptance cũ; nếu có side effect/health/isolation FAIL thì rollback **riêng Guard**, xác minh lại các invariant, báo `ROLLED_BACK` có evidence. Không chạy lại H3/H4 full suite nếu không có change trigger.
+4. **Chỉ bàn giao kết thúc**: `GUARD_MOUNT_PASS`, `ROLLED_BACK`, `NEEDS_OWNER_DECISION` (quyền mới thực sự cần), hoặc `BLOCKED/INTERRUPTED_BY_ENVIRONMENT` khi đã thử các đường thay thế **hợp lệ** và ghi rõ vì sao tất cả không khả dụng. Mỗi blocker ghi: chính xác phép đo, phương án đã thử, observed/error đã redacted, hướng tiếp tục, owner có thể giải quyết, first safe action.
+5. Push **một báo cáo tổng hợp** cùng evidence redacted lên GitHub, đọc lại remote và giữ nguyên task metadata/approval. `next_owner: chatgpt` review. Nếu chỉ là gián đoạn phiên không thể tránh, checkpoint tối thiểu cùng first safe action thay vì lặp các báo cáo `BLOCKED_PREFLIGHT` không có thông tin mới.
+
+**Ranh giới tuyệt đối:** Không thay đổi permission, SSH, firewall, network, port, production, provider key, ledger/permit/kill switch để "vượt cản"; không tự cấp approval, bỏ qua phép đo bắt buộc hoặc chạy paid inference trong đợt mount. Quy tắc "alternative-first" yêu cầu **cố gắng hợp lý và đủ chứng cứ**, không bắt agent thực hiện việc thiếu quyền hoặc không thể thực hiện về mặt kỹ thuật.
