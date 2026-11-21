@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- ChatGPT nghiệm thu B2-A offline từ `1caf096`/`c97fca2`, ghi nhận Level 2 thiếu parent directory fsync; mở B2-B chỉ-read trên KVM2 để khảo sát UID/mount/lock và render diff, **chưa** apply ledger thật/provider, paid GATE B vẫn BLOCKED_PREFLIGHT. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-a-chatgpt-review.md).
+
 - Codex hoàn tất H6 B2-A trên fixture P0 v1 do adapter Level 2 tạo. Kiểm lock/inode, một ACK khi có cạnh tranh, crash, replay, settlement, schema lỗi và Compose render offline. ChatGPT nghiệm thu theo §10. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-a.md).
 
 - Chủ dự án ủy quyền ChatGPT điều phối liên tục (quy tắc §10) và ChatGPT mở H6 Stage B2-A: Codex xây dựng/test tương thích shared P0 ledger và Level 2 writer hoàn toàn trên mock/schema giả, không chạm ledger thật, provider, production hoặc paid. [Task](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md).
