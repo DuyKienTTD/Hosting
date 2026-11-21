@@ -60,6 +60,8 @@ sensitivity: public-redacted
 
 - [TTD-HERMES-E2E-HARD-CAP-001](tasks/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md) đã complete ở chế độ read-only/offline với kết luận `GO_FOR_SEPARATE_IMPLEMENTATION_APPROVAL`. Đề nghị Hermes auxiliary + private inference guard + authenticated bridge; **chưa phê duyệt triển khai runtime phụ, thay egress, tạo secret mới, mở kill switch hoặc gọi AI thêm**. Kill switch vẫn bật.
 
+- Đã tạo [ADR-P0-002](decisions/2026-11-21-hermes-auxiliary-guard-bridge-approval-proposal.md) **PROPOSED**, đề xuất GATE A chỉ triển khai Hermes auxiliary + guard + bridge, tạo 2 service secrets, mock full request capture và rollback; giữ kill switch ON, **0 paid Hermes call**. GATE B (một paid Hermes call) cần phê duyệt riêng sau khi mock PASS. Việc tạo tài liệu không cấp quyền thao tác VPS.
+
 ## Việc đang chờ
 
 - Chưa thực hiện hardening SSH/XRDP hoặc firewall.
