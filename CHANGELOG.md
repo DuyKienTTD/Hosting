@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Review Codex B2-N active restart tại `029f80e` và chuẩn bị B2-O local để đo deadline và callback tự động trên tuyến fake tích hợp.
+
 - Tiếp nhận bảng tiêu chí provenance Work tại `c265340` và bổ sung lượt review độc lập bằng chứng runtime B2-N `a19765f` trên PR #4 hiện có.
 
 - Đối chiếu kết quả B2-N tại `a19765f`, ghi phạm vi fake runtime đã đo và đặc tả delta restart lúc run active cho Codex.

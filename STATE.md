@@ -92,7 +92,7 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
-- **H6 B2-N — kết quả Codex đã đối chiếu:** Projection n8n sandbox khớp, fake runtime local đạt các ca tại [PR #5](https://github.com/DuyKienTTD/Hosting/pull/5). Review độc lập runtime còn chờ trên PR #4. Delta Codex là restart Hermes khi run đang chạy, chỉ dùng fixture local. Live và paid giữ các cổng chặn hiện hành. [Handoff](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md#h6-b2-n-codex-delta--restart-khi-run-đang-chạy).
+- **H6 B2-N/B2-O — Codex:** [`029f80e`](https://github.com/DuyKienTTD/Hosting/commit/029f80e198e21fcff3fac49038dbe2038f0eca95) chứng minh cùng run ID và một fake dispatch sau SIGKILL lúc active trong fixture local, review độc lập còn chờ trên PR #4. B2-O đã chuẩn bị cho Codex để đo deadline và callback tự động trên tuyến fake local có Guard/bridge/n8n. [Handoff](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md#h6-b2-o--deadline-và-callback-trên-tuyến-fake-tích-hợp).
 
 - **H6 B2-M — canary giả KVM2 đã nghiệm thu có giới hạn:** Hai lần startup, 20 health, rollback theo Codex evidence, xác nhận bằng Work QA [PR #3](https://github.com/DuyKienTTD/Hosting/pull/3). Đã đo bytes ledger giả và metadata ledger/lock trong cửa sổ sau start đầu qua restart. Live `NO_GO`, writer mount `BLOCKED_UID_OR_MOUNT`, paid `BLOCKED_PREFLIGHT`. [Work QA](reports/2026-11-22-work-b2-m-independent-canary-qa.md) · [Codex](reports/2026-11-22-hermes-gate-b-h6-b2-m-kvm2-idle-canary.md).
 
