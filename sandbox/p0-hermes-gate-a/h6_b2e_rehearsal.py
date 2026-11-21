@@ -325,14 +325,31 @@ def verify_services(root, project, file, image, mounts):
              and status["Gid"].split() == ["0"] * 4, "actual UID/caps drift")
         need(not any(line.split()[1] == "00000000" for line in (proc / "net/route").read_text().splitlines()[1:]),
              "unexpected default route")
-        need(not (proc / "root" / PROVIDER.lstrip("/")).exists()
-             and not (proc / "root/var/run/docker.sock").exists()
-             and not (proc / "root" / LIVE_LEDGER.lstrip("/")).exists(), "prohibited provider/live ledger/socket exposure")
+        # Resolve absolute symlinks such as /var/run inside the container mount
+        # namespace. Host-side stat through /proc/<pid>/root may follow /run on the host.
+        docker("exec", cid, "python3", "-B", "-c", NO_BYPASS, service)
         if service == "writer":
             mount_line = next(line for line in (proc / "mountinfo").read_text().splitlines() if line.split()[4] == LEDGER)
             need(mount_line.split(" - ")[1].split()[0] == "ext4" and actual[LEDGER]["Propagation"] == "rprivate",
                  "writer is not using the isolated rprivate ext4 bind")
     print("PASS B2E runtime: root caps=0, NNP, RO rootfs, ext4 rprivate, RO key, no routes or sensitive mounts", flush=True)
+
+
+NO_BYPASS = """
+import os, sys
+from pathlib import Path
+assert {p.name for p in Path('/sys/class/net').iterdir()} == {'lo'}
+assert not any(os.path.lexists(p) for p in (
+    '/run/secrets/openai_provider_api_key', '/opt/ttd/ledger/level2-budget.json',
+    '/var/run/docker.sock', '/run/docker.sock'))
+assert os.statvfs('/').f_flag & os.ST_RDONLY
+assert os.statvfs('/run/h6-b2d-auth').f_flag & os.ST_RDONLY
+if sys.argv[1] == 'guard':
+    assert os.statvfs('/opt/ttd/h6-b2d-ipc').f_flag & os.ST_RDONLY
+    assert not Path('/opt/ttd/mock-ledger').exists()
+else:
+    assert not Path('/run/secrets/guard_service_token').exists()
+"""
 
 
 GUARD_PROBE = """
