@@ -460,6 +460,24 @@ documents:
     verified_at: 2026-11-21
     sensitivity: public-redacted
 
+  - id: gate-b-hermes-consult-2026-11-21
+    path: reports/2026-11-21-gate-b-hermes-consult.md
+    type: report
+    status: current
+    authoritative_for: Hermes-specialist-analysis-of-runtime-mismatch-canonical-request-and-token-counting-for-Gate-B
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: gate-b-hermes-consult-evidence-2026-11-21
+    path: reports/evidence/2026-11-21-gate-b-hermes-consult.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-mock-and-code-level-evidence-for-Hermes-Gate-B-H2-consult
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria

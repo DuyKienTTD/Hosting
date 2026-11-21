@@ -83,11 +83,11 @@ Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và s�
 
 ### Handoff H2 — Hermes Agent: runtime mismatch và exact request (read-only/mock)
 
-- `from_agent: chatgpt`; `to_agent: hermes-agent`; `owner: hermes-agent`; `handoff_state: PREPARED_FOR_OWNER_FORWARD` (chưa gửi/ACK); `why_this_agent: inference runtime, response serialization, model/tool/metadata semantics`.
+- `from_agent: chatgpt`; `to_agent: hermes-agent`; `owner: hermes-agent`; `handoff_state: DONE`; `why_this_agent: inference runtime, response serialization, model/tool/metadata semantics`.
 - **BẮT BUỘC đọc:** `AGENTS.md`, `rules/AGENT_WORKFLOW.md`, `rules/REPOSITORY_SECURITY.md`, `STATE.md`, `CATALOG.yaml`, `agents/hermes.md` và hai báo cáo GATE B mới nhất; ghi commit quy tắc.
 - **Bắt đầu:** đối chiếu `sandbox/p0-hermes-gate-a/bridge.py`, `guard.py`, test harness và evidence fresh-task (chỉ nếu công cụ có quyền truy cập); định vị check phát `HERMES_RUNTIME_MISMATCH`, so expected metadata trên task đầu và task mới, idempotency/task/session, model exact `gpt-6-luna` và `max_output_tokens=600`.
 - **Trả lời cụ thể:** nguyên nhân mismatch với log đã khử nhạy cảm; cách làm request deterministic từ Hermes auxiliary không đổi semantic trên retry; vị trí canonical-serialization và SHA256 của **full provider-bound request**; test nào xác nhận first task, new task, replay/callback cùng one-shot accounting; thông số request gửi `/v1/responses/input_tokens` sao cho cùng `model/instructions/input/tools` với request inference. Nếu không thấy live runtime, chỉ đánh DOCUMENTED/UNKNOWN, không báo VERIFIED_LIVE.
-- **Nghiệm thu:** report `reports/2026-11-21-gate-b-hermes-consult.md` có reproduction, fault hypothesis, patch suggestion, mock tests và link commit. `next_owner: chatgpt`. Không gọi paid inference, không mở tool/fallback.
+- **Nghiệm thu:** report `reports/2026-11-21-gate-b-hermes-consult.md` và evidence `reports/evidence/2026-11-21-gate-b-hermes-consult.json` đã được tạo bằng read-only/mock analysis. `next_owner: chatgpt`. Không gọi paid inference, không mở tool/fallback.
 
 ### Handoff H3 — ChatGPT phân tích và Codex thực thi (sau H1/H2)
 

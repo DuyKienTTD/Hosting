@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "task_id": "ttd-hermes-gate-b-001",
+  "consult_id": "gate-b-hermes-consult-2026-11-21",
+  "verified_at": "2026-11-21",
+  "rules_commit_read": "01aa77af581aa8eb0f6e3e44d43f7b764013c6d8",
+  "result": "H2_COMPLETE_READ_ONLY_MOCK_ONLY",
+  "mismatch_analysis": {
+    "check_location": "sandbox/p0-hermes-gate-a/bridge.py:131-136",
+    "persistent_state_location": "sandbox/p0-hermes-gate-a/bridge.py:231-246",
+    "initial_live_error_metadata_available": false,
+    "fresh_task_pass_in_existing_evidence": true,
+    "local_reproducer": {
+      "result": "PASS",
+      "first_status": 502,
+      "first_error": "HERMES_RUNTIME_MISMATCH",
+      "replay_status": 502,
+      "replay_error": "HERMES_RUNTIME_MISMATCH",
+      "fresh_status": 200,
+      "fresh_mode": "hermes_mock",
+      "fail_calls": 1,
+      "pass_calls": 1,
+      "interpretation": "same task_id replays persisted failure without a new run_hermes call; fresh task_id executes and passes"
+    },
+    "conclusion": "runtime mismatch is not proven live; stale failed bridge state keyed by task_id is a sufficient explanation for the observed error/passing-fresh-task pattern"
+  },
+  "request_contract": {
+    "bridge_runs_request": {
+      "bytes": 432,
+      "sha256": "857c5f7cd0e09dd4e23120e7e156be9669605c50a4832ec13c43d909ea009b49"
+    },
+    "provider_bound_canonical_location": "sandbox/p0-hermes-gate-a/mock_contract.py:30-38",
+    "provider_bound_guard_capture_location": "sandbox/p0-hermes-gate-a/guard.py:115-143",
+    "authoritative_digest_surface": "forwarded /v1/responses wire bytes after guard enforcement",
+    "fixture_request": {
+      "bytes": 253,
+      "sha256": "2806c39b34fe015dba9985897ad3efe000d885eb4271d58e07673736b79ca6bf"
+    },
+    "reported_live_candidate": {
+      "bytes": 3308,
+      "sha256": "6a12a6786371b683bed0229a2c95c8c222dacb1083a219f5d29a7a02810cf643",
+      "independently_recomputed": false
+    }
+  },
+  "token_counting_contract": {
+    "endpoint": "POST /v1/responses/input_tokens",
+    "must_match_inference_fields": [
+      "model",
+      "instructions",
+      "input",
+      "tools"
+    ],
+    "safe_projection_fields": [
+      "model",
+      "instructions",
+      "input",
+      "tools",
+      "include",
+      "prompt_cache_key",
+      "reasoning",
+      "service_tier"
+    ],
+    "exclude_from_count_surface": [
+      "stream",
+      "store",
+      "max_output_tokens"
+    ],
+    "binding_rule": "record input_tokens result together with the SHA-256 digest of the forwarded provider-bound request"
+  },
+  "mock_tests_run_this_session": {
+    "mock_contract_test": "PASS",
+    "one_shot_linux_test": "PASS",
+    "one_shot_interop_test": "PASS"
+  },
+  "one_shot_and_callback": {
+    "historical_combined_mock_pass_exists": true,
+    "historical_source": "reports/2026-11-21-hermes-gate-b-guard-remediation-results.md",
+    "current_egress_checkpoint_combined_rerun": "not_run",
+    "current_gap": "callback plus one-shot accounting has not been rerun on the latest isolated topology checkpoint"
+  },
+  "paid_attempts_delta": 0,
+  "api_cost_delta_usd": 0,
+  "next_owner": "chatgpt"
+}
