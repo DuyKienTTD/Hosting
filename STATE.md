@@ -27,6 +27,12 @@ sensitivity: public-redacted
 - Có 90 gói cần nâng cấp và VPS cần khởi động lại.
 - Hermes chạy bằng root trong container; image n8n/Hermes dùng tag `latest`.
 
+## Nền tảng AI Automation TTD METAL
+
+- Mục tiêu tổng thể: [PROJECT.md](PROJECT.md).
+- Đã chuẩn hóa giao nhiệm vụ qua `tasks/`, kết quả qua `reports/`; [quy tắc](rules/AGENT_WORKFLOW.md).
+- Chưa kiểm thử thực tế tích hợp hai chiều n8n ↔ Hermes; đây là nhiệm vụ kỹ thuật tiếp theo, chưa triển khai.
+
 ## Việc đang chờ
 
 - Chưa thực hiện hardening SSH/XRDP hoặc firewall.
