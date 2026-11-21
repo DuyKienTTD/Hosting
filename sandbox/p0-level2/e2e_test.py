@@ -38,6 +38,7 @@ def post(url: str, payload: dict, token: str | None, timeout: float = 40) -> tup
 def record(cases: list[dict], name: str, passed: bool, **details: object) -> None:
     cases.append({"case": name, "pass": bool(passed), **details})
     if not passed:
+        print(json.dumps({"suite": "p0_level2_provider_e2e", "pass": False, "failed_case": cases[-1]}, separators=(",", ":")))
         raise AssertionError(name)
 
 
