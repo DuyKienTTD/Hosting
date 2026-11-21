@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- Đối chiếu Provider E2E PASS (1 call, USD 0.0000496 theo usage, chưa đối soát hóa đơn) và Hermes Agent E2E `BLOCKED_COST_CONTROL`. Tạo `TTD-HERMES-E2E-HARD-CAP-001` để Codex khảo sát read-only cơ chế hard output cap trước request và shared budget gate; chưa cấp quyền triển khai thêm hoặc paid inference.
+
 - Hoàn tất Mức 2 Provider E2E trên sandbox: đúng 1 GPT-6 Luna call, authenticated n8n callback/schema PASS, 131 input + 73 output + 0 reasoning token, usage-based cost USD 0,0000496; replay/conflict không phát sinh call mới.
 - Thêm persistent atomic ledger, allowlist CONNECT proxy và kill switch đã bật; task mới bị chặn trước provider, không public port/firewall/DNS/production change, n8n/Hermes production restart 0.
 - Ghi `HERMES_E2E_BLOCKED_COST_CONTROL`: Hermes CLI thật chưa chứng minh hard output cap trước request và chưa có private inference callback route; không dùng Provider PASS làm bằng chứng Hermes.
