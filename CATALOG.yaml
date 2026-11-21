@@ -331,8 +331,16 @@ documents:
   - id: ttd-hermes-gate-b-single-paid-call-proposal-2026-11-21
     path: decisions/2026-11-21-hermes-gate-b-single-paid-call-proposal.md
     type: decision
-    status: proposed
+    status: approved_with_restrictions
     authoritative_for: pending-owner-approval-of-one-hermes-real-provider-paid-call
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: ttd-hermes-gate-b-001
+    path: tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md
+    type: task
+    status: approved_to_execute
+    authoritative_for: codex-one-shot-approved-paid-hermes-e2e-with-cost-control
     updated_at: 2026-11-21
     sensitivity: public
 
