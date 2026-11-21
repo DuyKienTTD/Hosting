@@ -45,3 +45,13 @@ Official docs: API key scopes/effective role and model permissions differ from i
 - https://help.openai.com/en/articles/9186755-managing-projects-in-the-api-platform
 - https://developers.openai.com/api/docs/guides/api-keys
 - https://developers.openai.com/api/docs/guides/rbac
+
+## ChatGPT formal H5 acceptance — 2026-11-22
+
+**H5_ACCEPTED / PROVIDER_PREFLIGHT_PASS (scope-limited) / GATE_B_PAID_BLOCKED_PREFLIGHT.** Reviewer compared pinned Codex commit 1d9a604a574e5feb37e85b87d22f4a3c264b25ea including full six-file diff, H5 follow-up report and JSON evidence against task TTD-HERMES-GATE-B-001, ADR-P0-003, and prior H3/mount evidence. Diff added H5 report/evidence and catalog references, inserted a result section into existing task, and updated STATE/CHANGELOG; no change to task metadata owner/status/approval_scope/paid_inference_approval and no code/runtime change in that commit. This review is evidence-based, not an independent KVM2 re-probe.
+
+Accepted H5: dashboard key/project/model and administrative Responses scope; model GET HTTP 200; provider input_tokens HTTP 200 returning 723 for frozen candidate SHA256 e66603e05a4a9b0d7a4bbd7b9142a89e15e38176c2fe1fddbf3dd5764ff1a929; max_output_tokens=600; conservative candidate reserve USD 0.0035 within USD 0.01/job; mock one-shot consume/reserve before exactly one mock dispatch, tamper/replay denial, n8n callback; guard-only mount/production/ledger invariants and 0 paid delta. Distinguish **VERIFIED_LIVE_REPORTED_BY_CODEX**, **VERIFIED_MOCK**, and **DOCUMENTED_ADMIN**; no direct paid Responses create or live remaining rate-window quota verification.
+
+Not accepted as H6 ready: live Guard still 1953a81 mock-only, real ledger mounted read-only, no end-to-end actual provider transport/admission and no exact-final-wire proof on an H6 paid path. If H6 changes input-affecting bytes, digest and token count must be rebound to new final bytes. H5 mock PASS persists under the documented conditions; do not rerun it gratuitously.
+
+**Decision:** H5 reviewer DONE; next phase H6 sandbox integration requires scope/owner approval review before changing runtime, and paid dispatch remains STOP. No H6 handoff SENT or ACKNOWLEDGED by this acceptance; owner of task remains Codex, status blocked, ADR conditional paid approval unchanged.
