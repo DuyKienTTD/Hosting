@@ -2,6 +2,8 @@
 
 ## 2026-11-21
 
+- Review feasibility Hermes hard cap và lập ADR-P0-002 ở trạng thái PROPOSED: đề xuất GATE A cho Hermes auxiliary, guard, bridge và provider mock capture (kill switch bật, 0 paid call); paid Hermes call GATE B yêu cầu phê duyệt riêng. Không thực hiện thay đổi VPS.
+
 - Hoàn tất `TTD-HERMES-E2E-HARD-CAP-001` ở chế độ read-only/offline: xác minh Hermes `0.22.5`, exact-model/no-tools serialization và kết luận CLI/config upstream không đủ hard output cap.
 - Thêm offline guard contract rehearsal PASS cho kill switch, validation-before-reservation, idempotency và 10-way concurrency dùng bản sao shared ledger; paid call mới 0, production change 0.
 - Đề xuất Hermes auxiliary nguyên bản + private pre-dispatch guard + authenticated bridge/callback ở trạng thái `GO_FOR_SEPARATE_IMPLEMENTATION_APPROVAL`; Hermes E2E vẫn `BLOCKED_COST_CONTROL` cho tới khi mock/full-input/no-bypass và paid-test riêng được duyệt.
