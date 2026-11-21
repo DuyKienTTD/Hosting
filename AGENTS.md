@@ -8,6 +8,8 @@ Trước khi nhận việc mới, nắm mục tiêu doanh nghiệp tại [PROJEC
 
 Giữ repository thành nguồn thông tin chung, ngắn gọn và đáng tin cậy để tác nhân mới có thể bắt đầu làm việc mà không phải đọc toàn bộ lịch sử chat.
 
+Mỗi tác nhân phải tham khảo [agents/README.md](agents/README.md) và hồ sơ chính mình trước khi nhận việc. Không coi **Hostinger** (nền tảng) là một AI Agent; khả năng của **Hostinger Agent** cần khảo sát riêng. Hồ sơ chỉ ghi năng lực và bằng chứng, không tự tạo quyền truy cập. Khi giao việc cho tác nhân khác, xem hồ sơ của họ và kiểm tra quyền phiên hiện tại. Nhiệm vụ khảo sát: [TTD-AGENT-CAPABILITY-SURVEY-001](tasks/2026-11-21-agent-capability-survey.md). Chủ dự án có thể chuyển tiếp câu hỏi và báo cáo giữa các tác nhân; không đòi kết nối trực tiếp giữa các agent.
+
 ## Thứ tự đọc bắt buộc
 
 1. `README.md` — phạm vi và bản đồ repository.
