@@ -294,6 +294,14 @@ documents:
     verified_at: 2026-11-21
     sensitivity: public-redacted
 
+  - id: ttd-hermes-aux-guard-bridge-approval-proposal-2026-11-21
+    path: decisions/2026-11-21-hermes-auxiliary-guard-bridge-approval-proposal.md
+    type: decision
+    status: proposed
+    authoritative_for: pending-approval-to-deploy-isolated-hermes-guard-bridge-with-mock-only
+    updated_at: 2026-11-21
+    sensitivity: public
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
