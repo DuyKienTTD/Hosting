@@ -1,7 +1,7 @@
 ---
 id: ttd-work-b2-h-assurance-001
 type: task
-status: prepared
+status: done
 approved_at: 2026-11-22
 updated_at: 2026-11-22
 sensitivity: public-redacted
@@ -44,3 +44,9 @@ Read full `README.md`, `PROJECT.md`, `STATE.md`, `CATALOG.yaml`, `AGENTS.md`, `r
 **STOP:** immediate on requested secret, unauthorized access, real ledger interaction, paid/prod operations or scope collision; continue independent safe audit.
 
 **HANDOFF:** `from_agent: chatgpt-work`, `to_agent: chatgpt`, initial `PREPARED_FOR_OWNER_FORWARD`. This GitHub task is **prepared, not SENT or ACKNOWLEDGED**. Open in ChatGPT Work mode and send task URL; Work must ACK with source commit and permissions when it actually starts. ChatGPT will reconcile Work and Codex reports; contradictions -> targeted verification before any live integration or paid gate.
+
+## Final handoff and ChatGPT acceptance — 2026-11-22
+
+**CHATGPT_WORK_QA_ACCEPTED / REPORT_MERGED / LIVE_INTEGRATION_NO_GO.** Work ACK and source/evidence audit are captured in [its independent report](../reports/2026-11-22-work-b2-h-assurance.md), source commit `b2eaf342cd58c93f812b00edd5f912293e8df2f0`. ChatGPT cross-checked with Codex B2-H `71fdd40`. PR [#1](https://github.com/DuyKienTTD/Hosting/pull/1) was merged as documentation only at `3e9ccc808286582a83e5f205e3473d9ca4d8960f`, with report remote readback PASS. GitHub refused self-APPROVE review on the connected PR author account (422); analytical acceptance was recorded as [PR comment](https://github.com/DuyKienTTD/Hosting/pull/1#issuecomment-7068246108). No claim of an independent GitHub APPROVED review is made.
+
+**Two blockers retained:** (1) permit-required writer startup prevents safe permitless idle/health preflight, (2) bridge 20s/n8n 30s/Guard 45s + mock-only callback require isolated async contract tests. Existing parent B2-I callback fixture gate remains Codex's technical assignment. Separate source/mock-only idle startup design/test is assigned for Codex *after or in parallel if separate edit surface and no conflict*; no live mount/provisioning/recreate. Work's write-set is closed; `next_owner: chatgpt` for coordinating review, Codex for authorized technical code/mock. No real ledger/permit/provider/paid/production authorization. `GATE_B_PAID: BLOCKED_PREFLIGHT`.
