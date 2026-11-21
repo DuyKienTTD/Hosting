@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 WEBHOOK = "http://n8n-p0-sandbox:5678/webhook/ttd-p0-fake-ads-audit-v1"
-REASONER = "http://127.0.0.1:8080/v1/reason"
+REASONER = os.environ.get("P0_REASONER_URL", "http://reasoner-p0:8080/v1/reason")
 TOKEN = os.environ["P0_TOKEN"]
 LEDGER = Path(os.environ.get("P0_BUDGET_PATH", "/opt/ttd/state/level2-budget.json"))
 
