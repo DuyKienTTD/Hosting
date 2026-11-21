@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **H6 B2-K mock PASS (2026-11-22):** Adapter, executor và receiver có tiến trình/datastore riêng. 6/6 test đạt, một dispatch giả, callback receipt ký và phục hồi sau restart. ChatGPT review. Live `NO_GO`, paid `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-k-cross-service.md).
+
 - **Work B2-J đã nghiệm thu / Codex B2-L mở (2026-11-22):** PR [#2](https://github.com/DuyKienTTD/Hosting/pull/2) chỉ có báo cáo thiết kế, merge `0d8c0f6` và remote blob PASS; ChatGPT `WORK_B2_J_SOURCE_DESIGN_ACCEPTED`, không có fixture/runtime PASS. Chọn `H6_B2_L_WRITER_IDLE_SOURCE_MOCK_AUTHORIZED` cho Codex implement startup không permit, health IPC chỉ đọc, sáu crash windows trên ledger giả. B2-K adapter đa dịch vụ vẫn là luồng độc lập, chưa ACK mới. Không live/KVM2 apply, real ledger/permit/provider/paid; `NO_GO / BLOCKED_PREFLIGHT`. [Review](reports/2026-11-22-work-b2-j-chatgpt-review.md).
 
 - **ChatGPT B2-I accepted / B2-K mở (2026-11-22):** Chấp nhận `H6_B2_I_ASYNC_CONTRACT_MOCK_PASS` theo mã/evidence Codex `8ded770`: 12/12 unit, 4/4 wall clock, 46s -> unknown 45s giữ reserve; HMAC callback/replay/restart và 8 admission -> 1 mock dispatch PASS. **Một SQLite cho hai vai trò** chưa chứng minh cross-service. Mở `H6_B2_K_CROSS_SERVICE_ADAPTER_OFFLINE_AUTHORIZED`: Codex mock adapter/Hermes/callback với lưu trữ riêng và run-ID, không KVM2 live/production/provider/paid. Work B2-J vẫn `PREPARED`; writer startup chưa đổi. [Reviewer](reports/2026-11-22-hermes-gate-b-h6-b2-i-chatgpt-review.md).

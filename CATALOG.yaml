@@ -999,6 +999,24 @@ documents:
     verified_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: hermes-gate-b-h6-b2-k-cross-service-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-k-cross-service.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-K-cross-service-mock-and-recovery
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-k-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-k-cross-service.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-K-separate-processes-and-stores-test-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria

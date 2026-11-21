@@ -1,0 +1,38 @@
+{
+  "task_id": "ttd-hermes-gate-b-001",
+  "stage": "H6_B2_K",
+  "result": "H6_B2_K_CROSS_SERVICE_MOCK_PASS",
+  "observed_date_ict": "2026-11-22",
+  "approval_commit": "4a527e752744f4f41f1107dfae3cd566348fa86b",
+  "rules_task_base": "4d5b5e9a7b5e46d782dea3316b697d6f115e4ee6",
+  "approval_task_blob": "303e7507c22b270b13e5969480445f2a65b5d134",
+  "workflow_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "source_blobs": {
+    "sandbox/p0-hermes-gate-a/h6_b2k_services.py": "f6462add9459d70d93c1a70e424ec569a10482ab",
+    "sandbox/p0-hermes-gate-a/h6_b2k_services_test.py": "dd574a554ae8a949983b6433d24b90d369fe7665"
+  },
+  "runtime": {"os": "Windows", "python": "3.12.3", "sqlite": "3.45.1", "transport": "HTTP loopback", "distinct_processes": 3, "distinct_disposable_databases": 3},
+  "suite": {
+    "passed": 6,
+    "failed": 0,
+    "elapsed_s": 8.756,
+    "tests": [
+      "concurrent_admission_mapping_and_dispatch",
+      "disjoint_stores_lost_admission_and_hermes_ack",
+      "receiver_unreachable_recovers_without_dispatch",
+      "signed_receipt_tamper_keeps_outbox_unconfirmed",
+      "unknown_dispatch_ack_callback_ack_and_explicit_redelivery",
+      "wrong_binding_order_token_and_replay_after_restart"
+    ]
+  },
+  "concurrency": {"admissions": 6, "mapping_requests": 4, "start_requests": 4, "logical_jobs": 1, "run_ids": 1, "dispatches": 1, "settlements": 1, "receipts": 1},
+  "unknown_with_lost_callback_ack": {"dispatches": 1, "settlements": 0, "receipts": 1, "callback_attempts": 2, "reserve": "held"},
+  "recovery": {"lost_202_same_job": true, "lost_run_ack_same_run": true, "outbox_requires_signed_receipt": true, "receiver_restart_keeps_receipt": true},
+  "inherited_b2_i_timing_evidence": "8ded7704ca8e72ef37cdb7a832ca9740b23e11a2",
+  "live_hermes_idempotency_and_effective_deadline": "UNKNOWN",
+  "live_integration": "NO_GO",
+  "paid_gate_b": "BLOCKED_PREFLIGHT",
+  "scope_counters": {"kvm2_operations": 0, "production_mutations": 0, "real_ledger_permit_or_key_accesses": 0, "provider_api": 0, "paid": 0, "usd": 0},
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}

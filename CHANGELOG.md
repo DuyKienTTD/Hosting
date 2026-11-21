@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Codex hoàn tất B2-K cross-service mock với ba tiến trình/datastore, run-ID bền và callback/receipt xác thực. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-k-cross-service.md).
+
 - ChatGPT nghiệm thu audit Work B2-J (PR #2 merge `0d8c0f6`), phân tách permitless writer idle/health khỏi quyền admission và mở Codex B2-L source/mock (song song độc lập với B2-K). Không có KVM2/live/P0 real/provider/paid authorization. [Review](reports/2026-11-22-work-b2-j-chatgpt-review.md).
 
 - ChatGPT nghiệm thu B2-I `8ded770` fixture 202/status/callback (12/12 + 4/4), mở B2-K mock cross-service với adapter/Hermes/receiver tách dữ liệu; Work B2-J vẫn chuẩn bị. Không live P0/provider/paid. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-i-chatgpt-review.md).
