@@ -1,0 +1,144 @@
+services:
+  provider-mock:
+    image: ghcr.io/hostinger/hvps-hermes-agent@sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f
+    pull_policy: never
+    container_name: ttd-gate-a-provider-mock
+    init: true
+    entrypoint: ["python3", "/opt/ttd/provider_mock.py"]
+    volumes:
+      - ./provider_mock.py:/opt/ttd/provider_mock.py:ro
+      - ./secrets/guard-service-token:/run/secrets/guard_service_token:ro
+    networks:
+      gate_upstream:
+        aliases: [gate-a-provider-mock]
+    read_only: true
+    tmpfs: [/tmp:rw,noexec,nosuid,size=16m]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.25
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8082/healthz',timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  guard:
+    image: ghcr.io/hostinger/hvps-hermes-agent@sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f
+    pull_policy: never
+    container_name: ttd-gate-a-guard
+    init: true
+    entrypoint: ["python3", "/opt/ttd/guard.py"]
+    volumes:
+      - ./guard.py:/opt/ttd/guard.py:ro
+      - ./guard_contract_test.py:/opt/ttd/guard_contract_test.py:ro
+      - ./secrets/guard-service-token:/run/secrets/guard_service_token:ro
+      - /root/ttd-p0-level1/level2-state/level2-budget.json:/opt/ttd/ledger/level2-budget.json:ro
+      - ./capture:/opt/ttd/capture
+    networks:
+      gate_provider:
+        aliases: [gate-a-guard]
+      gate_upstream: {}
+    read_only: true
+    tmpfs: [/tmp:rw,noexec,nosuid,size=16m]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: 0.25
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/healthz',timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  hermes-aux:
+    image: ghcr.io/hostinger/hvps-hermes-agent@sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f
+    pull_policy: never
+    container_name: ttd-gate-a-hermes
+    init: true
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        export API_SERVER_KEY="$$(cat /run/secrets/api_server_key)";
+        export OPENAI_API_KEY="$$(cat /run/secrets/guard_service_token)";
+        exec /usr/local/bin/hermes gateway run --no-supervise --force
+    environment:
+      HOME: /root
+      HERMES_HOME: /root/.hermes
+      OPENAI_BASE_URL: http://gate-a-guard:8081/v1
+      HERMES_IGNORE_RULES: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+      NO_PROXY: "*"
+    volumes:
+      - ./hermes-home:/root/.hermes
+      - ./secrets/api-server-key:/run/secrets/api_server_key:ro
+      - ./secrets/guard-service-token:/run/secrets/guard_service_token:ro
+    networks:
+      gate_control:
+        aliases: [gate-a-hermes]
+      gate_provider: {}
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+      - /run:rw,nosuid,size=16m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 1536m
+    cpus: 1.0
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8642/health',timeout=3)"]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+      start_period: 20s
+
+  bridge:
+    image: ghcr.io/hostinger/hvps-hermes-agent@sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f
+    pull_policy: never
+    container_name: ttd-gate-a-bridge
+    init: true
+    entrypoint: ["python3", "/opt/ttd/bridge.py"]
+    volumes:
+      - ./bridge.py:/opt/ttd/bridge.py:ro
+      - ./gate_a_test.py:/opt/ttd/gate_a_test.py:ro
+      - ./secrets/api-server-key:/run/secrets/api_server_key:ro
+      - ./secrets/existing-p0-token:/run/secrets/existing_p0_token:ro
+      - ./bridge-state:/opt/ttd/state
+      - ./capture:/opt/ttd/capture:ro
+    networks:
+      p0_private:
+        aliases: [reasoner-p0]
+      gate_control: {}
+    read_only: true
+    tmpfs: [/tmp:rw,noexec,nosuid,size=16m]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: 0.25
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz',timeout=3)"]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+      start_period: 20s
+
+networks:
+  p0_private:
+    external: true
+    name: ttd-ai-p0-sandbox
+  gate_control:
+    name: ttd-hermes-gate-a-control
+    internal: true
+  gate_provider:
+    name: ttd-hermes-gate-a-provider
+    internal: true
+  gate_upstream:
+    name: ttd-hermes-gate-a-upstream
+    internal: true

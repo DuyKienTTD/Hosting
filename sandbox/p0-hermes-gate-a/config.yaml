@@ -1,0 +1,36 @@
+model:
+  provider: openai-api
+  default: gpt-6-luna
+  base_url: http://gate-a-guard:8081/v1
+
+agent:
+  max_turns: 1
+  api_max_retries: 0
+  auto_recovery_cycles: 0
+  reasoning_effort: none
+  service_tier: default
+
+platform_toolsets:
+  api_server: []
+  cli: []
+
+memory:
+  memory_enabled: false
+  user_profile_enabled: false
+
+skills:
+  auto_load: []
+
+auxiliary:
+  title_generation:
+    enabled: false
+    model_upgrade_enabled: false
+
+gateway:
+  api_server:
+    enabled: true
+    host: 0.0.0.0
+    port: 8642
+    model_name: ttd-hermes-gate-a
+    max_concurrent_runs: 1
+    direct_model_requests: true
