@@ -1,0 +1,90 @@
+{
+  "task_id": "ttd-hermes-gate-b-001",
+  "result": "H6_B2_C_UID_MODEL_OFFLINE_PASS",
+  "evidence_class": "VERIFIED_OFFLINE_MOCK",
+  "apply_gate": "BLOCKED_UID_OR_MOUNT",
+  "paid_gate": "BLOCKED_PREFLIGHT",
+  "observed_date_ict": "2026-11-22",
+  "handoff_commit": "f9ce46fbc234b5a554a27a78d759d99182156617",
+  "rules_task_base": "fa0b2bc926026761aa7b26b3fe5e5855071c95cc",
+  "rules_workflow_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "runtime": {
+    "environment": "local Docker Desktop Linux",
+    "docker_engine": "29.4.3",
+    "compose": "5.1.4",
+    "image_digest": "sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+    "render_preflight_pass": true,
+    "writer_uid_gid": [0, 0],
+    "cap_inh_prm_eff_bnd_amb": [0, 0, 0, 0, 0],
+    "no_new_privileges": true,
+    "read_only_rootfs": true,
+    "network_mode": "none",
+    "interfaces": ["lo"],
+    "published_ports": 0,
+    "writer_rw_mounts": ["synthetic directory bind rprivate", "private IPC volume"],
+    "writer_guard_shared_key_ro": true,
+    "guard_ledger_absent": true,
+    "docker_socket_and_provider_secret_absent": true,
+    "fixture_resources_remaining": {"containers": 0, "volumes": 0, "networks": 0, "scratch_directories": 0}
+  },
+  "source_blobs": {
+    "compose.h6-b2-c-fixture.yaml": "d9e7141ae530162e0a58a019eb7b8fad9f879dd0",
+    "h6_b2c_identity_test.py": "4ed2aa5780b518e199b37d59db756e845404785e",
+    "run_h6_b2c_fixture.ps1": "fdef355d42e5307dfaa7683cd22bf2c180391fdd",
+    "h6_writer.py": "a5dcad2d2594077f0aeddcd4bea4d39544bc189e",
+    "one_shot.py": "b16d1b710dd13611cb96bdf27f7ad3eed3597e90",
+    "adapter.py": "146bcf453821dbb0fe1b0f10b0cc4f06c9ff9c50"
+  },
+  "ipc": {
+    "transport": "SOCK_SEQPACKET",
+    "socket_mode": "0600",
+    "socket_parent_mode": "0700",
+    "guard_uid_gid": [0, 0],
+    "root_bilateral_peer_and_hmac_pass": true,
+    "same_uid_gid_accepted_by_kernel_but_rejected_by_hmac": true,
+    "wrong_gid_with_key_rejected": true,
+    "no_socket_mount_connection_rejected": true,
+    "wrong_server_proof_rejected": true,
+    "captured_request_replay_rejected": true,
+    "out_of_scope_requests_rejected": 3,
+    "snapshot_unchanged_by_out_of_scope_requests": true
+  },
+  "dac_and_acl": {
+    "baseline_owner": [0, 0],
+    "baseline_parent_mode": "0700",
+    "baseline_ledger_and_lock_mode": "0600",
+    "baseline_acl_absent": true,
+    "alternate_uid": 23062,
+    "denied_without_acl": true,
+    "named_acl_allows_open": true,
+    "named_acl_cannot_grant_fchmod_on_root_lock": true,
+    "level2_fchmod_and_rename_revoke_effective_access": true,
+    "default_acl_also_loses_effective_access": true
+  },
+  "transactions": {
+    "separate_level2_container": true,
+    "contention_same_lock_device_and_inode": true,
+    "lock_inode_stable": true,
+    "ledger_rename_switches_inode": true,
+    "old_fd_still_reads_old_ledger": true,
+    "admissions": 4,
+    "durable_acks": 1,
+    "both_updates_persist": true,
+    "crash_cases": [
+      {"phase": "before_replace", "ack": false, "previous_bytes_intact": true, "explicit_fixture_recovery_admitted_once": true},
+      {"phase": "after_file_and_directory_fsync", "ack": false, "inflight_persists": true, "replay_denied": true}
+    ],
+    "after_container_restart_replay_rejected": true,
+    "after_writer_stop_committed_bytes_and_inodes_match": true
+  },
+  "scope_counters": {
+    "kvm2_operations": 0,
+    "real_ledger_or_lock_operations": 0,
+    "real_permit_operations": 0,
+    "provider_operations": 0,
+    "paid_requests": 0,
+    "production_operations": 0
+  },
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}

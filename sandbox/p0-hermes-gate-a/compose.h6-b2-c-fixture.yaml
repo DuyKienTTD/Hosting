@@ -1,0 +1,195 @@
+# Standalone local Docker Desktop fixture. No base Compose file or live inputs.
+x-source-0: &source0 ./h6_b2c_identity_test.py:/fixture/h6_b2c_identity_test.py:ro
+x-source-1: &source1 ./h6_writer.py:/fixture/h6_writer.py:ro
+x-source-2: &source2 ./h6_b2a_ledger_test.py:/fixture/h6_b2a_ledger_test.py:ro
+x-source-3: &source3 ./h6_stage_a_test.py:/fixture/h6_stage_a_test.py:ro
+x-source-4: &source4 ./one_shot.py:/fixture/one_shot.py:ro
+x-source-5: &source5 ./mock_contract.py:/fixture/mock_contract.py:ro
+
+x-source-6: &source6 ./bridge.py:/fixture/bridge.py:ro
+x-source-7: &source7 ./guard.py:/fixture/guard.py:ro
+x-source-8: &source8 ./one_shot_linux_test.py:/fixture/one_shot_linux_test.py:ro
+x-ledger: &ledger
+  type: bind
+  source: ${TTD_H6_B2_C_FAKE_LEDGER:?use the local fixture runner}
+  target: /case/mock-ledger
+  bind:
+    propagation: rprivate
+    create_host_path: false
+
+x-fixture: &fixture
+  image: python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89
+  pull_policy: never
+  network_mode: none
+  user: "0:0"
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  read_only: true
+  pids_limit: 32
+  entrypoint: [python, -B, /fixture/h6_b2c_identity_test.py]
+  environment:
+    PYTHONPATH: /fixture
+    PYTHONUNBUFFERED: "1"
+
+services:
+  init:
+    <<: *fixture
+    command: [init]
+    volumes:
+      - *source0
+      - *source1
+      - *source2
+      - *source3
+      - *source4
+      - *source5
+      - *source6
+      - *source7
+      - *source8
+      - ../p0-level2/adapter.py:/level2/adapter.py:ro
+      - *ledger
+      - acl:/case/acl
+      - ipc:/case/ipc
+      - auth:/case/auth
+  writer:
+    <<: *fixture
+    command: [writer]
+    volumes:
+      - *source0
+      - *source1
+      - *source2
+      - *source3
+      - *source4
+      - *source5
+      - *source6
+      - *source7
+      - *source8
+      - *ledger
+      - ipc:/case/ipc
+      - auth:/case/auth:ro
+    healthcheck:
+      test: [CMD, python, -B, /fixture/h6_b2c_identity_test.py, ready]
+      interval: 1s
+      timeout: 2s
+      retries: 5
+  level2:
+    <<: *fixture
+    command: [level2]
+    volumes:
+      - *source0
+      - *source1
+      - *source2
+      - *source3
+      - *source4
+      - *source5
+      - *source6
+      - *source7
+      - *source8
+      - ../p0-level2/adapter.py:/level2/adapter.py:ro
+      - *ledger
+  guard:
+    <<: *fixture
+    command: [guard]
+    volumes:
+      - *source0
+      - *source1
+      - *source2
+      - *source3
+      - *source4
+      - *source5
+      - *source6
+      - *source7
+      - *source8
+      - ipc:/case/ipc:ro
+      - auth:/case/auth:ro
+  same-uid:
+    <<: *fixture
+    command: [same-uid]
+    volumes:
+      - *source0
+      - *source1
+      - *source2
+      - *source3
+      - *source4
+      - *source5
+      - *source6
+      - *source7
+      - *source8
+      - ipc:/case/ipc:ro
+  wrong-gid:
+    <<: *fixture
+    user: "0:23060"
+    command: [wrong-gid]
+    volumes:
+      - *source0
+      - *source1
+      - *source2
+      - *source3
+      - *source4
+      - *source5
+      - *source6
+      - *source7
+      - *source8
+      - ipc:/case/ipc:ro
+      - auth:/case/auth:ro
+  unmounted:
+    <<: *fixture
+    command: [unmounted]
+    volumes:
+      - *source0
+      - *source1
+      - *source2
+      - *source3
+      - *source4
+      - *source5
+      - *source6
+      - *source7
+      - *source8
+  acl-nonroot:
+    <<: *fixture
+    user: "23062:23060"
+    command: [acl-nonroot]
+    volumes:
+      - *source0
+      - *source1
+      - *source2
+      - *source3
+      - *source4
+      - *source5
+      - *source6
+      - *source7
+      - *source8
+      - acl:/case/acl
+  acl-level2:
+    <<: *fixture
+    command: [acl-level2]
+    volumes:
+      - *source0
+      - *source1
+      - *source2
+      - *source3
+      - *source4
+      - *source5
+      - *source6
+      - *source7
+      - *source8
+      - ../p0-level2/adapter.py:/level2/adapter.py:ro
+      - acl:/case/acl
+  faults:
+    <<: *fixture
+    command: [faults]
+    volumes:
+      - *source0
+      - *source1
+      - *source2
+      - *source3
+      - *source4
+      - *source5
+      - *source6
+      - *source7
+      - *source8
+      - *ledger
+
+volumes:
+  acl:
+  ipc:
+  auth:

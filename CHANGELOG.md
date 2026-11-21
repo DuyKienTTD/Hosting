@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Codex hoàn tất H6 B2-C offline, kiểm writer UID 0 bỏ caps đối chiếu UID riêng/ACL, xác thực Unix socket, cạnh tranh Level 2 và crash/replay/rollback trên ledger giả. Bàn giao ChatGPT nghiệm thu. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-c-uid-model.md).
+
 - ChatGPT accepts B2-B read-only evidence at `6a6e691`, keeps `BLOCKED_UID_OR_MOUNT`; opens B2-C offline-only model comparison for root UID writer with zero capabilities vs non-root ACL on synthetic ledger. No KVM2 apply/provider/paid. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-b-chatgpt-review.md).
 
 - Codex hoàn tất B2-B chỉ đọc trên KVM2, xác minh blocker DAC cho writer UID 23062 và render preview/rollback khớp phạm vi. Bàn giao ChatGPT nghiệm thu. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-b-preflight.md).

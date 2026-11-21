@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **H6 B2-C offline PASS (2026-11-22)** — writer UID 0 bỏ toàn bộ caps và xác thực HMAC hai chiều qua Unix socket đạt trên ledger giả. UID 23062 với ACL lỗi ở lock `fchmod` và mất quyền sau Level 2 ghi. ChatGPT nghiệm thu trước mọi quyết định apply. Live apply giữ `BLOCKED_UID_OR_MOUNT`, paid GATE B giữ `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-c-uid-model.md).
+
 - **H6 B2-B reviewed (2026-11-22):** `READ_ONLY_PREFLIGHT_ACCEPTED`, live apply `BLOCKED_UID_OR_MOUNT`: ledger/lock root:root 0600, directory 0700; writer UID 23062 cannot access. ChatGPT opens `H6_B2_C_UID_MODEL_OFFLINE_AUTHORIZED` for Codex: compare root-owned no-capabilities writer and nonroot ACL on fake root-owned ledger, test IPC peer auth and Level 2 concurrency, offline-only, no KVM2 apply, no real-ledger/permit/provider/paid/production. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-b-chatgpt-review.md).
 
 - **H6 B2-B đã kiểm chỉ đọc (2026-11-22):** `H6_B2_B_READ_ONLY_PREFLIGHT_COMPLETE`, apply `BLOCKED_UID_OR_MOUNT`. Ledger/lock `0:0` mode `0600` và parent `0700` không ACL, writer UID 23062 không có quyền. Preview Compose và rollback render đã đối chiếu. ChatGPT nghiệm thu theo §10. GATE B paid `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-b-preflight.md).
