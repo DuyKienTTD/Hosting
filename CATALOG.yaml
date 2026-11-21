@@ -903,7 +903,7 @@ documents:
   - id: ttd-work-b2-h-assurance-001
     path: tasks/2026-11-22-work-independent-b2-h-assurance.md
     type: task
-    status: prepared
+    status: done
     authoritative_for: independent-chatgpt-work-B2-H-read-only-security-audit
     updated_at: 2026-11-22
     verified_at: 2026-11-22
@@ -932,6 +932,15 @@ documents:
     type: report
     status: current
     authoritative_for: H6-B2-H-live-NO-GO-acceptance-and-B2-I-deadline-callback-mock-scope
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-work-b2-h-assurance-report-2026-11-22
+    path: reports/2026-11-22-work-b2-h-assurance.md
+    type: report
+    status: current
+    authoritative_for: independent-Work-B2-H-assurance-ChatGPT-accepted
     updated_at: 2026-11-22
     verified_at: 2026-11-22
     sensitivity: public-redacted
