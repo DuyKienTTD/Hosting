@@ -357,3 +357,7 @@ Proxy trên KVM2 đã rời mạng dùng chung. Guard vào được proxy và s�
 - Model listing (không đồng nghĩa quyền project/billing): https://developers.openai.com/api/reference/resources/models/methods/list
 - Input token counting `POST /v1/responses/input_tokens`: https://developers.openai.com/api/reference/resources/responses/subresources/input_tokens/methods/count
 - Cần so sánh lại docs, entitlement và pricing **tại thời điểm đo live**, không coi documentation là live proof.
+
+## Kết quả H5 Provider preflight — 2026-11-22
+
+**ACKNOWLEDGED** từ chủ dự án. Rule/task commit `9067ccd21f8b7a939e93b511da8cb825b0740918`. **MODEL_METADATA_PASS / BLOCKED_FINAL_REQUEST_AND_PROJECT_VERIFICATION.** Một GET metadata qua Guard trả HTTP 200, khớp GPT-6 Luna. Guard live dùng bản Gate A `1953a81` chỉ có mock upstream. Chưa xác minh project, quyền Responses, billing/quota hoặc final digest và token count. Ledger, permit, kill switch và production khớp baseline, paid attempts bằng 0. `next_owner: chatgpt`, `handoff_state: PREPARED_FOR_OWNER_FORWARD`. [Báo cáo](../reports/2026-11-22-hermes-gate-b-h5-provider-preflight.md) · [Evidence](../reports/evidence/2026-11-22-ttd-hermes-gate-b-h5.json).

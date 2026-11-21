@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- H5 xác minh GPT-6 Luna metadata HTTP 200 từ Guard. H5 còn bị chặn vì thiếu bằng chứng project và final forwarded digest gắn với runtime. Không phát sinh paid inference. [Báo cáo](reports/2026-11-22-hermes-gate-b-h5-provider-preflight.md).
+
 - Bàn giao H5 provider preflight trong task GATE B hiện có: owner Codex, ChatGPT nghiệm thu, first action KVM2, model/project/Responses, forwarded digest, input_tokens, pricing, budget, one-shot readiness; không dispatch paid trong H5; handoff chỉ PREPARED_FOR_OWNER_FORWARD.
 
 - ChatGPT nghiệm thu Guard-only mount từ report/evidence GitHub commit `7455fa3`: `GUARD_MOUNT_ACCEPTED` trong phạm vi mount; giữ paid GATE B `BLOCKED_PREFLIGHT`, không tuyên bố ChatGPT tự kiểm tra KVM2 và không phát sinh provider call.

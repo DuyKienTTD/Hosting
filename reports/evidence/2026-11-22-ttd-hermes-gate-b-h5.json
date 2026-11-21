@@ -1,0 +1,57 @@
+{
+  "task_id": "ttd-hermes-gate-b-001",
+  "handoff_id": "H5_PROVIDER_PREFLIGHT",
+  "rules_commit_read": "9067ccd21f8b7a939e93b511da8cb825b0740918",
+  "verified_at": "2026-11-22",
+  "result": "BLOCKED_FINAL_REQUEST_AND_PROJECT_VERIFICATION",
+  "model_metadata": {
+    "method": "GET",
+    "path": "/v1/models/gpt-6-luna",
+    "http": 200,
+    "exact_model_match": true,
+    "tls_verified_over_guard_proxy": true
+  },
+  "guard": {
+    "live_source_sha256": "15c51be630350077ee30b6cbeaa327d8d4d7a26792934b9244e1346129faa939",
+    "matching_source_commit": "1953a81",
+    "repository_guard_source_commit": "69dd952",
+    "source_unchanged_before_after": true,
+    "mock_upstream": true,
+    "live_freeze_call": false,
+    "live_one_shot_handler": false,
+    "guard_only_read_only_mount": true,
+    "guard_proxy_http": 200,
+    "mount_acceptance_network_ids_unchanged": true,
+    "containers_recreated": 0
+  },
+  "provider": {
+    "project_verified": false,
+    "responses_create_permission_verified": false,
+    "billing_quota_verified": false,
+    "final_forwarded_sha256": null,
+    "provider_input_tokens": null,
+    "api_metadata_requests": 1,
+    "token_count_requests": 0,
+    "paid_inference_requests": 0,
+    "paid_inference_cost_delta_usd": 0
+  },
+  "theoretical_standard_usd": {
+    "input_token_limit": 4000,
+    "output_token_limit": 600,
+    "uncached": 0.0007,
+    "all_input_cache_write_30m": 0.0008,
+    "all_input_cache_write_30m_plus_10_percent": 0.00088,
+    "reserve_candidate_unapproved_for_dispatch": 0.0035
+  },
+  "postflight": {
+    "production_http": [200, 200],
+    "production_restarts": [0, 0],
+    "real_ledger_bytes_unchanged": true,
+    "ledger_attempts": 1,
+    "one_shot_permits": 0,
+    "one_shot_task_records": 0,
+    "global_kill_switch": true,
+    "compose_and_runtime_metadata_match_mount_baseline": true
+  },
+  "next_owner": "chatgpt"
+}

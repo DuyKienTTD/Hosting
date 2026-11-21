@@ -585,6 +585,24 @@ documents:
     verified_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: hermes-gate-b-h5-provider-preflight-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h5-provider-preflight.md
+    type: report
+    status: blocked
+    authoritative_for: h5-model-access-and-provider-preflight-blockers
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h5-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h5.json
+    type: evidence
+    status: current
+    authoritative_for: h5-provider-preflight-measurements
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
