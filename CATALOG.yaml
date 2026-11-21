@@ -226,6 +226,14 @@ documents:
     updated_at: 2026-11-21
     sensitivity: public
 
+  - id: ttd-p0-reasoning-integration-proposal-2026-11-21
+    path: decisions/2026-11-21-p0-reasoning-integration-proposal.md
+    type: decision
+    status: proposed
+    authoritative_for: pending-p0-private-inference-and-n8n-webhook-decisions
+    updated_at: 2026-11-21
+    sensitivity: public
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
