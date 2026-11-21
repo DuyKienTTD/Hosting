@@ -131,6 +131,15 @@ documents:
     updated_at: 2026-11-21
     sensitivity: public-redacted
 
+  - id: hermes-capability-survey-2026-11-21
+    path: reports/2026-11-21-hermes-capability-survey.md
+    type: report
+    status: current
+    authoritative_for: hermes-webui-runtime-capabilities-and-limits-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
   - id: component-hostinger
     path: agents/hostinger.md
     type: knowledge

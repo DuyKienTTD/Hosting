@@ -2,6 +2,9 @@
 
 ## 2026-11-21
 
+- Thêm `reports/2026-11-21-hermes-capability-survey.md`, cập nhật `agents/hermes.md`, `CATALOG.yaml` và `STATE.md` cho khảo sát bổ sung theo task `TTD-AGENT-CAPABILITY-SURVEY-001`.
+- Ghi nhận rõ khác biệt giữa Hermes WebUI session và Hermes VPS container `0.22.5`; xác minh lại GitHub write, skills/memory/session recall và giữ trạng thái BLOCKED/UNKNOWN cho inference API, n8n MCP và connector business.
+
 - Thêm danh bạ vai trò `agents/` cho ChatGPT, Codex, Hermes, Hostinger/Hostinger Agent và n8n, phân biệt capability verified/reported/unknown.
 - Đưa lên GitHub task `TTD-AGENT-CAPABILITY-SURVEY-001` để chủ dự án chuyển câu hỏi đến từng tác nhân và nhận báo cáo tự đánh giá.
 - Liên kết các hồ sơ vào README, PROJECT, AGENTS, STATE và CATALOG.
