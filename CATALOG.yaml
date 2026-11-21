@@ -56,6 +56,14 @@ documents:
     updated_at: 2026-11-21
     sensitivity: public
 
+  - id: agent-coordination-policy-2026-11-21
+    path: rules/AGENT_WORKFLOW.md
+    type: rule
+    status: current
+    authoritative_for: mandatory-research-first-specialist-routing-and-explicit-acknowledged-handoffs
+    updated_at: 2026-11-21
+    sensitivity: public
+
   - id: shared-agent-workflow
     path: rules/AGENT_WORKFLOW.md
     type: rule
