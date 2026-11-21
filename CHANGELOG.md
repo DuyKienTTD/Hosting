@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- ChatGPT nghiệm thu QA Work B2-H độc lập và merge PR #1 `3e9ccc8`; xác nhận LIVE_INTEGRATION_NO_GO, writer startup requires permit và bridge/n8n deadline/callback mock blockers. Giữ B2-I offline, bổ sung kiểm startup idle trên dữ liệu giả; không mở provider/ledger thật/paid. [Báo cáo](reports/2026-11-22-work-b2-h-assurance.md).
+
 - ChatGPT accepted B2-H read-only evidence at `71fdd40` with LIVE_INTEGRATION_NO_GO (bridge 20s/n8n 30s/Guard 45s; mock-only callback), authorized B2-I async deadline/callback contract offline/mock; real ledger/production/provider/paid unchanged. [Review](reports/2026-11-22-hermes-gate-b-h6-b2-h-chatgpt-review.md).
 
 - Codex hoàn tất H6 B2-H read-only trên KVM2, đối chiếu H4, UID/mount/proxy, Compose preview và workflow n8n đang publish. Live integration NO-GO do deadline/callback và writer mount chưa duyệt. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-h-read-only.md).
