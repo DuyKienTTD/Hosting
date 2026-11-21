@@ -1,0 +1,220 @@
+{
+  "task_id": "ttd-hermes-gate-b-001",
+  "stage": "H6_B2_I",
+  "result": "H6_B2_I_ASYNC_CONTRACT_MOCK_PASS",
+  "verification": "VERIFIED_OFFLINE_MOCK",
+  "observed_date_ict": "2026-11-22",
+  "approval_commit": "afb05732bfe17ea0f815d5b8fb9393150c90acc3",
+  "rules_task_base": "54eb352378dab23a4a3b0c9ac37f83122bdce75b",
+  "workflow_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "approval_task_blob": "6007607ba540bc1309758af8db422065441bda69",
+  "source_git_blobs": {
+    "sandbox/p0-hermes-gate-a/h6_b2i_async_mock.py": "a73bc3accba11ff0fc71ed9508928d7404f700be",
+    "sandbox/p0-hermes-gate-a/h6_b2i_async_mock_test.py": "a87d694efbd28be496c91bc54743656d854337ea"
+  },
+  "environment": {
+    "os": "Windows",
+    "python": "3.12.3",
+    "sqlite": "3.45.1",
+    "transport": "HTTP loopback ephemeral port",
+    "datastore": "disposable synthetic SQLite",
+    "real_hermes_n8n_or_guard_processes": 0
+  },
+  "historical_b2h": {
+    "commit": "71fdd40a363bfc70ebbb618352118eef9d925215",
+    "bridge_poll_window_s": 20,
+    "n8n_http_timeout_s": 30,
+    "live_hermes_effective_deadline": "UNKNOWN"
+  },
+  "fixture_budgets": {
+    "ipc_s": 4,
+    "guard_connect_s": 5,
+    "guard_response_s": 45,
+    "hermes_sdk_s": 60,
+    "callback_socket_s": 5,
+    "callback_signature_max_age_s": 10,
+    "injected_loopback_ack_timeout_ms": 150,
+    "max_callback_delivery_attempts": 2
+  },
+  "unit_suite": {
+    "passed": 12,
+    "failed": 0,
+    "runner_elapsed_s": 2.915,
+    "tests": [
+      "abandoned_dispatch_and_sender_restart",
+      "admission_http_timeout_after_commit",
+      "callback_auth_binding_strict_schema_and_replay_after_restart",
+      "concurrent_admission_and_workers",
+      "dead_letter_and_redelivery_after_callback_timeout",
+      "delay_05",
+      "delay_21",
+      "delay_31",
+      "delay_46",
+      "ipc_connect_sdk_and_settlement_faults",
+      "job_auth_and_mock_only_submission",
+      "unreachable_callback_bounded_reconciliation"
+    ],
+    "virtual_clock_timeline": [
+      {
+        "duration_s": 5,
+        "terminal_at_s": 5,
+        "callback_at_s": 5,
+        "callback_wall_s": 0.064,
+        "wall_clock_wait": false,
+        "post_202_wall_ms": 33.928,
+        "outcome": "paid_succeeded",
+        "dispatches": 1,
+        "settlements": 1,
+        "reserve": "settled",
+        "receipts": 1,
+        "delivery_attempts": 1
+      },
+      {
+        "duration_s": 21,
+        "terminal_at_s": 21,
+        "callback_at_s": 21,
+        "callback_wall_s": 0.027,
+        "wall_clock_wait": false,
+        "post_202_wall_ms": 27.993,
+        "outcome": "paid_succeeded",
+        "dispatches": 1,
+        "settlements": 1,
+        "reserve": "settled",
+        "receipts": 1,
+        "delivery_attempts": 1
+      },
+      {
+        "duration_s": 31,
+        "terminal_at_s": 31,
+        "callback_at_s": 31,
+        "callback_wall_s": 0.046,
+        "wall_clock_wait": false,
+        "post_202_wall_ms": 23.939,
+        "outcome": "paid_succeeded",
+        "dispatches": 1,
+        "settlements": 1,
+        "reserve": "settled",
+        "receipts": 1,
+        "delivery_attempts": 1
+      },
+      {
+        "duration_s": 46,
+        "terminal_at_s": 45,
+        "callback_at_s": 45,
+        "callback_wall_s": 0.097,
+        "wall_clock_wait": false,
+        "post_202_wall_ms": 30.101,
+        "outcome": "outcome_unknown",
+        "dispatches": 1,
+        "settlements": 0,
+        "reserve": "held",
+        "receipts": 1,
+        "delivery_attempts": 1
+      }
+    ]
+  },
+  "wall_clock_recheck": {
+    "passed": 4,
+    "failed": 0,
+    "timeline": [
+      {
+        "duration_s": 5,
+        "terminal_at_s": 5,
+        "callback_at_s": 5,
+        "callback_wall_s": 5.072,
+        "wall_clock_wait": true,
+        "post_202_wall_ms": 10.404,
+        "outcome": "paid_succeeded",
+        "dispatches": 1,
+        "settlements": 1,
+        "reserve": "settled",
+        "receipts": 1,
+        "delivery_attempts": 1
+      },
+      {
+        "duration_s": 21,
+        "terminal_at_s": 21,
+        "callback_at_s": 21,
+        "callback_wall_s": 21.02,
+        "wall_clock_wait": true,
+        "post_202_wall_ms": 8.28,
+        "outcome": "paid_succeeded",
+        "dispatches": 1,
+        "settlements": 1,
+        "reserve": "settled",
+        "receipts": 1,
+        "delivery_attempts": 1
+      },
+      {
+        "duration_s": 31,
+        "terminal_at_s": 31,
+        "callback_at_s": 31,
+        "callback_wall_s": 31.032,
+        "wall_clock_wait": true,
+        "post_202_wall_ms": 10.231,
+        "outcome": "paid_succeeded",
+        "dispatches": 1,
+        "settlements": 1,
+        "reserve": "settled",
+        "receipts": 1,
+        "delivery_attempts": 1
+      },
+      {
+        "duration_s": 46,
+        "terminal_at_s": 45,
+        "callback_at_s": 45,
+        "callback_wall_s": 45.046,
+        "wall_clock_wait": true,
+        "post_202_wall_ms": 10.417,
+        "outcome": "outcome_unknown",
+        "dispatches": 1,
+        "settlements": 0,
+        "reserve": "held",
+        "receipts": 1,
+        "delivery_attempts": 1
+      }
+    ]
+  },
+  "fault_assertions": {
+    "identical_concurrent_admissions": 8,
+    "logical_jobs": 1,
+    "mock_dispatches_in_concurrency_case": 1,
+    "settlements_in_concurrency_case": 1,
+    "logical_receipts_in_concurrency_case": 1,
+    "missing_admission_ack_caused_redispatch": false,
+    "unknown_outcome_reserve_refunded": false,
+    "unknown_callback_rewrite_status": 409,
+    "callback_expired_invalid_or_missing_auth_status": 401,
+    "callback_wrong_binding_or_replay_status": 409,
+    "callback_wrong_schema_status": 422,
+    "callback_lost_ack_reconciliation": {
+      "mock_dispatches": 1,
+      "settlements": 0,
+      "logical_receipts": 1,
+      "delivery_attempts": 2,
+      "reserve": "held"
+    },
+    "ipc_and_connect_timeouts_dispatches": 0,
+    "unreachable_callback_is_dead_letter": true,
+    "persisted_sender_restart_recovery": true
+  },
+  "live_integration": "NO_GO",
+  "paid_gate_b": "BLOCKED_PREFLIGHT",
+  "scope_counters": {
+    "kvm2_operations": 0,
+    "production_mutations": 0,
+    "real_ledger_lock_or_permit_accesses": 0,
+    "real_credential_accesses": 0,
+    "openai_api_operations": 0,
+    "paid_attempts": 0,
+    "usd": 0
+  },
+  "remaining": [
+    "effective Hermes deadline and run-id/idempotency recovery",
+    "actual n8n sandbox contract, callback auth and receipt identity",
+    "cross-service storage and recovery",
+    "independent B2-J writer startup/mount review"
+  ],
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}

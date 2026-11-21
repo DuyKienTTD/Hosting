@@ -2,6 +2,8 @@
 
 ## 2026-11-22
 
+- Codex hoàn tất H6 B2-I mock `202/status/callback` với SQLite tạm, HMAC callback và test delay, lost ACK, replay, dead-letter, unknown reserve. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-i-async-contract.md).
+
 - Phân hai luồng độc lập: Codex B2-I triển khai/test async 202/status/callback trên fixture, Work B2-J audit idle writer startup và recovery/readiness; không chỉnh cùng source, không live P0/production/provider/paid. [Task Work](tasks/2026-11-22-work-b2-j-idle-startup-audit.md) · [Task Codex](tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md).
 
 - ChatGPT nghiệm thu QA Work B2-H độc lập và merge PR #1 `3e9ccc8`; xác nhận LIVE_INTEGRATION_NO_GO, writer startup requires permit và bridge/n8n deadline/callback mock blockers. Giữ B2-I offline, bổ sung kiểm startup idle trên dữ liệu giả; không mở provider/ledger thật/paid. [Báo cáo](reports/2026-11-22-work-b2-h-assurance.md).

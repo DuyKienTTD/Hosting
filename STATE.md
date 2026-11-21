@@ -92,6 +92,8 @@ sensitivity: public-redacted
 
 ## Việc đang chờ
 
+- **H6 B2-I async contract mock PASS (2026-11-22):** Fixture `202/status/callback` đạt 12/12 test và 4/4 timeline wall-clock. Ca 46 s chốt unknown ở 45 s, giữ reserve, không dispatch/settle lặp. ChatGPT review trước khi xét adapter/workflow sandbox và đối chiếu B2-J. Live `NO_GO`, paid `BLOCKED_PREFLIGHT`. [Báo cáo](reports/2026-11-22-hermes-gate-b-h6-b2-i-async-contract.md).
+
 - **Song song B2-I Codex và B2-J Work (2026-11-22):** ChatGPT theo §10 đặc tả Codex kiểm `202/status/callback` bất đồng bộ bằng fixture 5/21/31/46s với ledger/key giả, không đụng writer startup; Work [B2-J](tasks/2026-11-22-work-b2-j-idle-startup-audit.md) audit độc lập mô hình writer `IDLE_NO_PERMIT`/crash/restart/read-only health và rollback, chỉ ghi báo cáo qua PR riêng. Không chồng write-set, chưa Codex/Work ACK mới. Live `NO_GO`, ledger/permit thật và provider/paid vẫn cấm. GATE B `BLOCKED_PREFLIGHT`.
 
 - **QA độc lập Work B2-H đã nghiệm thu và merge (2026-11-22):** Báo cáo [Work](reports/2026-11-22-work-b2-h-assurance.md) qua PR [#1](https://github.com/DuyKienTTD/Hosting/pull/1), merge `3e9ccc8`; ChatGPT review nhất quán Codex: `LIVE_INTEGRATION_NO_GO`. Hai blocker là **writer start yêu cầu permit ready** và **bridge/n8n deadline + callback mock-only**. B2-I mock callback đã mở; kiểm startup idle trên ledger giả được bổ sung như cổng kỹ thuật riêng, không áp dụng KVM2/ledger thật. GitHub không cho self-APPROVE PR; reviewer kết luận bằng comment. GATE B paid `BLOCKED_PREFLIGHT`.
