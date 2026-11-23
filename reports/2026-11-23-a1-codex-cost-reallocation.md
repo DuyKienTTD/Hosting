@@ -22,3 +22,9 @@ owner: chatgpt
 ## A1 capability follow-up — 2026-11-23
 
 A1 đã ACK **vai trò** và báo cáo trực tiếp rằng GitHub, Drive, Gmail, Calendar, WordPress production/staging, Google Ads read, Canva, HeyGen, vidIQ/YouTube và QA/tooling đã kết nối. Những phép thử do A1 tự báo cáo được ghi `SELF_REPORTED_VERIFIED_BY_A1`, không phải điều phối đã lặp lại độc lập. Google Ads write, Google Cloud Shell, YouTube publish end-to-end, WordPress production write, video paid render, GitHub Python runner theo chính task chưa được chứng minh. A1-GOV02-QA01 chưa có ACK task ID hoặc commit/test mới. Không phát sinh external action hoặc billing.
+
+## Delta điều phối và thực chứng sau QA (A0, 2026-11-23)
+
+Phần trên là **checkpoint lịch sử tại thời điểm soạn**, không phải trạng thái hiện hành. A1 đã có role/task ACK, commit/PR #32 với Work độc lập [QA offline PASS_WITH_LIMITS](https://github.com/DuyKienTTD/Hosting/pull/32#issuecomment-7092722230), và proposal [PR #33](https://github.com/DuyKienTTD/Hosting/pull/33) được Hermes [QA nguồn PASS_WITH_LIMITS](https://github.com/DuyKienTTD/Hosting/pull/33#issuecomment-7093339962). Chưa có quyền Phase B, merge, live hoặc paid.
+
+A0 đã tạm dừng Hostinger: [OPS](https://github.com/DuyKienTTD/Hosting/pull/24#issuecomment-7093337445), [SEC](https://github.com/DuyKienTTD/Hosting/pull/29#issuecomment-7093338761); thông báo chưa chứng minh Hostinger phiên riêng đã ACK. D2 OPS chuyển **A1 sole writer** qua nhánh mới stacked trên PR24 HEAD `e9c2d8f`; [lệnh A1](https://github.com/DuyKienTTD/Hosting/pull/24#issuecomment-7093346631). Work đã hoàn thành QA D1 18 nhóm synthetic, verdict NEEDS_HOSTINGER_DELTA; không thay lịch sử D1. Hermes nhận sửa F01–F03 PR34 theo A1 independent QA. Work vừa QA PR31, verdict `NEEDS_COORDINATOR_GOV_DELTA`, coordinator sửa delta G1–G3 trên cùng PR31 để QA targeted lại. Codex vẫn exception-only.
