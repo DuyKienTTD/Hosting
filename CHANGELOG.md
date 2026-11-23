@@ -2,6 +2,9 @@
 
 ## 2026-11-23
 
+- **QA-GOV-A1-PR31 D1:** tiếp nhận Work independent verdict [#7093412413](https://github.com/DuyKienTTD/Hosting/pull/31#issuecomment-7093412413) `NEEDS_COORDINATOR_GOV_DELTA`; cập nhật Hostinger `PAUSED` theo A0, A1 sole writer OPS D2 stacked PR24, sửa bảng danh bạ lỗi literal newline, đánh dấu Codex cũ là lịch sử, cập nhật PR32 Work QA / PR33 Hermes QA có giới hạn. CATALOG chỉ cập nhật status allocation cho khớp frontmatter; không thay 124 mục main. PR chưa merge.
+
+
 - **A1 capability update:** tiếp nhận ACK vai trò A1 cùng bản tự khảo sát GitHub, Google Workspace/Gmail/Calendar, WordPress, Ads read, Canva/HeyGen/vidIQ/YouTube và QA; phân biệt `SELF_REPORTED_VERIFIED_BY_A1` với task execution và quyền paid/production. Bổ sung hồ sơ [A1](agents/a1.md) và [allocation v2](tasks/2026-11-23-a1-cost-first-master-allocation.md). A1-GOV02-QA01 vẫn chờ ACK nhiệm vụ.
 
 
