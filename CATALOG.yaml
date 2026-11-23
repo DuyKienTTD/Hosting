@@ -1,5 +1,5 @@
 schema_version: 1
-updated_at: 2026-11-23
+updated_at: 2026-11-24
 repository_visibility: public
 default_language: vi
 
@@ -1157,6 +1157,105 @@ documents:
     authoritative_for: hostinger-ws02-read-only-infrastructure-baseline-scope
     updated_at: 2026-11-22
     sensitivity: public-redacted
+
+  - id: dgn3-row-level-wbs-candidate-2026-11-24
+    path: program/WORK_BREAKDOWN.md
+    type: knowledge
+    status: candidate-not-dispatched
+    authoritative_for: coordinator-branch-row-level-wbs-design-candidate-not-effective-main
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: dgn4-row-level-assignment-matrix-candidate-2026-11-24
+    path: program/ASSIGNMENT_MATRIX.md
+    type: knowledge
+    status: candidate-not-dispatched
+    authoritative_for: coordinator-branch-row-level-assignment-candidate-not-effective-main
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: a1-dgn-roadmap-integration-2026-11-24
+    path: tasks/2026-11-24-a1-dgn-roadmap-integration.md
+    type: task
+    status: prepared-owner-forward
+    dispatch_eligible: false
+    authoritative_for: a1-own-roadmap-integration-work-order-source-time-prepared-owner-forward-later-recipient-receipt-in-a1-roadmap
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: a2-dgn-roadmap-integration-2026-11-24
+    path: tasks/2026-11-24-a2-dgn-roadmap-integration.md
+    type: task
+    status: prepared-owner-forward
+    dispatch_eligible: false
+    authoritative_for: a2-own-roadmap-integration-work-order-source-time-prepared-owner-forward-later-recipient-receipt-in-a2-roadmap
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: work-dgn-roadmap-integration-2026-11-24
+    path: tasks/2026-11-24-work-dgn-roadmap-integration.md
+    type: task
+    status: prepared-owner-forward
+    dispatch_eligible: false
+    authoritative_for: work-own-roadmap-integration-work-order-source-time-prepared-owner-forward-later-recipient-receipt-in-work-roadmap
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: dgn-package-operating-model-candidate-2026-11-24
+    path: program/OPERATING_MODEL.md
+    type: knowledge
+    status: candidate-not-effective
+    authoritative_for: dgn2-integrated-operating-model-design-not-effective-rule
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: dgn1-product-charter-candidate-2026-11-24
+    path: program/PRODUCT_AND_UI.md
+    type: knowledge
+    status: author-complete-candidate-not-merged
+    authoritative_for: dgn1-product-charter-and-operator-ui-design
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: dgn2-agent-skills-directory-candidate-2026-11-24
+    path: program/SKILL_REGISTRY.md
+    type: knowledge
+    status: author-complete-candidate-not-merged
+    authoritative_for: dgn2-agent-capability-and-skills-directory
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: a1-dgn-roadmap-integration-candidate-2026-11-24
+    path: program/roadmaps/a1.md
+    type: knowledge
+    status: author-complete-candidate-not-merged
+    authoritative_for: a1-dgn-roadmap-integration
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: a2-dgn-roadmap-integration-candidate-2026-11-24
+    path: program/roadmaps/a2.md
+    type: knowledge
+    status: author-complete-candidate-not-merged
+    authoritative_for: a2-dgn-roadmap-integration
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: work-dgn-roadmap-integration-candidate-2026-11-24
+    path: program/roadmaps/work.md
+    type: knowledge
+    status: author-complete-candidate-not-merged
+    authoritative_for: work-dgn-roadmap-integration-and-feasibility
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: coordinator-dgn-package-roadmap-2026-11-24
+    path: program/roadmaps/coordinator.md
+    type: knowledge
+    status: reviewed-with-conditions-owner-decision-pending
+    authoritative_for: coordinator-dgn-package-integration-status-and-a0-review-reconciliation
+    updated_at: 2026-11-24
+    sensitivity: public
 
 collections:
   agents: verified agent role profiles and capability evidence
