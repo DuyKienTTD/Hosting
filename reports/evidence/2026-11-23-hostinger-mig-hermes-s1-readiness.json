@@ -1,0 +1,204 @@
+{
+  "id": "hostinger-mig-hermes-s1-readiness-evidence-2026-11-23",
+  "task_id": "MIG-HERMES/S1",
+  "instruction_url": "https://github.com/DuyKienTTD/Hosting/pull/11#issuecomment-7090870590",
+  "ack_execute": "EXECUTE MIG-HERMES/S1",
+  "base_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "referenced_commits": {
+    "sec02_report": "142f6dc5dbc033554bd0b43e3444ea0d59f60d96",
+    "inf01_report": "486afc2042f72a3024b5fcdfe2cab5eaa3c44fe4"
+  },
+  "executing_agent": "Hermes WebUI",
+  "intended_repo_owner_for_task": "hostinger-agent",
+  "scope_mode": "read-only and draft only",
+  "side_effects": {
+    "archive_downloaded": false,
+    "archive_opened": false,
+    "archive_imported": false,
+    "backup_created_or_renewed": false,
+    "restore_started": false,
+    "source_modified": false,
+    "destination_modified": false,
+    "vps_changed": false,
+    "paid_api_called": false
+  },
+  "evidence_boundary": {
+    "live_control_plane_verified_in_this_session": false,
+    "notes": [
+      "This assessment reuses remote repo snapshots and official docs because Hermes WebUI does not have verified Hostinger control-plane access in this session.",
+      "Fields requiring fresh hPanel/control-plane reads are classified as REPORTED or UNKNOWN."
+    ]
+  },
+  "source_runtime": {
+    "alias": "ttdnew.tech",
+    "product_class": "Hostinger AI Automation application (U4S)",
+    "runtime": "u4s-hermes-agent",
+    "plan_label": "OpenClaw metadata label, not runtime truth",
+    "resource_identifier": "SOURCE_APP_UUID_REDACTED",
+    "version": {
+      "reported_current": "v0.22.5-2",
+      "reported_target_upgrade": "v0.23.2-1"
+    },
+    "backup_authority": "Managed Hermes dashboard Backups",
+    "last_verified_utc": "REPORTED_FROM_PRIOR_REPORTS",
+    "classification": "VERIFIED/REPORTED"
+  },
+  "destination_runtime": {
+    "alias": "KVM2 Hermes on VPS",
+    "product_class": "Hostinger VPS KVM2 self-hosted Hermes",
+    "runtime": "Hermes container on Docker project hermes-agent-l7fe",
+    "resource_identifier": "1722328",
+    "reported_version": "0.22.5",
+    "backup_authority": "Hostinger VPS scheduled backups",
+    "last_verified_utc": "2026-11-23",
+    "classification": "VERIFIED/REPORTED"
+  },
+  "backup_metadata": {
+    "source": {
+      "backup_time_utc": "2026-11-22 05:22:45 UTC",
+      "approx_size_mb": 1233,
+      "entry_count_reported": 12743,
+      "download_link_expiry_utc": "2026-11-30 02:07:28 UTC",
+      "freshness_risk": "does not prove inclusion of changes after backup time",
+      "class": "REPORTED"
+    },
+    "destination": {
+      "latest_listed_completed_backup_utc": "2026-11-16 09:23:43 UTC",
+      "schedule": "weekly",
+      "restore_tested": false,
+      "freshness_risk": "not fresh enough to claim safe rollback readiness",
+      "class": "REPORTED"
+    }
+  },
+  "official_doc_findings": {
+    "managed_hermes_backups": [
+      "Managed Hermes backups are automated daily and retained for 7 days.",
+      "The dashboard supports restore, download and restore history.",
+      "Restoring replaces all current application files and cannot be undone."
+    ],
+    "managed_to_vps_switch": [
+      "Switching from Managed Hermes to a VPS plan is a subscription change, not a data migration.",
+      "Managed Hermes setup and data do not move to the VPS.",
+      "Memory, agents, configurations and conversation history are not transferred."
+    ],
+    "self_hosted_hermes_backup": [
+      "Hermes docs define hermes backup and hermes import for Hermes-created backup zips.",
+      "Hermes backup includes the whole Hermes home, including settings, profiles, memory, conversations, scheduled jobs and secrets."
+    ],
+    "self_hosted_importers": [
+      "Hermes import-agent supports OpenClaw, Claude Code, Codex, Cursor, Grok Bot and OpenBot.",
+      "Managed Hermes backup download is not documented as a supported import source."
+    ]
+  },
+  "compatibility_assessment": {
+    "documented": [
+      "Managed Hermes backup download/restore exists within Managed Hermes dashboard.",
+      "Self-hosted Hermes can restore Hermes-created backup zips using hermes import.",
+      "Managed Hermes to VPS switch does not transfer data."
+    ],
+    "unknown": [
+      "Whether a Managed Hermes downloaded backup has the same format/semantics as a hermes backup zip.",
+      "Whether any official import bridge exists from Managed Hermes backup into an already running VPS Hermes instance.",
+      "Exact archive content types without inspecting the archive."
+    ],
+    "verdict": "BLOCKED_COMPATIBILITY"
+  },
+  "options": [
+    {
+      "option_id": "A",
+      "name": "preserve destination and selectively import after isolated test",
+      "recommended_now": false,
+      "data_loss_boundary": "low for destination if kept isolated",
+      "collision_risk": "high until import semantics are known",
+      "rollback": "isolated-target rollback only",
+      "notes": "not executable yet due undocumented compatibility"
+    },
+    {
+      "option_id": "B",
+      "name": "separate namespace or parallel instance then reconcile",
+      "recommended_now": true,
+      "data_loss_boundary": "lowest for production destination",
+      "collision_risk": "medium; reconciliation still unknown",
+      "rollback": "destroy isolated lane only",
+      "notes": "best future test shape if a supported import path emerges"
+    },
+    {
+      "option_id": "C",
+      "name": "replacement of destination runtime",
+      "recommended_now": false,
+      "data_loss_boundary": "highest",
+      "collision_risk": "maximum",
+      "rollback": "depends on fresh destination restore proof not yet available",
+      "notes": "not recommended without explicit owner decision and verified rollback"
+    }
+  ],
+  "recovery_acceptance_design": {
+    "required_before_any_execution": [
+      "fresh source backup verified independently",
+      "fresh destination backup verified independently",
+      "manifest for profiles/memory/conversations/skills/jobs/settings/credentials",
+      "isolated target runtime",
+      "version comparison",
+      "explicit collision policy",
+      "no-delete-source rule until final verification",
+      "rollback evidence plan"
+    ],
+    "rpo": "UNKNOWN",
+    "rto": "UNKNOWN"
+  },
+  "tabletop_tests": [
+    {
+      "scenario": "stale source backup after last updates",
+      "expected": "STOP / no change",
+      "observed": "backup time predates possible later changes; refresh approval required",
+      "result": "PASS_STOP"
+    },
+    {
+      "scenario": "target identifier collision or overwrite risk",
+      "expected": "preserve or parallelize; do not import into live destination",
+      "observed": "separate destination runtime already exists and collision policy is not approved",
+      "result": "PASS_STOP"
+    },
+    {
+      "scenario": "failed isolated import requiring rollback",
+      "expected": "rollback only inside isolated target, no production mutation",
+      "observed": "future isolated rollback possible only after fresh dual backups and approved isolated environment",
+      "result": "PASS_STOP"
+    }
+  ],
+  "readiness_table": [
+    {
+      "item": "source identity",
+      "source_utc": "2026-11-21/2026-11-23 prior reports",
+      "observed": "Managed Hermes runtime u4s-hermes-agent on ttdnew.tech",
+      "expected": "explicit source identity before migration",
+      "class": "VERIFIED/REPORTED",
+      "risk": "wrong-target action",
+      "required_approval": "identity preflight mandatory",
+      "next_owner": "chatgpt"
+    },
+    {
+      "item": "destination identity",
+      "source_utc": "2026-11-23 prior reports",
+      "observed": "VPS 1722328 with separate Hermes Docker project",
+      "expected": "explicit destination identity before migration",
+      "class": "VERIFIED/REPORTED",
+      "risk": "wrong-target action",
+      "required_approval": "identity preflight mandatory",
+      "next_owner": "chatgpt"
+    },
+    {
+      "item": "import path compatibility",
+      "source_utc": "2026-11-23 docs review",
+      "observed": "no documented Managed-Hermes-backup to VPS-Hermes import path found",
+      "expected": "officially supported import path or vendor-confirmed safe bridge",
+      "class": "UNKNOWN/DOCUMENTED_BLOCKER",
+      "risk": "data loss or false assumptions",
+      "required_approval": "vendor-confirmed method or separate isolated conversion plan",
+      "next_owner": "chatgpt"
+    }
+  ],
+  "assessment_delivery_verdict": "MIG_HERMES_S1_ASSESSMENT_READY_FOR_REVIEW",
+  "migration_readiness_verdict": "BLOCKED_COMPATIBILITY",
+  "next_owner": "chatgpt"
+}
