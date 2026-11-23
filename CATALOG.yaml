@@ -1,5 +1,5 @@
 schema_version: 1
-updated_at: 2026-11-23
+updated_at: 2026-11-24
 repository_visibility: public
 default_language: vi
 
@@ -1179,7 +1179,7 @@ documents:
     type: task
     status: prepared-owner-forward
     dispatch_eligible: false
-    authoritative_for: a1-own-roadmap-integration-work-order-not-sent-or-acked
+    authoritative_for: a1-own-roadmap-integration-work-order-source-time-prepared-owner-forward-later-recipient-receipt-in-a1-roadmap
     updated_at: 2026-11-24
     sensitivity: public
 
@@ -1188,7 +1188,7 @@ documents:
     type: task
     status: prepared-owner-forward
     dispatch_eligible: false
-    authoritative_for: a2-own-roadmap-integration-work-order-not-sent-or-acked
+    authoritative_for: a2-own-roadmap-integration-work-order-source-time-prepared-owner-forward-later-recipient-receipt-in-a2-roadmap
     updated_at: 2026-11-24
     sensitivity: public
 
@@ -1197,7 +1197,7 @@ documents:
     type: task
     status: prepared-owner-forward
     dispatch_eligible: false
-    authoritative_for: work-own-roadmap-integration-work-order-not-sent-or-acked
+    authoritative_for: work-own-roadmap-integration-work-order-source-time-prepared-owner-forward-later-recipient-receipt-in-work-roadmap
     updated_at: 2026-11-24
     sensitivity: public
 
@@ -1246,6 +1246,14 @@ documents:
     type: knowledge
     status: author-complete-candidate-not-merged
     authoritative_for: work-dgn-roadmap-integration-and-feasibility
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: coordinator-dgn-package-roadmap-2026-11-24
+    path: program/roadmaps/coordinator.md
+    type: knowledge
+    status: reviewed-with-conditions-owner-decision-pending
+    authoritative_for: coordinator-dgn-package-integration-status-and-a0-review-reconciliation
     updated_at: 2026-11-24
     sensitivity: public
 
