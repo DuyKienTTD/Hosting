@@ -1,20 +1,24 @@
-# TTD METAL — Danh bạ tác nhân và thành phần
+# TTD METAL — Danh bạ năng lực và nguồn hồ sơ
 
-**Nguồn duy nhất về phân vai và năng lực**; đọc sau [AGENTS](../AGENTS.md), [PROJECT](../PROJECT.md) và [STATE](../STATE.md). Hồ sơ không thay thế việc kiểm tra quyền truy cập thật trong phiên đang chạy.
+**Chỉ mục năng lực, KHÔNG phải nguồn giao nhiệm vụ hiện hành.** Nguồn duy nhất về priority/role/status khi candidate được phê duyệt là [program/current.json](../program/current.json); phải đọc đầy đủ [AGENTS](../AGENTS.md), [workflow](../rules/AGENT_WORKFLOW.md), [repository security](../rules/REPOSITORY_SECURITY.md), [STATE](../STATE.md), [CATALOG](../CATALOG.yaml) và task thật. Trên `main` quy tắc hiện hành vẫn có hiệu lực đến khi A0 duyệt merge.
 
-## Phân loại
+**KNG-01 ONLY:** A1 viết code/tích hợp trên nhánh được giao; Work QA độc lập; Điều phối điều hành, A0 duyệt cuối. Không tự kích hoạt G0/UC01/infra/media/Ads, Hostinger hay Codex. Quyền kỹ thuật từ hồ sơ là session-scoped, không phải authorization. Không coi GitHub comment là Work ACK, không xác nhận production/live từ dữ liệu ngày 23/11.
 
-| Thành phần | Loại | Vai trò ưu tiên | Hồ sơ | Mức xác minh |
+## Danh bạ năng lực (snapshot PR31 — KHÔNG phải current dispatch)
+
+| Thành phần | Loại | Năng lực lịch sử | Hồ sơ | Mức xác minh |
 |---|---|---|---|---|
-| ChatGPT | AI trợ lý tương tác | tư vấn, đặc tả, phân tích, điều phối bằng GitHub | [chatgpt](chatgpt.md) | GitHub write/read đã thử trong phiên; thực thi nền chưa có |
-| Codex | Tác nhân kỹ thuật | code, VPS, Docker, API, kiểm thử, vận hành | [codex](codex.md) | capability survey hoàn tất; quyền được ghi theo session |
+| ChatGPT Điều phối | AI trợ lý tương tác | tư vấn, đặc tả, phân tích, điều phối bằng GitHub | [chatgpt](chatgpt.md) | GitHub write/read đã thử trong phiên; thực thi nền chưa có |
+| **A1 — ChatGPT Thông thường** | AI trợ lý phiên riêng | GitHub/metadata, validator, code offline, QA độc lập theo task | [a1](a1.md) | Role ACK; PR #32 author delta, Work QA offline PASS_WITH_LIMITS; PR #33 proposal review PASS_WITH_LIMITS | 
+| ChatGPT Work | Agent thực hiện đa bước | source QA độc lập, browser/UX, offline integration | [chatgpt](chatgpt.md) (profile Work riêng pending) | QA PR #32 và PR #24 đã có evidence; quyền theo phiên |
+| Codex | Tác nhân kỹ thuật **ngoại lệ chi phí** | chỉ case đặc thù đã chứng minh các Agent khác không làm được | [codex](codex.md) | CODEX_NOT_AUTHORIZED cho lệnh mới nếu chưa được A0 duyệt chi phí |
 | Hermes | AI agent trên VPS/WebUI | suy luận, tools, memory, thực thi tác vụ | [hermes](hermes.md) | capability survey hoàn tất; E2E với n8n chưa chạy |
-| Hostinger | Nhà cung cấp / control plane + Hostinger Agent | Cloud Hosting, WordPress, domain/DNS/email, VPS/Docker/backup | [hostinger](hostinger.md) | khảo sát account inventory + GitHub PASS; thao tác theo quyền/approval |
+| Hostinger | Nhà cung cấp / control plane + Hostinger Agent | hPanel/VPS/DNS, capability lịch sử (không giao mới) | [hostinger](hostinger.md) | **PAUSED theo A0**, chưa ACK thông báo; mọi thay đổi tiếp tục bị chặn |
 | n8n | Workflow engine, **không phải AI agent** | trigger, connectors, schedule, job state | [n8n](n8n.md) | service healthy, 0 workflow, MCP tắt |
 
 **Hostinger Agent** là trợ lý AI có giao diện trong hPanel, phải khảo sát riêng; không đồng nhất với Hostinger là nhà cung cấp hoặc với quyền root/VPS. Các hồ sơ là **bản ghi năng lực** không phải lệnh cấp quyền.
 
-## Quy ước về mức bằng chứng
+## Thang bằng chứng (snapshot PR31)
 
 - `VERIFIED`: có phép thử trực tiếp và liên kết kết quả; ghi môi trường và thời gian.
 - `REPORTED`: báo cáo của tác nhân/kiểm kê, chưa kiểm lại độc lập khi cần.
@@ -23,39 +27,11 @@
 - `UNKNOWN`: chưa biết; không được suy diễn.
 - `PLANNED`: mục tiêu tương lai, không phải năng lực hiện tại.
 
-## Cách phối hợp
 
-- **Chủ dự án** quyết định mục tiêu, quyền, ngân sách và publish; tác nhân không tự cấp quyền.
-- **Mỗi task có 1 owner** chịu trách nhiệm kết quả, có thể có collaborators. Vai trò ưu tiên là gợi ý điều phối, không độc quyền một loại việc.
-- **ChatGPT** có thể tạo task/đánh giá bằng chứng; **Codex** ưu tiên phát triển/kiểm toán kỹ thuật; **Hermes** ưu tiên reasoning và tác vụ dùng tools; **n8n** ưu tiên trigger/execution; **Hostinger** cung cấp platform và các thao tác trong hPanel được phê duyệt.
-- Chuyển nhiệm vụ bằng URL task + trạng thái/đầu vào/tiêu chí nghiệm thu; nhận kết quả bằng URL report và commit. Không lấy lịch sử chat làm nguồn sự thật.
-- Dữ liệu sống (job state, retry, queue) đặt tại n8n/DB; GitHub lưu đặc tả, quyết định, mã nguồn, evidence đã khử nhạy cảm và báo cáo.
-- Nếu hai tác nhân cùng sửa, dùng file task riêng, branch/PR hoặc phối hợp trước commit. Không force-push, không tự viết đè báo cáo có ngày.
-- Thiếu năng lực hoặc công cụ: chuyển cho tác nhân phù hợp hoặc ghi BLOCKED. Không giả định mọi nền tảng có quyền sửa production.
-- Để biết ai có năng lực mới nhất, xem hồ sơ và các evidence liên kết; nếu cần xác minh lại, giao [khảo sát bổ sung](../tasks/2026-11-21-agent-capability-survey.md).
+**D5 pre-dispatch boundary:** For *manual preparation only*, use [fail-closed candidate selector](../program/kng/select_task.py) (`python3 program/kng/select_task.py --root .`), not `tasks/` glob or CATALOG `type: task` alone. Explicit `dispatch_eligible: true`, nonarchived supported task status and safe existing file are mandatory; missing/false/unknown eligibility is never eligible. Invalid catalog/schema causes STOP. Output is **not** dispatch authority; the Director must separately issue a real work order, and the recipient must ACK in its actual chat. No automatic distributor exists or is being deployed.
 
-## Điều phối nghiên cứu trước thực thi
+## Quy tắc đọc và giao việc
 
-**Bắt buộc đọc** [AGENTS](../AGENTS.md), [AGENT_WORKFLOW mục 7](../rules/AGENT_WORKFLOW.md), [quy tắc bảo mật](../rules/REPOSITORY_SECURITY.md), [STATE](../STATE.md), [CATALOG](../CATALOG.yaml), hồ sơ của mình và task trước khi nhận việc. Thứ tự ưu tiên: ChatGPT tổng hợp nguồn chính thức + evidence; Hostinger Agent khảo sát VPS/hPanel/network/hosting; Hermes khảo sát agent/inference/tools/serialized request; Codex viết code, chạy test, deploy sandbox/rollback; n8n thực thi workflow khi đã bật. **Phân vai dựa trên năng lực và quyền được chứng minh trong phiên, không độc quyền.**
-
-Mọi handoff phải có **một owner**, nguồn đầu vào, **bước bắt đầu cụ thể**, bằng chứng nghiệm thu, giới hạn quyền, next owner và trạng thái `PREPARED/SENT/ACKNOWLEDGED/IN_PROGRESS/DONE/BLOCKED`. GitHub task đã commit chỉ là `PREPARED`, chưa phải đã gửi/nhận. Nếu phải chuyển tiếp thủ công, báo `PREPARED_FOR_OWNER_FORWARD` và cung cấp thông điệp rõ người nhận. Người nhận đọc lại quy tắc và ghi rule commit đã dùng trong ACK/report.
-
-## Phân công theo nghiệp vụ — định hướng, chưa có nghĩa đã sẵn sàng
-
-| Nghiệp vụ | Owner ưu tiên | Thành phần hỗ trợ | Giới hạn |
-|---|---|---|---|
-| Nền tảng/API/triển khai VPS | Codex | Hostinger/VPS, Hermes | production changes cần quyền riêng |
-| Chiến lược, backlog, nghiệm thu | ChatGPT hoặc owner task được chỉ định | Codex, Hermes | không thành single point of failure 24/7 |
-| Video/content pipeline | Hermes | n8n, Codex, công cụ media | chi phí render và publish cần gate |
-| Ads/SEO analysis | Hermes hoặc ChatGPT | n8n, Codex, connectors | read-first, chỉ ghi khi có quyền |
-| Scheduled reporting | n8n workflow + owner nghiệp vụ | Hermes, DB | n8n điều phối, không tự suy luận |
-| Backup, network, VPS ops | Codex cho code/server; Hostinger Agent cho tài nguyên hPanel | Chủ dự án, n8n | tránh mất kết nối / downtime |
-| Cloud Hosting, domain, DNS, email, backup inventory | Hostinger Agent | Codex, ChatGPT | chỉ thao tác khi tool/quyền đã kiểm chứng |
-
-## Nguồn xác minh
-
-- [Hermes tự đánh giá](../reports/2026-11-21-hermes-self-assessment.md)
-- [n8n/Hermes live audit](../reports/2026-11-21-n8n-hermes-integration-audit.md)
-- [Evidence live](../reports/evidence/2026-11-21-ttd-ai-platform-audit-001.json)
-- [VPS inventory](../inventory/current-vps-state.md)
-- [Hostinger account/capability inventory](../reports/2026-11-21-hostinger-account-capability-inventory.md)
+- Hồ sơ [A1](a1.md), [Codex](codex.md), [Work/Điều phối](chatgpt.md), [Hermes](hermes.md), [Hostinger](hostinger.md), [n8n](n8n.md) chỉ mô tả công cụ/nguồn đã quan sát; **không phải** nguồn trạng thái hoặc công việc đang hoạt động.
+- Mọi task phải có chỉ thị chủ quyền/ACK thực tế, write-set, STOP và bằng chứng; không chọn nhiệm vụ chỉ vì `type: task` trong CATALOG. **Các mục `archived-inactive-not-dispatchable` hoặc `dispatch_eligible: false` phải bị loại khỏi mọi bộ chọn task.** Nếu selector không hiểu trường này, phải STOP, không được đoán.
+- Bản danh bạ PR31 đầy đủ (gồm các quyết định OPS/Hostinger và Codex trước KNG) vẫn được giữ [theo commit bất biến](https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/agents/README.md), blob `3c8a50a8b07a53bd28414a049cd5f5c366005913`. Mọi mệnh lệnh trong bản snapshot đó chỉ là bằng chứng lịch sử, không tự hoạt động lại.

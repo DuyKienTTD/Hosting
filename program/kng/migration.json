@@ -64,7 +64,10 @@
       "operation": "add one canonical registry index entry after merge; eliminate competing active status titles, no historical deletion",
       "source_ref": "PR31@a770de80a2467ca1789c820b63416209cf53b7d1",
       "integration_authority": "https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192",
-      "result_blob": "bf24d5726c8518617f02777aec6d271723946358"
+      "result_blob": "a611919b6ef42e16e30d14aa650c43fb9bbbe681",
+      "previous_result_blob": "bf24d5726c8518617f02777aec6d271723946358",
+      "previous_result_ref": "PR41-D4@b446bce1aa2def210251f41283b96276dbc8fa1c",
+      "result_pin_reconciled_at": "PR42-D5"
     },
     {
       "path": "rules/AGENT_WORKFLOW.md",

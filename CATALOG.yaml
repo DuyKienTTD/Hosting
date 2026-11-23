@@ -37,32 +37,34 @@ documents:
   - id: hosting-progress-and-target-capabilities-2026-11-23
     path: reports/2026-11-23-hosting-progress-and-target-capabilities.md
     type: report
-    status: coordinator-estimate-pending-independent-qa
-    authoritative_for: project-portfolio-maturity-estimate-and-planned-user-facing-capabilities-as-of-2026-11-23
+    status: historical-estimate-not-live-readiness
+    authoritative_for: dated-estimate-only-not-verified-live-project-readiness
     updated_at: 2026-11-23
     sensitivity: public-redacted
 
   - id: agent-a1-chatgpt-standard
     path: agents/a1.md
     type: knowledge
-    status: current
-    authoritative_for: a1-standard-chatgpt-agent-role-capability-boundaries
+    status: historical-capability-profile-non-routing
+    authoritative_for: historical-a1-capability-evidence-not-current-task-or-priority
     updated_at: 2026-11-23
     sensitivity: public
 
   - id: ttd-a1-cost-first-master-allocation-2026-11-23
     path: tasks/2026-11-23-a1-cost-first-master-allocation.md
     type: task
-    status: proposed_governance_with_agent_evidence
-    authoritative_for: agent-a1-work-assignment-cost-first-codex-exception-gate
+    status: archived-inactive-not-dispatchable
+    authoritative_for: historical-pr31-allocation-archive-not-operational-task-authority
+    # Original task frontmatter remains byte-exact PR31 evidence; catalog excludes it from dispatch.
     updated_at: 2026-11-23
+    dispatch_eligible: false
     sensitivity: public
 
   - id: report-2026-11-23-a1-codex-cost-reallocation
     path: reports/2026-11-23-a1-codex-cost-reallocation.md
     type: report
-    status: proposed_for_review
-    authoritative_for: owner-ordered-reallocation-and-codex-dispatch-holds
+    status: historical-proposal-not-current-authority
+    authoritative_for: historical-pr31-cost-first-proposal-not-current-dispatch
     updated_at: 2026-11-23
     sensitivity: public
 
@@ -215,8 +217,8 @@ documents:
   - id: agent-codex
     path: agents/codex.md
     type: knowledge
-    status: current
-    authoritative_for: codex-role-capabilities
+    status: historical-capability-profile-non-routing
+    authoritative_for: codex-capability-evidence-not-current-work-dispatch
     updated_at: 2026-11-21
     verified_at: 2026-11-21
     sensitivity: public-redacted

@@ -19,6 +19,20 @@
 
 1. Work Q0 fixed baseline at [#7097774156](https://github.com/DuyKienTTD/Hosting/pull/39#issuecomment-7097774156): use the exact nine common full-file inputs and frozen task-specific suffixes. Integrated D2 reads the nine corresponding complete files plus the new 2,751-byte typed current route, then **the identical suffix files**. Count full UTF-8 blob bytes; no invented tokenizer output.
 2. Exact Q0 tasks: R WS-04 SEO backlog 11/149,148 B → **12/124,752 B**; G WS-01 docs-only proposal 12/151,686 B → **13/127,290 B**; S WS-02 safe n8n readiness triage 15/197,424 B → **16/173,028 B**. All three save 24,396 UTF-8 B with one extra full read; source list/blob SHAs in [machine evidence](../reports/evidence/2026-11-23-a1-kng01-d2-q0-metrics.json). No Work blind-comprehension result claimed.
+### Q0 R WS-04 evaluation-only role binding
+
+```yaml
+scenario_id: Q0_R_WS04
+simulated_brief_preparer: Work
+actual_ws04_dispatch: false
+status: EVALUATION_ONLY_KNG_ONLY_HOLD
+program_owner: Chat Điều phối
+comprehension_reviewer: Work
+role_precedence: explicit scenario assignment over generic capability
+```
+
+The Work brief-preparer role above exists **only inside the frozen Q0 R simulation**. Actual WS-04 remains **ON_HOLD_DEPENDENCY_KNG01**: no live assignment, WordPress/Ads permission, new standing SEO role, or real Agent ACK follows. Work as `comprehension_reviewer` is the independent scoring function, separate from the simulated brief-preparer role. Do not derive this scenario's role from the generic [Agent capability directory](../agents/README.md). Evidence: [Work frozen Q0 definition](https://github.com/DuyKienTTD/Hosting/pull/39#issuecomment-7097774156) and [A2 role-routing finding](https://github.com/DuyKienTTD/Hosting/pull/42#issuecomment-7102698883). The sealed A2 17/18 result remains unchanged.
+
 3. Independently graded comprehension/routing belongs to **Work**. A1 drafts scenarios/rubric only. Any false permission, wrong current owner, missing STOP/security full read, stale task or evidence loss is critical FAIL even if size falls.
 4. Exact Q0 four hypothetical changes: technical routing 3 files/4 fields→**1/2**; WS-02 real-ACK 4/5→**1/2**; WS-02 paper report acceptance 4/5→**2/4**; new secret handling rule 4/4→**2/2**. These are **proposed manual authoritative edit targets**, not timed changes; [derive.py](kng/derive.py) renders STATE/CATALOG mirrors from typed source, but PR31 nonshared legacy paths remain and Work must test interpretation. See evidence for exact per-field map.
 
