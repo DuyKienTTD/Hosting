@@ -1,0 +1,1157 @@
+{
+  "id": "hermes-biz02-s2-mvp-acceptance-2026-11-23",
+  "task_id": "BIZ-02/S2",
+  "mode": "OFFLINE_DRAFT_TABLETOP",
+  "base_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "source_refs": {
+    "PR6": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+    "BIZ01_PR12": "8c821bbf1842eccb8519127f54ba7673965276d5",
+    "BIZ02_PR20": "fcdc0f898b13b19a42a000d84c8ac4632de1806b",
+    "GROW01_PR18": "3c8cb40357ee23d13a2c1aa7e07e6848ff5256dd",
+    "GROW02A_PR23": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61",
+    "UX01_PR14": "9deab7391190bb9a159a924db320d08cb2a43b3f",
+    "UX02_PR16": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+    "ENG01_PR10": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+    "ENG02_PR13": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+    "ENG03_PR19": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+    "ENG04_PR21": "761e9545d2fcca8f359513b9918d0a6bb4aef776",
+    "OPS_PR22": "7f18955897c4f05b3523f467398889cf1e53cebd"
+  },
+  "source_pr_url": "https://github.com/DuyKienTTD/Hosting/pull/23#issuecomment-7091682554",
+  "story_status_legend": [
+    "ACCEPT_OFFLINE",
+    "STUB_ONLY",
+    "BLOCKED_NEEDS_BACKEND",
+    "BLOCKED_NEEDS_A0",
+    "BLOCKED_ACCESS",
+    "NOT_TESTED"
+  ],
+  "stories": [
+    {
+      "id": "J1",
+      "title": "Incident acknowledge/escalate",
+      "actor": "operator → named on-call reviewer",
+      "role_authority": "synthetic reviewer only; no server authorization established",
+      "preconditions": [
+        "offline fixtures isolated",
+        "no production credentials",
+        "roles and A0 decisions unapproved"
+      ],
+      "fixture_id": "FX-J1",
+      "synthetic_input": {
+        "job_id": "job-synthetic-01",
+        "signal": "outcome_unknown"
+      },
+      "steps": [
+        {
+          "actor_action": "open offline incident queue",
+          "ui_expected": "offline incident queue shows fixture and source watermark",
+          "mock_adapter_expected": "UX S2 fixture / OPS S1 evaluator supplies synthetic record only",
+          "receipt_expected": "no external receipt before operator decision"
+        },
+        {
+          "actor_action": "inspect data and choose review/hold",
+          "ui_expected": "show explicit state, provenance and blocked action",
+          "mock_adapter_expected": "no live write/paid dispatch",
+          "receipt_expected": "mock decision note, not alert delivery"
+        },
+        {
+          "actor_action": "record reviewer decision or escalate",
+          "ui_expected": "display owner and decision reason",
+          "mock_adapter_expected": "no real side effect",
+          "receipt_expected": "mock decision note, not alert delivery"
+        }
+      ],
+      "audit": "job_id + source snapshot + operator role + reason + state transition",
+      "blocked_transitions": [
+        "retry",
+        "live alert dispatch",
+        "role self-approval"
+      ],
+      "source_prs": [
+        "#16",
+        "#22",
+        "#20"
+      ],
+      "source_paths": {
+        "#16": "sandbox/operator-ui/README.md",
+        "#13": "reports/2026-11-23-eng-01a-s2-fake-channel-adapters.md",
+        "#10": "reports/2026-11-23-eng-01a-s1-offline-connector-contract.md",
+        "#19": "reports/2026-11-23-eng-01a-s3-d1-prepared-result-binding.md",
+        "#21": "reports/2026-11-23-eng-01a-s4-release-readiness.md",
+        "#22": "reports/2026-11-23-hostinger-ops01a-s1-monitoring-qa.md",
+        "#23": "reports/2026-11-23-hermes-grow02a-s1-attribution-contract.md",
+        "#18": "reports/2026-11-23-hermes-grow-01-s1-media-workflow.md",
+        "#20": "reports/evidence/2026-11-23-hermes-biz02-s1-priority-matrix.json"
+      },
+      "implementation_status": "OFFLINE_MOCK_DESIGN",
+      "coverage_status": "ACCEPT_OFFLINE",
+      "use_case_ids": [
+        "UC06",
+        "UC07"
+      ],
+      "approval_gate": "operator may mark local triage; escalation owner named; server authority BLOCKED_NEEDS_BACKEND",
+      "product_test_status": "NOT_TESTED",
+      "nonfunctional": {
+        "server_auth": "BLOCKED_NEEDS_BACKEND",
+        "privacy": "synthetic metadata only; no identity joins",
+        "durability": "backend durable receipt unverified",
+        "localization_keyboard": "EN/VI and keyboard browser QA NOT_TESTED",
+        "retention": "BLOCKED_NEEDS_A0",
+        "financial": "paid/Ads/write disabled"
+      }
+    },
+    {
+      "id": "J2",
+      "title": "WP/Woo EN/VI gap inspection",
+      "actor": "content operator + technical reviewer",
+      "role_authority": "synthetic reviewer only; no server authorization established",
+      "preconditions": [
+        "offline fixtures isolated",
+        "no production credentials",
+        "roles and A0 decisions unapproved"
+      ],
+      "fixture_id": "FX-J2",
+      "synthetic_input": {
+        "record_ref": "product-synthetic-vi-01",
+        "locale": "vi",
+        "missing_field": "alt_text"
+      },
+      "steps": [
+        {
+          "actor_action": "open catalog gap view",
+          "ui_expected": "catalog gap view shows fixture and source watermark",
+          "mock_adapter_expected": "ENG S2 fake WP/Woo read through S3 mock bridge supplies synthetic record only",
+          "receipt_expected": "no external receipt before operator decision"
+        },
+        {
+          "actor_action": "inspect data and choose review/hold",
+          "ui_expected": "show explicit state, provenance and blocked action",
+          "mock_adapter_expected": "no live write/paid dispatch",
+          "receipt_expected": "versioned gap review draft; no site mutation"
+        },
+        {
+          "actor_action": "record reviewer decision or escalate",
+          "ui_expected": "display owner and decision reason",
+          "mock_adapter_expected": "no real side effect",
+          "receipt_expected": "versioned gap review draft; no site mutation"
+        }
+      ],
+      "audit": "fixture source/watermark + locale + gap key + reviewer decision",
+      "blocked_transitions": [
+        "write product",
+        "publish page",
+        "assume stale snapshot current"
+      ],
+      "source_prs": [
+        "#13",
+        "#19",
+        "#21",
+        "#20"
+      ],
+      "source_paths": {
+        "#16": "sandbox/operator-ui/README.md",
+        "#13": "reports/2026-11-23-eng-01a-s2-fake-channel-adapters.md",
+        "#10": "reports/2026-11-23-eng-01a-s1-offline-connector-contract.md",
+        "#19": "reports/2026-11-23-eng-01a-s3-d1-prepared-result-binding.md",
+        "#21": "reports/2026-11-23-eng-01a-s4-release-readiness.md",
+        "#22": "reports/2026-11-23-hostinger-ops01a-s1-monitoring-qa.md",
+        "#23": "reports/2026-11-23-hermes-grow02a-s1-attribution-contract.md",
+        "#18": "reports/2026-11-23-hermes-grow-01-s1-media-workflow.md",
+        "#20": "reports/evidence/2026-11-23-hermes-biz02-s1-priority-matrix.json"
+      },
+      "implementation_status": "OFFLINE_MOCK_DESIGN",
+      "coverage_status": "ACCEPT_OFFLINE",
+      "use_case_ids": [
+        "UC01"
+      ],
+      "approval_gate": "site owner must approve real read; editor cannot write",
+      "product_test_status": "NOT_TESTED",
+      "nonfunctional": {
+        "server_auth": "BLOCKED_NEEDS_BACKEND",
+        "privacy": "synthetic metadata only; no identity joins",
+        "durability": "backend durable receipt unverified",
+        "localization_keyboard": "EN/VI and keyboard browser QA NOT_TESTED",
+        "retention": "BLOCKED_NEEDS_A0",
+        "financial": "paid/Ads/write disabled"
+      }
+    },
+    {
+      "id": "J3",
+      "title": "GA4 aggregate and UTM provenance",
+      "actor": "analyst + privacy owner",
+      "role_authority": "synthetic reviewer only; no server authorization established",
+      "preconditions": [
+        "offline fixtures isolated",
+        "no production credentials",
+        "roles and A0 decisions unapproved"
+      ],
+      "fixture_id": "FX-J3",
+      "synthetic_input": {
+        "property_ref": "property-synthetic",
+        "sessions": 3,
+        "tagged_sessions": 2,
+        "attribution": "UNKNOWN"
+      },
+      "steps": [
+        {
+          "actor_action": "open aggregate report panel",
+          "ui_expected": "aggregate report panel shows fixture and source watermark",
+          "mock_adapter_expected": "ENG S2 fake GA4 read and GROW02A offline UTM contract supplies synthetic record only",
+          "receipt_expected": "no external receipt before operator decision"
+        },
+        {
+          "actor_action": "inspect data and choose review/hold",
+          "ui_expected": "show explicit state, provenance and blocked action",
+          "mock_adapter_expected": "no live write/paid dispatch",
+          "receipt_expected": "synthetic aggregate report; identity attribution UNKNOWN"
+        },
+        {
+          "actor_action": "record reviewer decision or escalate",
+          "ui_expected": "display owner and decision reason",
+          "mock_adapter_expected": "no real side effect",
+          "receipt_expected": "synthetic aggregate report; identity attribution UNKNOWN"
+        }
+      ],
+      "audit": "property mock ref + period + source label + freshness/unknown reason",
+      "blocked_transitions": [
+        "join to named CRM lead",
+        "infer qualified lead",
+        "enable live GA4"
+      ],
+      "source_prs": [
+        "#13",
+        "#19",
+        "#23",
+        "#20"
+      ],
+      "source_paths": {
+        "#16": "sandbox/operator-ui/README.md",
+        "#13": "reports/2026-11-23-eng-01a-s2-fake-channel-adapters.md",
+        "#10": "reports/2026-11-23-eng-01a-s1-offline-connector-contract.md",
+        "#19": "reports/2026-11-23-eng-01a-s3-d1-prepared-result-binding.md",
+        "#21": "reports/2026-11-23-eng-01a-s4-release-readiness.md",
+        "#22": "reports/2026-11-23-hostinger-ops01a-s1-monitoring-qa.md",
+        "#23": "reports/2026-11-23-hermes-grow02a-s1-attribution-contract.md",
+        "#18": "reports/2026-11-23-hermes-grow-01-s1-media-workflow.md",
+        "#20": "reports/evidence/2026-11-23-hermes-biz02-s1-priority-matrix.json"
+      },
+      "implementation_status": "OFFLINE_MOCK_DESIGN",
+      "coverage_status": "ACCEPT_OFFLINE",
+      "use_case_ids": [
+        "UC02",
+        "UC03"
+      ],
+      "approval_gate": "property read auth and lawful consent for real use BLOCKED_ACCESS",
+      "product_test_status": "NOT_TESTED",
+      "nonfunctional": {
+        "server_auth": "BLOCKED_NEEDS_BACKEND",
+        "privacy": "synthetic metadata only; no identity joins",
+        "durability": "backend durable receipt unverified",
+        "localization_keyboard": "EN/VI and keyboard browser QA NOT_TESTED",
+        "retention": "BLOCKED_NEEDS_A0",
+        "financial": "paid/Ads/write disabled"
+      }
+    },
+    {
+      "id": "J4",
+      "title": "Bilingual draft and reviewer handoff",
+      "actor": "editor + rights reviewer + engineer + publisher",
+      "role_authority": "synthetic reviewer only; no server authorization established",
+      "preconditions": [
+        "offline fixtures isolated",
+        "no production credentials",
+        "roles and A0 decisions unapproved"
+      ],
+      "fixture_id": "FX-J4",
+      "synthetic_input": {
+        "package_ref": "P2-synthetic-v1",
+        "locales": [
+          "en",
+          "vi"
+        ],
+        "rights_verified": false,
+        "technical_verified": false
+      },
+      "steps": [
+        {
+          "actor_action": "open content draft review",
+          "ui_expected": "content draft review shows fixture and source watermark",
+          "mock_adapter_expected": "GROW01 P1-P3 synthetic review gate supplies synthetic record only",
+          "receipt_expected": "no external receipt before operator decision"
+        },
+        {
+          "actor_action": "inspect data and choose review/hold",
+          "ui_expected": "show explicit state, provenance and blocked action",
+          "mock_adapter_expected": "no live write/paid dispatch",
+          "receipt_expected": "NEEDS_REVIEW/BLOCKED draft only, no channel post"
+        },
+        {
+          "actor_action": "record reviewer decision or escalate",
+          "ui_expected": "display owner and decision reason",
+          "mock_adapter_expected": "no real side effect",
+          "receipt_expected": "NEEDS_REVIEW/BLOCKED draft only, no channel post"
+        }
+      ],
+      "audit": "package/version + separate reviewer roles + reason",
+      "blocked_transitions": [
+        "publish",
+        "export as approved",
+        "client-side role override"
+      ],
+      "source_prs": [
+        "#18",
+        "#16",
+        "#23",
+        "#20"
+      ],
+      "source_paths": {
+        "#16": "sandbox/operator-ui/README.md",
+        "#13": "reports/2026-11-23-eng-01a-s2-fake-channel-adapters.md",
+        "#10": "reports/2026-11-23-eng-01a-s1-offline-connector-contract.md",
+        "#19": "reports/2026-11-23-eng-01a-s3-d1-prepared-result-binding.md",
+        "#21": "reports/2026-11-23-eng-01a-s4-release-readiness.md",
+        "#22": "reports/2026-11-23-hostinger-ops01a-s1-monitoring-qa.md",
+        "#23": "reports/2026-11-23-hermes-grow02a-s1-attribution-contract.md",
+        "#18": "reports/2026-11-23-hermes-grow-01-s1-media-workflow.md",
+        "#20": "reports/evidence/2026-11-23-hermes-biz02-s1-priority-matrix.json"
+      },
+      "implementation_status": "OFFLINE_MOCK_DESIGN",
+      "coverage_status": "ACCEPT_OFFLINE",
+      "use_case_ids": [
+        "UC04",
+        "UC05"
+      ],
+      "approval_gate": "rights/tech/business/channel approvals and A0; fixture APPROVED != human signoff",
+      "product_test_status": "NOT_TESTED",
+      "nonfunctional": {
+        "server_auth": "BLOCKED_NEEDS_BACKEND",
+        "privacy": "synthetic metadata only; no identity joins",
+        "durability": "backend durable receipt unverified",
+        "localization_keyboard": "EN/VI and keyboard browser QA NOT_TESTED",
+        "retention": "BLOCKED_NEEDS_A0",
+        "financial": "paid/Ads/write disabled"
+      }
+    },
+    {
+      "id": "J5",
+      "title": "Workflow build, simulate, unknown receipt",
+      "actor": "operator + security/budget owner",
+      "role_authority": "synthetic reviewer only; no server authorization established",
+      "preconditions": [
+        "offline fixtures isolated",
+        "no production credentials",
+        "roles and A0 decisions unapproved"
+      ],
+      "fixture_id": "FX-J5",
+      "synthetic_input": {
+        "workflow_ref": "flow-synthetic-01",
+        "outcome": "outcome_unknown",
+        "paid_retry_requested": false
+      },
+      "steps": [
+        {
+          "actor_action": "open builder and receipt timeline",
+          "ui_expected": "builder and receipt timeline shows fixture and source watermark",
+          "mock_adapter_expected": "UX S2 local simulate + ENG S3 fake bridge (S4 Linux unrun) supplies synthetic record only",
+          "receipt_expected": "no external receipt before operator decision"
+        },
+        {
+          "actor_action": "inspect data and choose review/hold",
+          "ui_expected": "show explicit state, provenance and blocked action",
+          "mock_adapter_expected": "no live write/paid dispatch",
+          "receipt_expected": "single synthetic receipt or UNKNOWN hold; no retry"
+        },
+        {
+          "actor_action": "record reviewer decision or escalate",
+          "ui_expected": "display owner and decision reason",
+          "mock_adapter_expected": "no real side effect",
+          "receipt_expected": "single synthetic receipt or UNKNOWN hold; no retry"
+        }
+      ],
+      "audit": "workflow/version + run ref + receipt identity + decision reason",
+      "blocked_transitions": [
+        "auto paid retry",
+        "activate real workflow",
+        "dashboard 200 => model healthy"
+      ],
+      "source_prs": [
+        "#16",
+        "#10",
+        "#19",
+        "#21",
+        "#22",
+        "#20"
+      ],
+      "source_paths": {
+        "#16": "sandbox/operator-ui/README.md",
+        "#13": "reports/2026-11-23-eng-01a-s2-fake-channel-adapters.md",
+        "#10": "reports/2026-11-23-eng-01a-s1-offline-connector-contract.md",
+        "#19": "reports/2026-11-23-eng-01a-s3-d1-prepared-result-binding.md",
+        "#21": "reports/2026-11-23-eng-01a-s4-release-readiness.md",
+        "#22": "reports/2026-11-23-hostinger-ops01a-s1-monitoring-qa.md",
+        "#23": "reports/2026-11-23-hermes-grow02a-s1-attribution-contract.md",
+        "#18": "reports/2026-11-23-hermes-grow-01-s1-media-workflow.md",
+        "#20": "reports/evidence/2026-11-23-hermes-biz02-s1-priority-matrix.json"
+      },
+      "implementation_status": "STUB_OR_MOCK_SPLIT",
+      "coverage_status": "STUB_ONLY",
+      "use_case_ids": [
+        "UC06",
+        "UC08"
+      ],
+      "approval_gate": "server-side auth/durable ledger and budget owner approval absent",
+      "product_test_status": "NOT_TESTED",
+      "nonfunctional": {
+        "server_auth": "BLOCKED_NEEDS_BACKEND",
+        "privacy": "synthetic metadata only; no identity joins",
+        "durability": "backend durable receipt unverified",
+        "localization_keyboard": "EN/VI and keyboard browser QA NOT_TESTED",
+        "retention": "BLOCKED_NEEDS_A0",
+        "financial": "paid/Ads/write disabled"
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "case_id": "S01",
+      "story_id": "J1",
+      "fixture_id": "FX-J1",
+      "scenario": "positive triage",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "operator",
+        "action": "ack"
+      },
+      "expected_status": "ACCEPT_OFFLINE",
+      "observed": "ACCEPT_OFFLINE",
+      "expected_event": "approval_queue_item_opened",
+      "expected_receipt": "local ack draft",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "none",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    },
+    {
+      "case_id": "S02",
+      "story_id": "J1",
+      "fixture_id": "FX-J1",
+      "scenario": "unknown no paid retry",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "operator",
+        "action": "paid_retry",
+        "outcome_unknown": true
+      },
+      "expected_status": "BLOCKED_NEEDS_BACKEND",
+      "observed": "BLOCKED_NEEDS_BACKEND",
+      "expected_event": "connector_read_outcome_recorded",
+      "expected_receipt": "UNKNOWN held",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "retry disabled",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    },
+    {
+      "case_id": "S03",
+      "story_id": "J1",
+      "fixture_id": "FX-J1",
+      "scenario": "dashboard 200 is not inference",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "operator",
+        "action": "claim_inference",
+        "dashboard_http_200": true
+      },
+      "expected_status": "NOT_TESTED",
+      "observed": "NOT_TESTED",
+      "expected_event": "none",
+      "expected_receipt": "UNKNOWN model health",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "missing inference receipt",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    },
+    {
+      "case_id": "S04",
+      "story_id": "J2",
+      "fixture_id": "FX-J2",
+      "scenario": "positive EN/VI gap review",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "editor",
+        "action": "review_gap"
+      },
+      "expected_status": "ACCEPT_OFFLINE",
+      "observed": "ACCEPT_OFFLINE",
+      "expected_event": "catalog_gap_detected",
+      "expected_receipt": "mock gap draft",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "none",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    },
+    {
+      "case_id": "S05",
+      "story_id": "J2",
+      "fixture_id": "FX-J2",
+      "scenario": "real site read without auth",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "editor",
+        "action": "live_site_read",
+        "read_auth": false
+      },
+      "expected_status": "BLOCKED_ACCESS",
+      "observed": "BLOCKED_ACCESS",
+      "expected_event": "none",
+      "expected_receipt": "no live receipt",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "missing site owner read scope",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    },
+    {
+      "case_id": "S06",
+      "story_id": "J2",
+      "fixture_id": "FX-J2",
+      "scenario": "write product from mock",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "editor",
+        "action": "write_site"
+      },
+      "expected_status": "BLOCKED_NEEDS_A0",
+      "observed": "BLOCKED_NEEDS_A0",
+      "expected_event": "none",
+      "expected_receipt": "no post ID",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "no write approval",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    },
+    {
+      "case_id": "S07",
+      "story_id": "J3",
+      "fixture_id": "FX-J3",
+      "scenario": "aggregate unknown provenance",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "analyst",
+        "action": "aggregate_report"
+      },
+      "expected_status": "ACCEPT_OFFLINE",
+      "observed": "ACCEPT_OFFLINE",
+      "expected_event": "ga4_aggregate_observed",
+      "expected_receipt": "mock rows; attribution UNKNOWN",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "none",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    },
+    {
+      "case_id": "S08",
+      "story_id": "J3",
+      "fixture_id": "FX-J3",
+      "scenario": "GA4 join identified lead",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "analyst",
+        "action": "identity_join",
+        "consent": false
+      },
+      "expected_status": "BLOCKED_NEEDS_A0",
+      "observed": "BLOCKED_NEEDS_A0",
+      "expected_event": "none",
+      "expected_receipt": "no joined identity",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "no consent and join policy",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    },
+    {
+      "case_id": "S09",
+      "story_id": "J4",
+      "fixture_id": "FX-J4",
+      "scenario": "draft bilingual review",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "editor",
+        "action": "submit_draft"
+      },
+      "expected_status": "ACCEPT_OFFLINE",
+      "observed": "ACCEPT_OFFLINE",
+      "expected_event": "content_draft_submitted",
+      "expected_receipt": "draft package only",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "none",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    },
+    {
+      "case_id": "S10",
+      "story_id": "J4",
+      "fixture_id": "FX-J4",
+      "scenario": "rights/technical signoff missing",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "publisher",
+        "action": "publish",
+        "rights": false,
+        "technical": false
+      },
+      "expected_status": "BLOCKED_NEEDS_A0",
+      "observed": "BLOCKED_NEEDS_A0",
+      "expected_event": "content_review_decided",
+      "expected_receipt": "BLOCKED draft; no post",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "rights and engineer absent",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    },
+    {
+      "case_id": "S11",
+      "story_id": "J4",
+      "fixture_id": "FX-J4",
+      "scenario": "client role tampered",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "client_role_changed_to_owner",
+        "action": "server_approve"
+      },
+      "expected_status": "BLOCKED_NEEDS_BACKEND",
+      "observed": "BLOCKED_NEEDS_BACKEND",
+      "expected_event": "none",
+      "expected_receipt": "no real approval",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "server RBAC not implemented",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    },
+    {
+      "case_id": "S12",
+      "story_id": "J5",
+      "fixture_id": "FX-J5",
+      "scenario": "local workflow simulation",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "operator",
+        "action": "simulate"
+      },
+      "expected_status": "ACCEPT_OFFLINE",
+      "observed": "ACCEPT_OFFLINE",
+      "expected_event": "connector_read_outcome_recorded",
+      "expected_receipt": "mock only",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "none",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    },
+    {
+      "case_id": "S13",
+      "story_id": "J5",
+      "fixture_id": "FX-J5",
+      "scenario": "unknown receipt forbids retry",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "operator",
+        "action": "paid_retry",
+        "outcome_unknown": true
+      },
+      "expected_status": "BLOCKED_NEEDS_BACKEND",
+      "observed": "BLOCKED_NEEDS_BACKEND",
+      "expected_event": "connector_read_outcome_recorded",
+      "expected_receipt": "UNKNOWN held",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "unknown state; paid retry forbidden",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    },
+    {
+      "case_id": "S14",
+      "story_id": "J5",
+      "fixture_id": "FX-J5",
+      "scenario": "invalid mapping fixture",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "operator",
+        "action": "activate_live",
+        "mapping_valid": false
+      },
+      "expected_status": "BLOCKED_NEEDS_BACKEND",
+      "observed": "BLOCKED_NEEDS_BACKEND",
+      "expected_event": "none",
+      "expected_receipt": "no dispatch",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "mapping invalid and activation unavailable",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    },
+    {
+      "case_id": "S15",
+      "story_id": "J5",
+      "fixture_id": "FX-J5",
+      "scenario": "Ads optimization spend gate",
+      "assumptions": "synthetic-only; no true account, actor approval, or deployed backend",
+      "input_flags": {
+        "synthetic": true,
+        "actor_role": "campaign_manager",
+        "action": "ads_write",
+        "budget_approved": false
+      },
+      "expected_status": "BLOCKED_NEEDS_A0",
+      "observed": "BLOCKED_NEEDS_A0",
+      "expected_event": "none",
+      "expected_receipt": "no spend",
+      "expected_audit": "fixture_id + actor + source ref + decision reason; no real log",
+      "failure_signal": "A0 budget and Ads owner absent",
+      "design_verdict": "PASS_TABLETOP",
+      "execution_method": "OFFLINE_POLICY_EVALUATOR_EXECUTED",
+      "product_functional_result": "NOT_TESTED"
+    }
+  ],
+  "traceability": [
+    {
+      "use_case_id": "UC01",
+      "source_tier_unchanged": "MVP_OFFLINE_NOW",
+      "story_ids": [
+        "J2"
+      ],
+      "source_prs": [
+        "#13",
+        "#19",
+        "#20",
+        "#21"
+      ],
+      "scenario_ids": [
+        "S04",
+        "S05",
+        "S06"
+      ],
+      "kpis": [
+        {
+          "name": "inventory_review_coverage",
+          "numerator": "fake records reviewed",
+          "denominator": "fake records in selected fixture",
+          "unit": "ratio",
+          "window": "weekly",
+          "data_owner": "content owner",
+          "attribution_and_dedup": "version/site+locale+record ID, dedup update watermark",
+          "consent_status": "NO_REAL_CUSTOMER_DATA",
+          "baseline": "BASELINE_UNKNOWN"
+        },
+        {
+          "name": "resolved_content_gap_rate",
+          "numerator": "gaps marked resolved after human check",
+          "denominator": "unique confirmed content gaps",
+          "unit": "ratio",
+          "window": "monthly",
+          "data_owner": "content owner",
+          "attribution_and_dedup": "one gap per record+field+version, no live site inference",
+          "consent_status": "REQUIRES_OWNER_REVIEW",
+          "baseline": "BASELINE_UNKNOWN"
+        }
+      ],
+      "unmet_gate": "real WP/Woo read auth and fixture denominator"
+    },
+    {
+      "use_case_id": "UC02",
+      "source_tier_unchanged": "NEXT_AFTER_READ_AUTH",
+      "story_ids": [
+        "J3"
+      ],
+      "source_prs": [
+        "#13",
+        "#19",
+        "#20",
+        "#23"
+      ],
+      "scenario_ids": [
+        "S07",
+        "S08"
+      ],
+      "kpis": [
+        {
+          "name": "channel_attribution_coverage",
+          "numerator": "aggregate sessions with channel tag",
+          "denominator": "all aggregate sessions for same property/window",
+          "unit": "ratio",
+          "window": "weekly",
+          "data_owner": "analytics owner",
+          "attribution_and_dedup": "GA4 property/date/channel only; do not infer unique people",
+          "consent_status": "READ_AUTH_PENDING",
+          "baseline": "BASELINE_UNKNOWN"
+        },
+        {
+          "name": "engaged_session_rate",
+          "numerator": "GA4 engaged sessions",
+          "denominator": "GA4 sessions",
+          "unit": "ratio",
+          "window": "monthly",
+          "data_owner": "analytics owner",
+          "attribution_and_dedup": "GA4 definitions/property only; no form/lead joins",
+          "consent_status": "READ_AUTH_PENDING",
+          "baseline": "BASELINE_UNKNOWN"
+        }
+      ],
+      "unmet_gate": "GA4 property read auth, consent and aggregate freshness"
+    },
+    {
+      "use_case_id": "UC03",
+      "source_tier_unchanged": "MVP_OFFLINE_NOW",
+      "story_ids": [
+        "J3"
+      ],
+      "source_prs": [
+        "#13",
+        "#19",
+        "#20",
+        "#23"
+      ],
+      "scenario_ids": [
+        "S07",
+        "S08"
+      ],
+      "kpis": [
+        {
+          "name": "UTM_validity_rate",
+          "numerator": "synthetic campaign links with valid source+medium+campaign",
+          "denominator": "synthetic campaign links checked",
+          "unit": "ratio",
+          "window": "weekly",
+          "data_owner": "marketing owner",
+          "attribution_and_dedup": "dedup normalized URL; GROW-02A owns full dictionary",
+          "consent_status": "NO_PII",
+          "baseline": "BASELINE_UNKNOWN"
+        },
+        {
+          "name": "qualified_lead_rate",
+          "numerator": "CRM leads explicitly qualified by sales",
+          "denominator": "distinct consented CRM leads reviewed",
+          "unit": "ratio",
+          "window": "monthly",
+          "data_owner": "sales owner",
+          "attribution_and_dedup": "no person join to GA4/chat without key/consent; do not infer from clicks",
+          "consent_status": "UNKNOWN_REQUIRES_CONSENT",
+          "baseline": "BASELINE_UNKNOWN"
+        }
+      ],
+      "unmet_gate": "CRM consent and A0 attribution policy; no identity join"
+    },
+    {
+      "use_case_id": "UC04",
+      "source_tier_unchanged": "MVP_OFFLINE_NOW",
+      "story_ids": [
+        "J4"
+      ],
+      "source_prs": [
+        "#16",
+        "#18",
+        "#20",
+        "#23"
+      ],
+      "scenario_ids": [
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "kpis": [
+        {
+          "name": "draft_review_completion",
+          "numerator": "synthetic drafts with all mandatory QA fields",
+          "denominator": "synthetic drafts submitted for review",
+          "unit": "ratio",
+          "window": "weekly",
+          "data_owner": "editorial owner",
+          "attribution_and_dedup": "stable package_id/version; not count of published content",
+          "consent_status": "NO_REAL_CUSTOMER_DATA",
+          "baseline": "BASELINE_UNKNOWN"
+        },
+        {
+          "name": "QA_rework_rate",
+          "numerator": "reviewed drafts returned for substantive correction",
+          "denominator": "reviewed drafts with recorded decision",
+          "unit": "ratio",
+          "window": "monthly",
+          "data_owner": "editorial owner",
+          "attribution_and_dedup": "one review decision per package version",
+          "consent_status": "REQUIRES_RIGHTS_REVIEW",
+          "baseline": "BASELINE_UNKNOWN"
+        }
+      ],
+      "unmet_gate": "actual rights/engineering review, localization browser QA"
+    },
+    {
+      "use_case_id": "UC05",
+      "source_tier_unchanged": "LATER_WITH_SEPARATE_WRITE_APPROVAL",
+      "story_ids": [
+        "J4"
+      ],
+      "source_prs": [
+        "#16",
+        "#18",
+        "#20",
+        "#23"
+      ],
+      "scenario_ids": [
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "kpis": [
+        {
+          "name": "handoff_gate_completeness",
+          "numerator": "packages with all separately verified approvals",
+          "denominator": "packages submitted for real handoff",
+          "unit": "ratio",
+          "window": "weekly",
+          "data_owner": "publisher",
+          "attribution_and_dedup": "package_id+version; synthetic signoffs excluded",
+          "consent_status": "REQUIRES_CONSENT",
+          "baseline": "BASELINE_UNKNOWN"
+        },
+        {
+          "name": "authorized_publish_success_rate",
+          "numerator": "real authorized posts confirmed by platform",
+          "denominator": "real attempted authorized posts",
+          "unit": "ratio",
+          "window": "monthly",
+          "data_owner": "account owner",
+          "attribution_and_dedup": "platform post ID; never count exported drafts as posts",
+          "consent_status": "REQUIRES_APPROVAL",
+          "baseline": "BASELINE_UNKNOWN"
+        }
+      ],
+      "unmet_gate": "rights/channel owner publish approval; no post receipt"
+    },
+    {
+      "use_case_id": "UC06",
+      "source_tier_unchanged": "MVP_OFFLINE_NOW",
+      "story_ids": [
+        "J1",
+        "J5"
+      ],
+      "source_prs": [
+        "#10",
+        "#16",
+        "#19",
+        "#20",
+        "#21",
+        "#22"
+      ],
+      "scenario_ids": [
+        "S01",
+        "S02",
+        "S03",
+        "S12",
+        "S13",
+        "S14",
+        "S15"
+      ],
+      "kpis": [
+        {
+          "name": "triage_coverage",
+          "numerator": "synthetic blocked/unknown items with owner",
+          "denominator": "synthetic blocked/unknown items created",
+          "unit": "ratio",
+          "window": "weekly",
+          "data_owner": "operator",
+          "attribution_and_dedup": "unique job_id+state transition; replay same ID not counted twice",
+          "consent_status": "NO_REAL_CUSTOMER_DATA",
+          "baseline": "BASELINE_UNKNOWN"
+        },
+        {
+          "name": "mean_synthetic_resolution_time",
+          "numerator": "sum of elapsed minutes for resolved synthetic incidents",
+          "denominator": "number of resolved synthetic incidents",
+          "unit": "minutes per resolved incident",
+          "window": "monthly",
+          "data_owner": "operator",
+          "attribution_and_dedup": "exclude open incidents; real incident stream unavailable",
+          "consent_status": "BASELINE_UNKNOWN",
+          "baseline": "BASELINE_UNKNOWN"
+        }
+      ],
+      "unmet_gate": "server RBAC/durable receipt and real escalation owner"
+    },
+    {
+      "use_case_id": "UC07",
+      "source_tier_unchanged": "NEXT_AFTER_READ_AUTH",
+      "story_ids": [
+        "J1"
+      ],
+      "source_prs": [
+        "#16",
+        "#20",
+        "#22"
+      ],
+      "scenario_ids": [
+        "S01",
+        "S02",
+        "S03"
+      ],
+      "kpis": [
+        {
+          "name": "synthetic_triage_coverage",
+          "numerator": "synthetic inquiries assigned a category and reviewer",
+          "denominator": "synthetic inquiries provided",
+          "unit": "ratio",
+          "window": "weekly",
+          "data_owner": "sales owner",
+          "attribution_and_dedup": "one case ID per inquiry, not contact identity",
+          "consent_status": "NO_REAL_CUSTOMER_DATA",
+          "baseline": "BASELINE_UNKNOWN"
+        },
+        {
+          "name": "qualified_inquiry_handoff_rate",
+          "numerator": "consented inquiries sales explicitly accepts as qualified",
+          "denominator": "consented inquiries human-reviewed",
+          "unit": "ratio",
+          "window": "monthly",
+          "data_owner": "sales owner",
+          "attribution_and_dedup": "separate messages/inquiries from qualified leads; no merge with GA4",
+          "consent_status": "CONSENT_AND_READ_AUTH_PENDING",
+          "baseline": "BASELINE_UNKNOWN"
+        }
+      ],
+      "unmet_gate": "consented inbox read and sales human handoff"
+    },
+    {
+      "use_case_id": "UC08",
+      "source_tier_unchanged": "LATER_WITH_SEPARATE_WRITE_APPROVAL",
+      "story_ids": [
+        "J5"
+      ],
+      "source_prs": [
+        "#10",
+        "#16",
+        "#19",
+        "#20",
+        "#21",
+        "#22"
+      ],
+      "scenario_ids": [
+        "S12",
+        "S13",
+        "S14",
+        "S15"
+      ],
+      "kpis": [
+        {
+          "name": "proposal_review_coverage",
+          "numerator": "Ads proposals reviewed by budget owner",
+          "denominator": "Ads proposals submitted",
+          "unit": "ratio",
+          "window": "monthly",
+          "data_owner": "ads owner",
+          "attribution_and_dedup": "campaign ID scope only, no customer identity",
+          "consent_status": "ACCOUNT_ACCESS_UNKNOWN",
+          "baseline": "BASELINE_UNKNOWN"
+        },
+        {
+          "name": "cost_per_qualified_lead",
+          "numerator": "approved campaign spend in currency",
+          "denominator": "distinct consented qualified leads attributed under reviewed policy",
+          "unit": "currency per qualified lead",
+          "window": "monthly",
+          "data_owner": "ads + sales owners",
+          "attribution_and_dedup": "attribution policy and dedup required; never equate clicks with leads",
+          "consent_status": "ATTRIBUTION_AND_CONSENT_UNKNOWN",
+          "baseline": "BASELINE_UNKNOWN"
+        }
+      ],
+      "unmet_gate": "A0 budget, lawful attributed leads and Ads write approval"
+    }
+  ],
+  "a0_pending": [
+    {
+      "id": "A0-1",
+      "status": "AWAITING_A0_DECISION",
+      "question": "Đối tượng đầu tiên?"
+    },
+    {
+      "id": "A0-2",
+      "status": "AWAITING_A0_DECISION",
+      "question": "KPI chính sau khi có dữ liệu?"
+    },
+    {
+      "id": "A0-3",
+      "status": "AWAITING_A0_DECISION",
+      "question": "Nguồn dữ liệu mở đọc đầu tiên?"
+    },
+    {
+      "id": "A0-4",
+      "status": "AWAITING_A0_DECISION",
+      "question": "MVP slice?"
+    },
+    {
+      "id": "A0-5",
+      "status": "AWAITING_A0_DECISION",
+      "question": "Cadence and retention?"
+    }
+  ],
+  "minimum_launch_slice": {
+    "name": "MVP_OFFLINE_DEMO",
+    "recommended_story_ids": [
+      "J1",
+      "J2",
+      "J3",
+      "J4",
+      "J5"
+    ],
+    "scope": "five human-reviewed fixture demonstrations; J5 mock-only with server-bound actions disabled",
+    "exclusions": [
+      "browser E2E untested",
+      "no live connector",
+      "no server-side approval",
+      "no actual publish",
+      "no paid retry",
+      "no identifiable GA4 join",
+      "no real monitoring or retention policy"
+    ],
+    "business_success_criteria": [
+      "all five stories reviewable with source and owner shown",
+      "every blocked transition visibly held as design criterion",
+      "16 KPIs traceable but BASELINE_UNKNOWN; times only measurable after approved instrumentation"
+    ],
+    "highest_risk_interface_mismatch": "UX client-side approval or UNKNOWN receipt mistaken for server-authoritative durable permission; require independent backend auth and receipt binding"
+  },
+  "side_effects": {
+    "live_logins": 0,
+    "paid_calls": 0,
+    "production_writes": 0,
+    "customer_records": 0,
+    "publishes": 0
+  },
+  "validator_status": "EXECUTED_OFFLINE_POLICY_ONLY",
+  "verdict": "BIZ02_S2_OFFLINE_MVP_ACCEPTANCE_DRAFT_READY_FOR_REVIEW",
+  "next_owner": "ChatGPT Điều phối"
+}
