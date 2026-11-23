@@ -1,0 +1,551 @@
+{
+  "task_id": "ENG-01A-S1",
+  "agent": "codex",
+  "observed_date_ict": "2026-11-23",
+  "recorded_utc": "2026-11-23T03:23:54.554125+00:00",
+  "base_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "rules_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "workflow_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "spec_commit": "a0b493ada720084ee77a3231aca0f22ce92d1d61",
+  "instruction": "https://github.com/DuyKienTTD/Hosting/pull/7#issuecomment-7090656024",
+  "ack": "EXECUTE_RECEIVED_AND_ACKNOWLEDGED_2026_11_23",
+  "upstream": {
+    "plan_pr6": "cdf0aed51965465601320fd57623a84065ad9c5b",
+    "b2o_pr5": "d95f1619d3e82d9bfe38ea583d50b1f5b1a5a810",
+    "b2p_pr7": "54b4e1853861b4170cd3dd38c52a223726589ce3",
+    "work_pr4": "5a036fa8952b0dede7470579011a053bcdce51b1",
+    "inf01_pr9": "486afc2042f72a3024b5fcdfe2cab5eaa3c44fe4"
+  },
+  "source": {
+    "sandbox/connector-contracts/offline_connector.py": {
+      "git_blob": "2bbfb4ef308e39ea1b548f22553c673d3a684a97",
+      "checked_out_sha256": "d85e49241b14f2f3b2ab7aac72341361cc1e1d0ed52239dc907ca4b284889647"
+    },
+    "sandbox/connector-contracts/test_offline_connector.py": {
+      "git_blob": "657a4d5931c9391e88b121f7b22d873cb7120fc0",
+      "checked_out_sha256": "ac61b3bdedf26261d27350a1a97c936d57d59ea9168e008f7501050f9b851410"
+    }
+  },
+  "source_manifest_sha256": "fa2ba53cde31eae9d2311211b6b3204905b939796564b1f4c04c61ed5534961f",
+  "environment": {
+    "python": "3.12.3",
+    "implementation": "CPython",
+    "os": "Windows",
+    "os_release": "11",
+    "machine": "AMD64",
+    "sqlite": "3.45.1",
+    "stdlib_only": true,
+    "python_utf8_mode": true
+  },
+  "environment_sha256": "b049037cb4da5c300fd3e2cf3d1d315508d518555731261aa095d3d53e79d93a",
+  "source_audit": {
+    "imports": [
+      "argparse",
+      "contextlib",
+      "hashlib",
+      "json",
+      "offline_connector",
+      "os",
+      "pathlib",
+      "re",
+      "sqlite3",
+      "stat",
+      "subprocess",
+      "sys",
+      "tempfile",
+      "unittest"
+    ],
+    "network_transport_present": false,
+    "live_enabled": false,
+    "socket_audit_fault_self_check": "denied",
+    "credentials_or_endpoint_input": "denied",
+    "source_is_standard_library_only": true
+  },
+  "test_command": "python -X utf8 -B sandbox/connector-contracts/test_offline_connector.py --evidence <temp-path>",
+  "observed": "local isolated SQLite, committed fake dispatch and receipt traces survive fresh Python processes",
+  "expected": "at most one dispatch and one receipt per job; durable conflict-safe unknown and ACK recovery",
+  "tests_run": 8,
+  "cases": {
+    "working_before_dispatch": {
+      "expected": {
+        "interrupted_state": "working",
+        "outcome": "outcome_unknown",
+        "dispatches": 0,
+        "receipts": 1
+      },
+      "observed": {
+        "outcome": "outcome_unknown",
+        "dispatches": 0,
+        "receipts": 1,
+        "job_id": "job-cb0dea55cdd9a9dba27a4896376c31069093ec1bab8ac11ee56ebd81d8eb84f6",
+        "receipt_id": "receipt-8681ac8b5bcac520e7cc0c59ca14d6a2967a98b48cf7e498ec0f61e7d3f7effe",
+        "audit": [
+          {
+            "sequence": 1,
+            "event": "admitted",
+            "observed_ms": 0
+          },
+          {
+            "sequence": 2,
+            "event": "working",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 3,
+            "event": "sending",
+            "observed_ms": 2
+          },
+          {
+            "sequence": 4,
+            "event": "receipt_committed",
+            "observed_ms": 2
+          },
+          {
+            "sequence": 5,
+            "event": "receipt_ack",
+            "observed_ms": 2
+          }
+        ],
+        "interrupted_state": "working",
+        "receipt_committed_before_crash": false,
+        "same_receipt_on_recovery": null,
+        "crash_exit": 86,
+        "crash_pid": 39352,
+        "recovery_pid": 4436,
+        "replay_same_job": true
+      }
+    },
+    "working_after_dispatch": {
+      "expected": {
+        "interrupted_state": "working",
+        "outcome": "outcome_unknown",
+        "dispatches": 1,
+        "receipts": 1
+      },
+      "observed": {
+        "outcome": "outcome_unknown",
+        "dispatches": 1,
+        "receipts": 1,
+        "job_id": "job-0725d9c99019cde3f21ea61e599bed016c01a267d61e05c22eb71a3618f2989d",
+        "receipt_id": "receipt-a9b75e621aa586e6f79674902c1b4e8337a37e70f4481314c9c78344467689e3",
+        "audit": [
+          {
+            "sequence": 6,
+            "event": "admitted",
+            "observed_ms": 0
+          },
+          {
+            "sequence": 7,
+            "event": "working",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 8,
+            "event": "fake_dispatch",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 9,
+            "event": "sending",
+            "observed_ms": 2
+          },
+          {
+            "sequence": 10,
+            "event": "receipt_committed",
+            "observed_ms": 2
+          },
+          {
+            "sequence": 11,
+            "event": "receipt_ack",
+            "observed_ms": 2
+          }
+        ],
+        "interrupted_state": "working",
+        "receipt_committed_before_crash": false,
+        "same_receipt_on_recovery": null,
+        "crash_exit": 86,
+        "crash_pid": 33056,
+        "recovery_pid": 37796,
+        "replay_same_job": true
+      }
+    },
+    "sending_before_receipt": {
+      "expected": {
+        "interrupted_state": "sending",
+        "outcome": "completed",
+        "dispatches": 1,
+        "receipts": 1
+      },
+      "observed": {
+        "outcome": "completed",
+        "dispatches": 1,
+        "receipts": 1,
+        "job_id": "job-c2332ec10b462edc7b7291efc1e2d44876a6fa1d3dd8e4da5e52acd7fb0057c7",
+        "receipt_id": "receipt-e4d9a8f2dcf30feddba2512ac6a30597bf1113780ae9165796b86867d071fcb5",
+        "audit": [
+          {
+            "sequence": 12,
+            "event": "admitted",
+            "observed_ms": 0
+          },
+          {
+            "sequence": 13,
+            "event": "working",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 14,
+            "event": "fake_dispatch",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 15,
+            "event": "sending",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 16,
+            "event": "receipt_committed",
+            "observed_ms": 2
+          },
+          {
+            "sequence": 17,
+            "event": "receipt_ack",
+            "observed_ms": 2
+          }
+        ],
+        "interrupted_state": "sending",
+        "receipt_committed_before_crash": false,
+        "same_receipt_on_recovery": null,
+        "crash_exit": 86,
+        "crash_pid": 17972,
+        "recovery_pid": 14492,
+        "replay_same_job": true
+      }
+    },
+    "sending_after_receipt": {
+      "expected": {
+        "interrupted_state": "sending",
+        "outcome": "completed",
+        "dispatches": 1,
+        "receipts": 1
+      },
+      "observed": {
+        "outcome": "completed",
+        "dispatches": 1,
+        "receipts": 1,
+        "job_id": "job-d71c12fa4196cb17aec6e0a2910decbe1ed75a9ef4f72ac14e398aed5ded084a",
+        "receipt_id": "receipt-3ba3bbb48ae91f4529857d2a652cd6e51ddff61b0cd70d25afbca782fbd3712e",
+        "audit": [
+          {
+            "sequence": 18,
+            "event": "admitted",
+            "observed_ms": 0
+          },
+          {
+            "sequence": 19,
+            "event": "working",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 20,
+            "event": "fake_dispatch",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 21,
+            "event": "sending",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 22,
+            "event": "receipt_committed",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 23,
+            "event": "receipt_ack",
+            "observed_ms": 2
+          }
+        ],
+        "interrupted_state": "sending",
+        "receipt_committed_before_crash": true,
+        "same_receipt_on_recovery": true,
+        "crash_exit": 86,
+        "crash_pid": 33260,
+        "recovery_pid": 23564,
+        "replay_same_job": true
+      }
+    },
+    "contract": {
+      "expected": "202 for valid synthetic admission and deny invalid schema/network/credentials",
+      "observed": {
+        "admission": 202,
+        "rejected": [
+          "missing",
+          "mode",
+          "unapproved",
+          "budget",
+          "deadline",
+          "real_channel",
+          "real_key",
+          "endpoint",
+          "credentials"
+        ],
+        "endpoint_config_denied": true,
+        "credential_config_denied": true,
+        "nonfixture_storage_denied": true,
+        "socket_audit_self_check": "denied"
+      }
+    },
+    "expired_pending": {
+      "expected": "unknown with no dispatch and one receipt",
+      "observed": {
+        "outcome": "outcome_unknown",
+        "dispatches": 0,
+        "receipts": 1,
+        "job_id": "job-49c967ce8c53e1afcfad5611d34888785532602cc67292ede99ca55e66a239ab",
+        "receipt_id": "receipt-c75bc158fed3d7ed780cbaf8cc4e5e053267a87baf0103b7815bfbb29b92f5a4",
+        "audit": [
+          {
+            "sequence": 1,
+            "event": "admitted",
+            "observed_ms": 0
+          },
+          {
+            "sequence": 2,
+            "event": "working",
+            "observed_ms": 20
+          },
+          {
+            "sequence": 3,
+            "event": "sending",
+            "observed_ms": 20
+          },
+          {
+            "sequence": 4,
+            "event": "receipt_committed",
+            "observed_ms": 20
+          },
+          {
+            "sequence": 5,
+            "event": "receipt_ack",
+            "observed_ms": 20
+          }
+        ]
+      }
+    },
+    "known_failure": {
+      "expected": "failed with one dispatch and one receipt",
+      "observed": {
+        "outcome": "failed",
+        "dispatches": 1,
+        "receipts": 1,
+        "job_id": "job-42af7d68ed6aa8570f4591d81f3540f77236e737fc4c5126f4cd380526e5425d",
+        "receipt_id": "receipt-db302c2ca5882696ff5774d50b0335a5fc8884b7bb806864f7fec0d5e56a9c93",
+        "audit": [
+          {
+            "sequence": 1,
+            "event": "admitted",
+            "observed_ms": 0
+          },
+          {
+            "sequence": 2,
+            "event": "working",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 3,
+            "event": "fake_dispatch",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 4,
+            "event": "sending",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 5,
+            "event": "receipt_committed",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 6,
+            "event": "receipt_ack",
+            "observed_ms": 1
+          }
+        ]
+      }
+    },
+    "callback_identity": {
+      "expected": "missing and forged identities rejected before valid recovery",
+      "observed": {
+        "outcome": "completed",
+        "dispatches": 1,
+        "receipts": 1,
+        "job_id": "job-49c967ce8c53e1afcfad5611d34888785532602cc67292ede99ca55e66a239ab",
+        "receipt_id": "receipt-651ea6fd28c886a1d62ccec8ce2d737e4410aae2bf9a36ce43f34e644f2cbbb2",
+        "audit": [
+          {
+            "sequence": 1,
+            "event": "admitted",
+            "observed_ms": 0
+          },
+          {
+            "sequence": 2,
+            "event": "working",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 3,
+            "event": "fake_dispatch",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 4,
+            "event": "sending",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 5,
+            "event": "receipt_committed",
+            "observed_ms": 3
+          },
+          {
+            "sequence": 6,
+            "event": "receipt_ack",
+            "observed_ms": 3
+          }
+        ],
+        "missing_http": 422,
+        "mismatch_http": 409,
+        "state_unchanged": true
+      }
+    },
+    "success_replay_conflict": {
+      "expected": "completed, one dispatch/receipt, stable replay and conflict 409",
+      "observed": {
+        "outcome": "completed",
+        "dispatches": 1,
+        "receipts": 1,
+        "job_id": "job-49c967ce8c53e1afcfad5611d34888785532602cc67292ede99ca55e66a239ab",
+        "receipt_id": "receipt-8a31c6b205d25454d52e7db4d7541c44e0a7620e65a537acae30c8dd62d45b0f",
+        "audit": [
+          {
+            "sequence": 1,
+            "event": "admitted",
+            "observed_ms": 0
+          },
+          {
+            "sequence": 2,
+            "event": "working",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 3,
+            "event": "fake_dispatch",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 4,
+            "event": "sending",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 5,
+            "event": "receipt_committed",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 6,
+            "event": "receipt_ack",
+            "observed_ms": 1
+          }
+        ],
+        "conflict_http": 409,
+        "replay_http": 200,
+        "unchanged": true
+      }
+    },
+    "timeout_and_late_result": {
+      "expected": "unknown at deadline, reject late settlement/callback, no redispatch",
+      "observed": {
+        "outcome": "outcome_unknown",
+        "dispatches": 1,
+        "receipts": 1,
+        "job_id": "job-a78df45d559bbc0c4e831b74bf7ad525984c75e9aaadb74d26244c508edb21c7",
+        "receipt_id": "receipt-1d28fae2355498e8c245b9cf7fadd30be12a638337f665bd5387ac2e6f0ad432",
+        "audit": [
+          {
+            "sequence": 1,
+            "event": "admitted",
+            "observed_ms": 0
+          },
+          {
+            "sequence": 2,
+            "event": "working",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 3,
+            "event": "fake_dispatch",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 4,
+            "event": "sending",
+            "observed_ms": 20
+          },
+          {
+            "sequence": 5,
+            "event": "receipt_committed",
+            "observed_ms": 20
+          },
+          {
+            "sequence": 6,
+            "event": "receipt_ack",
+            "observed_ms": 20
+          }
+        ],
+        "deadline_ms": 20,
+        "late_settlement_rejected": true,
+        "conflicting_callback_rejected": true,
+        "same_receipt": true
+      }
+    },
+    "worker_lock": {
+      "expected": "another worker cannot recover while lock is held",
+      "observed": {
+        "recovery_denied": true,
+        "state": "pending",
+        "dispatches": 0
+      }
+    }
+  },
+  "verdict": "ENG01A_S1_OFFLINE_CONTRACT_PASS",
+  "real_connector": "REAL_CONNECTOR_UNTESTED",
+  "blockers": {
+    "offline_scope": [],
+    "outside_scope": "distributed exactly-once and real-channel auth/quota/cost not tested"
+  },
+  "ai02_closeout": {
+    "local_verdict": "B2P_LOCAL_RENDER_PASS_ACCEPT_WITH_LIMITATIONS",
+    "projection_and_timer": "FIXED_IN_B2P_CANDIDATE_ONLY",
+    "ack": "ACK_PROVENANCE_CLARIFIED",
+    "kvm2": "BLOCKED_PREFLIGHT_INPUT",
+    "fixture_go": false,
+    "dependency": "INF-01 PR #9 is available for ChatGPT gate synthesis; no KVM2 operation in S1"
+  },
+  "historical_suites_rerun": false,
+  "scope_counters": {
+    "external_service_calls": 0,
+    "provider_calls": 0,
+    "paid_attempts": 0,
+    "usd": 0,
+    "kvm2_accesses": 0,
+    "production_mutations": 0
+  },
+  "paid_gate_b": "BLOCKED_PREFLIGHT",
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}

@@ -1,7 +1,7 @@
 ---
 id: eng-01a-s1-offline-connector-contract
 type: task
-status: ready
+status: ready_for_review
 updated_at: 2026-11-23
 sensitivity: public
 owner: codex
@@ -22,4 +22,4 @@ reviewer: chatgpt
 
 **STOP / INVARIANTS:** Fake dữ liệu tổng hợp, SQLite tạm riêng, `LIVE_ENABLED=False`. Thiếu bằng chứng cách ly, bind callback hoặc phát hiện công việc trùng thì dừng phần liên quan. Zero network/provider calls và paid cost trong fixture. Không truy cập KVM2, production, account connector, credential, ledger/permit/kill switch thật. Paid Gate B giữ `BLOCKED_PREFLIGHT`.
 
-**ARTIFACT / NEXT_OWNER:** PR riêng vào main, báo cáo/evidence đã khử nhạy cảm, test delta và remote readback. ChatGPT Điều phối nghiệm thu offline.
+**ARTIFACT / NEXT_OWNER:** PR riêng vào main, [báo cáo](../reports/2026-11-23-eng-01a-s1-offline-connector-contract.md) và [evidence](../reports/evidence/2026-11-23-eng-01a-s1-offline-connector-contract.json) đã khử nhạy cảm, test delta và remote readback. ChatGPT Điều phối nghiệm thu offline.
