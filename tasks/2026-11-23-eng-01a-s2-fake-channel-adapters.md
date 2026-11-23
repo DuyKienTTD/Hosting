@@ -1,7 +1,7 @@
 ---
 id: eng-01a-s2-fake-channel-adapters
 type: task
-status: ready
+status: ready_for_review
 updated_at: 2026-11-23
 sensitivity: public
 owner: codex
@@ -20,4 +20,4 @@ reviewer: chatgpt
 
 **STOP / INVARIANTS:** `LIVE_ENABLED=False`. Fixture tổng hợp, read-only, zero requests, zero provider calls và zero USD. Dừng khi cần credentials/account, network, runtime hoặc dependency ngoài stdlib. Không chạy lại S1, không sửa PR #5/#7/#10, không KVM2/Docker/production. Paid Gate B giữ `BLOCKED_PREFLIGHT`.
 
-**HANDOFF:** `ENG01A_S2_CHANNEL_MOCK_PASS` hoặc blocker có evidence. `REAL_GA4_UNTESTED / REAL_WP_WOO_UNTESTED`. ChatGPT Điều phối nghiệm thu bản ghi theo SHA.
+**HANDOFF:** `ENG01A_S2_CHANNEL_MOCK_PASS` hoặc blocker có evidence. `REAL_GA4_UNTESTED / REAL_WP_WOO_UNTESTED`. ChatGPT Điều phối nghiệm thu [báo cáo](../reports/2026-11-23-eng-01a-s2-fake-channel-adapters.md) và [evidence](../reports/evidence/2026-11-23-eng-01a-s2-fake-channel-adapters.json) theo SHA.
