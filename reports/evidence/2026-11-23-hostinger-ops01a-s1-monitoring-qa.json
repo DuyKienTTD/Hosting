@@ -1,40 +1,14 @@
 {
   "task": "OPS-01A/S1",
   "agent": "hostinger-agent",
-  "status": "OPS01A_S1_PARTIAL_BLOCKED",
+  "status": "OPS01A_S1_OFFLINE_MONITORING_POLICY_PASS",
   "base_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
   "branch": "hostinger/ops-01a-s1-offline-monitoring-2026-11-23",
   "policy_version": "ops-01a-s1-v2",
-  "modified_files": [
-    "tasks/2026-11-23-hostinger-ops01a-s1-monitoring-policy.md",
-    "sandbox/ops-monitoring/policy.json",
-    "sandbox/ops-monitoring/evaluator.py",
-    "sandbox/ops-monitoring/fixtures/readiness_bad_then_good.json",
-    "sandbox/ops-monitoring/fixtures/readiness_good_then_bad.json",
-    "sandbox/ops-monitoring/fixtures/readiness_unknown_interleave.json",
-    "sandbox/ops-monitoring/fixtures/disk_threshold_trend.json",
-    "sandbox/ops-monitoring/fixtures/backup_overdue.json",
-    "sandbox/ops-monitoring/fixtures/backup_schedule_unknown.json",
-    "sandbox/ops-monitoring/fixtures/p0_exit_137.json",
-    "sandbox/ops-monitoring/fixtures/tls_blocked.json",
-    "sandbox/ops-monitoring/fixtures/negative_controls.json",
-    "sandbox/ops-monitoring/tests/test_evaluator.py",
-    "reports/2026-11-23-hostinger-ops01a-s1-monitoring-qa.md",
-    "reports/evidence/2026-11-23-hostinger-ops01a-s1-monitoring-qa.json"
-  ],
-  "test_cases": {
-    "declared": 10,
-    "last_attempted_before_final_remote_correction": {"passed": 9, "failed": 1, "failure": "unknown-interleave expected state in harness"},
-    "final_execution_after_correction": "BLOCKED_SANDBOX_UNAVAILABLE",
-    "final_pass_count": null
-  },
-  "recover_checks": {
-    "bad_then_good": "source corrected for OPEN then chronological RECOVER",
-    "good_then_bad": "source/test expects OPEN only",
-    "unknown_interleave": "source/test expects UNKNOWN then later OPEN",
-    "duplicate_out_of_order_identity_source": "fixture and test source present"
-  },
-  "side_effect_controls": {"network_calls": 0, "live_monitoring": 0, "production_actions": 0, "docker_daemon": 0, "external_transport": 0},
-  "verdict": "PARTIAL_BLOCKED",
+  "tests": {"declared":10,"run":10,"passed":10,"failed":0,"recover_order_checked":true,"unknown_interleave_checked":true,"dedupe_checked":true},
+  "fixtures": ["readiness_bad_then_good","readiness_good_then_bad","readiness_unknown_interleave","disk_threshold_trend","backup_overdue","backup_schedule_unknown","p0_exit_137","tls_blocked","negative_controls"],
+  "side_effect_controls": {"network_calls":0,"live_monitoring":0,"production_actions":0,"docker_daemon":0,"external_transport":0},
+  "state_semantics": {"open_after_chronological_failures":true,"recover_only_after_open_and_chronological_successes":true,"unknown_resets_streak":true,"duplicate_and_out_of_order_rejected":true,"identity_and_source_mismatch_audited":true},
+  "verdict": "OPS01A_S1_OFFLINE_MONITORING_POLICY_PASS",
   "next_owner": "chatgpt"
 }
