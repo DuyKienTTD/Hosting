@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import h6_b2p_preflight as p
 
@@ -12,16 +13,8 @@ import h6_b2p_preflight as p
 class PreflightTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.baseline = json.loads(p.BASE_EVIDENCE.read_bytes())
-        cls.events = cls.baseline["events"]
+        cls.events = json.loads(p.BASE_EVIDENCE.read_bytes())["events"]
         cls.owner = "a" * 32
-        with tempfile.TemporaryDirectory(prefix="h6-b2p-test-") as scratch:
-            path = Path(scratch).resolve()
-            cls.spec, _, cls.source = p.prepare(path, cls.owner)
-            rendered = p.b2o.docker("--context", "desktop-linux", "compose", "--project-directory", str(path),
-                                    "-p", p.PROJECT, "--profile", "*", "-f", "-", "config", "--format", "json",
-                                    "--no-path-resolution", input_data=p.b2o.canonical(cls.spec))
-        cls.render = json.loads(rendered)
 
     def test_base_projection_matches_and_rejects_drift(self):
         wf = p.target_workflow()
@@ -38,10 +31,71 @@ class PreflightTests(unittest.TestCase):
         without = [e for e in self.events if e is not timer]
         mutations = {"missing": without, "duplicate": self.events + [timer],
                      "wrong_role": without + [timer | {"role": "bridge"}],
+                     "mixed_role": self.events + [timer | {"role": "bridge"}],
+                     "non_integer_timestamp": without + [timer | {"mono_ns": str(timer["mono_ns"])}],
                      "after_read_end": without + [timer | {"mono_ns": read_end["mono_ns"] + 1}]}
         for label, events in mutations.items():
             with self.subTest(label=label), self.assertRaises(RuntimeError):
                 p.verify_timer(events)
+
+    def test_other_task_timer_is_outside_task_scope(self):
+        timer = next(e for e in self.events if e["event"] == "guard_response_timer_fired")
+        self.assertEqual(p.verify_timer(self.events + [timer | {"task": "b2o-31", "role": "bridge"}]),
+                         p.verify_timer(self.events))
+
+    def test_candidate_projection_pins_staged_content_before_returning_spec(self):
+        with tempfile.TemporaryDirectory(prefix="h6-b2p-d1-projection-") as scratch:
+            path = Path(scratch).resolve()
+            spec, _, _, provenance = p.prepare(path, self.owner)
+            staged = path / provenance["file"]
+            candidate = p.verified_candidate_projection(staged.read_bytes(), spec)
+            self.assertEqual(candidate, p.CANDIDATE_PROJECTION_SHA256)
+            self.assertNotEqual(candidate, p.b2o.PROJECTION)
+            self.assertEqual(provenance["candidate_staged_file_sha256"], p.digest(staged.read_bytes()))
+            baseline_specification = p.b2o.specification
+
+            def stage_wrong_route(staging_path, owner):
+                result = baseline_specification(staging_path, owner)
+                file = staging_path / "workflows.json"
+                workflows = json.loads(file.read_bytes())
+                node = next(n for n in workflows[0]["nodes"] if n["id"] == "call-reasoner")
+                node["parameters"]["url"] += "/unexpected"
+                file.write_bytes(p.b2o.canonical(workflows))
+                return result
+
+            with patch.object(p.b2o, "specification", side_effect=stage_wrong_route):
+                with self.assertRaisesRegex(RuntimeError, "staged candidate workflow projection drift"):
+                    p.prepare(path, self.owner)
+
+    def test_candidate_rejects_changed_bytes_after_copy(self):
+        with tempfile.TemporaryDirectory(prefix="h6-b2p-d1-copy-") as scratch:
+            path = Path(scratch).resolve()
+            _, _, _, provenance = p.prepare(path, self.owner)
+            raw = (path / provenance["file"]).read_bytes()
+            pin = provenance["candidate_staged_file_sha256"]
+            copied = path / "copied-workflows.json"
+            copied.write_bytes(raw)
+            p.verify_staged_workflow(copied, pin)
+            # Semantics are unchanged, so only the exact-byte check can catch this.
+            copied.write_bytes(raw + b"\n")
+            self.assertEqual(json.loads(raw), json.loads(copied.read_bytes()))
+            with self.assertRaisesRegex(RuntimeError, "staged workflow bytes changed"):
+                p.verify_staged_workflow(copied, pin)
+            with self.assertRaisesRegex(RuntimeError, "missing exact staged workflow digest"):
+                p.verify_staged_workflow(copied, None)
+
+
+class RenderTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.owner = "a" * 32
+        with tempfile.TemporaryDirectory(prefix="h6-b2p-test-") as scratch:
+            path = Path(scratch).resolve()
+            cls.spec, _, cls.source, _ = p.prepare(path, cls.owner)
+            rendered = p.b2o.docker("--context", "desktop-linux", "compose", "--project-directory", str(path),
+                                    "-p", p.PROJECT, "--profile", "*", "-f", "-", "config", "--format", "json",
+                                    "--no-path-resolution", input_data=p.b2o.canonical(cls.spec))
+        cls.render = json.loads(rendered)
 
     def test_candidate_isolation_rejects_drift(self):
         p.validate(self.render, self.spec, self.owner, self.source)
