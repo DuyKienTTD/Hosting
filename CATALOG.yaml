@@ -25,7 +25,7 @@ documents:
   - id: ttd-a1-cost-first-master-allocation-2026-11-23
     path: tasks/2026-11-23-a1-cost-first-master-allocation.md
     type: task
-    status: proposed_reallocation_pending_agent_ack
+    status: proposed_governance_with_agent_evidence
     authoritative_for: agent-a1-work-assignment-cost-first-codex-exception-gate
     updated_at: 2026-11-23
     sensitivity: public
