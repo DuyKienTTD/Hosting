@@ -13,7 +13,7 @@ RELS=['program/kng/validate.py','program/kng/test_validate.py','program/current.
       'program/README.md','program/KNOWLEDGE_OPTIMIZATION.md','program/OPERATING_PROTOCOL.md',
       'program/WORK_BREAKDOWN.md','program/roadmaps/a1.md',
       'program/PRODUCT_AND_UI.md','program/SKILL_REGISTRY.md','program/roadmaps/work.md',
-      'README.md','program/kng/select_task.py','program/kng/test_select_task.py','program/kng/derive.py','reports/evidence/2026-11-23-a1-kng01-d2-q0-metrics.json',
+      'README.md','program/kng/select_task.py','program/kng/test_select_task.py','program/kng/release_state.py','program/kng/test_release_state.py','program/kng/derive.py','reports/evidence/2026-11-23-a1-kng01-d2-q0-metrics.json',
       'agents/README.md','AGENTS.md','PROJECT.md','STATE.md','CATALOG.yaml',
       'rules/AGENT_WORKFLOW.md','rules/REPOSITORY_SECURITY.md']
 class Contract(unittest.TestCase):
@@ -69,6 +69,14 @@ class Contract(unittest.TestCase):
         p='program/current.json';j=self.obj(p);j['mode']='G0_AND_KNG';self.put(p,j);self.err('UNSAFE_PRIORITY')
     def test_wrong_authority(self):
         p='program/current.json';j=self.obj(p);j['source_authority']='PR39_IS_EFFECTIVE';self.put(p,j);self.err('WRONG_AUTHORITY')
+    def test_unapproved_release_self_activation(self):
+        p='program/current.json';j=self.obj(p);j['release_gate']['status']='EFFECTIVE';self.put(p,j);self.err('UNVERIFIED_RELEASE_ACTIVATION')
+    def test_stale_work_pending_ack(self):
+        p='program/current.json';j=self.obj(p);j['agent_status']['Work']='KNG_D2_TARGETED_REQA_PENDING_ACK';self.put(p,j);self.err('STALE_AGENT_STATE')
+    def test_stale_d2_task_binding(self):
+        p='program/current.json';j=self.obj(p);j['work_ack_task_id']='WORK-KNG01-D2-TARGETED-INDEPENDENT-REQA';self.put(p,j);self.err('ACK_RECEIPT_MISMATCH')
+    def test_fake_source_qa_verdict(self):
+        p='program/current.json';j=self.obj(p);j['last_work_source_qa']['verdict']='KNG_ACCEPTED';self.put(p,j);self.err('SOURCE_QA_PROVENANCE_MISMATCH')
     def test_fake_work_ack(self):
         p='program/current.json';j=self.obj(p);j['work_ack']='DONE';self.put(p,j);self.err('FALSE_ACK')
     def test_stale_agent_state(self):

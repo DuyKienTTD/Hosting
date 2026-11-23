@@ -48,13 +48,20 @@ def validate(root, *, verify_objects=True):
             except LookupError as exc: reject('PROVENANCE_UNVERIFIED', label + ': ' + str(exc))
             except ValueError as exc: reject('SOURCE_BLOB_MISMATCH', label + ': ' + str(exc))
     if state.get('mode') != 'KNG_ONLY': reject('UNSAFE_PRIORITY', state.get('mode'))
-    if state.get('source_authority') != 'main_effective_rules_until_approved_merge': reject('WRONG_AUTHORITY', 'candidate cannot supersede main')
+    if state.get('record_kind') != 'KNG_RELEASE_SOURCE_SNAPSHOT' or state.get('source_authority') != 'main_effective_rules_until_verified_activation': reject('WRONG_AUTHORITY', 'source snapshot cannot independently activate main')
+    gate = state.get('release_gate', {})
+    if not isinstance(gate, dict) or gate.get('phase') != 'PREMERGE_CANDIDATE' or gate.get('status') != 'NOT_EFFECTIVE' or gate.get('approval_event') is not None or gate.get('remote_main_readback') is not None:
+        reject('UNVERIFIED_RELEASE_ACTIVATION', 'effective authority must be established by external authenticated A0 + main-tree readback')
     if set(state.get('must_read', [])) != REQUIRED_RULES: reject('MISSING_MANDATORY_RULE', state.get('must_read'))
     if state.get('production_authorized') is not False or state.get('merge_authorized') is not False or state.get('codex_authorized') is not False: reject('UNSAFE_PERMISSION', 'production, merge and codex must remain false')
     # A real Work ACK must be bound to the exact dispatch, not a swapped task ID.
-    expected_work_task = 'WORK-KNG01-D2-TARGETED-INDEPENDENT-REQA'
-    if state.get('work_ack_task_id') != expected_work_task:
-        reject('ACK_RECEIPT_MISMATCH', 'Work task ID differs from authorized D2 dispatch')
+    if state.get('work_ack_task_id') is not None:
+        reject('ACK_RECEIPT_MISMATCH', 'no new current Work dispatch; historical D2 task ID belongs only to historical QA record')
+    if state.get('agent_status', {}).get('Work') != 'QA_COMPLETE_NO_NEW_TASK':
+        reject('STALE_AGENT_STATE', 'Work must reflect completed source QA without new dispatch')
+    work_qa = state.get('last_work_source_qa', {})
+    if not isinstance(work_qa, dict) or work_qa.get('source_sha') != 'b8cd377d3c3696c486fed41adc941a9d4db92ecc' or work_qa.get('verdict') != 'KNG01_PR42_SOURCE_QA_PASS_WITH_FINAL_GATES' or work_qa.get('receipt_url') != 'https://github.com/DuyKienTTD/Hosting/pull/42#issuecomment-7103815886' or work_qa.get('record_type') != 'HISTORICAL_COMPLETED_SOURCE_QA_NOT_NEW_ACK':
+        reject('SOURCE_QA_PROVENANCE_MISMATCH', 'completed Work source QA must retain exact immutable D5 readback')
     if state.get('work_ack') not in ('UNKNOWN','ACKNOWLEDGED'): reject('FALSE_ACK', state.get('work_ack'))
     if state.get('work_ack') == 'ACKNOWLEDGED':
         receipt = state.get('work_ack_receipt')
@@ -92,7 +99,7 @@ def validate(root, *, verify_objects=True):
         if x.get('path') in protected and ex not in ('PREVIEW_ONLY_SHARED_WRITER_GATE','APPLIED_ISOLATED_INTEGRATION'): reject('UNSAFE_SHARED_WRITE', x['path'])
         if ex == 'APPLIED_ISOLATED_INTEGRATION':
             integration = state.get('integration',{})
-            if x.get('path') not in COMMON_PATHS or integration.get('mode') != 'D2_ISOLATED_INTEGRATION_NOT_EFFECTIVE' or integration.get('branch') != 'a1/kng01-shared-integration-d2-2026-11-23' or integration.get('grant_url') != 'https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192':
+            if x.get('path') not in COMMON_PATHS or integration.get('mode') != 'HISTORICAL_D2_SOURCE_INTEGRATION' or integration.get('branch') != 'a1/kng01-shared-integration-d2-2026-11-23' or integration.get('grant_url') != 'https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192':
                 reject('UNSAFE_SHARED_WRITE', x.get('path'))
             if x.get('source_ref','').split('@')[-1] != lock.get('migration_bases',{}).get(x.get('path'),{}).get('commit'):
                 reject('SOURCE_PIN_MISMATCH', x.get('path'))

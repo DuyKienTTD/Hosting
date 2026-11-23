@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "record_kind": "CANDIDATE_ROUTING_SNAPSHOT_NOT_EFFECTIVE_RULES",
+  "record_kind": "KNG_RELEASE_SOURCE_SNAPSHOT",
   "mode": "KNG_ONLY",
-  "source_authority": "main_effective_rules_until_approved_merge",
+  "source_authority": "main_effective_rules_until_verified_activation",
   "main_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
   "pr31_sha": "a770de80a2467ca1789c820b63416209cf53b7d1",
   "pr39_source_sha": "22d741e3f1dd325540932dea63c3a6da635113c3",
@@ -19,7 +19,7 @@
   "work_ack": "UNKNOWN",
   "agent_status": {
     "A1": "KNG_ONLY",
-    "Work": "KNG_D2_TARGETED_REQA_PENDING_ACK",
+    "Work": "QA_COMPLETE_NO_NEW_TASK",
     "A2": "ON_HOLD_DEPENDENCY_KNG01",
     "Hostinger": "ON_HOLD_DEPENDENCY_KNG01",
     "Hermes": "ON_HOLD_DEPENDENCY_KNG01",
@@ -39,8 +39,8 @@
     "program/roadmaps/work.md"
   ],
   "coordinator_readback_required": true,
-  "status_note": "D3 targeted author fix on PR41. Work D2 independent review ACK and verdict are historical at comment 7099819982; Work D3 targeted re-QA has no session ACK. work_ack UNKNOWN refers to pending future D3 review; no live or merge rights.",
-  "work_ack_task_id": "WORK-KNG01-D2-TARGETED-INDEPENDENT-REQA",
+  "status_note": "Work independent PR42 technical source QA complete at pinned comment 7103815886. No new Work task or ACK. KNG candidate is NOT_EFFECTIVE until separate A0 exact merge approval and independent remote main-tree readback. This is a source snapshot, not live merge authority.",
+  "work_ack_task_id": null,
   "work_ack_receipt": null,
   "last_work_qa_d1": {
     "status": "NEEDS_A1_FIX",
@@ -67,7 +67,7 @@
     }
   },
   "integration": {
-    "mode": "D2_ISOLATED_INTEGRATION_NOT_EFFECTIVE",
+    "mode": "HISTORICAL_D2_SOURCE_INTEGRATION",
     "grant_url": "https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192",
     "branch": "a1/kng01-shared-integration-d2-2026-11-23",
     "allowed_common_paths": [
@@ -87,5 +87,26 @@
     "receipt_url": "https://github.com/DuyKienTTD/Hosting/pull/41#issuecomment-7099819982",
     "source_sha": "666a32f54bd55cebb88117725a5f8c7c6208ffd0",
     "record_type": "HISTORICAL_REVIEW_NOT_NEW_D3_ACK"
+  },
+  "last_work_source_qa": {
+    "actor": "Work",
+    "task_id": "WORK-KNG01-PR42-FINAL-FIXTURE-MICRO-RECHECK",
+    "verdict": "KNG01_PR42_SOURCE_QA_PASS_WITH_FINAL_GATES",
+    "source_sha": "b8cd377d3c3696c486fed41adc941a9d4db92ecc",
+    "receipt_url": "https://github.com/DuyKienTTD/Hosting/pull/42#issuecomment-7103815886",
+    "record_type": "HISTORICAL_COMPLETED_SOURCE_QA_NOT_NEW_ACK"
+  },
+  "release_gate": {
+    "phase": "PREMERGE_CANDIDATE",
+    "status": "NOT_EFFECTIVE",
+    "candidate_at_source_authoring": true,
+    "activation_requires": [
+      "separate_A0_exact_candidate_and_tree_approval",
+      "merge_commit_on_main",
+      "verified_remote_main_tree_and_parents_readback"
+    ],
+    "verification_module": "program/kng/release_state.py",
+    "approval_event": null,
+    "remote_main_readback": null
   }
 }

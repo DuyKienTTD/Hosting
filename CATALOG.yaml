@@ -21,8 +21,8 @@ documents:
   - id: kng01-current-routing-candidate
     path: program/current.json
     type: knowledge
-    status: candidate-not-main-effective
-    authoritative_for: kng01-routing-only-after-authorized-adoption
+    status: release-source-snapshot-external-activation-required
+    authoritative_for: kng01-routing-source-after-independent-a0-and-main-readback
     updated_at: 2026-11-23
     sensitivity: public-redacted
 

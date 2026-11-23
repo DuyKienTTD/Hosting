@@ -219,8 +219,11 @@ def verified_views(root, j):
     pins = (j['main_sha'], j['pr31_sha'])
     if not all(isinstance(x, str) and SHA.fullmatch(x) for x in pins):
         raise ValueError('PROVENANCE_UNVERIFIED: invalid source pins')
-    if j.get('work_ack_task_id') != D2_WORK_ID:
+    task_binding = j.get('work_ack_task_id')
+    if task_binding not in (None, D2_WORK_ID):
         raise ValueError('ACK_RECEIPT_MISMATCH: stale D2 task binding')
+    if task_binding == D2_WORK_ID and j.get('agent_status', {}).get('Work') == 'QA_COMPLETE_NO_NEW_TASK':
+        raise ValueError('ACK_RECEIPT_MISMATCH: completed QA cannot have a current D2 task binding')
     work_ack = j.get('work_ack', 'UNKNOWN')
     work_receipt = j.get('work_ack_receipt')
     work_status = j.get('agent_status', {}).get('Work', '')
@@ -254,13 +257,15 @@ def generated_lines(j, root='.'):
     pins, status, ack, report = verified_views(root, j)
     work = j['agent_status']['Work']
     evidence = report['path'] if report else 'NONE'
-    role = ('- **Director:** Chat Điều phối. **Implementation:** A1. **Independent QA:** Work; D1 finding needs A1 delta; D2 reviewer ACK pending.'
-            if work == 'KNG_D2_TARGETED_REQA_PENDING_ACK' else
-            '- **Director:** Chat Điều phối. **Implementation:** A1. **Independent QA status:** ' + work + '.')
+    if 'release_gate' in j and (j.get('release_gate', {}).get('phase') != 'PREMERGE_CANDIDATE' or j.get('release_gate', {}).get('status') != 'NOT_EFFECTIVE'):
+        raise ValueError('UNVERIFIED_RELEASE_ACTIVATION: source cannot self-activate')
+    role = '- **Director:** Chat Điều phối. **Implementation:** A1. **Independent Work source QA:** ' + work + ' (no new Work ACK).'
     return '\n'.join([
-       '- **Portfolio priority:** KNG_ONLY.', role,
-       '- **Effective main:** `' + pins[0] + '`. **PR31 draft:** `' + pins[1] + '`.',
-       '- **Permission gates:** production=false, paid=false, merge=false, Codex=false; PR/branch does not authorize live work. New non-KNG dispatch is ON_HOLD.',
+       '- **Portfolio priority in this source:** KNG_ONLY.', role,
+       '- **Source baseline main:** `' + pins[0] + '`. **PR31 historical source:** `' + pins[1] + '`.',
+       '- **Release authority:** PREMERGE_CANDIDATE / NOT_EFFECTIVE in this immutable source snapshot. After A0-approved merge, effective authority requires independent exact-tree and remote main readback; this file alone is never proof.',
+       '- **Completed source QA:** ' + j.get('last_work_source_qa', {}).get('verdict', 'UNVERIFIED') + ' at ' + j.get('last_work_source_qa', {}).get('receipt_url', 'NO_EVIDENCE') + ' (historical, not an active task).',
+       '- **Permission gates:** production=false, paid=false, merge=false, Codex=false; no automatic dispatch. Non-KNG task activation remains HOLD unless separately authorized.',
        '- **WS-02 historical handoff:** ' + status + '; receipt=' + ('VERIFIED_REFERENCE' if ack else 'NONE') + '; new report=' + evidence + '.'
     ])
 

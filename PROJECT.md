@@ -1,6 +1,6 @@
 # TTD METAL — Tổng quan dự án AI Automation
 
-**Business charter (long-term) — current execution priority is KNG-01 only.**
+**Business charter (long-term).** KNG-01-only is the pinned release-source priority, not proof of live task or merge authority.
 
 ## Dự án để làm gì?
 
@@ -15,9 +15,9 @@ Các luồng ưu tiên:
 
 Mục tiêu dài hạn là chu trình `nhận mục tiêu -> lập kế hoạch -> chọn công cụ -> thực hiện -> kiểm thử -> báo cáo -> cải thiện`, với quyền và hạn mức rõ ràng.
 
-## Ưu tiên thực thi hiện hành (2026-11-23)
+## Ưu tiên trong nguồn snapshot (23/11/2026; kiểm chứng hiệu lực theo bối cảnh)
 
-**KNG-01 ONLY.** A0/Điều phối tạm dừng mọi G0/UC01/UI/Ads/media/infra feature work. [Nguồn định tuyến và owner của candidate](program/current.json); chỉ có hiệu lực trên `main` khi merge được A0 phê duyệt. Mỗi task cần ACK thật; GitHub comment không kích hoạt Agent.
+**KNG-01 ONLY** trong snapshot nguồn; A0/Điều phối đã tạm dừng G0/UC01/UI/Ads/media/infra tại thời điểm ghi. [Nguồn định tuyến](program/current.json) chưa có hiệu lực khi PR43 còn Draft. Ngay cả sau merge, chỉ coi KNG có hiệu lực nếu có phê duyệt A0 cho đúng commit/tree và [remote main readback đã xác minh](program/kng/release_state.py); nếu thiếu thì **NOT_EFFECTIVE** và dừng giao việc mới. Work đã hoàn thành QA source PR42, không có ACK nhiệm vụ mới. Mỗi task thực tế phải có chỉ thị và ACK riêng; GitHub comment không kích hoạt Agent.
 
 ## Nguồn có thẩm quyền và trạng thái
 
