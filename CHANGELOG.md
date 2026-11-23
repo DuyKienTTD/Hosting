@@ -2,6 +2,9 @@
 
 ## 2026-11-23
 
+- **QA-GOV-A1-PR31 D2 (G1-R):** xóa tuyến giao Hostinger ở điểm sử dụng trong danh bạ, A1 profile, allocation task và AGENTS; ghi rõ Hostinger PAUSED và chỉ resume theo A0 + Agent ACK. Work nghiệm thu G2/G3 từ trước; chỉ cần re-QA phần G1-R; không thay đổi CATALOG hoặc production.
+
+
 - **QA-GOV-A1-PR31 D1:** tiếp nhận Work independent verdict [#7093412413](https://github.com/DuyKienTTD/Hosting/pull/31#issuecomment-7093412413) `NEEDS_COORDINATOR_GOV_DELTA`; cập nhật Hostinger `PAUSED` theo A0, A1 sole writer OPS D2 stacked PR24, sửa bảng danh bạ lỗi literal newline, đánh dấu Codex cũ là lịch sử, cập nhật PR32 Work QA / PR33 Hermes QA có giới hạn. CATALOG chỉ cập nhật status allocation cho khớp frontmatter; không thay 124 mục main. PR chưa merge.
 
 
