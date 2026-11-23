@@ -1,7 +1,7 @@
 ---
 id: ttd-multi-agent-master-allocation-2026-11-23
 type: task
-status: proposed_for_cross_agent_review
+status: review_received_pending_integration
 updated_at: 2026-11-23
 sensitivity: public
 owner: chatgpt
@@ -11,7 +11,7 @@ approval_scope: planning_and_read_only_review_only
 
 # DRAFT — Kế hoạch công việc tổng thể và phân bổ theo năng lực Agent
 
-**Base snapshot của đợt thẩm định:** `main@a22516aa9e5940baccc37ab2edf9eeed2ccc3d93` (23/11/2026). **Sau ACK, main đã tiến tới `e385c1bea2070973e3007e5717f7e980348d6ab3`**, chứa Hostinger report; PR #6 vẫn có base SHA cũ, phải reconcile drift trước merge. **Chưa được các Agent xác nhận. Không phải phê duyệt triển khai production hoặc paid API.** ChatGPT chịu trách nhiệm hợp nhất; từng tác nhân chỉ xác nhận phần thuộc năng lực/quyền phiên của mình. Chủ dự án phê chuẩn baseline cuối cùng sau vòng đối chiếu.
+**Base snapshot của đợt thẩm định:** `main@a22516aa9e5940baccc37ab2edf9eeed2ccc3d93` (23/11/2026). **Sau ACK, main đã tiến tới `e385c1bea2070973e3007e5717f7e980348d6ab3`**, chứa Hostinger report; PR #6 vẫn có base SHA cũ, phải reconcile drift trước merge. **Bốn Agent đã ACK phản biện; PR còn ở trạng thái DRAFT, chưa có phê duyệt cuối cùng hoặc quyền production/paid API.** ChatGPT chịu trách nhiệm hợp nhất; từng tác nhân chỉ xác nhận phần thuộc năng lực/quyền phiên của mình. Chủ dự án phê chuẩn baseline cuối cùng sau vòng đối chiếu.
 
 ## 1. Mục tiêu và nguồn
 
@@ -81,6 +81,54 @@ Cả ba phản hồi đã đọc bản `PR6@e5f702e`. Nguồn: [Codex ACK](https
 - Guard hardening `ready_for_code_and_mock` có phần lịch sử đã được remediation/H6 thực hiện. Codex đối chiếu residual theo diff, không chạy lại luồng đã PASS nếu không có delta.
 - ENG-01 cần test delta worker restart khi job ở `working/sending`; B2-N restart Hermes và B2-O restart receiver không tự chứng minh nhánh này. Đưa vào acceptance của ENG-01A/B khi thực sự triển khai.
 - WS-02/GATE B có task gốc; các dòng `NO_TASK_YET` chỉ là đề mục kế hoạch, không được coi là READY_EXECUTION.
+
+## 4A. CẬP NHẬT TIẾN ĐỘ THỰC THI THEO PR — 23/11/2026
+
+**Đánh giá điều phối tại repo main `e385c1bea2070973e3007e5717f7e980348d6ab3` và các nhánh PR #4, #6–#15.** Đây là snapshot công việc được chứng minh qua *GitHub artifact*; không phải phép xác minh lại runtime live. Phần này bổ sung trạng thái **thực thi thực tế** cho danh mục §4, không thiết kế lại, không thay task owner/approval, không tự đóng PR hay mở production.
+
+### Ba chỉ số độc lập (không cộng làm một phần trăm)
+
+| Chỉ số | Giá trị | Cách tính, phạm vi |
+| --- | ---: | --- |
+| Review phân công PR #6 | **4/4 = 100% phản hồi** | Codex, Work, Hermes WebUI, Hostinger Agent đều ACK `ACCEPT_WITH_CHANGES`. Chưa phải final approval hoặc ACK mọi task. |
+| W0 có evidence/PR thực thi | **6/6 = 100% có dấu vết** | GOV-01 PR #6; AI-01 PR #4; AI-02 PR #7; INF-01 PR #9; INF-02 PR #8; BIZ-01 PR #12. Có evidence không đồng nghĩa DONE. |
+| Danh mục có PR/evidence gắn trực tiếp | **10/23 = 43,5% độ phủ** | 9 trong 22 dòng portfolio + MIG-HERMES: GOV-01, INF-01, INF-02, AI-01, AI-02, SEC-02, BIZ-01, UX-01, ENG-01A, MIG-HERMES. 13 dòng khác chưa có PR/evidence thực thi được đối chiếu tại snapshot; không đánh đồng với 0% công sức. |
+| PR mới #7–#15 đã merge | **0/9** | Chín PR này tại mốc đọc đều open, phần lớn draft; nhánh có report PASS vẫn cần review/merge hoặc xử lý blocker riêng. |
+| Tỷ lệ hoàn thành sản phẩm toàn dự án | **CHƯA ĐỦ CƠ SỞ ĐỊNH LƯỢNG** | Không suy ra từ 4/4 review, 10/23 coverage hay số lượng mock PASS; cần trọng số nghiệm thu theo deliverable và kiểm chứng live. |
+
+### Ma trận evidence / trạng thái chi tiết — giữ đúng 23 ID ở §4
+
+| ID | Owner theo phân công / executor evidence | Dấu vết hiện có | Trạng thái kiểm chứng và phần còn lại |
+| --- | --- | --- | --- |
+| GOV-01 | ChatGPT | [PR #6](https://github.com/DuyKienTTD/Hosting/pull/6), 4 ACK | **REVIEW_RECEIVED / INTEGRATING**; chốt xung đột, index, delta và final approval chưa xong |
+| GOV-02 | ChatGPT; Codex validator sau | Không có PR implementation riêng | **PLANNED**; không kích hoạt CI validator |
+| INF-01 | Hostinger | [PR #9](https://github.com/DuyKienTTD/Hosting/pull/9) | **READ_ONLY_REPORT_WITH_BLOCKERS**; baseline đã đo nhưng P0 exited, Docker detail, TLS, public exposure và credential cần xử lý riêng |
+| INF-02 | Work | [PR #8](https://github.com/DuyKienTTD/Hosting/pull/8) | **RUNBOOK_READY_FOR_REVIEW**; 3/3 tabletop PASS; chưa monitoring live |
+| AI-01 | Work | [PR #4](https://github.com/DuyKienTTD/Hosting/pull/4) | **QA_IN_PROGRESS / FINAL_B2O_VERDICT_NOT_CONFIRMED**; không lấy B2-N QA làm sign-off toàn B2-O |
+| AI-02 | Codex | [PR #7](https://github.com/DuyKienTTD/Hosting/pull/7) | **B2P_LOCAL_RENDER_PASS; D1_SOURCE_DELTA_PASS**; KVM2 `BLOCKED_PREFLIGHT_INPUT`, delta Work review chưa xác nhận |
+| AI-03 | ChatGPT | Không có decision artifact riêng | **WAITING_AI01_AI02_EVIDENCE**; chưa GO fixture |
+| AI-03F | Codex, nếu gate riêng | Chưa có PR được ủy quyền | **CONDITIONAL_NOT_AUTHORIZED** |
+| AI-04 | Codex, nếu đủ Gate B | Task Gate B hiện hữu | **PAID_GATE_B_BLOCKED_PREFLIGHT**; không paid Hermes E2E |
+| SEC-01 | ChatGPT | Không có task/PR triển khai riêng | **PLANNED / POLICY_DRAFT_NOT_VERIFIED** |
+| SEC-02 | Hostinger | [PR #11](https://github.com/DuyKienTTD/Hosting/pull/11) | **DESIGN_READY_FOR_REVIEW**; chưa hardening/restore/rotate secret |
+| BIZ-01 | Hermes WebUI | [PR #12](https://github.com/DuyKienTTD/Hosting/pull/12) | **READ_ONLY_DISCOVERY_PASS / REVIEW_PENDING**; account scopes/live unverified |
+| BIZ-02 | ChatGPT | Chưa có PR evidence độc lập | **PLANNED**, cần input BIZ-01 |
+| UX-01 | Work | [PR #14](https://github.com/DuyKienTTD/Hosting/pull/14) | **SPEC_READY_FOR_REVIEW**; 5 journeys + negative cases tabletop, frontend/backend chưa implement |
+| ENG-01A | Codex | [PR #10](https://github.com/DuyKienTTD/Hosting/pull/10) S1; [PR #13](https://github.com/DuyKienTTD/Hosting/pull/13) S2 | **S1 8/8 OFFLINE_PASS; S2 7/7 MOCK_PASS; REVIEW/INTEGRATION_PENDING**, real GA4/WP/Woo untested |
+| ENG-01B | Codex | Chưa có real-connector PR | **CONDITIONAL / REAL_CONNECTOR_UNTESTED** |
+| GROW-01 | Hermes | Không có PR implementation riêng | **PLANNED** |
+| GROW-02A | Work (đề xuất điều chỉnh) | Không có PR riêng | **PLANNED**, cần KPI/event scope |
+| GROW-02B | Codex | Không có PR thật | **CONDITIONAL / NO_REAL_PIPELINE** |
+| OPS-01A | Hostinger | Dữ liệu tham khảo PR #8/#9, chưa PR riêng | **PLANNED**; thiết kế health/SLO chưa sign-off riêng |
+| OPS-01B | Codex | Chưa có PR monitoring live | **CONDITIONAL / NOT_RUNNING** |
+| QA-01 | Work | QA theo PR #4 và các lượt review khác | **ONGOING_AS_RELEASE_ROLE**, chưa có deliverable QA chung độc lập |
+| MIG-HERMES | Hostinger theo task gốc; **PR #15 report tự ghi executor Hermes WebUI** | [PR #15](https://github.com/DuyKienTTD/Hosting/pull/15) | **ASSESSMENT_REPORTED / BLOCKED_COMPATIBILITY**; metadata owner/executor phải đối chiếu, chưa có đường import an toàn được chứng minh, không migration |
+
+**Điểm lệch cần xử lý khi review, không thay bằng suy đoán:** PR #15 gắn nhánh Hostinger nhưng báo cáo tự khai executor Hermes WebUI; giữ cả hai nguồn và xác minh provenance trước acceptance. PR #7 lấy base từ nhánh PR #5 chứ không trực tiếp main; PR #10 và #13 có files trùng `CATALOG/STATE/CHANGELOG`, cần review conflict theo SHA trước merge. PR #9 phát hiện plaintext admin credential xuất hiện trong metadata công cụ (báo cáo đã redacted): security finding cần luồng kiểm soát riêng; không ghi giá trị, không tự rotate. PR #8, #11, #14 được nghiệm thu **thiết kế/tabletop** chứ không ghi runtime live.
+
+**Ước lượng quản trị có kiểm soát:** nếu cần một con số tạm để báo cáo, dùng `43,5% danh mục đã có bằng chứng công việc` chứ **không** gọi là `43,5% sản phẩm hoàn thành`. Chỉ chấm % hoàn thành thực sự của từng deliverable sau khi phân chia acceptance checkpoints có trọng số; giữ `UNKNOWN` cho phần chưa có tiêu chí đo. Việc chủ dự án báo PR #6 đã chạy khoảng 50% là tín hiệu tiến độ quản trị, **không thay thế** số đo completion của toàn bộ 23 hạng mục.
+
+**Next review owner = ChatGPT**: đối chiếu PR #4/#7 delta và các PR #8–#15 theo nguồn; không tự nghiệm thu hoặc merge công việc implementer; xử lý phần phân bổ đã ACK, đồng bộ danh mục main sau đồng thuận. No production/paid/restore/migration/credential changes từ cập nhật portfolio này.
 
 ## 5. Dependency graph đã nới khóa paid
 
