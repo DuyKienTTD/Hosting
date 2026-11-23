@@ -12,7 +12,7 @@ SNAP={'record_kind':'KNG_RELEASE_SOURCE_SNAPSHOT',
       'main_sha':BASE,'production_authorized':False,'merge_authorized':False,
       'codex_authorized':False,'work_ack':'UNKNOWN','work_ack_task_id':None,
       'work_ack_receipt':None,'agent_status':{'Work':'QA_COMPLETE_NO_NEW_TASK'},
-      'last_work_source_qa':{'verdict':'KNG01_PR42_SOURCE_QA_PASS_WITH_FINAL_GATES',
+      'last_work_source_qa':{'actor':'Work','task_id':'WORK-KNG01-PR42-FINAL-FIXTURE-MICRO-RECHECK','verdict':'KNG01_PR42_SOURCE_QA_PASS_WITH_FINAL_GATES',
          'source_sha':'b8cd377d3c3696c486fed41adc941a9d4db92ecc',
          'record_type':'HISTORICAL_COMPLETED_SOURCE_QA_NOT_NEW_ACK'}}
 APP={'candidate_sha':CAND,'target_tree':TREE,'baseline_sha':BASE,
@@ -62,6 +62,9 @@ class Gate(unittest.TestCase):
         self.assertEqual('UNRECONCILED_WORK_STATE',run(s=s).reason)
     def test_fake_work_source_qa(self):
         s=copy.deepcopy(SNAP);s['last_work_source_qa']['verdict']='KNG_ACCEPTED'
+        self.assertEqual('UNVERIFIED_WORK_SOURCE_QA',run(s=s).reason)
+    def test_wrong_work_source_qa_actor(self):
+        s=copy.deepcopy(SNAP);s['last_work_source_qa']['actor']='A1'
         self.assertEqual('UNVERIFIED_WORK_SOURCE_QA',run(s=s).reason)
     def test_untrusted_approval_exception(self):
         def fail(_):raise RuntimeError('remote denied')

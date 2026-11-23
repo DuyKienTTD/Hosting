@@ -75,6 +75,8 @@ class Contract(unittest.TestCase):
         p='program/current.json';j=self.obj(p);j['agent_status']['Work']='KNG_D2_TARGETED_REQA_PENDING_ACK';self.put(p,j);self.err('STALE_AGENT_STATE')
     def test_stale_d2_task_binding(self):
         p='program/current.json';j=self.obj(p);j['work_ack_task_id']='WORK-KNG01-D2-TARGETED-INDEPENDENT-REQA';self.put(p,j);self.err('ACK_RECEIPT_MISMATCH')
+    def test_fake_source_qa_actor(self):
+        p='program/current.json';j=self.obj(p);j['last_work_source_qa']['actor']='A1';self.put(p,j);self.err('SOURCE_QA_PROVENANCE_MISMATCH')
     def test_fake_source_qa_verdict(self):
         p='program/current.json';j=self.obj(p);j['last_work_source_qa']['verdict']='KNG_ACCEPTED';self.put(p,j);self.err('SOURCE_QA_PROVENANCE_MISMATCH')
     def test_fake_work_ack(self):

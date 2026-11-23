@@ -60,7 +60,7 @@ def validate(root, *, verify_objects=True):
     if state.get('agent_status', {}).get('Work') != 'QA_COMPLETE_NO_NEW_TASK':
         reject('STALE_AGENT_STATE', 'Work must reflect completed source QA without new dispatch')
     work_qa = state.get('last_work_source_qa', {})
-    if not isinstance(work_qa, dict) or work_qa.get('source_sha') != 'b8cd377d3c3696c486fed41adc941a9d4db92ecc' or work_qa.get('verdict') != 'KNG01_PR42_SOURCE_QA_PASS_WITH_FINAL_GATES' or work_qa.get('receipt_url') != 'https://github.com/DuyKienTTD/Hosting/pull/42#issuecomment-7103815886' or work_qa.get('record_type') != 'HISTORICAL_COMPLETED_SOURCE_QA_NOT_NEW_ACK':
+    if not isinstance(work_qa, dict) or work_qa.get('actor') != 'Work' or work_qa.get('task_id') != 'WORK-KNG01-PR42-FINAL-FIXTURE-MICRO-RECHECK' or work_qa.get('source_sha') != 'b8cd377d3c3696c486fed41adc941a9d4db92ecc' or work_qa.get('verdict') != 'KNG01_PR42_SOURCE_QA_PASS_WITH_FINAL_GATES' or work_qa.get('receipt_url') != 'https://github.com/DuyKienTTD/Hosting/pull/42#issuecomment-7103815886' or work_qa.get('record_type') != 'HISTORICAL_COMPLETED_SOURCE_QA_NOT_NEW_ACK':
         reject('SOURCE_QA_PROVENANCE_MISMATCH', 'completed Work source QA must retain exact immutable D5 readback')
     if state.get('work_ack') not in ('UNKNOWN','ACKNOWLEDGED'): reject('FALSE_ACK', state.get('work_ack'))
     if state.get('work_ack') == 'ACKNOWLEDGED':

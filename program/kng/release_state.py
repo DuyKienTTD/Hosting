@@ -40,7 +40,9 @@ def assess_release(snapshot, *, approval=None, remote=None,
             or snapshot.get('work_ack_receipt') is not None):
         return fail('UNRECONCILED_WORK_STATE')
     qa = snapshot.get('last_work_source_qa', {})
-    if (qa.get('verdict') != 'KNG01_PR42_SOURCE_QA_PASS_WITH_FINAL_GATES'
+    if (qa.get('actor') != 'Work'
+            or qa.get('task_id') != 'WORK-KNG01-PR42-FINAL-FIXTURE-MICRO-RECHECK'
+            or qa.get('verdict') != 'KNG01_PR42_SOURCE_QA_PASS_WITH_FINAL_GATES'
             or qa.get('source_sha') != 'b8cd377d3c3696c486fed41adc941a9d4db92ecc'
             or qa.get('record_type') != 'HISTORICAL_COMPLETED_SOURCE_QA_NOT_NEW_ACK'):
         return fail('UNVERIFIED_WORK_SOURCE_QA')
