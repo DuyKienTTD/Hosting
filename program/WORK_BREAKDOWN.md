@@ -35,6 +35,12 @@ K-GIT GitHub branch/diff/PR; K-DOC structured writing; K-DATA data analysis/SQL;
 | REL-01 | Release | Integrated roadmap review, independent QA and next milestone | K-QA,K-SEC,K-GIT | Coordinator | sufficient gate deliverables | one roadmap-level verdict, no false LIVE |
 | REL-02 | Release | Owner portfolio acceptance, scoped live approvals if needed | K-DOC,K-SEC | A0 | REL-01 | explicit decision/event |
  
+| G3-A1 | G3 | Check A1 capability and data inventory claims against executed evidence | K-GIT,K-TEST | A1 | G1-03 | source-linked delta with actual checks |
+| QA-U01 | G4 | Independently sample A2 WordPress audit, report incorrect inference | K-QA,K-SEO,K-DATA | A1 | UC01-01 | sampled audit evidence and verdict |
+| EXIST-QA31 | Existing | Execute already assigned PR31 cost-first/progress independent QA | K-QA,K-GIT,K-SEC | Work | PR31 pinned assignment | one factual verdict, no unrelated rerun |
+| SEC-H | Infra | Secure hardening plan for SSH/exposed ports/firewall/backup | K-SEC,K-VPS,K-BACKUP | Hostinger | INF-01 | risk-gated work package with live evidence |
+| WP-H | Infra | Diagnose WordPress HTTP500 source as safely reproducible | K-VPS,K-WP,K-OBS | Hostinger | UC01-01 | bounded diagnosis, no site mutation |
+
 ## Critical path and parallel work
 Start G0-01 (A2), G1-01 (A1), INF-01 (Hostinger), Work current PR31 QA (existing task), all separate write sets. Coordinator develops G2-01 without writing shared PR31 sources. G0-02→UI-01; G1-02/03→G1-04; G2-01→G2-02; UC01-01 may begin from existing authenticated WP baseline without waiting for all governance changes. UI-02, CTRL-01, INF-04 require explicit technical readiness. Don't duplicate already PASS historical tasks.
 
