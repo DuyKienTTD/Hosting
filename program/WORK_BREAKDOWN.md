@@ -50,7 +50,7 @@ Historical evidence and old parallel-start prose are preserved at [PR39 original
 
 ### Canonical schema
 
-Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DELIVERABLE, REQUIRED_SKILL_IDS, MINIMUM_TOOL_CAPABILITY, AGENT_CANDIDATES, PREDECESSORS, ENVIRONMENT/DATA/ACCESS, RISK/COST/STOP, ACCEPTANCE, EVIDENCE/PROVENANCE, STATUS and TARGET_ROADMAP. One accountable primary candidate is named; candidate does not mean dispatched, accepted or authorized. UNKNOWN is never zero, PASS or permission.
+Every row defines exactly 18 fields: `WBS_ID | PRODUCT_OUTCOME | FEATURE/UI | WORK_TYPE | PRIORITY | DELIVERABLE | REQUIRED_SKILL_IDS | MINIMUM_TOOL_CAPABILITY | PRIMARY_OWNER_CANDIDATE | AGENT_CANDIDATES | CONTRIBUTORS | PREDECESSORS | ENVIRONMENT/DATA/ACCESS | RISK/COST/STOP | ACCEPTANCE | EVIDENCE/PROVENANCE | STATUS | TARGET_ROADMAP`. `PRIMARY_OWNER_CANDIDATE` is one accountable proposed owner (or `NO_VERIFIED_EXECUTION_OWNER`); `AGENT_CANDIDATES` are possible executors; `CONTRIBUTORS` are non-owning consultants/reviewers. A consultant is not a fallback executor. Candidate does not mean dispatched, accepted or authorized. UNKNOWN is never zero, PASS or permission.
 
 ### Priority and work-type semantics
 
