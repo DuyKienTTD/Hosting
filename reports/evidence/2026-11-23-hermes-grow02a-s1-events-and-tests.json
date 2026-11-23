@@ -943,7 +943,9 @@
     {
       "id": "T4-unique-event",
       "kind": "event",
+      "source_system": "editorial_fixture",
       "event_id": "evt-synthetic-001",
+      "schema_version": "0.1-proposal",
       "expected": "ACCEPTED_SYNTHETIC",
       "observed": "ACCEPTED_SYNTHETIC",
       "payload": {
@@ -953,7 +955,9 @@
     {
       "id": "T5-replay-event",
       "kind": "event",
+      "source_system": "editorial_fixture",
       "event_id": "evt-synthetic-001",
+      "schema_version": "0.1-proposal",
       "expected": "DUPLICATE_IGNORED",
       "observed": "DUPLICATE_IGNORED",
       "payload": {
@@ -963,12 +967,159 @@
     {
       "id": "T5b-conflicting-replay",
       "kind": "event",
+      "source_system": "editorial_fixture",
       "event_id": "evt-synthetic-001",
+      "schema_version": "0.1-proposal",
       "payload": {
         "status": "PUBLISHED"
       },
       "expected": "BLOCKED_CONFLICTING_REPLAY",
       "observed": "BLOCKED_CONFLICTING_REPLAY"
+    },
+    {
+      "id": "D1-other-source-same-id",
+      "kind": "event",
+      "source_system": "catalog_fixture",
+      "event_id": "evt-synthetic-001",
+      "schema_version": "0.1-proposal",
+      "payload": {
+        "status": "DRAFT"
+      },
+      "expected": "ACCEPTED_SYNTHETIC",
+      "observed": "ACCEPTED_SYNTHETIC"
+    },
+    {
+      "id": "D1-other-source-replay",
+      "kind": "event",
+      "source_system": "catalog_fixture",
+      "event_id": "evt-synthetic-001",
+      "schema_version": "0.1-proposal",
+      "payload": {
+        "status": "DRAFT"
+      },
+      "expected": "DUPLICATE_IGNORED",
+      "observed": "DUPLICATE_IGNORED"
+    },
+    {
+      "id": "D1-other-version-same-id",
+      "kind": "event",
+      "source_system": "editorial_fixture",
+      "event_id": "evt-synthetic-001",
+      "schema_version": "0.2-proposal",
+      "payload": {
+        "status": "DRAFT"
+      },
+      "expected": "ACCEPTED_SYNTHETIC",
+      "observed": "ACCEPTED_SYNTHETIC"
+    },
+    {
+      "id": "D1-other-version-conflict",
+      "kind": "event",
+      "source_system": "editorial_fixture",
+      "event_id": "evt-synthetic-001",
+      "schema_version": "0.2-proposal",
+      "payload": {
+        "status": "PUBLISHED"
+      },
+      "expected": "BLOCKED_CONFLICTING_REPLAY",
+      "observed": "BLOCKED_CONFLICTING_REPLAY"
+    },
+    {
+      "id": "D1-reordered-payload-keys",
+      "kind": "event",
+      "source_system": "editorial_fixture",
+      "event_id": "evt-synthetic-reordered",
+      "schema_version": "0.1-proposal",
+      "payload": {
+        "status": "DRAFT",
+        "locale": "vi"
+      },
+      "expected": "ACCEPTED_SYNTHETIC",
+      "observed": "ACCEPTED_SYNTHETIC"
+    },
+    {
+      "id": "D1-reordered-payload-replay",
+      "kind": "event",
+      "source_system": "editorial_fixture",
+      "event_id": "evt-synthetic-reordered",
+      "schema_version": "0.1-proposal",
+      "payload": {
+        "locale": "vi",
+        "status": "DRAFT"
+      },
+      "expected": "DUPLICATE_IGNORED",
+      "observed": "DUPLICATE_IGNORED"
+    },
+    {
+      "id": "D1-missing-source",
+      "kind": "event",
+      "event_id": "evt-synthetic-invalid-source",
+      "schema_version": "0.1-proposal",
+      "payload": {
+        "status": "DRAFT"
+      },
+      "expected": "BLOCKED_INVALID_EVENT_NAMESPACE",
+      "observed": "BLOCKED_INVALID_EVENT_NAMESPACE"
+    },
+    {
+      "id": "D1-blank-source",
+      "kind": "event",
+      "source_system": "   ",
+      "event_id": "evt-synthetic-invalid-source",
+      "schema_version": "0.1-proposal",
+      "payload": {
+        "status": "DRAFT"
+      },
+      "expected": "BLOCKED_INVALID_EVENT_NAMESPACE",
+      "observed": "BLOCKED_INVALID_EVENT_NAMESPACE"
+    },
+    {
+      "id": "D1-invalid-source-type",
+      "kind": "event",
+      "source_system": [
+        "editorial_fixture"
+      ],
+      "event_id": "evt-synthetic-invalid-source",
+      "schema_version": "0.1-proposal",
+      "payload": {
+        "status": "DRAFT"
+      },
+      "expected": "BLOCKED_INVALID_EVENT_NAMESPACE",
+      "observed": "BLOCKED_INVALID_EVENT_NAMESPACE"
+    },
+    {
+      "id": "D1-missing-version",
+      "kind": "event",
+      "source_system": "editorial_fixture",
+      "event_id": "evt-synthetic-invalid-version",
+      "payload": {
+        "status": "DRAFT"
+      },
+      "expected": "BLOCKED_INVALID_EVENT_NAMESPACE",
+      "observed": "BLOCKED_INVALID_EVENT_NAMESPACE"
+    },
+    {
+      "id": "D1-invalid-version",
+      "kind": "event",
+      "source_system": "editorial_fixture",
+      "event_id": "evt-synthetic-invalid-version",
+      "schema_version": "1.0-live",
+      "payload": {
+        "status": "DRAFT"
+      },
+      "expected": "BLOCKED_INVALID_EVENT_NAMESPACE",
+      "observed": "BLOCKED_INVALID_EVENT_NAMESPACE"
+    },
+    {
+      "id": "D1-missing-event-id",
+      "kind": "event",
+      "source_system": "editorial_fixture",
+      "schema_version": "0.1-proposal",
+      "payload": {
+        "status": "DRAFT"
+      },
+      "expected": "BLOCKED_INVALID_EVENT_NAMESPACE",
+      "observed": "BLOCKED_INVALID_EVENT_NAMESPACE"
     },
     {
       "id": "T6-unconsented-join",
@@ -992,7 +1143,7 @@
       "observed": "BLOCKED_MISSING_OR_INVALID_UTM"
     }
   ],
-  "test_execution": "EXECUTED_OFFLINE_PYTHON_STDLIB_PASS",
+  "test_execution": "EXECUTED_OFFLINE_PYTHON_STDLIB_D1_COMPOSITE_PASS",
   "a0_pending": [
     {
       "id": "A0-1",
@@ -1067,6 +1218,23 @@
     "paid_calls": 0,
     "publishes": 0
   },
-  "verdict": "GROW02A_S1_DRAFT_EVENT_CONTRACT_READY_FOR_REVIEW",
-  "next_owner": "ChatGPT Điều phối"
+  "verdict": "GROW02A_S1_D1_COMPOSITE_DEDUP_PASS",
+  "next_owner": "ChatGPT Điều phối",
+  "d1_delta": {
+    "task_id": "GROW-02A/S1-D1",
+    "finding": "GROW02A-QA-01",
+    "assignment": "https://github.com/DuyKienTTD/Hosting/pull/23#issuecomment-7091502269",
+    "base_pr23_head": "44dd545e1698f884b41fd8dd49c94929e1415e50",
+    "base_validator_blob": "5bc8b89473c9940fb22ea8df94af24c58fa7031f",
+    "tested_validator_blob": "d07d2a0fa8df029009689363f494f13393c7c118",
+    "environment": "Linux-6.12.116+deb13-amd64-x86_64-with-glibc2.41",
+    "python": "3.14.10",
+    "command": "python3 -B sandbox/grow02a-offline-validator/validate.py",
+    "historical_s1_author_run": "9/9 reported at base; event namespace not exercised; retained as historical evidence only",
+    "tested_total": 21,
+    "tested_delta": 12,
+    "seen_distinct_composite_keys": 4,
+    "result": "PASS_OFFLINE_ONLY",
+    "effects": "NO_LIVE_API_OR_TRACKING_OR_CUSTOMER_DATA"
+  }
 }

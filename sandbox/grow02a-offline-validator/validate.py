@@ -32,11 +32,24 @@ def check(case, seen):
     if kind == 'utm':
         return validate_utm(case['url'])
     if kind == 'event':
-        event_id = case['event_id']
-        payload = case['payload']
-        if event_id in seen:
-            return 'DUPLICATE_IGNORED' if seen[event_id] == payload else 'BLOCKED_CONFLICTING_REPLAY'
-        seen[event_id] = payload
+        source = case.get('source_system')
+        event_id = case.get('event_id')
+        version = case.get('schema_version')
+        if (not isinstance(source, str) or not re.fullmatch(r'[a-z][a-z0-9_]{1,47}', source)
+                or not isinstance(event_id, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{1,79}', event_id)
+                or not isinstance(version, str) or not re.fullmatch(r'0\.[1-9][0-9]*-proposal', version)):
+            return 'BLOCKED_INVALID_EVENT_NAMESPACE'
+        payload = case.get('payload')
+        if not isinstance(payload, dict):
+            return 'BLOCKED_INVALID_EVENT_PAYLOAD'
+        try:
+            canonical = json.dumps(payload, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
+        except (TypeError, ValueError):
+            return 'BLOCKED_INVALID_EVENT_PAYLOAD'
+        key = (source, event_id, version)
+        if key in seen:
+            return 'DUPLICATE_IGNORED' if seen[key] == canonical else 'BLOCKED_CONFLICTING_REPLAY'
+        seen[key] = canonical
         return 'ACCEPTED_SYNTHETIC'
     if kind == 'join':
         return 'BLOCKED_NO_CONSENT_OR_JOIN_POLICY' if not case['consent_and_join_policy_approved'] else 'NEEDS_SEPARATE_AUTH'
