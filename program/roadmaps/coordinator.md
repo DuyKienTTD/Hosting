@@ -1,6 +1,6 @@
 # Chat Điều phối — Roadmap Portfolio & Release Governance
 
-**Owner:** Chat Điều phối | **ROADMAP_STATUS:** `PLANNED_NOT_ACKED` | **READ_SET:** master project/rules, PR31/PR6 and program docs, all four Agent roadmaps | **WRITE_SET:** own coordinator roadmap, nonconflicting integration/decision document and PR comments. **STOP:** author/reviewer conflict, stale pins, no owner ACK, invalid paid/release gates.
+**Owner:** Chat Điều phối | **ROADMAP_STATUS:** `REVIEWED_WITH_CONDITIONS / A0_OWNER_DECISION_PENDING` | **READ_SET:** master project/rules, PR31/PR6 and program docs, all four Agent roadmaps | **WRITE_SET:** own coordinator roadmap, nonconflicting integration/decision document and PR comments. **STOP:** author/reviewer conflict, stale pins, no owner ACK, invalid paid/release gates.
 
 | ID | Required skills | Task / measurable deliverable | Depends | Status | Evidence / UTC |
 |---|---|---|---|---|---|
@@ -8,8 +8,8 @@
 | G2-01 | K-DOC,K-SCHEMA,K-SEC | Implement candidate roadmap-level self-progress and single roadmap acceptance policy | product/wbs | PLANNED | — |
 | G2-03 | K-SEC,K-QA,K-DOC | Propose risk-tier QA, approval and rollback invariants, with no per-item management review | G2-01 | PLANNED | — |
 | G3-02 | K-GIT,K-DATA | Reuse PR31 34-PR classification, prioritize outcome-by-dependency, resolve owner clashes | G0-03 | PLANNED | — |
-| G3-03 | K-GIT,K-SCHEMA | Issue scoped per-agent roadmaps to actual sessions; record real ACK only, no false dispatch | G2-01,G3-02 | PLANNED | — |
-| REL-01 | K-QA,K-SEC,K-GIT | Collect agent roadmap-level handoffs and issue integrated factual verdict | all ready roadmaps | PLANNED | — |
+| G3-03 | K-GIT,K-SCHEMA | Issue scoped per-agent roadmaps to actual sessions; record real ACK only, no false dispatch | G2-01,G2-02,G3-02 | ROADMAP_INTEGRATION_3_OF_3_SOURCE_VERIFIED | A1 PR49 / A2 PR48 / Work fb8eb13; owner-forward receipts in own roadmaps; no automated dispatcher |
+| REL-01 | K-QA,K-SEC,K-GIT | Collect agent roadmap-level handoffs and issue integrated factual verdict | all ready roadmaps | REVIEWED_WITH_CONDITIONS / A0_OWNER_DECISION_PENDING | A0 review comment 6028576006 pinned to 2b9f9402; C1-C4 coordinator corrections in progress/current branch |
 | REL-02 | K-SEC,K-DOC | Present owner A0 one portfolio decision and approvals only for material exceptions | REL-01 | PLANNED | — |
 
 **KNG-01 priority override (2026-11-23):** All unrelated roadmap feature items are ON_HOLD_DEPENDENCY_KNG01 until Work independent QA, coordinator integration, A0-authorized merge and a new dispatch/actual ACK. Historical PLANNED items remain proposals, not current task orders.
@@ -247,7 +247,7 @@ This block is the **current status view**. Earlier C-D0/C-D1/C-D2/C-D4 and DGN i
 | DGN-3 | `ROW_LEVEL_DESIGN_COMPLETE / AUTHOR_SELF_CHECK_ONLY` | 32 rows, 18 fields including owner/candidates/contributors; branch only |
 | DGN-4 | `ROW_LEVEL_MATRIX_COMPLETE_WITH_CORRECTIONS / AUTHOR_SELF_CHECK_ONLY` | 32 rows, owner/candidates/contributors/fallback type; branch only |
 | R1–R5, R7 | `INTEGRATED_ON_COORDINATOR_BRANCH` | Matrix/WBS corrections; current view here supersedes old grouped matrix status |
-| R6 Agent roadmap integration | `PENDING_REAL_AGENT_SELF_WRITES` | A1/A2/Work must each update own roadmap after receiving exact integration order; Coordinator must not edit their files |
+| R6 Agent roadmap integration | `COMPLETE_3_OF_3_SOURCE_VERIFIED` | A1/A2/Work each updated only own roadmap; source readback verified; session transport is owner-forward evidence, not automated dispatch |
 | DGN package | `NOT_ACCEPTED` | One independent package review + A0 final decision remains |
 | Execution readiness / product execution | `NOT_PASSED / HOLD` | No build, business pilot, live WP/Ads/media, VPS, paid, dispatch automation or merge |
 
@@ -289,7 +289,9 @@ Each work order is design/roadmap maintenance only, defines exact WBS scope, fir
 
 **Source-pin discrepancy reconciled:** The Work work order was created against Coordinator roadmap blob `469c215d0147a9daee6e6335cad607520be98954`. Before Work completed, Coordinator updated its roadmap to blob `9930a86b5a768f79194e6433b28f5f88232e4e4a` on commit `80dfb3b854025691c19257f31644b624aa60e7d4`. Work detected the mismatch and records that it read the later blob. The WBS blob `11261e92d520e720d4798087d89f8269f8c19b20` and Assignment Matrix blob `248947cd9d05bcfcd39e6e3ba12f298da57a1f3a` match the pinned work-order sources. This is a benign Coordinator-document update between preparation and execution, not a Work write-set violation. The historical work order remains unchanged.
 
-**R6 integration status:**
+**Historical snapshot — superseded by the later 3/3 receipt below:** The following R6 lines preserve the source-time state before A1/A2 completed their own roadmap writes. Do not use these PREPARED/PARTIAL values as current status. The later 3/3 block and the integrated package status supersede them. The task files' `PREPARED_FOR_OWNER_FORWARD` fields remain historical preparation-state fields, not claims that no later recipient receipt exists.
+
+**R6 integration status (HISTORICAL — SUPERSEDED):**
 - Work: `ROADMAP_UPDATED_SOURCE_VERIFIED / READY_FOR_ROADMAP_ACCEPTANCE` (roadmap integration scope only).
 - A1: `PREPARED_FOR_OWNER_FORWARD`; branch HEAD remains DGN-2 head `070189b381dd3e17680c85fdff01e84978c0bf93`; no integration ACK/commit observed.
 - A2: `PREPARED_FOR_OWNER_FORWARD`; branch HEAD remains DGN-1 head `bf232a313c0dd696c4ae824c35e7d1ddfda1a613`; no integration ACK/commit observed.
@@ -299,7 +301,7 @@ Each work order is design/roadmap maintenance only, defines exact WBS scope, fir
 
 **Coordinator acceptance of Work integration:** source/readback and scope checks PASS. This is not independent package QA, not final A0 acceptance, and not authorization to execute the future Work-owned HOLD items.
 
-**Current status:** `R6_WORK=COMPLETE_SOURCE_VERIFIED`; `R6_A1=PREPARED_FOR_OWNER_FORWARD`; `R6_A2=PREPARED_FOR_OWNER_FORWARD`; `AGENT_ROADMAP_INTEGRATION=PARTIAL_1_OF_3`; `DGN_PACKAGE=NOT_ACCEPTED`; `EXECUTION_READINESS=NOT_PASSED`; `PRODUCT_EXECUTION=HOLD`.
+**Historical status (SUPERSEDED):** `R6_WORK=COMPLETE_SOURCE_VERIFIED`; `R6_A1=PREPARED_FOR_OWNER_FORWARD`; `R6_A2=PREPARED_FOR_OWNER_FORWARD`; `AGENT_ROADMAP_INTEGRATION=PARTIAL_1_OF_3`. This was accurate before A1/A2 self-writes and is retained only as history.
 
 
 ### Integrated DGN package candidate — all Agent roadmaps reconciled (2026-11-24)
@@ -336,7 +338,7 @@ Each work order is design/roadmap maintenance only, defines exact WBS scope, fir
 - Product UI remains NOT_BUILT. WordPress/Ads/GA4/media live reads/writes, VPS/production, paid APIs, Hostinger resume, Hermes new tasks, Codex and merge remain HOLD/NOT_AUTHORIZED.
 - WBS dependency graph is structurally mapped, but reliable calendar critical-path durations are not evidenced; dates remain UNKNOWN rather than invented.
 
-**Current program status:**
+**Current program status at this source snapshot:**
 ```yaml
 KNG01: MAIN_VERIFIED
 DGN1: AUTHOR_COMPLETE_SOURCE_VERIFIED
