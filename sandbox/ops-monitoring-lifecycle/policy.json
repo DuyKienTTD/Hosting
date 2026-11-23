@@ -1,0 +1,14 @@
+{
+  "rule_version": "ops-01a-s2-v1",
+  "state_machine": ["NORMAL", "OPEN", "RECOVERED"],
+  "qualifying_bad_samples": 3,
+  "qualifying_good_samples_after_open": 3,
+  "cooldown_seconds": 900,
+  "boundary": {"899": "SUPPRESSED_COOLDOWN", "900": "ELIGIBLE_REOPEN"},
+  "dedupe_key": "resource:rule:rule_version:incident_seq",
+  "sample_identity": "resource:source:sample_id:observed_at_utc",
+  "unknown_policy": "reset_streak_and_emit_UNKNOWN",
+  "out_of_order_policy": "reject_and_audit",
+  "external_notifications": false,
+  "persistence_claim": "synthetic_snapshot_replay_only"
+}
