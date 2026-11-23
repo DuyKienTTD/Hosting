@@ -169,3 +169,29 @@ Quy trình và các giới hạn: [Operating Protocol](../OPERATING_PROTOCOL.md)
 **C-D2 impact:** use the registry's two-axis capability/authorization model, evidence confidence vocabulary, per-WBS skill resolution, task receipt fields and nine install candidate contracts in the Coordinator Operating Model. No candidate installation or external tool action is authorized. **C-D3:** `IN_PROGRESS / WBS_DRAFT_READY_FOR_SCHEMA_ENRICHMENT`; retain all 32 original IDs and historical owner/route data, use the exact 20 canonical K IDs, map A2 S01–S12 and T01–T24 to existing deliverables, and only add new IDs for distinct uncovered deliverables. **C-D4:** preliminary planning matrix may be authored now, but no proposed owner becomes active until actual task-specific ACK, current capability/authorization check and separate A0 release of the relevant execution scope.
 
 **Independent acceptance remains package-level:** no PR46 review/merge or standalone A0 micro-gate was created. A0 Assistant + A0 review the complete DGN-1..4 package once; the source can be integrated for design now while DGN-2 remains `READY_FOR_ROADMAP_ACCEPTANCE` as A1's author verdict.
+
+
+### C-D4 preliminary assignment matrix — planning only (2026-11-24)
+
+**Purpose:** turn the frozen 32-row WBS into one accountable *proposed* owner per row, using the 20 canonical `K-*` skills and A1's evidence states. This is a planning matrix, not a session dispatch, new permission, or activation of any HOLD work. Original WBS IDs, dependencies, acceptance and historic owner fields remain unchanged until a separately authorized integrated WBS update.
+
+| WBS IDs | Proposed accountable owner | Skill fit / independent check | Capability & authorization caveat |
+|---|---|---|---|
+| G0-01,G0-02 | A2 | K-DOC,K-DATA,K-UX; Work feasibility input; independent A0 package review | DGN-1 author evidence available; current business connectors not verified; design only |
+| G0-03,G2-01,G2-03,G3-02,G3-03,REL-01 | Coordinator | K-DOC,K-SCHEMA,K-SEC,K-QA,K-GIT,K-DATA; independent A0 Assistant/A0 package gate | Coordinator Git access verified in current task; all cross-agent dispatch requires real ACK; no main write/merge grant |
+| G1-01,G1-02,G1-03,G3-A1 | A1 | K-GIT,K-PY,K-SCHEMA,K-TEST,K-SEC,K-DOC,K-DATA; Work independent QA where material | DGN-2 author evidence available; current scoped source rights only; KNG historical tasks are not reopened by this plan |
+| G1-04,EXIST-QA31 | Work | K-QA,K-TEST,K-DATA,K-GIT,K-SEC; reviewer must be independent of author | Historical assignments remain distinct; new task-specific ACK required before any new execution |
+| G2-02 | A1 | K-PY,K-SCHEMA,K-GIT,K-TEST; Work independent review | Future automation design only until separate approval, implementation scope and real receipt tests |
+| G3-01 | A1 (capability directory owner); A2 consulted for product-role requirements | K-DOC,K-GIT,K-DATA,K-SCHEMA | Directory design is A1's DGN-2; A2's DGN-1 skill subsection is not a competing global inventory |
+| INF-01,INF-02,INF-03,INF-04,SEC-H,WP-H | Hostinger Agent | K-VPS,K-SEC,K-OBS,K-BACKUP,K-N8N,K-API,K-WP; independent Work/A1 QA as risk requires | Historical specialist fit only; current session/rights UNKNOWN, remain HOLD until actual ACK and separate live authorization |
+| UI-01,UI-02,CTRL-01 | Work | K-UX,K-BROW,K-PY,K-API,K-TEST,K-SEC,K-AUTO; independent reviewer other than Work for Work-authored code | Work feasibility evidence supports manual design; UI build and cross-session controller remain HOLD/UNKNOWN |
+| UC01-01,GROW-01,GROW-02 | A2 | K-WP,K-SEO,K-ADS,K-MEDIA,K-DATA,K-UX; Work/A1 review by scope | Product owner fit from DGN-1; live WP/Ads/media connectors and write scopes not verified; read-only pilot requires separate approval |
+| UC01-02,GROW-03 | Work | K-WP,K-API,K-PY,K-TEST,K-UX,K-DATA,K-ADS | Integration/QA fit is historical/current-session dependent; actual data access and implementation authorization UNKNOWN/HOLD |
+| QA-U01 | A1 | K-QA,K-SEO,K-DATA,K-WP; Work or another qualified reviewer independent of A1 | Only after UC01-01 is separately authorized and A2 has produced auditable read-only findings; no current activation |
+| REL-02 | A0 | K-DOC,K-SEC (decision authority, not technical executor) | A0 retains portfolio acceptance and all reserved paid/production/merge decisions; no delegation inferred |
+
+**Fallback and tie-break:** if the proposed primary owner lacks a current verified tool or permission, do not silently transfer the task. Keep the named primary as a proposal, record `CAPABILITY_GAP/NOT_DISPATCHED`, then Coordinator proposes a qualified fallback based on the same skill IDs, current session evidence, write-set and cost; actual reassignment requires a new real handoff/ACK. Hostinger is not replaced by Codex automatically; Codex remains `CODEX_NOT_AUTHORIZED` absent a task-specific A0 exception. Hermes remains cost-gated and not a default substitute. n8n is runtime, never an Agent owner.
+
+**Roadmap routing proposal:** A1 → `program/roadmaps/a1.md`; A2 → `program/roadmaps/a2.md`; Work → `program/roadmaps/work.md`; Coordinator → this roadmap; Hostinger/Hermes/Codex → their own roadmaps only after an actual scoped task and ACK. No Agent may write another Agent's roadmap. All currently dormant operational rows retain HOLD; this matrix does not create a new assignment.
+
+**DGN-4 completeness remaining:** final per-row capability evidence and current rights must be reconciled with recipient self-session ACK for each newly activated task; no current A1 directory entry can certify another Agent's live capability. The design matrix now covers all 32 original IDs at group level while preserving one proposed owner for each row. Convert to one-row-per-WBS machine-readable assignment matrix only within the authorized Coordinator integration write-set after package consistency review; do not alter frozen main WBS from this planning branch.
