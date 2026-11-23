@@ -401,9 +401,9 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Define monitoring/alert thresholds, freshness, ownership, health-vs-inference semantics, redaction and incident/STOP path.
 - **REQUIRED_SKILL_IDS:** K-VPS,K-OBS,K-SEC,K-API
 - **MINIMUM_TOOL_CAPABILITY:** Architecture now; future metrics collector/dashboard/alert route in staging.
-- **PRIMARY_OWNER_CANDIDATE:** Coordinator design; Hostinger proposed infra owner (paused)
-- **AGENT_CANDIDATES:** Coordinator (design deliverable)
-- **CONTRIBUTORS:** Hostinger Agent (future operational specialist only after A0 resume + task ACK)
+- **PRIMARY_OWNER_CANDIDATE:** Coordinator
+- **AGENT_CANDIDATES:** Coordinator (design only); Hostinger Agent (future operations only after A0 resume and task ACK)
+- **CONTRIBUTORS:** Hostinger Agent is not an active contributor while paused; future operational specialist only after separate resume/ACK
 - **PREDECESSORS:** INF-01; INF-02 before production recovery claims.
 - **ENVIRONMENT_DATA_ACCESS:** Design docs; future staging runtime.
 - **RISK_COST_STOP:** Hostinger paused; recurring cost UNKNOWN. STOP before opening ports/public endpoints or external alerts.
@@ -665,9 +665,9 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Sample A1 directory claims against reproducible evidence; flag unsupported current-session/permission claims without repeating inventory.
 - **REQUIRED_SKILL_IDS:** K-GIT,K-TEST,K-QA,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Pinned GitHub blobs and targeted evidence checks; read-only.
-- **PRIMARY_OWNER_CANDIDATE:** Work independent reviewer candidate; A1 remains author
-- **AGENT_CANDIDATES:** Work
-- **CONTRIBUTORS:** A1 (source author/factual response only)
+- **PRIMARY_OWNER_CANDIDATE:** Work (independent QA owner candidate)
+- **AGENT_CANDIDATES:** Work only, subject to task ACK and current session capability
+- **CONTRIBUTORS:** A1 is source author/factual respondent only; A0 Assistant is package reviewer only, not execution owner
 - **PREDECESSORS:** G1-03,G3-01.
 - **ENVIRONMENT_DATA_ACCESS:** Read-only PR/source review.
 - **RISK_COST_STOP:** A1 cannot self-certify; Work DGN feasibility report is not automatically QA of PR46; separate ACK required.
