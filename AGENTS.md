@@ -2,6 +2,10 @@
 
 Các hướng dẫn này áp dụng cho toàn bộ repository.
 
+## Ưu tiên phân công hiện hành — A1 và Codex ngoại lệ (A0, 2026-11-23)
+
+**Mục 11 [AGENT_WORKFLOW](rules/AGENT_WORKFLOW.md) có hiệu lực ưu tiên** khi tài liệu cũ gợi ý giao Codex theo thói quen. **A1 là ChatGPT Thông thường ở phiên riêng**, khác ChatGPT Điều phối và ChatGPT Work; xem [hồ sơ A1](agents/a1.md) và [master allocation v2](tasks/2026-11-23-a1-cost-first-master-allocation.md). Điều phối phải tự thực hiện hoặc giao A1/Work/Hermes/Hostinger nếu đủ năng lực/công cụ, Codex chỉ còn ngoại lệ theo gate chi phí có A0 duyệt. **Thu hồi phần giao Codex đơn giản chưa làm**, không xóa kết quả lịch sử. Mọi lệnh GitHub vẫn `PREPARED_FOR_OWNER_FORWARD` cho tới khi Agent ACK; không tự tạo phiên A1. Không có quyền mới cho paid, live, production, merge.
+
 ## Mục tiêu
 
 Trước khi nhận việc mới, nắm mục tiêu doanh nghiệp tại [PROJECT.md](PROJECT.md). Đặc tả và kết quả trao đổi qua GitHub theo [rules/AGENT_WORKFLOW.md](rules/AGENT_WORKFLOW.md): task được commit trước khi giao; báo cáo, bằng chứng được commit/push sau khi thực hiện; tin nhắn chỉ dẫn URL và kết quả ngắn. Dùng `tasks/` cho đặc tả và `reports/` cho kết quả. Các giới hạn nhiệm vụ là ràng buộc, còn cách triển khai là linh hoạt.
