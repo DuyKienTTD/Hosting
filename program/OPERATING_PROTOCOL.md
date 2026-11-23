@@ -17,3 +17,9 @@ A1 owns implementation in its own branch. Work owns independent baseline/final Q
 - Do not mark KNG effective until authorized merge to main and remote readback.
 
 For reproducible candidate scope, see [migration plan](kng/migration.json), [validator](kng/validate.py), [tests](kng/test_validate.py) and [candidate entry](README.md).
+
+## Pre-dispatch Git task candidate filter (D5, candidate-only)
+
+Use the **single fail-closed read-only interface** `python3 program/kng/select_task.py --root .` ([source](kng/select_task.py), [negative/positive tests](kng/test_select_task.py)) before interpreting any `tasks/` file, CATALOG `type: task`, or old proposal as a possible task candidate. The selector accepts only explicit YAML boolean `dispatch_eligible: true`, `type: task`, a supported review-ready non-archived status and an existing safe path. Archive, `dispatch_eligible: false`, absent/unknown eligibility are never candidates; malformed/ambiguous input **STOPs with exit 2**, not partial results. An empty candidate list is valid. **Never bypass with a raw task glob or status text.** PyYAML must be installed; a missing dependency is a STOP, not an empty false PASS.
+
+**This is not a dispatcher.** A candidate is never executable authorization. Only the Director's **explicit work order**, authorized scope/owner, then the receiving Agent's real-chat **ACK** can activate a task; this process remains external, **NOT_DEPLOYED** as an automated runner. No script should create ACK, select a task owner, send a request or perform work based on this output. A0 retains merge/production/paid rights.

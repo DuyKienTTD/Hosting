@@ -27,6 +27,9 @@
 - `UNKNOWN`: chưa biết; không được suy diễn.
 - `PLANNED`: mục tiêu tương lai, không phải năng lực hiện tại.
 
+
+**D5 pre-dispatch boundary:** For *manual preparation only*, use [fail-closed candidate selector](../program/kng/select_task.py) (`python3 program/kng/select_task.py --root .`), not `tasks/` glob or CATALOG `type: task` alone. Explicit `dispatch_eligible: true`, nonarchived supported task status and safe existing file are mandatory; missing/false/unknown eligibility is never eligible. Invalid catalog/schema causes STOP. Output is **not** dispatch authority; the Director must separately issue a real work order, and the recipient must ACK in its actual chat. No automatic distributor exists or is being deployed.
+
 ## Quy tắc đọc và giao việc
 
 - Hồ sơ [A1](a1.md), [Codex](codex.md), [Work/Điều phối](chatgpt.md), [Hermes](hermes.md), [Hostinger](hostinger.md), [n8n](n8n.md) chỉ mô tả công cụ/nguồn đã quan sát; **không phải** nguồn trạng thái hoặc công việc đang hoạt động.

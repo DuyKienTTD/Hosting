@@ -13,7 +13,7 @@ RELS=['program/kng/validate.py','program/kng/test_validate.py','program/current.
       'program/README.md','program/KNOWLEDGE_OPTIMIZATION.md','program/OPERATING_PROTOCOL.md',
       'program/WORK_BREAKDOWN.md','program/roadmaps/a1.md',
       'program/PRODUCT_AND_UI.md','program/SKILL_REGISTRY.md','program/roadmaps/work.md',
-      'README.md','program/kng/derive.py','reports/evidence/2026-11-23-a1-kng01-d2-q0-metrics.json',
+      'README.md','program/kng/select_task.py','program/kng/test_select_task.py','program/kng/derive.py','reports/evidence/2026-11-23-a1-kng01-d2-q0-metrics.json',
       'AGENTS.md','PROJECT.md','STATE.md','CATALOG.yaml',
       'rules/AGENT_WORKFLOW.md','rules/REPOSITORY_SECURITY.md']
 class Contract(unittest.TestCase):
@@ -33,6 +33,16 @@ class Contract(unittest.TestCase):
         p='program/kng/inventory.json';j=self.obj(p);j['facts'][0]['source_sha']='0'*40;self.put(p,j);self.err('SOURCE_PIN_MISMATCH')
     def test_recovery_ref_plausible_nonexistent_commit(self):
         p='program/kng/inventory.json';j=self.obj(p);j['facts'][1]['recovery_ref']='PR39@'+'0'*40;self.put(p,j);self.err('SOURCE_PIN_MISMATCH')
+
+    def test_integrated_catalog_result_pin_must_match_actual_blob(self):
+        p='program/kng/migration.json'; j=self.obj(p)
+        for x in j['proposed_updates']:
+            if x['path']=='CATALOG.yaml':
+                x['result_blob']='bf24d5726c8518617f02777aec6d271723946358'
+                break
+        self.put(p,j)
+        self.err('INTEGRATED_BLOB_MISMATCH')
+
     def test_migration_base_valid_but_wrong(self):
         p='program/kng/migration.json';j=self.obj(p);j['proposed_updates'][0]['base_blob']='0'*40;self.put(p,j);self.err('MIGRATION_BLOB_MISMATCH')
 
