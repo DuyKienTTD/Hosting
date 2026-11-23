@@ -1,7 +1,7 @@
 ---
 id: eng-01a-s3-offline-integration
 type: task
-status: ready
+status: ready_for_review
 updated_at: 2026-11-23
 sensitivity: public
 owner: codex
@@ -20,4 +20,4 @@ reviewer: chatgpt
 
 **STOP / INVARIANTS:** `LIVE_ENABLED=False`. Nếu thiếu pin hoặc cần external transport/credential, dừng đúng bước. Không thay PR #7/#10/#13, không chạy lại suite lịch sử, không KVM2/Docker/production/provider/paid.
 
-**HANDOFF:** PR riêng về main, `ENG01A_S3_OFFLINE_INTEGRATION_PASS` hoặc blocker theo evidence, connector thật chưa thử. ChatGPT Điều phối nghiệm thu.
+**HANDOFF:** PR riêng về main, `ENG01A_S3_OFFLINE_INTEGRATION_PASS` hoặc blocker theo evidence, connector thật chưa thử. ChatGPT Điều phối nghiệm thu [báo cáo](../reports/2026-11-23-eng-01a-s3-integration-and-merge-preview.md) và [evidence](../reports/evidence/2026-11-23-eng-01a-s3-integration.json).
