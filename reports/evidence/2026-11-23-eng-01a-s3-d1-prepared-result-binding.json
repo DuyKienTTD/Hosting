@@ -1,0 +1,401 @@
+{
+  "task": "ENG-01A-S3-D1",
+  "agent": "Codex",
+  "ack": "EXECUTE ENG-01A-S3-D1",
+  "finding": "S3-QA-01",
+  "instruction_comment": 7091356418,
+  "work_qa_comment": 7091266578,
+  "base_pr19": "c343f7dded47a67e385ab05b8bb46aed88444f15",
+  "base_rules": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "workflow_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "source_pins": {
+    "s1_head": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+    "s1_blob": "2bbfb4ef308e39ea1b548f22553c673d3a684a97",
+    "s2_head": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+    "s2_blob": "bfda39bf3ac07aba09009462bb60620970a31951",
+    "fixture_blob": "ec30d2dd9d2fb9a0dbd0b6179d0a424321fdd166",
+    "previous_s3_bridge_blob": "f4f34acc1b4a6d29e6e0f3775bead5ec0e7989a5"
+  },
+  "baseline_negative": {
+    "fixture": "synthetic GA4 delayed, deadline 20, process tick 1, recovery tick 2",
+    "fault": "exception injected at native S1 settle entry",
+    "assertion_expected": "result null after working recovery",
+    "observed_before_fix": "unbound synthetic 504 exposed after recovery",
+    "test_exit": 1
+  },
+  "platform": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "arch": "AMD64",
+    "python": "3.12.3",
+    "sqlite": "3.45.1",
+    "linux": "LINUX_NOT_RUN"
+  },
+  "test_delta": {
+    "tests_run": 11,
+    "cases": {
+      "orphan_504": {
+        "expected": "prepared 504 survived pre-settlement exception but is absent from recovery receipt",
+        "observed": {
+          "prepared_status": 504,
+          "before_state": "working",
+          "dispatches": 1,
+          "reads": 1,
+          "receipts": 1,
+          "replay_stable": true,
+          "late_settlement_rejected": true,
+          "binding": {
+            "contract_version": 1,
+            "s3_request_sha256": "fb8fad9818856696baa79d7996d30aac2e762ca3f6bcef08ade1ecaaf9c307c3",
+            "native_request_sha256": "0344a04691cc53b161d701ab0d8eaac5b22e95c1ca9f955a1ca0d199b77659c5",
+            "native_receipt_id": "receipt-54ef5f3ec80ea597c53d3195d7109113de9eca39e75db44d5ece7964f7080a35",
+            "result_sha256": null,
+            "outcome": "outcome_unknown",
+            "binding_sha256": "8074d1edb18a1054de36781997065a4871dcda7abe8ce38d87e28d2a0aed24c3"
+          }
+        }
+      },
+      "transaction_crash": {
+        "expected": "exit rolls back outbox and association; recovery suppresses unbound 504",
+        "observed": {
+          "exit": 86,
+          "crash_pid": 26548,
+          "before_state": "working",
+          "outbox_rolled_back": true,
+          "association_rolled_back": true,
+          "dispatches": 1,
+          "reads": 1,
+          "receipts": 1,
+          "binding": {
+            "contract_version": 1,
+            "s3_request_sha256": "c67640651c6551f0eb2cb00e866af2032182f71082356b5f9eab8db6561c9db8",
+            "native_request_sha256": "5abd81d95265adbe3e0fdad7f0b10f4210509ab431e85bcea45f5451d9ba5e92",
+            "native_receipt_id": "receipt-de343ca0857e36fe118932876eb6eb86829875a8566346b111526400f7fbb3b2",
+            "result_sha256": null,
+            "outcome": "outcome_unknown",
+            "binding_sha256": "15d865d035e850c7a53c085ae9bfbd28cb2a3133ed5ef7fc22ca7bab8c11ecdc"
+          }
+        }
+      },
+      "bound_504": {
+        "expected": "normal 504 and committed outbox restart both expose a verified 504 under native unknown",
+        "observed": {
+          "status": 504,
+          "dispatches": 1,
+          "reads": 1,
+          "receipts": 1,
+          "normal_binding": {
+            "contract_version": 1,
+            "s3_request_sha256": "8656ed2f4a171156df38195f2bd4a16daec7239162c92efa7fdc2c944b24932d",
+            "native_request_sha256": "3eced422eaacbd2f329da991525d648016255d8e7596b70012aeef351ad4874a",
+            "native_receipt_id": "receipt-e9717f9d8e287c787ca3c57d2e7c1d9d38b5cee46b41677afcc3afd5b2d0d765",
+            "result_sha256": "81d60785929f89ae04aa60b32006ab1947051b3ed60234ceb5f39f302c5fb01b",
+            "outcome": "outcome_unknown",
+            "binding_sha256": "bad3d957647db301c1279689f0b22ff2763f40dbb6ec6e99244bd5fc4a346f25"
+          },
+          "exit": 86,
+          "crash_pid": 25964,
+          "recovery_pid": 19876,
+          "recovered_binding": {
+            "contract_version": 1,
+            "s3_request_sha256": "fa4aace514f65c464e5b626ef28733b5a36275ad1e739748e4c43ded0ae53474",
+            "native_request_sha256": "41fe2686cf11f7faf81da4679c3ceaac4c79af3ba4982ed073c11e88bbb6bd8b",
+            "native_receipt_id": "receipt-b392e6252136991671ccc352e1e438a79af048121475a3c3c84dec464c9cdf3f",
+            "result_sha256": "81d60785929f89ae04aa60b32006ab1947051b3ed60234ceb5f39f302c5fb01b",
+            "outcome": "outcome_unknown",
+            "binding_sha256": "bb07b212a882e643c5d5af8a159a390831f41c804e90a672f2bb4b53287ba590"
+          }
+        }
+      },
+      "invalid_or_legacy_binding": {
+        "expected": "wrong event, changed bytes, malformed JSON and absent association are suppressed",
+        "observed": {
+          "event": {
+            "native_state": "outcome_unknown",
+            "native_receipt_unchanged": true,
+            "result": null,
+            "result_sha256": null
+          },
+          "result": {
+            "native_state": "outcome_unknown",
+            "native_receipt_unchanged": true,
+            "result": null,
+            "result_sha256": null
+          },
+          "malformed": {
+            "native_state": "outcome_unknown",
+            "native_receipt_unchanged": true,
+            "result": null,
+            "result_sha256": null
+          },
+          "legacy": {
+            "native_state": "completed",
+            "native_receipt_unchanged": true,
+            "result": null,
+            "result_sha256": null
+          }
+        }
+      },
+      "ga4_admission_replay": {
+        "expected": "3 attributed rows, stable job and receipt, conflict 409",
+        "observed": {
+          "rows": 3,
+          "replay_http": 200,
+          "conflict_http": 409,
+          "request_sha256": "3efe9fad17c5a287ad324a9068b6a090676b478121e68e5475abf49f2c3489fc",
+          "receipt_binding": {
+            "contract_version": 1,
+            "s3_request_sha256": "3efe9fad17c5a287ad324a9068b6a090676b478121e68e5475abf49f2c3489fc",
+            "native_request_sha256": "76ea8809b36fa60ab757e58a4553aa0ec3c95128ac1c458558fc6af94b36e268",
+            "native_receipt_id": "receipt-c48d233fefd72863b15154baaaa442dbfe8c3487d81cb8fb1cfa616c87f0b84b",
+            "result_sha256": "93d864511a3044f477ffb1db14031a91f7581eef7cbaf298580f426afb176581",
+            "outcome": "completed",
+            "binding_sha256": "e0d466c6cc19a15759f049cca2b6416946591da20f8c30b93fcf171188dae6e0"
+          },
+          "audit": [
+            {
+              "sequence": 1,
+              "event": "admitted",
+              "observed_ms": 0
+            },
+            {
+              "sequence": 2,
+              "event": "working",
+              "observed_ms": 1
+            },
+            {
+              "sequence": 3,
+              "event": "fake_dispatch",
+              "observed_ms": 1
+            },
+            {
+              "sequence": 4,
+              "event": "sending",
+              "observed_ms": 1
+            },
+            {
+              "sequence": 5,
+              "event": "receipt_committed",
+              "observed_ms": 1
+            },
+            {
+              "sequence": 6,
+              "event": "receipt_ack",
+              "observed_ms": 1
+            }
+          ]
+        }
+      },
+      "wp_woo_reads": {
+        "expected": "EN/VI list, correct currency, stable cursor and same snapshot re-read",
+        "observed": {
+          "per_locale": {
+            "en": [
+              "fake-product-en-a",
+              "fake-product-en-b"
+            ],
+            "vi": [
+              "fake-product-vi-a",
+              "fake-product-vi-b"
+            ]
+          },
+          "detail": "fake-page-vi-a",
+          "same_snapshot": true
+        }
+      },
+      "errors_and_unknown": {
+        "expected": "403/429/404/422 failed, 504 unknown, no cursor/watermark advancement or retry",
+        "observed": {
+          "forbidden": {
+            "http": 403,
+            "outcome": "failed",
+            "dispatches": 1,
+            "receipts": 1
+          },
+          "quota": {
+            "http": 429,
+            "outcome": "failed",
+            "dispatches": 1,
+            "receipts": 1
+          },
+          "delayed": {
+            "http": 504,
+            "outcome": "outcome_unknown",
+            "dispatches": 1,
+            "receipts": 1
+          },
+          "missing_status": 404,
+          "invalid_status": 422,
+          "same_cursor_valid_after_faults": true
+        }
+      },
+      "native_deadline": {
+        "expected": "expired S1 deadline creates an unknown receipt with zero fake dispatches and S2 reads",
+        "observed": {
+          "outcome": "outcome_unknown",
+          "dispatches": 0,
+          "read_attempts": 0,
+          "receipts": 1,
+          "receipt_binding": {
+            "contract_version": 1,
+            "s3_request_sha256": "fed2b1c6beba188e2d263afc308d8ef5b7a75baf6919956a44bb5ef85223e6a1",
+            "native_request_sha256": "c08af693da018c82ade36e1bb9a8bd1d796671190c43bf35634e7c306eea95cb",
+            "native_receipt_id": "receipt-5e05dc665c10ee58a1e4128fb225deafadb58e0a429341df998e21da96a28d45",
+            "result_sha256": null,
+            "outcome": "outcome_unknown",
+            "binding_sha256": "55b196fcf0ebe4553ad0316cd9b2b928769ecf0008dbb4183a75d209f823fad4"
+          }
+        }
+      },
+      "callback_binding": {
+        "expected": "mismatched native request denied, valid callback returns same receipt",
+        "observed": {
+          "rejected": true,
+          "unchanged": true,
+          "receipt_binding": {
+            "contract_version": 1,
+            "s3_request_sha256": "c48dc1948f48b05f164a65be27be5192d4bf31c16a545c95b4eef23fd527fb3c",
+            "native_request_sha256": "4dffa9d53becd9a7797360bb0249e3e1c8afa8501f087504042fe0c43ab20c46",
+            "native_receipt_id": "receipt-c15abd9feb88936976cde4fd6807270f289ba894c231fa99f21f4c0d05a1586a",
+            "result_sha256": "93d864511a3044f477ffb1db14031a91f7581eef7cbaf298580f426afb176581",
+            "outcome": "completed",
+            "binding_sha256": "35cfe97d755ab158d56d697e790b2a4da53daccdb18b717cfe2fab86d3634bba"
+          }
+        }
+      },
+      "crash_after_read": {
+        "expected": "one fake dispatch/read before crash; immutable unknown and one receipt after restart",
+        "observed": {
+          "before_state": "working",
+          "outcome": "outcome_unknown",
+          "dispatches": 1,
+          "read_attempts": 1,
+          "receipts": 1,
+          "late_settlement_rejected": true,
+          "result_exposed": false,
+          "external_effect_delivered": false,
+          "exit": 86,
+          "crash_pid": 32520,
+          "recovery_pid": 31720,
+          "receipt_binding": {
+            "contract_version": 1,
+            "s3_request_sha256": "2d549376512740d5992360d07e3829b02805c4d1d1176c3f37cb686f48b08ae0",
+            "native_request_sha256": "f26ba83803f62e097d52b564edb114bf753fdeb64e010b5b19fe6c90a8c57fd4",
+            "native_receipt_id": "receipt-37ee7bd396956a1ce75e3b72fec55e269548d0ac5c574a6e3ba7433eed86f97f",
+            "result_sha256": null,
+            "outcome": "outcome_unknown",
+            "binding_sha256": "0380931b8e900a0392b1f1d6469f6e1f6d0a27f846b54c1d299dd8e2a78029a8"
+          },
+          "audit": [
+            {
+              "sequence": 1,
+              "event": "admitted",
+              "observed_ms": 0
+            },
+            {
+              "sequence": 2,
+              "event": "working",
+              "observed_ms": 1
+            },
+            {
+              "sequence": 3,
+              "event": "fake_dispatch",
+              "observed_ms": 1
+            },
+            {
+              "sequence": 4,
+              "event": "sending",
+              "observed_ms": 2
+            },
+            {
+              "sequence": 5,
+              "event": "receipt_committed",
+              "observed_ms": 2
+            },
+            {
+              "sequence": 6,
+              "event": "receipt_ack",
+              "observed_ms": 2
+            }
+          ]
+        }
+      },
+      "crash_after_receipt": {
+        "expected": "same outbox and committed receipt after fresh worker ACK, no reread",
+        "observed": {
+          "before_state": "sending",
+          "outcome": "completed",
+          "same_native_receipt": true,
+          "same_callback": true,
+          "dispatches": 1,
+          "read_attempts": 1,
+          "receipts": 1,
+          "external_effect_delivered": false,
+          "exit": 86,
+          "crash_pid": 22636,
+          "recovery_pid": 24700,
+          "receipt_binding": {
+            "contract_version": 1,
+            "s3_request_sha256": "24cb4f1e62fe35ad193f56b625168b9dfc29a12a10ac2a346cb4aaf72360a273",
+            "native_request_sha256": "276c9bfda45cdf0e7bd4460b50c949a2acce3f199136378368c2d6a807601b31",
+            "native_receipt_id": "receipt-aa1b943316441bbb68b23e38b51f2a1a3bdce9906146d79d2713c90657c3df53",
+            "result_sha256": "631c1ee678df3589ce7b1a46a31690f9742c1452aa5e6084d5ff156524e53e69",
+            "outcome": "completed",
+            "binding_sha256": "23ff69bd7085bb1380f6799734f3f4199dd834e8fd405dba5a2392af29ff411d"
+          },
+          "audit": [
+            {
+              "sequence": 1,
+              "event": "admitted",
+              "observed_ms": 0
+            },
+            {
+              "sequence": 2,
+              "event": "working",
+              "observed_ms": 1
+            },
+            {
+              "sequence": 3,
+              "event": "fake_dispatch",
+              "observed_ms": 1
+            },
+            {
+              "sequence": 4,
+              "event": "sending",
+              "observed_ms": 1
+            },
+            {
+              "sequence": 5,
+              "event": "receipt_committed",
+              "observed_ms": 1
+            },
+            {
+              "sequence": 6,
+              "event": "receipt_ack",
+              "observed_ms": 2
+            }
+          ]
+        }
+      }
+    }
+  },
+  "checks_not_rerun": [
+    "S1 full suite",
+    "S2 full suite",
+    "S4 full suite",
+    "S3 endpoint and pin case",
+    "Gate B"
+  ],
+  "s4": {
+    "pr": 21,
+    "head": "761e9545d2fcca8f359513b9918d0a6bb4aef776",
+    "status": "STALE_AFTER_S3_D1"
+  },
+  "limits": {
+    "kvm2": false,
+    "real_connectors": false,
+    "paid": false,
+    "production": false
+  },
+  "verdict": "ENG01A_S3_D1_PREPARED_RESULT_BINDING_PASS",
+  "next_owner": "ChatGPT Coordinator for independent Work QA"
+}

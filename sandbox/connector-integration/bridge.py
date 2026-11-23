@@ -1,5 +1,7 @@
 """S3 versioned binding for pinned S1 jobs and S2 synthetic reads."""
 
+from contextlib import contextmanager
+import hashlib
 import json
 import re
 
@@ -26,6 +28,10 @@ class Bridge:
                 key TEXT PRIMARY KEY, request BLOB NOT NULL, request_sha256 TEXT NOT NULL,
                 job_id TEXT NOT NULL UNIQUE, native_sha256 TEXT NOT NULL,
                 read_attempts INTEGER NOT NULL DEFAULT 0, prepared_result BLOB
+            )""")
+            db.execute("""CREATE TABLE IF NOT EXISTS s3_settled_results (
+                job_id TEXT PRIMARY KEY REFERENCES s3_intents(job_id),
+                event_sha256 TEXT NOT NULL, result_sha256 TEXT NOT NULL
             )""")
 
     def _require(self, condition, message):
@@ -95,7 +101,8 @@ class Bridge:
 
     def _intent(self, job_id):
         with self.local.tx() as db:
-            row = db.execute("SELECT * FROM s3_intents WHERE job_id=?", (job_id,)).fetchone()
+            row = db.execute("""SELECT i.*, s.event_sha256, s.result_sha256 FROM s3_intents AS i
+                LEFT JOIN s3_settled_results AS s USING (job_id) WHERE i.job_id=?""", (job_id,)).fetchone()
         self._require(row is not None, "unknown S3 job")
         return row
 
@@ -113,15 +120,41 @@ class Bridge:
         except self.s2.ReadError as exc:
             return self.s2.reply(exc.status, adapter.observed_at, error="synthetic_read_rejected")
 
+    def _bind_settled_result(self, db, job_id, prepared):
+        row = db.execute("""SELECT j.state, j.outcome, j.event, i.prepared_result
+            FROM jobs AS j JOIN s3_intents AS i USING (job_id) WHERE j.job_id=?""", (job_id,)).fetchone()
+        self._require(row is not None and row["state"] == "sending" and row["event"] is not None
+                      and row["prepared_result"] == self.s1.wire(prepared), "settlement did not match prepared read")
+        if row["outcome"] == prepared["outcome"]:
+            db.execute("INSERT INTO s3_settled_results VALUES (?,?,?)",
+                       (job_id, hashlib.sha256(row["event"]).hexdigest(), self.s1.sha(prepared)))
+
     def process(self, job_id, now_ms, checkpoint=lambda _: None):
         row = self._intent(job_id)
         request = json.loads(row["request"])
         prepared = None
 
         class ChannelWorker(self.s1.OfflineAdapter):
+            binding_job = None
+
             def settle(worker, native_job, request_sha256, outcome, tick):
-                outcome = prepared["outcome"] if prepared is not None else outcome
-                return super().settle(native_job, request_sha256, outcome, tick)
+                if prepared is None:
+                    return super().settle(native_job, request_sha256, outcome, tick)
+                worker.binding_job = native_job
+                try:
+                    return super().settle(native_job, request_sha256, prepared["outcome"], tick)
+                finally:
+                    worker.binding_job = None
+
+            @contextmanager
+            def tx(worker):
+                # Pinned S1 writes its outbox through this single transaction.
+                # Persist the association before that same transaction commits.
+                with super().tx() as db:
+                    yield db
+                    if worker.binding_job is not None:
+                        self._bind_settled_result(db, worker.binding_job, prepared)
+                        checkpoint("settlement_before_commit")
 
         def on_checkpoint(name):
             nonlocal prepared
@@ -142,6 +175,20 @@ class Bridge:
         ChannelWorker(self.local.root).process(job_id, now_ms, on_checkpoint)
         return self.snapshot(job_id)
 
+    def _settled_result(self, row, receipt):
+        raw = row["prepared_result"]
+        if (row["event_sha256"] != receipt["event_sha256"] or not isinstance(raw, bytes)
+                or hashlib.sha256(raw).hexdigest() != row["result_sha256"]):
+            return None
+        try:
+            result = json.loads(raw)
+            if (isinstance(result, dict) and result.get("outcome") == receipt["outcome"]
+                    and self.s1.wire(result) == raw):
+                return result
+        except (ValueError, RecursionError):
+            return None
+        return None
+
     def snapshot(self, job_id):
         native = self.local.snapshot(job_id)
         row = self._intent(job_id)
@@ -155,17 +202,12 @@ class Bridge:
                           and receipt["request_sha256"] == row["native_sha256"]
                           and receipt["outcome"] == native["outcome"]
                           and receipt["event_sha256"] == self.s1.sha(event), "native receipt binding drift")
-        result = json.loads(row["prepared_result"]) if row["prepared_result"] else None
-        # A prepared read can be orphaned by a crash. Expose it only once S1
-        # acknowledges a matching outcome. S1 remains authoritative for unknown.
         terminal = native["state"] in self.s1.OUTCOMES
-        if not terminal or result is None or result["outcome"] != native["outcome"]:
-            result = None
+        result = None
         binding = None
         if terminal:
             self._require(receipt is not None, "terminal job lacks receipt")
-            self._require(native["outcome"] == "outcome_unknown" or result is not None,
-                          "known native outcome lacks a matching prepared result")
+            result = self._settled_result(row, receipt)
             binding = {"contract_version": 1, "s3_request_sha256": row["request_sha256"],
                        "native_request_sha256": row["native_sha256"], "native_receipt_id": receipt["receipt_id"],
                        "result_sha256": self.s1.sha(result) if result is not None else None,

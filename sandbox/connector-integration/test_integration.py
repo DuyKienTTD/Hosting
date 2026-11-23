@@ -1,6 +1,7 @@
 """S3 delta only, using pinned S1/S2 modules and actual worker process exits."""
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -8,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from bridge import Bridge, LIVE_ENABLED
 import pinned_sources as pins
@@ -216,11 +218,133 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(after["native"]["state"], "completed")
         self.assertEqual(after["native"]["receipt"], before["native"]["receipt"])
         self.assertEqual(after["native"]["callback"], before["native"]["callback"])
+        self.assertEqual(after["result"]["status"], 200)
+        self.assertEqual(after["receipt_binding"]["result_sha256"], self.bridge._intent(job)["result_sha256"])
         self.assertEqual(self.bridge.process(job, 3), after)
         case("crash_after_receipt", "same outbox and committed receipt after fresh worker ACK, no reread",
              before_state="sending", outcome="completed", same_native_receipt=True, same_callback=True,
              dispatches=1, read_attempts=1, receipts=1, external_effect_delivered=False, exit=CRASH,
              crash_pid=crash, recovery_pid=recovery, receipt_binding=after["receipt_binding"], audit=after["native"]["audit"])
+
+    def assert_unbound_unknown(self, admitted):
+        job = admitted["job_id"]
+        reopened = Bridge(self.s1, self.s2, self.store.root)
+        after = reopened.process(job, 2)
+        self.assert_receipt(after)
+        self.assertEqual(after["native"]["state"], "outcome_unknown")
+        self.assertIsNone(after["result"])
+        self.assertIsNone(after["receipt_binding"]["result_sha256"])
+        with self.assertRaises(self.s1.Conflict):
+            self.store.settle(job, admitted["native_request_sha256"], "completed", 3)
+        self.assertEqual(reopened.process(job, 3), after)
+        return after
+
+    def test_recovery_does_not_bind_orphan_delayed_result(self):
+        request = intent("orphan-504", scenario="delayed")
+        admitted = self.bridge.admit(request, 0)
+        job = admitted["job_id"]
+        with patch.object(self.s1.OfflineAdapter, "settle", side_effect=RuntimeError("injected before S1 settle")):
+            with self.assertRaisesRegex(RuntimeError, "injected before S1 settle"):
+                self.bridge.process(job, 1)
+        row = self.bridge._intent(job)
+        self.assertEqual(json.loads(row["prepared_result"])["status"], 504)
+        self.assertIsNone(row["event_sha256"])
+        before = self.bridge.snapshot(job)
+        self.assertEqual(before["native"]["state"], "working")
+        self.assertIsNone(before["native"]["callback"])
+        self.assertIsNone(before["native"]["receipt"])
+        self.assertIsNone(before["result"])
+        after = self.assert_unbound_unknown(admitted)
+        reopened = Bridge(self.s1, self.s2, self.store.root)
+        self.assertEqual(reopened.admit(request, 3), admitted | {"http": 200, "replayed": True})
+        case("orphan_504", "prepared 504 survived pre-settlement exception but is absent from recovery receipt",
+             prepared_status=504, before_state="working", dispatches=1, reads=1, receipts=1,
+             replay_stable=True, late_settlement_rejected=True, binding=after["receipt_binding"])
+
+    def test_crash_inside_settlement_rolls_back_outbox_and_binding(self):
+        admitted = self.bridge.admit(intent("settlement-crash", scenario="delayed"), 0)
+        job = admitted["job_id"]
+        crash = self.worker_process(job, 1, "settlement_before_commit", CRASH)
+        row = self.bridge._intent(job)
+        self.assertEqual(json.loads(row["prepared_result"])["status"], 504)
+        self.assertIsNone(row["event_sha256"])
+        before = self.bridge.snapshot(job)
+        self.assertEqual(before["native"]["state"], "working")
+        self.assertIsNone(before["native"]["callback"])
+        self.assertIsNone(before["native"]["receipt"])
+        self.assertNotIn("sending", [entry["event"] for entry in before["native"]["audit"]])
+        after = self.assert_unbound_unknown(admitted)
+        case("transaction_crash", "exit rolls back outbox and association; recovery suppresses unbound 504",
+             exit=CRASH, crash_pid=crash, before_state="working", outbox_rolled_back=True,
+             association_rolled_back=True, dispatches=1, reads=1, receipts=1, binding=after["receipt_binding"])
+
+    def test_completed_delayed_result_is_bound_after_outbox_restart(self):
+        request = intent("committed-504", scenario="delayed")
+        admitted, normal = self.run_intent(request)
+        job = admitted["job_id"]
+        initial = Bridge(self.s1, self.s2, self.store.root)
+        self.assertEqual(initial.process(job, 2), normal)
+        self.assertEqual(normal["native"]["state"], "outcome_unknown")
+        self.assertEqual(normal["result"]["status"], 504)
+        self.assertEqual(normal["result"]["records"], [])
+        self.assertEqual(initial._intent(job)["event_sha256"], normal["native"]["receipt"]["event_sha256"])
+        self.assertEqual(initial._intent(job)["result_sha256"], normal["receipt_binding"]["result_sha256"])
+
+        admitted = self.bridge.admit(intent("restart-504", scenario="delayed"), 0)
+        job = admitted["job_id"]
+        crash = self.worker_process(job, 1, "sending_before_receipt", CRASH)
+        before = self.bridge.snapshot(job)
+        self.assertEqual(before["native"]["state"], "sending")
+        self.assertIsNone(before["result"])
+        self.assertIsNone(before["native"]["receipt"])
+        row = self.bridge._intent(job)
+        self.assertEqual(row["event_sha256"], self.s1.sha(before["native"]["callback"]))
+        recovery = self.worker_process(job, 2, "none")
+        self.assertNotEqual(crash, recovery)
+        reopened = Bridge(self.s1, self.s2, self.store.root)
+        after = reopened.snapshot(job)
+        self.assert_receipt(after)
+        self.assertEqual(after["native"]["state"], "outcome_unknown")
+        self.assertEqual(after["native"]["callback"], before["native"]["callback"])
+        self.assertEqual(after["native"]["receipt"]["event_sha256"], row["event_sha256"])
+        self.assertEqual(after["receipt_binding"]["result_sha256"], row["result_sha256"])
+        self.assertEqual(after["result"], normal["result"])
+        self.assertEqual(reopened.process(job, 3), after)
+        case("bound_504", "normal 504 and committed outbox restart both expose a verified 504 under native unknown",
+             status=504, dispatches=1, reads=1, receipts=1, normal_binding=normal["receipt_binding"],
+             exit=CRASH, crash_pid=crash, recovery_pid=recovery, recovered_binding=after["receipt_binding"])
+
+    def test_mismatched_or_legacy_binding_suppresses_prepared_result(self):
+        observed = {}
+        for mode in ("event", "result", "malformed", "legacy"):
+            with self.subTest(mode=mode):
+                scenario = "ok" if mode == "legacy" else "delayed"
+                admitted, bound = self.run_intent(intent("unbound-" + mode, scenario=scenario))
+                job = admitted["job_id"]
+                with self.store.tx() as db:
+                    if mode == "event":
+                        db.execute("UPDATE s3_settled_results SET event_sha256=? WHERE job_id=?", ("0" * 64, job))
+                    elif mode == "result":
+                        changed = self.s1.wire(bound["result"] | {"elapsed_ms": 99})
+                        db.execute("UPDATE s3_intents SET prepared_result=? WHERE job_id=?", (changed, job))
+                    elif mode == "malformed":
+                        changed = b"{"
+                        db.execute("UPDATE s3_intents SET prepared_result=? WHERE job_id=?", (changed, job))
+                        db.execute("UPDATE s3_settled_results SET result_sha256=? WHERE job_id=?",
+                                   (hashlib.sha256(changed).hexdigest(), job))
+                    else:
+                        db.execute("DELETE FROM s3_settled_results WHERE job_id=?", (job,))
+                reopened = Bridge(self.s1, self.s2, self.store.root)
+                after = reopened.process(job, 2)
+                self.assert_receipt(after)
+                self.assertEqual(after["native"], bound["native"])
+                self.assertIsNone(after["result"])
+                self.assertIsNone(after["receipt_binding"]["result_sha256"])
+                self.assertEqual(reopened.process(job, 3), after)
+                observed[mode] = {"native_state": after["native"]["state"], "native_receipt_unchanged": True,
+                                  "result": None, "result_sha256": None}
+        case("invalid_or_legacy_binding", "wrong event, changed bytes, malformed JSON and absent association are suppressed",
+             **observed)
 
     def test_offline_denials_provenance_and_no_personal_fields(self):
         self.assertIs(LIVE_ENABLED, False)
@@ -271,8 +395,13 @@ if __name__ == "__main__":
     else:
         parser = argparse.ArgumentParser(description=__doc__)
         parser.add_argument("--evidence", type=Path)
+        parser.add_argument("--test", action="append", help="run a named IntegrationTests method")
         args = parser.parse_args()
-        result = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(IntegrationTests))
+        available = unittest.defaultTestLoader.getTestCaseNames(IntegrationTests)
+        names = args.test or available
+        if any(name not in available for name in names):
+            parser.error("--test requires a named IntegrationTests method")
+        result = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(IntegrationTests(name) for name in names))
         if args.evidence and result.wasSuccessful():
             args.evidence.write_text(json.dumps({"tests_run": result.testsRun, "cases": RESULTS}, indent=2) + "\n",
                                      encoding="utf-8")
