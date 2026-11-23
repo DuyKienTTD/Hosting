@@ -1,0 +1,139 @@
+{
+  "task_id": "A1-ENG01A-S4-LINUX-QA01",
+  "agent": "A1",
+  "ack": "EXECUTE A1-ENG01A-S4-LINUX-QA01",
+  "date": "2026-11-23",
+  "mode": "INDEPENDENT_OFFLINE_LINUX_QA_PARTIAL",
+  "source": {
+    "main": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "pr_heads": {
+      "10": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+      "13": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+      "19": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "21": "272855817cffe5334757fcf3a64cfae750b3b119"
+    },
+    "pr31_unmerged": "210c15568bb2ecae17c59874d9a36c6cd2a27fda",
+    "main_workflow_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+    "manifest_blob": "8ee1ee5b0287b11635723ef15fcc19d7722240c4",
+    "checker_blob": "77d271387741e0e4cb17a9d85cf9a91f64b6b388",
+    "test_checker_blob": "6642544258b013d4846d4cda59819196e1ccc659"
+  },
+  "source_blob_check": {
+    "method": "GitHub authenticated connector per pinned source HEAD, not local git hash-object",
+    "verified": 12,
+    "total": 12,
+    "failed": 0,
+    "sha1s": [
+      "aab487f7126dba44528ec688312da6f6328ad92d",
+      "2bbfb4ef308e39ea1b548f22553c673d3a684a97",
+      "657a4d5931c9391e88b121f7b22d873cb7120fc0",
+      "168b8eef420f89c63115b2a7ba798933932373e7",
+      "bfda39bf3ac07aba09009462bb60620970a31951",
+      "ec30d2dd9d2fb9a0dbd0b6179d0a424321fdd166",
+      "a92040a0b2ccdabe60d09305415bd16973d88314",
+      "ab327ae4bb756bbf7b22b6926f34e6e6888502f7",
+      "f65a6f699e9fedc20c9869deea33edb7c20fa2b8",
+      "d8e122c98cc095644f42cffdc66b91bcd4387707",
+      "78bc55a75782c5ea2905b0efa5d12abd3ff9ef27",
+      "7bc35d40c317056d18c10bef9fdd47b2f6db3d98"
+    ]
+  },
+  "linux": {
+    "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "python": "3.13.5",
+    "git": "2.47.3",
+    "sqlite": "3.46.1",
+    "workspace": "/mnt/data/eng01a-linux-qa",
+    "github_git_clone": "BLOCKED_DNS_AND_DIRECT_HTTPS",
+    "local_git_objects": "NOT_AVAILABLE",
+    "external_calls": 0,
+    "paid_calls": 0
+  },
+  "actual_tests": {
+    "type": "SHA_TABLE_SYNTHETIC_NOT_OFFICIAL_CHECKER",
+    "command": "python3 /mnt/data/eng01a-linux-qa/source_manifest_cases.py",
+    "run": 7,
+    "pass": 7,
+    "fail": 0,
+    "error": 0,
+    "exit": 0,
+    "compile": "PASS",
+    "expected_projected_digest": "57d930a7d45cf695cd25bd372a9057a64bf7786d62b83134548dc7d9c0528119",
+    "observed_projected_digest_run1": "57d930a7d45cf695cd25bd372a9057a64bf7786d62b83134548dc7d9c0528119",
+    "observed_projected_digest_run2_reversed": "57d930a7d45cf695cd25bd372a9057a64bf7786d62b83134548dc7d9c0528119",
+    "not_actual_file_assembly": true
+  },
+  "cases": [
+    {
+      "id": "table_manifest_digest",
+      "expected": "historical path/contentSHA table digest",
+      "observed": "57d930a7d45cf695cd25bd372a9057a64bf7786d62b83134548dc7d9c0528119",
+      "status": "PASS_SYNTHETIC_LINUX_TABLE_ONLY"
+    },
+    {
+      "id": "order_invariance",
+      "expected": "reverse order same canonical table digest",
+      "observed": "PASS; same digest",
+      "status": "PASS_SYNTHETIC_LINUX_TABLE_ONLY"
+    },
+    {
+      "id": "sha_drift",
+      "expected": "reject altered content SHA",
+      "observed": "CONTENT_DIGEST_DRIFT",
+      "status": "PASS_SYNTHETIC_LINUX_TABLE_ONLY"
+    },
+    {
+      "id": "missing_source",
+      "expected": "reject missing path",
+      "observed": "MISSING_OR_DUPLICATE_SOURCE",
+      "status": "PASS_SYNTHETIC_LINUX_TABLE_ONLY"
+    },
+    {
+      "id": "stale_manifest",
+      "expected": "reject old S3 HEAD",
+      "observed": "STALE_SOURCE_PIN",
+      "status": "PASS_SYNTHETIC_LINUX_TABLE_ONLY"
+    },
+    {
+      "id": "duplicate_path",
+      "expected": "reject duplicate table path",
+      "observed": "MISSING_OR_DUPLICATE_SOURCE",
+      "status": "PASS_SYNTHETIC_LINUX_TABLE_ONLY"
+    },
+    {
+      "id": "invalid_sha_format",
+      "expected": "reject malformed hash",
+      "observed": "INVALID_SHA256",
+      "status": "PASS_SYNTHETIC_LINUX_TABLE_ONLY"
+    }
+  ],
+  "not_run": [
+    "two official independent release_check.assemble from actual local Git objects",
+    "test_release_check.py full S4",
+    "S3-D1 Linux SQLite/process exit86 recovery",
+    "real connector integration",
+    "live transport/browser/production"
+  ],
+  "historical_only": {
+    "windows_s4_3of3": "AUTHOR_PASS_NOT_LINUX",
+    "windows_s3d1_4of4": "AUTHOR_PASS_NOT_LINUX",
+    "windows_bundle_digest": "57d930a7d45cf695cd25bd372a9057a64bf7786d62b83134548dc7d9c0528119"
+  },
+  "blocker": {
+    "kind": "SOURCE_MATERIALIZATION_UNAVAILABLE",
+    "detail": "Connector can read UTF-8 repository objects, container cannot resolve GitHub and full local pinned Git object/ref snapshot absent. Cannot execute unchanged release_check or claim full assembly.",
+    "next_action": "Provide approved offline Git bundle containing all pinned Git commits/trees/blobs and remote-tracking refs in isolated Linux; run missing official release/SQLite delta only"
+  },
+  "side_effects": {
+    "source_modified": false,
+    "shared_metadata_modified": false,
+    "main_modified": false,
+    "pr36_modified": false,
+    "merge": false,
+    "production": false,
+    "paid_api": false,
+    "codex": false
+  },
+  "verdict": "LINUX_NOT_RUN_SOURCE_ONLY_PARTIAL",
+  "next_owner": "ChatGPT Điều phối"
+}
