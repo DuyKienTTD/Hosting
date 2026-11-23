@@ -2,6 +2,8 @@
 
 ## 2026-11-23
 
+- **QA-GOV-A1-PR31 D3 handoff correction:** Work D2 [#7093666150](https://github.com/DuyKienTTD/Hosting/pull/31#issuecomment-7093666150) confirmed Hostinger PAUSED G1-R closed and identified five stale current OPS-D2 handoff references. Updated AGENTS, workflow §11.1a, agent directory, A1 profile and allocation: A1 PR36 delivered 31/31 author-only tests, Hermes independent PR36 QA [#7093565021](https://github.com/DuyKienTTD/Hosting/pull/36#issuecomment-7093565021) PREPARED pending ACK/verdict; Work 18-case QA remains D1 history. No CATALOG, main, PR24 or production changes; pending independent Work D3 re-QA.
+
 - **QA-GOV-A1-PR31 D2 (G1-R):** xóa tuyến giao Hostinger ở điểm sử dụng trong danh bạ, A1 profile, allocation task và AGENTS; ghi rõ Hostinger PAUSED và chỉ resume theo A0 + Agent ACK. Work nghiệm thu G2/G3 từ trước; chỉ cần re-QA phần G1-R; không thay đổi CATALOG hoặc production.
 
 
