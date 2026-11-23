@@ -2,6 +2,8 @@
 
 ## 2026-11-23
 
+- ENG-01A-S1 đạt 8/8 kiểm thử offline, gồm bốn cửa sổ worker crash/restart, replay không dispatch lặp và receipt bất biến. Chờ ChatGPT Điều phối nghiệm thu. [Báo cáo](reports/2026-11-23-eng-01a-s1-offline-connector-contract.md).
+
 - Nghiệm thu B2-O fake local tại `d95f161` và chuẩn bị B2-P preflight chỉ đọc.
 
 ## 2026-11-22
