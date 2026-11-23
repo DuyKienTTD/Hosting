@@ -1201,6 +1201,54 @@ documents:
     updated_at: 2026-11-24
     sensitivity: public
 
+  - id: dgn-package-operating-model-candidate-2026-11-24
+    path: program/OPERATING_MODEL.md
+    type: knowledge
+    status: candidate-not-effective
+    authoritative_for: dgn2-integrated-operating-model-design-not-effective-rule
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: dgn1-product-charter-candidate-2026-11-24
+    path: program/PRODUCT_AND_UI.md
+    type: knowledge
+    status: author-complete-candidate-not-merged
+    authoritative_for: dgn1-product-charter-and-operator-ui-design
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: dgn2-agent-skills-directory-candidate-2026-11-24
+    path: program/SKILL_REGISTRY.md
+    type: knowledge
+    status: author-complete-candidate-not-merged
+    authoritative_for: dgn2-agent-capability-and-skills-directory
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: a1-dgn-roadmap-integration-candidate-2026-11-24
+    path: program/roadmaps/a1.md
+    type: knowledge
+    status: author-complete-candidate-not-merged
+    authoritative_for: a1-dgn-roadmap-integration
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: a2-dgn-roadmap-integration-candidate-2026-11-24
+    path: program/roadmaps/a2.md
+    type: knowledge
+    status: author-complete-candidate-not-merged
+    authoritative_for: a2-dgn-roadmap-integration
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: work-dgn-roadmap-integration-candidate-2026-11-24
+    path: program/roadmaps/work.md
+    type: knowledge
+    status: author-complete-candidate-not-merged
+    authoritative_for: work-dgn-roadmap-integration-and-feasibility
+    updated_at: 2026-11-24
+    sensitivity: public
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
