@@ -6,6 +6,8 @@ class Lifecycle:
         self.resource=resource; self.rule=rule; self.rule_version=rule_version; self.source=source; self.cooldown_seconds=cooldown_seconds
         self.state='NORMAL'; self.last_ts=None; self.last_alert_ts=None; self.bad_streak=0; self.good_streak=0; self.incident_seq=0
         self.seen={}; self.audit=[]
+        # Dedicated in-memory, snapshot-persisted replay identity for accepted interruptions.
+        self.interruption_replays={}
     def _dt(self, value):
         if not isinstance(value, str) or not value.endswith('Z'): raise ValueError('timestamp must be UTC Z')
         parsed=datetime.fromisoformat(value[:-1]+'+00:00')
@@ -17,6 +19,8 @@ class Lifecycle:
         'rule_version', 'freshness', 'health_status', 'signal'))
     _ALLOWED = _REQUIRED | frozenset(('rule',))
     _SID_LIMIT = 128
+    _MAX_INTERRUPTION_IDS = 256
+    _SNAPSHOT_VERSION = 2
 
     @classmethod
     def _valid_id(cls, sid):
@@ -83,11 +87,19 @@ class Lifecycle:
         if sid in self.seen:
             return self._reject('EXACT_REPLAY' if self.seen[sid] == canonical
                                 else 'CONFLICTING_REPLAY', sample)
+        if sid in self.interruption_replays:
+            return self._reject('EXACT_REPLAY' if self.interruption_replays[sid] == canonical
+                                else 'CONFLICTING_REPLAY', sample)
+        # Fail closed at registry capacity: do not evict identity and permit a
+        # duplicate interruption to mutate streaks again; stop all fresh ingest.
+        if len(self.interruption_replays) >= self._MAX_INTERRUPTION_IDS:
+            return self._reject('INTERRUPTION_REGISTRY_FULL', sample)
         if self.last_ts is not None and now <= self.last_ts:
             return self._reject('NON_ADVANCING_TIMESTAMP', sample)
         if error == 'TRUSTED_INTERRUPTION':
-            # Only qualifying streaks are reset. No watermark, seen-ID,
-            # incident, notification or state mutation; audit is diagnostic.
+            # Replay identity is separate from valid-sample 'seen' and persists
+            # through snapshot/restore. Watermark and incident remain untouched.
+            self.interruption_replays[sid]=canonical
             self.bad_streak=0; self.good_streak=0
             return self._reject('TRUSTED_INTERRUPTION', sample)
         self.seen[sid]=canonical; self.last_ts=now
@@ -111,7 +123,33 @@ class Lifecycle:
     def control_snapshot(self):
         return json.dumps({'state':self.state,'last_ts':self.last_ts.isoformat() if self.last_ts else None,'last_alert_ts':self.last_alert_ts.isoformat() if self.last_alert_ts else None,'bad_streak':self.bad_streak,'good_streak':self.good_streak,'incident_seq':self.incident_seq,'seen':sorted(self.seen)},sort_keys=True)
     def snapshot(self):
-        return json.dumps({'resource':self.resource,'rule':self.rule,'rule_version':self.rule_version,'source':self.source,'cooldown_seconds':self.cooldown_seconds,'state':self.state,'last_ts':self.last_ts.isoformat() if self.last_ts else None,'last_alert_ts':self.last_alert_ts.isoformat() if self.last_alert_ts else None,'bad_streak':self.bad_streak,'good_streak':self.good_streak,'incident_seq':self.incident_seq,'seen':self.seen,'audit':self.audit},sort_keys=True)
+        return json.dumps({'resource':self.resource,'rule':self.rule,'rule_version':self.rule_version,'source':self.source,'cooldown_seconds':self.cooldown_seconds,'state':self.state,'last_ts':self.last_ts.isoformat() if self.last_ts else None,'last_alert_ts':self.last_alert_ts.isoformat() if self.last_alert_ts else None,'bad_streak':self.bad_streak,'good_streak':self.good_streak,'incident_seq':self.incident_seq,'seen':self.seen,'audit':self.audit,'snapshot_version':self._SNAPSHOT_VERSION,'interruption_replays':self.interruption_replays},sort_keys=True)
     @classmethod
     def restore(cls, payload):
-        d=json.loads(payload); x=cls(d['resource'],d['rule'],d['rule_version'],d['source'],d['cooldown_seconds']); x.state=d['state']; x.last_ts=datetime.fromisoformat(d['last_ts']) if d['last_ts'] else None; x.last_alert_ts=datetime.fromisoformat(d['last_alert_ts']) if d['last_alert_ts'] else None; x.bad_streak=d['bad_streak']; x.good_streak=d['good_streak']; x.incident_seq=d['incident_seq']; x.seen=d['seen']; x.audit=d.get('audit',[]); return x
+        d=json.loads(payload)
+        version=d.get('snapshot_version',1)
+        if version not in (1,cls._SNAPSHOT_VERSION):
+            raise ValueError('UNSUPPORTED_SNAPSHOT_VERSION')
+        if version==1:
+            # Historical v1 snapshots lack authoritative interruption identities.
+            # Refuse restoration if any accepted interruption appears in audit.
+            if any(isinstance(a,dict) and a.get('type')=='TRUSTED_INTERRUPTION'
+                   for a in d.get('audit',[])):
+                raise ValueError('LEGACY_INTERRUPTION_REPLAY_UNAVAILABLE')
+            interruptions={}
+        else:
+            interruptions=d.get('interruption_replays')
+            if (not isinstance(interruptions,dict)
+                    or len(interruptions)>cls._MAX_INTERRUPTION_IDS
+                    or any(not cls._valid_id(k) or not isinstance(v,str)
+                           for k,v in interruptions.items())):
+                raise ValueError('INVALID_INTERRUPTION_REPLAY_REGISTRY')
+        if any(k in d['seen'] for k in interruptions):
+            raise ValueError('REPLAY_ID_COLLISION')
+        x=cls(d['resource'],d['rule'],d['rule_version'],d['source'],d['cooldown_seconds'])
+        x.state=d['state']
+        x.last_ts=datetime.fromisoformat(d['last_ts']) if d['last_ts'] else None
+        x.last_alert_ts=datetime.fromisoformat(d['last_alert_ts']) if d['last_alert_ts'] else None
+        x.bad_streak=d['bad_streak']; x.good_streak=d['good_streak']; x.incident_seq=d['incident_seq']
+        x.seen=d['seen']; x.audit=d.get('audit',[]); x.interruption_replays=interruptions
+        return x

@@ -1,24 +1,119 @@
 {
   "rule_version": "ops-01a-s2-v1",
-  "state_machine": ["NORMAL", "OPEN", "RECOVERED"],
+  "state_machine": [
+    "NORMAL",
+    "OPEN",
+    "RECOVERED"
+  ],
   "qualifying_bad_samples": 3,
   "qualifying_good_samples_after_open": 3,
   "timestamp_policy": "strictly_advancing_utc_after_full_validation",
-  "validation_order": ["sample_type", "sample_id_string_length_charset", "required_and_allowed_fields", "canonical_json_finite_noncyclic", "field_types", "utc_timestamp_parse", "resource", "source", "rule_version", "optional_explicit_rule", "sample_id_replay", "strictly_advancing_time", "trusted_freshness_health_signal", "state_transition"],
-  "rejected_sample_mutation": "invalid_identity_payload_replay_or_clock: control_state_unchanged, sanitized audit only; trusted_interruption: reset bad_streak and good_streak only; audit only otherwise",
-  "sample_id_policy": {"type": "string", "min_length": 1, "max_length": 128, "allowed_characters": "ASCII alphanumeric underscore period colon hyphen", "invalid_audit_id": null},
-  "payload_policy": {"allow_extra_fields": false, "required_fields": ["sample_id","observed_at_utc","resource","source","rule_version","freshness","health_status","signal"], "optional_fields": ["rule"], "non_json_values": "INVALID_PAYLOAD", "nan_infinity_cycles": "INVALID_PAYLOAD", "canonicalization": "json sorted compact finite-only"},
-  "rule_binding": {"provided_rule": "must_equal_configured_rule", "absent_rule": "backward_compatible_single_rule_synthetic_v1_only; no real trust assertion", "wrong_explicit_rule": "RULE_MISMATCH before control mutation"},
-  "trusted_interruption": {"conditions": "valid payload, correct resource/source/rule_version/optional_rule, valid strictly later UTC, non-replayed sample, freshness!=fresh or health_status!=observed or signal not bad/good", "control_mutations": ["bad_streak=0", "good_streak=0"], "control_fields_unchanged": ["state", "last_ts", "last_alert_ts", "incident_seq", "seen"], "audit_type": "TRUSTED_INTERRUPTION"},
-  "replay_policy": {"exact_same_id_payload":"reject_no_control_mutation","same_id_conflicting_payload":"reject_no_control_mutation"},
-  "incident_policy": {"NORMAL_bad3":"OPEN_new_incident","RECOVERED_bad3":"OPEN_new_incident_independent_of_notification_cooldown","OPEN_bad3":"notification_only_no_new_incident"},
+  "validation_order": [
+    "sample_type",
+    "sample_id_string_length_charset",
+    "required_and_allowed_fields",
+    "canonical_json_finite_noncyclic",
+    "field_types",
+    "utc_timestamp_parse",
+    "resource",
+    "source",
+    "rule_version",
+    "optional_explicit_rule",
+    "sample_id_replay",
+    "strictly_advancing_time",
+    "trusted_freshness_health_signal",
+    "state_transition"
+  ],
+  "rejected_sample_mutation": "invalid/foreign/replay/capacity errors do not mutate control state; trusted interruption once per valid identity resets only both streak counters plus dedicated replay record and sanitized audit",
+  "sample_id_policy": {
+    "type": "string",
+    "min_length": 1,
+    "max_length": 128,
+    "allowed_characters": "ASCII alphanumeric underscore period colon hyphen",
+    "invalid_audit_id": null
+  },
+  "payload_policy": {
+    "allow_extra_fields": false,
+    "required_fields": [
+      "sample_id",
+      "observed_at_utc",
+      "resource",
+      "source",
+      "rule_version",
+      "freshness",
+      "health_status",
+      "signal"
+    ],
+    "optional_fields": [
+      "rule"
+    ],
+    "non_json_values": "INVALID_PAYLOAD",
+    "nan_infinity_cycles": "INVALID_PAYLOAD",
+    "canonicalization": "json sorted compact finite-only"
+  },
+  "rule_binding": {
+    "provided_rule": "must_equal_configured_rule",
+    "absent_rule": "backward_compatible_single_rule_synthetic_v1_only; no real trust assertion",
+    "wrong_explicit_rule": "RULE_MISMATCH before control mutation"
+  },
+  "trusted_interruption": {
+    "conditions": "valid payload, correct resource/source/rule_version/optional_rule, valid strictly later UTC, non-replayed sample, freshness!=fresh or health_status!=observed or signal not bad/good",
+    "control_mutations": [
+      "bad_streak=0",
+      "good_streak=0",
+      "interruption_replays[sample_id]=canonical_input"
+    ],
+    "control_fields_unchanged": [
+      "state",
+      "last_ts",
+      "last_alert_ts",
+      "incident_seq",
+      "seen"
+    ],
+    "audit_type": "TRUSTED_INTERRUPTION"
+  },
+  "replay_policy": {
+    "exact_same_id_payload": "reject_no_control_mutation",
+    "same_id_conflicting_payload": "reject_no_control_mutation"
+  },
+  "incident_policy": {
+    "NORMAL_bad3": "OPEN_new_incident",
+    "RECOVERED_bad3": "OPEN_new_incident_independent_of_notification_cooldown",
+    "OPEN_bad3": "notification_only_no_new_incident"
+  },
   "cooldown_seconds": 900,
-  "boundary": {"899":"SUPPRESSED_COOLDOWN","900":"ELIGIBLE_NOTIFICATION","901":"ELIGIBLE_NOTIFICATION"},
+  "boundary": {
+    "899": "SUPPRESSED_COOLDOWN",
+    "900": "ELIGIBLE_NOTIFICATION",
+    "901": "ELIGIBLE_NOTIFICATION"
+  },
   "dedupe_key": "resource:rule:rule_version:incident_seq",
   "incident_id": "resource:rule:rule_version:incident_seq",
   "unknown_policy": "correctly_attributed_monotonic_UNKNOWN_stale_blocked_interrupts_streak; foreign_invalid_does_not",
   "out_of_order_policy": "reject_before_control_mutation",
   "external_notifications": false,
   "persistence_claim": "synthetic_snapshot_replay_only",
-  "s1_composition": "S1_EQUIVALENCE_FIXTURE_ONLY; local PinnedS1Evaluator stand-in, not a runtime import"
+  "s1_composition": "S1_EQUIVALENCE_FIXTURE_ONLY; local PinnedS1Evaluator stand-in, not a runtime import",
+  "replay_registry_policy": {
+    "scope": "synthetic_in_process_only",
+    "snapshot_version": 2,
+    "max_interruption_ids": 256,
+    "record": "canonical_finite_json_by_sample_id_only_after_a_qualifying_trusted_interruption",
+    "valid_seen": "separate; same ID across both registries is a collision",
+    "lookup_order": [
+      "fully_validate_payload_and_source",
+      "accepted_seen_lookup",
+      "accepted_interruption_lookup",
+      "capacity_guard",
+      "strictly_advancing_trusted_time"
+    ],
+    "exact_replay": "EXACT_REPLAY; no control mutation",
+    "conflicting_replay": "CONFLICTING_REPLAY; no control mutation",
+    "corrected_valid_same_id": "CONFLICTING_REPLAY; explicit correction protocol not implemented",
+    "registry_full": "INTERRUPTION_REGISTRY_FULL; freeze all new sample ingestion, no control mutation, never evict an interruption identity",
+    "retention": "until explicit reset/new lifecycle instance; no time-based pruning; max 256 identities per instance",
+    "snapshot_restore": "v2 persists registry, validates length and no overlap with valid-seen IDs",
+    "legacy_v1": "restore allowed only if no trusted interruption in legacy audit; otherwise reject as missing replay provenance",
+    "limitations": "not a durable/cryptographically trusted registry; no cross-process locking/restart persistence absent external snapshot; existing valid seen store still separately unbounded"
+  }
 }

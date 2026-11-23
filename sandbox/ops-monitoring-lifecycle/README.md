@@ -41,3 +41,34 @@ The original S2 10/10 provenance remains historical; D1 evidence is reported sep
   **S1_EQUIVALENCE_FIXTURE_ONLY**; neither real S1 import nor S1 composition
   execution was tested. D1 cooldown/incident and snapshot claims remain
   synthetic-only. No VPS, outbound notification or paid service.
+
+## D3 trusted interruption replay registry (offline)
+
+- Independent Hermes QA (PR #36, 21 groups: 19 PASS / 2 FAIL) found that an
+  already-applied `TRUSTED_INTERRUPTION` could reset a later good streak again
+  before the accepted-sample watermark had caught up, including after restore.
+  This D3 delta stores `sample_id -> canonical JSON` in a separate
+  `interruption_replays` map when an **actually accepted** interruption breaks
+  both streaks. `seen` remains strictly for accepted normal good/bad samples.
+- All future occurrences of that ID are classified as `EXACT_REPLAY` if the
+  canonical payload is identical, otherwise `CONFLICTING_REPLAY`; neither
+  resets streaks. A valid good/bad sample with an already-interrupted ID is
+  **not** treated as a correction: it is `CONFLICTING_REPLAY`. Malformed or
+  foreign inputs do **not** reserve IDs in this registry. An interruption
+  reusing an already accepted valid-sample ID also conflicts.
+- Snapshot **version 2** includes the registry and restores it with size and
+  overlap checks. Legacy v1 snapshots without interruption evidence may be
+  restored; a v1 snapshot containing an interruption audit is rejected because
+  the replay map cannot be reconstructed from a nonauthoritative audit.
+  Caller-supplied snapshot JSON is **not authenticated**, and an adversary
+  deleting history is outside this synthetic offline boundary.
+- At most **256** interruption IDs per in-process Lifecycle. **No eviction**:
+  once full, all *new* sample IDs fail with `INTERRUPTION_REGISTRY_FULL`,
+  leaving state/time/streaks unchanged, while previously registered replay
+  IDs still reject normally. This halts the mock to avoid silently weakening
+  dedupe and requires a separately approved reset/new instance; no live
+  notification or auto-reset is implemented. The original `seen` map for
+  good/bad samples is separately unbounded and is **not** solved here.
+- Scope remains `S1_EQUIVALENCE_FIXTURE_ONLY`, not S1 runtime import. No
+  durable database, multiprocess dedupe/atomicity, real monitoring, VPS,
+  notifications, production or paid API. Work/Hermes independent D3 QA pending.

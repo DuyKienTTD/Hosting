@@ -1,0 +1,189 @@
+{
+  "task_id": "A1-OPS01A-S2-D3",
+  "agent": "A1",
+  "ack": "EXECUTE A1-OPS01A-S2-D3",
+  "mode": "OFFLINE_CODE_AND_TESTS",
+  "date": "2026-11-23",
+  "source": {
+    "repository": "DuyKienTTD/Hosting",
+    "pr": 36,
+    "pre_head": "6838ca7d5e69b43f5272e5fe7f03ba5fff1d7222",
+    "base_pr24": "e9c2d8f759850ea9c654de7e103549e041f66679",
+    "main": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "original_lifecycle_blob": "6d138ab6e044fc85067b9bbf7f6ae0db8a50af78",
+    "hermes_review_comment_id": 7093801751,
+    "assignment_comment_id": 7093810461,
+    "hermes_qa_commit": "ac07e2465725614ee747ff8127e29a1338f22e8d",
+    "hermes_independent": {
+      "groups": 21,
+      "pass": 19,
+      "fail": 2,
+      "verdict": "NEEDS_A1_DELTA"
+    }
+  },
+  "environment": {
+    "platform": "Linux",
+    "python": "3.13.5",
+    "git": "2.47.3",
+    "github_git_clone": "BLOCKED_DNS",
+    "source_integrity": "exact original and new Git hash-object blobs",
+    "scope": "OFFLINE_STD_LIB_ONLY"
+  },
+  "implementation": {
+    "registry": "interruption_replays",
+    "limit": 256,
+    "snapshot_version": 2,
+    "canonical": "json sorted compact finite-only",
+    "lookup_order": [
+      "full_validation_and_source_identity",
+      "existing_accepted_seen",
+      "accepted_interruption_replays",
+      "capacity_guard",
+      "trusted_timestamp_watermark"
+    ],
+    "exact": "EXACT_REPLAY_NO_CONTROL_MUTATION",
+    "conflicting": "CONFLICTING_REPLAY_NO_CONTROL_MUTATION",
+    "valid_corrected_same_id": "CONFLICTING_REPLAY",
+    "legacy_restore": "v1 without trusted interruption audit allowed; with interruption audit FAIL_CLOSED",
+    "capacity_behavior": "INTERRUPTION_REGISTRY_FULL, freeze all new sample IDs, no eviction and no control mutation",
+    "live_limitations": [
+      "No durable persistence",
+      "No cryptographic snapshot integrity",
+      "No cross-process locking or server identity",
+      "Existing good/bad seen registry separately unbounded",
+      "No production monitoring/notifications"
+    ]
+  },
+  "tests": {
+    "pre_fix": {
+      "focused": 13,
+      "pass": 5,
+      "fail": 6,
+      "error": 2,
+      "status": "EXPECTED_RED",
+      "command": "python3 -m unittest discover -s sandbox/ops-monitoring-lifecycle/tests -p test_d3_replay.py -v"
+    },
+    "post_fix": {
+      "total": 44,
+      "pass": 44,
+      "fail": 0,
+      "error": 0,
+      "d1": 10,
+      "d2": 21,
+      "d3": 13,
+      "elapsed_seconds": 0.01,
+      "exit_code": 0,
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s sandbox/ops-monitoring-lifecycle/tests -p 'test*.py' -v"
+    },
+    "compile": "PASS",
+    "policy_json_parse": "PASS",
+    "independent_reviewer": "PENDING"
+  },
+  "test_cases": [
+    {
+      "id": "test_r1_exact_before_watermark",
+      "expected": "U@12 after goods 11.1/11.2 => EXACT_REPLAY; third new good RECOVERED",
+      "observed": "PASS",
+      "mode": "EXECUTED_AUTHOR_PYTHON"
+    },
+    {
+      "id": "test_r2_conflicting_after_restore",
+      "expected": "U changed payload after restore => CONFLICTING_REPLAY; next good RECOVERED",
+      "observed": "PASS",
+      "mode": "EXECUTED_AUTHOR_PYTHON"
+    },
+    {
+      "id": "test_valid_after_interruption_id_is_collision",
+      "expected": "valid sample ID previously accepted as interruption => CONFLICTING_REPLAY",
+      "observed": "PASS",
+      "mode": "EXECUTED_AUTHOR_PYTHON"
+    },
+    {
+      "id": "test_valid_id_then_interruption_is_collision",
+      "expected": "trusted interruption ID previously accepted normal => CONFLICTING_REPLAY",
+      "observed": "PASS",
+      "mode": "EXECUTED_AUTHOR_PYTHON"
+    },
+    {
+      "id": "test_foreign_invalid_do_not_poison_registry",
+      "expected": "foreign source, wrong rule, malformed ID do not reserve interruption ID",
+      "observed": "PASS",
+      "mode": "EXECUTED_AUTHOR_PYTHON"
+    },
+    {
+      "id": "test_after_watermark_replay_is_harmless",
+      "expected": "replay after watermark advances cannot mutate state",
+      "observed": "PASS",
+      "mode": "EXECUTED_AUTHOR_PYTHON"
+    },
+    {
+      "id": "test_bad_streak_restarts_once",
+      "expected": "new bad x3 still OPEN after one trusted interruption, even with replay",
+      "observed": "PASS",
+      "mode": "EXECUTED_AUTHOR_PYTHON"
+    },
+    {
+      "id": "test_snapshot_deterministic_restore_and_duplicate",
+      "expected": "v2 snapshot parity and duplicate replay",
+      "observed": "PASS",
+      "mode": "EXECUTED_AUTHOR_PYTHON"
+    },
+    {
+      "id": "test_bounded_registry_no_eviction_replay",
+      "expected": "256 entries cap; no eviction; oldest exact replay still caught",
+      "observed": "PASS",
+      "mode": "EXECUTED_AUTHOR_PYTHON"
+    },
+    {
+      "id": "test_full_registry_freezes_new_valid_progress",
+      "expected": "capacity rejects all new IDs",
+      "observed": "PASS",
+      "mode": "EXECUTED_AUTHOR_PYTHON"
+    },
+    {
+      "id": "test_legacy_restore_without_interruptions",
+      "expected": "v1 no interruption can restore",
+      "observed": "PASS",
+      "mode": "EXECUTED_AUTHOR_PYTHON"
+    },
+    {
+      "id": "test_legacy_restore_with_interruptions_rejected",
+      "expected": "v1 with trusted interruption audit rejected",
+      "observed": "PASS",
+      "mode": "EXECUTED_AUTHOR_PYTHON"
+    },
+    {
+      "id": "test_cooldown_remains",
+      "expected": "899/900/901 second threshold unchanged",
+      "observed": "PASS",
+      "mode": "EXECUTED_AUTHOR_PYTHON"
+    }
+  ],
+  "new_blobs": {
+    "sandbox/ops-monitoring-lifecycle/lifecycle.py": "0043cb1a00ff1a3e9fbc7f1267900ebde02f4769",
+    "sandbox/ops-monitoring-lifecycle/policy.json": "4153bd777b73043b6eaebb3f7e5302d55a640d56",
+    "sandbox/ops-monitoring-lifecycle/README.md": "5590dbcd7c3e95c169c4e4387d7e99a231dc3b7d",
+    "sandbox/ops-monitoring-lifecycle/tests/test_d3_replay.py": "99bbf7cdff080521ccc88a3b1d24054e55a0853a"
+  },
+  "write_set": [
+    "sandbox/ops-monitoring-lifecycle/lifecycle.py",
+    "sandbox/ops-monitoring-lifecycle/policy.json",
+    "sandbox/ops-monitoring-lifecycle/README.md",
+    "sandbox/ops-monitoring-lifecycle/tests/test_d3_replay.py",
+    "reports/2026-11-23-a1-ops01a-s2-d3-replay.md",
+    "reports/evidence/2026-11-23-a1-ops01a-s2-d3-replay.json"
+  ],
+  "side_effects": {
+    "main_changes": 0,
+    "hostinger_pr24_changes": 0,
+    "shared_metadata_changes": 0,
+    "production_changes": 0,
+    "vps_calls": 0,
+    "paid_calls": 0,
+    "codex_calls": 0,
+    "merges": 0,
+    "ci_triggers": 0
+  },
+  "verdict": "A1_OPS01A_S2_D3_AUTHOR_TESTS_PASS_OFFLINE_PENDING_INDEPENDENT_QA",
+  "next_owner": "ChatGPT Điều phối → independent Hermes/Work QA"
+}
