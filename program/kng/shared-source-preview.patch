@@ -1,0 +1,56 @@
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -1,3 +1,5 @@
+ # Hosting
+ 
++**KNG-01 integration candidate (NOT active until approved):** Only KNG-01 is active; G0/UC01/infra new work held. See `program/current.json` after adoption. Effective main rules remain fully mandatory.
++
+ Nguồn tri thức chung cho hạ tầng Hosting/VPS: trạng thái hiện tại, kiểm kê, báo cáo, quy tắc, runbook, quyết định và tài liệu tham khảo.
+diff --git a/PROJECT.md b/PROJECT.md
+--- a/PROJECT.md
++++ b/PROJECT.md
+@@ -1,3 +1,5 @@
+ # TTD METAL — Tổng quan dự án AI Automation
+ 
++**Candidate current routing:** KNG-01 only; the long-term business objectives below remain intact and are not authorization to start G0, UC01, Ads or infra. `program/current.json` is effective only after approval and main integration.
++
+ **Điểm bắt đầu cho mọi tác nhân** | Cập nhật: 2026-11-21
+diff --git a/STATE.md b/STATE.md
+--- a/STATE.md
++++ b/STATE.md
+@@ -10,3 +10,5 @@
+ # Trạng thái hiện tại
+ 
++**Candidate historical boundary:** dated November 21–22 material is last-observed, not live service state. KNG-only priority derives from A0/coordinator; `program/current.json` is a future pointer after approved adoption. Retain all dated evidence and indexes.
++
+ Đây là điểm đọc nhanh. Chi tiết đầy đủ nằm trong `inventory/current-vps-state.md`.
+diff --git a/AGENTS.md b/AGENTS.md
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -1,3 +1,5 @@
+ # Hướng dẫn cho tác nhân
+ 
++**KNG candidate routing:** A0 pauses new non-KNG tasks. Once approved, current KNG coordinator/A1/Work ownership points to `program/current.json`; mandatory full-read of this file, effective workflow/security, STATE and CATALOG remains.
++
+ Các hướng dẫn này áp dụng cho toàn bộ repository.
+diff --git a/CATALOG.yaml b/CATALOG.yaml
+--- a/CATALOG.yaml
++++ b/CATALOG.yaml
+@@ -5,6 +5,7 @@
+ 
+ entrypoints:
+   read_first: README.md
++  knowledge_normalization_candidate: program/current.json
+   project_charter: PROJECT.md
+   task_handoff_rules: rules/AGENT_WORKFLOW.md
+   current_state: STATE.md
+diff --git a/rules/AGENT_WORKFLOW.md b/rules/AGENT_WORKFLOW.md
+--- a/rules/AGENT_WORKFLOW.md
++++ b/rules/AGENT_WORKFLOW.md
+@@ -9,3 +9,5 @@
+ # Quy ước chung: giao việc và bàn giao qua GitHub
+ 
++**Candidate supersession pointer:** newer A0 KNG-01-only priority holds G0/UC01/UI/infra new work. Only after approved integration does `program/current.json` provide canonical current routing. This navigation pointer cannot replace any safety, STOP, cost, or merge rule.
++
+ Áp dụng cho Codex, ChatGPT Work và mọi tác nhân có quyền truy cập repository. Mục đích: **GitHub là nơi lưu tài liệu làm việc và kết quả có thể truy xuất**, còn tin nhắn giao việc chỉ cần ngắn gọn và dẫn link. Không áp đặt kỹ thuật triển khai, cấu trúc code hay checklist cứng khi không cần.

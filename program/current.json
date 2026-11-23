@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "record_kind": "CANDIDATE_ROUTING_SNAPSHOT_NOT_EFFECTIVE_RULES",
+  "mode": "KNG_ONLY",
+  "source_authority": "main_effective_rules_until_approved_merge",
+  "main_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "pr31_sha": "a770de80a2467ca1789c820b63416209cf53b7d1",
+  "pr39_source_sha": "22d741e3f1dd325540932dea63c3a6da635113c3",
+  "must_read": [
+    "AGENTS.md",
+    "rules/AGENT_WORKFLOW.md",
+    "rules/REPOSITORY_SECURITY.md",
+    "STATE.md",
+    "CATALOG.yaml"
+  ],
+  "priority_owner": "Chat Điều phối",
+  "implementation_owner": "A1",
+  "independent_qa_owner": "Work",
+  "work_ack": "UNKNOWN",
+  "agent_status": {
+    "A1": "KNG_ONLY",
+    "Work": "KNG_INDEPENDENT_QA_PENDING_ACK",
+    "A2": "ON_HOLD_DEPENDENCY_KNG01",
+    "Hostinger": "ON_HOLD_DEPENDENCY_KNG01",
+    "Hermes": "ON_HOLD_DEPENDENCY_KNG01",
+    "Codex": "ON_HOLD_DEPENDENCY_KNG01"
+  },
+  "production_authorized": false,
+  "merge_authorized": false,
+  "codex_authorized": false,
+  "source_paths": [
+    "program/README.md",
+    "program/KNOWLEDGE_OPTIMIZATION.md",
+    "program/OPERATING_PROTOCOL.md",
+    "program/WORK_BREAKDOWN.md",
+    "program/roadmaps/a1.md",
+    "program/PRODUCT_AND_UI.md",
+    "program/SKILL_REGISTRY.md",
+    "program/roadmaps/work.md"
+  ],
+  "coordinator_readback_required": true,
+  "status_note": "KNG implementation draft only. No Work KNG QA ACK asserted; PR31 is unmerged. Original evidence remains on main and prior PRs."
+}

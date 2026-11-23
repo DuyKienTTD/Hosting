@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "implementation_status": "CANDIDATE_PROGRAM_NORMALIZED_SHARED_FILES_PREVIEW_ONLY",
+  "source_base": "22d741e3f1dd325540932dea63c3a6da635113c3",
+  "pr31_conflict_head": "a770de80a2467ca1789c820b63416209cf53b7d1",
+  "applied_candidate_files": ["program/README.md","program/KNOWLEDGE_OPTIMIZATION.md","program/OPERATING_PROTOCOL.md","program/WORK_BREAKDOWN.md","program/roadmaps/a1.md","program/current.json","program/kng/inventory.json","program/kng/migration.json","program/kng/validate.py","program/kng/test_validate.py"],
+  "proposed_updates": [
+    {"path":"README.md","base_blob":"d86b4644a0781213b7007d9fc672c0881be36f59","execution":"PREVIEW_ONLY_SHARED_WRITER_GATE","pr31_conflict_review":"PR31 does not edit README; semantic authority links require coordinated integration","operation":"replace long stale live/authority shortcut with single KNG entry pointer and link full mandatory rules"},
+    {"path":"PROJECT.md","base_blob":"c645aa2df0b6cbad1f854dd4d10c6bf15553b0f6","execution":"PREVIEW_ONLY_SHARED_WRITER_GATE","pr31_conflict_review":"PR31 changes PROJECT.md; rebase exact latest content before any write","operation":"separate durable long-term product vision from present KNG-only priority in one short status link"},
+    {"path":"STATE.md","base_blob":"c8e8941aa1418f70ed9542063f0485a129739d25","execution":"PREVIEW_ONLY_SHARED_WRITER_GATE","pr31_conflict_review":"PR31 changes STATE.md; preserve historical checkpoint and evidence; add single canonical current-pointer","operation":"replace repeated current agent/task rollups by references; retain chronological source evidence"},
+    {"path":"AGENTS.md","base_blob":"cb6a8af9d2634cc4eb959132d6c3f2fafcbfaf35","execution":"PREVIEW_ONLY_SHARED_WRITER_GATE","pr31_conflict_review":"PR31 changes AGENTS.md; mandatory full-read policy remains until approved effective rule","operation":"replace duplicated operative routing paragraphs with pointer to authoritative priority; never weaken full security rules"},
+    {"path":"CATALOG.yaml","base_blob":"719c9c5d2832382285d732b9ad21f55d8c163733","execution":"PREVIEW_ONLY_SHARED_WRITER_GATE","pr31_conflict_review":"PR31 adds index entries; preserve every accepted ID/path, index only adopted KNG artifacts","operation":"add one canonical registry index entry after merge; eliminate competing active status titles, no historical deletion"},
+    {"path":"rules/AGENT_WORKFLOW.md","base_blob":"69ec0db902f457f06dd547dae171220331df0f5e","execution":"PREVIEW_ONLY_SHARED_WRITER_GATE","pr31_conflict_review":"PR31 modifies rule; reconcile §11 and new KNG override without overwriting","operation":"append one controlling KNG supersession pointer and clarify old routing as historical, not replace safety guard"}
+  ],
+  "delete_candidates": [],
+  "physical_deletions": 0,
+  "rollback": "git revert the later authorized migration commit; original blobs and source PR HEADs remain intact",
+  "next_gate": "Coordinator resolves PR31 single-writer lease, then supervised shared-source write + independent Work QA + authorized integration to main."
+}

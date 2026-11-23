@@ -1,0 +1,197 @@
+{
+  "task_id": "A1-KNG01-GIT-NORMALIZATION-D1",
+  "owner": "A1",
+  "mode": "EXECUTE_KNG_ONLY_CANDIDATE",
+  "date": "2026-11-23",
+  "ack": "ACKNOWLEDGED",
+  "source_pins": {
+    "main": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "pr31": "a770de80a2467ca1789c820b63416209cf53b7d1",
+    "pr39_base": "22d741e3f1dd325540932dea63c3a6da635113c3",
+    "main_rules_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+    "main_security_blob": "c24d608036b11dcd3fafcaefbefa23fdb591990e"
+  },
+  "actual_author_tests": {
+    "environment": "Linux Python 3.13.5 Git 2.47.3; isolated generated fixture workspace; real GitHub contents inspected separately",
+    "command": "python3 -m unittest discover -s program/kng -p test_validate.py -v",
+    "total": 18,
+    "positive": 1,
+    "negative": 17,
+    "passed": 18,
+    "failed": 0,
+    "errors": 0,
+    "exit": 0,
+    "not_rerun": "Existing Work/PR31 QA, all source ENG and historic suites",
+    "limit": "Full-repository Git objects unavailable via Linux DNS; local fixtures use test-only placeholders for unchanged documents; no full repository validator E2E or Work comprehension run"
+  },
+  "test_ids": [
+    "test_positive_candidate",
+    "test_broken_link",
+    "test_duplicate_fact_id",
+    "test_duplicate_migration_target",
+    "test_duplicate_wbs",
+    "test_fake_work_ack",
+    "test_invalid_sha",
+    "test_missing_mandatory_rules",
+    "test_missing_recovery",
+    "test_missing_source",
+    "test_secret_literal",
+    "test_stale_agent_state",
+    "test_stale_priority_phrase",
+    "test_unsafe_delete_without_reference_review",
+    "test_unsafe_permissions",
+    "test_unsafe_priority",
+    "test_unsafe_shared_edit",
+    "test_wrong_authority"
+  ],
+  "source_inventory": {
+    "facts": 12,
+    "conflicts": 5,
+    "decisions": {
+      "KEEP": 5,
+      "MERGE": 4,
+      "ARCHIVE": 3,
+      "DELETE": 0
+    },
+    "physical_deletion": 0,
+    "all_original_hashes_pinned": true,
+    "original_git_history_preserved": true,
+    "pr31_shared_files_modified": false
+  },
+  "wbs_preservation": {
+    "source_rows": 32,
+    "candidate_rows": 32,
+    "unique_ids": 32,
+    "unchanged_fields": [
+      "owner",
+      "skills",
+      "dependencies",
+      "acceptance"
+    ],
+    "matching_rows": 32,
+    "missing_rows": 0
+  },
+  "read_context_measurement": {
+    "method": "UTF8 byte counts from GitHub source tree and candidate source; fixed authored read paths; mandatory 5 main files read in BOTH conditions, not a tokenizer or real user task timing",
+    "mandatory_main_bytes": 118810,
+    "scenarios": [
+      {
+        "name": "routine_business",
+        "before_bytes": 141898,
+        "after_bytes": 131793,
+        "before_steps": 10,
+        "after_steps": 9,
+        "delta_bytes": -10105,
+        "critical_comprehension": "NOT_RUN_BY_WORK"
+      },
+      {
+        "name": "technical_git_code",
+        "before_bytes": 146743,
+        "after_bytes": 137099,
+        "before_steps": 11,
+        "after_steps": 11,
+        "delta_bytes": -9644,
+        "critical_comprehension": "NOT_RUN_BY_WORK"
+      },
+      {
+        "name": "security_sensitive",
+        "before_bytes": 139613,
+        "after_bytes": 133262,
+        "before_steps": 10,
+        "after_steps": 10,
+        "delta_bytes": -6351,
+        "critical_comprehension": "NOT_RUN_BY_WORK"
+      }
+    ],
+    "conditional": "Source-only candidate read-path proxy; not actual user prompt tokens, elapsed time, ability to obey STOP or actual main cost. Work must independently score same 3 tasks."
+  },
+  "manual_write_amplification_model": {
+    "method": "Static candidate owner-of-fact edit target model, NOT executed end-to-end update process; each evidence artifact remains append-only and not counted as duplicate status",
+    "scenarios": [
+      {
+        "change": "agent_role_reassignment",
+        "before_target_files": [
+          "AGENTS.md",
+          "PROJECT.md",
+          "STATE.md",
+          "agents/a1.md"
+        ],
+        "after_canonical_fields": [
+          "program/current.json: agent_status/role owner",
+          "agent-owned roadmap: evidence link"
+        ],
+        "before": 4,
+        "after": 2
+      },
+      {
+        "change": "task_status_update",
+        "before_target_files": [
+          "STATE.md",
+          "CATALOG.yaml",
+          "task frontmatter",
+          "agent roadmap"
+        ],
+        "after_canonical_fields": [
+          "agent-owned roadmap: item status",
+          "dated evidence: append-only receipt"
+        ],
+        "before": 4,
+        "after": 2
+      },
+      {
+        "change": "evidence_acceptance",
+        "before_target_files": [
+          "STATE.md",
+          "CATALOG.yaml",
+          "CHANGELOG.md",
+          "review report"
+        ],
+        "after_canonical_fields": [
+          "dated evidence: acceptance event",
+          "candidate routing index only if current gate changes"
+        ],
+        "before": 4,
+        "after": 2
+      },
+      {
+        "change": "rule_supersession",
+        "before_target_files": [
+          "AGENTS.md",
+          "PROJECT.md",
+          "rules/AGENT_WORKFLOW.md",
+          "STATE.md",
+          "CHANGELOG.md"
+        ],
+        "after_canonical_fields": [
+          "effective rule source (exclusive writer)",
+          "routing index pointer after approved merge"
+        ],
+        "before": 5,
+        "after": 2
+      }
+    ],
+    "interpretation": "These are modeling assumptions requiring independent Work comparison and authorized real shared-source migration; do not claim actual effort reduction in effective main."
+  },
+  "candidate_pins": {
+    "branch": "a1/kng01-git-normalization-d1-2026-11-23",
+    "first_commit": "952bf28d430fe837759e23f2db17fe03b09227c2",
+    "candidate_source_count": 10,
+    "old_program_11_files_preserved_in_ancestry": true,
+    "shared_migration_preview": "program/kng/shared-source-preview.patch",
+    "patch_base": "main e385c1be",
+    "patch_status": "PREVIEW_NOT_APPLIED"
+  },
+  "security": {
+    "repo_public": true,
+    "secret_scan_scope": "candidate tracked files and patch; synthetic negative-case string is not credential",
+    "private_material_uploaded": false,
+    "destructive_history_changes": false,
+    "shared_main_pr31_writes": false,
+    "production": false,
+    "paid": false,
+    "codex": false,
+    "merge": false
+  },
+  "verdict": "KNG01_A1_AUTHOR_CANDIDATE_READY_FOR_INDEPENDENT_QA_WITH_SHARED_SOURCE_GATE",
+  "next_owner": "Chat Điều phối → Work independent QA then authorized shared-file integration"
+}
