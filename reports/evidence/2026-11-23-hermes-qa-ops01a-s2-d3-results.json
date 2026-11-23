@@ -1,0 +1,558 @@
+{
+  "task": "QA-A1-OPS01A-S2-D3-HERMES",
+  "pr36_head": "5626bb55072cdcca0d39f3ba57180d3c57af05ad",
+  "source_blob": "0043cb1a00ff1a3e9fbc7f1267900ebde02f4769",
+  "runtime": "3.14.10",
+  "cases": [
+    {
+      "name": "R1_exact_original",
+      "inputs": "bad@0..2;g1@10,g2@11;U@12;g3@11.1,g4@11.2;U@12;g5@13",
+      "expected": {
+        "before": [
+          2,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7,
+          1
+        ],
+        "after": [
+          2,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7,
+          1,
+          "EXACT_REPLAY"
+        ],
+        "next": [
+          "RECOVERED"
+        ]
+      },
+      "observed": {
+        "before": [
+          2,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7,
+          1
+        ],
+        "after": [
+          2,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7,
+          1,
+          "EXACT_REPLAY"
+        ],
+        "next": [
+          "RECOVERED"
+        ]
+      },
+      "status": "PASS",
+      "novel_attack": false,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "R2_conflict_original_restore",
+      "inputs": "R1 sequence;restore;U@12 stale/bad;g5@13",
+      "expected": {
+        "before": [
+          2,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7,
+          1
+        ],
+        "after": [
+          2,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7,
+          1,
+          "CONFLICTING_REPLAY"
+        ],
+        "next": [
+          "RECOVERED"
+        ]
+      },
+      "observed": {
+        "before": [
+          2,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7,
+          1
+        ],
+        "after": [
+          2,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7,
+          1,
+          "CONFLICTING_REPLAY"
+        ],
+        "next": [
+          "RECOVERED"
+        ]
+      },
+      "status": "PASS",
+      "novel_attack": false,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "cross_registry_id_conflicts",
+      "inputs": "U@12 then good ID U@13; valid g2@11 then U ID g2@12",
+      "expected": [
+        [
+          "CONFLICTING_REPLAY",
+          true,
+          1
+        ],
+        [
+          "CONFLICTING_REPLAY",
+          2,
+          0
+        ]
+      ],
+      "observed": [
+        [
+          "CONFLICTING_REPLAY",
+          true,
+          1
+        ],
+        [
+          "CONFLICTING_REPLAY",
+          2,
+          0
+        ]
+      ],
+      "status": "PASS",
+      "novel_attack": false,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "F2_F3_invalid_foreign_no_registry_poison",
+      "inputs": "six bad Z or malformed IDs at t100..105 then corrected Z@12",
+      "expected": [
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ]
+      ],
+      "observed": [
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ]
+      ],
+      "status": "PASS",
+      "novel_attack": false,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "N1_canonical_format_time_rollback",
+      "inputs": "U accepted 12.000000Z; replay 12Z then 10Z; advance g5@13 then exact U",
+      "expected": [
+        "CONFLICTING_REPLAY",
+        "CONFLICTING_REPLAY",
+        "EXACT_REPLAY",
+        "RECOVERED",
+        0
+      ],
+      "observed": [
+        "CONFLICTING_REPLAY",
+        "CONFLICTING_REPLAY",
+        "EXACT_REPLAY",
+        "RECOVERED",
+        0
+      ],
+      "status": "PASS",
+      "novel_attack": true,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "v2_restore_rejects_corruption",
+      "inputs": "v2 missing/list/257/collision/nonascii-id/int-value/version=3",
+      "expected": [
+        [
+          "missing",
+          "ValueError:INVALID_INTERRUPTION_REPLAY_REGISTRY"
+        ],
+        [
+          "list",
+          "ValueError:INVALID_INTERRUPTION_REPLAY_REGISTRY"
+        ],
+        [
+          "oversized",
+          "ValueError:INVALID_INTERRUPTION_REPLAY_REGISTRY"
+        ],
+        [
+          "collision",
+          "ValueError:REPLAY_ID_COLLISION"
+        ],
+        [
+          "bad_id",
+          "ValueError:INVALID_INTERRUPTION_REPLAY_REGISTRY"
+        ],
+        [
+          "bad_val",
+          "ValueError:INVALID_INTERRUPTION_REPLAY_REGISTRY"
+        ],
+        [
+          "version",
+          "ValueError:UNSUPPORTED_SNAPSHOT_VERSION"
+        ]
+      ],
+      "observed": [
+        [
+          "missing",
+          "ValueError:INVALID_INTERRUPTION_REPLAY_REGISTRY"
+        ],
+        [
+          "list",
+          "ValueError:INVALID_INTERRUPTION_REPLAY_REGISTRY"
+        ],
+        [
+          "oversized",
+          "ValueError:INVALID_INTERRUPTION_REPLAY_REGISTRY"
+        ],
+        [
+          "collision",
+          "ValueError:REPLAY_ID_COLLISION"
+        ],
+        [
+          "bad_id",
+          "ValueError:INVALID_INTERRUPTION_REPLAY_REGISTRY"
+        ],
+        [
+          "bad_val",
+          "ValueError:INVALID_INTERRUPTION_REPLAY_REGISTRY"
+        ],
+        [
+          "version",
+          "ValueError:UNSUPPORTED_SNAPSHOT_VERSION"
+        ]
+      ],
+      "status": "PASS",
+      "novel_attack": false,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "legacy_v1_with_vs_without_interruption",
+      "inputs": "v1 of middle (audit U) and v1 of opened (no U)",
+      "expected": [
+        "LEGACY_INTERRUPTION_REPLAY_UNAVAILABLE",
+        "OPEN",
+        0
+      ],
+      "observed": [
+        "LEGACY_INTERRUPTION_REPLAY_UNAVAILABLE",
+        "OPEN",
+        0
+      ],
+      "status": "PASS",
+      "novel_attack": false,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "capacity_256_257_restore_freeze",
+      "inputs": "U0..U255 unknown t1..256;257th U256;old U0; restore; new good/bad",
+      "expected": [
+        255,
+        [
+          256,
+          "TRUSTED_INTERRUPTION"
+        ],
+        [
+          256,
+          "INTERRUPTION_REGISTRY_FULL",
+          true,
+          true
+        ],
+        [
+          "EXACT_REPLAY",
+          256
+        ],
+        [
+          "INTERRUPTION_REGISTRY_FULL",
+          "NORMAL",
+          null,
+          0
+        ],
+        [
+          "INTERRUPTION_REGISTRY_FULL",
+          "NORMAL",
+          null,
+          0
+        ]
+      ],
+      "observed": [
+        255,
+        [
+          256,
+          "TRUSTED_INTERRUPTION"
+        ],
+        [
+          256,
+          "INTERRUPTION_REGISTRY_FULL",
+          true,
+          true
+        ],
+        [
+          "EXACT_REPLAY",
+          256
+        ],
+        [
+          "INTERRUPTION_REGISTRY_FULL",
+          "NORMAL",
+          null,
+          0
+        ],
+        [
+          "INTERRUPTION_REGISTRY_FULL",
+          "NORMAL",
+          null,
+          0
+        ]
+      ],
+      "status": "PASS",
+      "novel_attack": false,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "N2_cap_freezes_open_incident_recovery",
+      "inputs": "OPEN;g1@10,g2@11;256 unique U; new good@1000,bad@1001",
+      "expected": [
+        [
+          "OPEN",
+          0,
+          "2026-01-01T00:00:11+00:00",
+          1,
+          "2026-01-01T00:00:02+00:00",
+          5,
+          256
+        ],
+        "INTERRUPTION_REGISTRY_FULL",
+        "INTERRUPTION_REGISTRY_FULL",
+        "OPEN",
+        0,
+        "2026-01-01T00:00:11+00:00",
+        1,
+        "2026-01-01T00:00:02+00:00",
+        5,
+        256
+      ],
+      "observed": [
+        [
+          "OPEN",
+          0,
+          "2026-01-01T00:00:11+00:00",
+          1,
+          "2026-01-01T00:00:02+00:00",
+          5,
+          256
+        ],
+        "INTERRUPTION_REGISTRY_FULL",
+        "INTERRUPTION_REGISTRY_FULL",
+        "OPEN",
+        0,
+        "2026-01-01T00:00:11+00:00",
+        1,
+        "2026-01-01T00:00:02+00:00",
+        5,
+        256
+      ],
+      "status": "PASS",
+      "novel_attack": true,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "N3_untrusted_v2_snapshot_history_erasure",
+      "inputs": "v2 after middle; delete replay registry and diagnostic audit; restore; replay U@12",
+      "expected": [
+        "TRUSTED_INTERRUPTION",
+        1,
+        0
+      ],
+      "observed": [
+        "TRUSTED_INTERRUPTION",
+        1,
+        0
+      ],
+      "status": "PASS",
+      "novel_attack": true,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "v2_equality_policy_S1_boundary",
+      "inputs": "middle; roundtrip v2; parse policy",
+      "expected": [
+        true,
+        256,
+        2,
+        true
+      ],
+      "observed": [
+        true,
+        256,
+        2,
+        true
+      ],
+      "status": "PASS",
+      "novel_attack": false,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "cooldown_open_899",
+      "inputs": "OPEN bad@899..+2",
+      "expected": [
+        "SUPPRESSED_COOLDOWN",
+        false,
+        1
+      ],
+      "observed": [
+        "SUPPRESSED_COOLDOWN",
+        false,
+        1
+      ],
+      "status": "PASS",
+      "novel_attack": false,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "cooldown_recovered_899",
+      "inputs": "RECOVERED bad@899..+2",
+      "expected": [
+        "OPEN",
+        false,
+        2
+      ],
+      "observed": [
+        "OPEN",
+        false,
+        2
+      ],
+      "status": "PASS",
+      "novel_attack": false,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "cooldown_open_900",
+      "inputs": "OPEN bad@900..+2",
+      "expected": [
+        "NOTIFICATION",
+        true,
+        1
+      ],
+      "observed": [
+        "NOTIFICATION",
+        true,
+        1
+      ],
+      "status": "PASS",
+      "novel_attack": false,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "cooldown_recovered_900",
+      "inputs": "RECOVERED bad@900..+2",
+      "expected": [
+        "OPEN",
+        true,
+        2
+      ],
+      "observed": [
+        "OPEN",
+        true,
+        2
+      ],
+      "status": "PASS",
+      "novel_attack": false,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "cooldown_open_901",
+      "inputs": "OPEN bad@901..+2",
+      "expected": [
+        "NOTIFICATION",
+        true,
+        1
+      ],
+      "observed": [
+        "NOTIFICATION",
+        true,
+        1
+      ],
+      "status": "PASS",
+      "novel_attack": false,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    },
+    {
+      "name": "cooldown_recovered_901",
+      "inputs": "RECOVERED bad@901..+2",
+      "expected": [
+        "OPEN",
+        true,
+        2
+      ],
+      "observed": [
+        "OPEN",
+        true,
+        2
+      ],
+      "status": "PASS",
+      "novel_attack": false,
+      "source_sha": "5626bb55072cdcca0d39f3ba57180d3c57af05ad"
+    }
+  ],
+  "total": 17,
+  "passed": 17,
+  "failed": 0
+}
