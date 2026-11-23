@@ -1,0 +1,117 @@
+{
+  "manifest_version": 1,
+  "contract_versions": {
+    "s1": 1,
+    "s2": 1,
+    "s3": 1
+  },
+  "baseline": {
+    "ref": "refs/remotes/origin/main",
+    "commit": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "tree": "991af4f21ca12f3db98c7a1bd89c297f18e446d7"
+  },
+  "packages": [
+    {
+      "name": "s1",
+      "pr": 10,
+      "ref": "refs/remotes/origin/codex/eng-01a-s1-offline-contract-2026-11-23",
+      "head": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+      "prefix": "sandbox/connector-contracts",
+      "files": [
+        {
+          "path": "sandbox/connector-contracts/README.md",
+          "git_blob_sha1": "aab487f7126dba44528ec688312da6f6328ad92d",
+          "content_sha256": "7e435c0b40d4afe0f5cecd471a14430d3edf2cc8c5d57ac2f9503dc7a27fa4d0"
+        },
+        {
+          "path": "sandbox/connector-contracts/offline_connector.py",
+          "git_blob_sha1": "2bbfb4ef308e39ea1b548f22553c673d3a684a97",
+          "content_sha256": "d85e49241b14f2f3b2ab7aac72341361cc1e1d0ed52239dc907ca4b284889647"
+        },
+        {
+          "path": "sandbox/connector-contracts/test_offline_connector.py",
+          "git_blob_sha1": "657a4d5931c9391e88b121f7b22d873cb7120fc0",
+          "content_sha256": "ac61b3bdedf26261d27350a1a97c936d57d59ea9168e008f7501050f9b851410"
+        }
+      ]
+    },
+    {
+      "name": "s2",
+      "pr": 13,
+      "ref": "refs/remotes/origin/codex/eng-01a-s2-fake-channel-adapters-2026-11-23",
+      "head": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+      "prefix": "sandbox/connector-channel-mocks",
+      "files": [
+        {
+          "path": "sandbox/connector-channel-mocks/README.md",
+          "git_blob_sha1": "168b8eef420f89c63115b2a7ba798933932373e7",
+          "content_sha256": "abff4bcfbac77258dad17980379b07ba545e6dd4a42908ec90824f6e1597d1c7"
+        },
+        {
+          "path": "sandbox/connector-channel-mocks/channel_mocks.py",
+          "git_blob_sha1": "bfda39bf3ac07aba09009462bb60620970a31951",
+          "content_sha256": "249d5cb3b5906b371e88cb76ad9e4340346250504968c6b15a477d437d1533f0"
+        },
+        {
+          "path": "sandbox/connector-channel-mocks/fixtures.json",
+          "git_blob_sha1": "ec30d2dd9d2fb9a0dbd0b6179d0a424321fdd166",
+          "content_sha256": "38274001930d99999c69325e64b854e57e8a849bb0def49b9a3765bfde745ba7"
+        },
+        {
+          "path": "sandbox/connector-channel-mocks/test_channel_mocks.py",
+          "git_blob_sha1": "a92040a0b2ccdabe60d09305415bd16973d88314",
+          "content_sha256": "e2447525fc354044423197d2653acefa901618569dbb61fc0391b13069130307"
+        }
+      ]
+    },
+    {
+      "name": "s3",
+      "pr": 19,
+      "ref": "refs/remotes/origin/codex/eng-01a-s3-offline-integration-2026-11-23",
+      "head": "c343f7dded47a67e385ab05b8bb46aed88444f15",
+      "prefix": "sandbox/connector-integration",
+      "files": [
+        {
+          "path": "sandbox/connector-integration/README.md",
+          "git_blob_sha1": "5ceac7f8759ecbcaac828b8b0e23794f311fea06",
+          "content_sha256": "9a90be95d712040ac757db67b334e29ff2288236b8bba4c0937f78572893ab37"
+        },
+        {
+          "path": "sandbox/connector-integration/bridge.py",
+          "git_blob_sha1": "f4f34acc1b4a6d29e6e0f3775bead5ec0e7989a5",
+          "content_sha256": "9b5055b974753408eaccac1b18a9db981eab901e131627f20a65b2cde6d33c25"
+        },
+        {
+          "path": "sandbox/connector-integration/merge_preview.py",
+          "git_blob_sha1": "d8e122c98cc095644f42cffdc66b91bcd4387707",
+          "content_sha256": "91bfe218f499355106a68883e090cca432171c188612f5be73ed95bdad819a09"
+        },
+        {
+          "path": "sandbox/connector-integration/pinned_sources.py",
+          "git_blob_sha1": "78bc55a75782c5ea2905b0efa5d12abd3ff9ef27",
+          "content_sha256": "2d69db9f56a3cf9a3fdd2d6f9a067c44296d5561225f1633c4eaae8b175c8756"
+        },
+        {
+          "path": "sandbox/connector-integration/test_integration.py",
+          "git_blob_sha1": "8fbe718e96d41786e63f9cc50426e6adbd89a5b7",
+          "content_sha256": "b894ece91b9f0acc06d7369efa906045d21cd199652451f7f5c3fc5f3cce7908"
+        }
+      ]
+    }
+  ],
+  "policy": {
+    "LIVE_ENABLED": false,
+    "MOCK_ONLY": true,
+    "backend": "BACKEND_PRODUCTION_NOT_READY",
+    "connector": "REAL_CONNECTOR_UNTESTED",
+    "allow_external_network": false,
+    "allow_live_endpoint": false,
+    "allow_credentials": false,
+    "allow_production_hostname": false,
+    "allow_account_id": false,
+    "allow_real_data": false,
+    "allow_paid": false,
+    "allow_external_side_effect": false
+  },
+  "offline_s3_delta_command": "PYTHONDONTWRITEBYTECODE=1 python3 -X utf8 -B sandbox/connector-integration/test_integration.py"
+}

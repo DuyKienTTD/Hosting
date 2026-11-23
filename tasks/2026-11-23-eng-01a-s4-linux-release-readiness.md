@@ -1,7 +1,7 @@
 ---
 id: eng-01a-s4-linux-release-readiness
 type: task
-status: ready
+status: ready_for_review
 updated_at: 2026-11-23
 sensitivity: public
 owner: codex
@@ -21,3 +21,5 @@ reviewer: chatgpt
 **STOP / INVARIANTS:** `LIVE_ENABLED=False / MOCK_ONLY`. Không KVM2, production, connector/API account, credential, provider/paid hoặc Actions runner chưa xác minh. Không cài Linux hoặc bật Docker để vượt phạm vi. Gate B paid `BLOCKED_PREFLIGHT`.
 
 **HANDOFF:** ChatGPT Điều phối nhận verdict scoped, PR/SHA, report/evidence và remote readback.
+
+**RESULT:** `ENG01A_S4_MANIFEST_READY_LINUX_NOT_RUN`. [Báo cáo](../reports/2026-11-23-eng-01a-s4-release-readiness.md) và [evidence](../reports/evidence/2026-11-23-eng-01a-s4-release-readiness.json).

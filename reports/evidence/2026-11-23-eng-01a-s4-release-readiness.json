@@ -1,0 +1,200 @@
+{
+  "task": "ENG-01A-S4",
+  "agent": "Codex",
+  "assignment_comment": 7091188510,
+  "ack_base": {
+    "ref": "refs/remotes/origin/main",
+    "commit": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "tree": "991af4f21ca12f3db98c7a1bd89c297f18e446d7"
+  },
+  "workflow_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "packages": [
+    {
+      "pr": 10,
+      "head": "79dfe8aae5c30d4e896c29333e0296ada1671b7e"
+    },
+    {
+      "pr": 13,
+      "head": "0235b5f9bb38d0d7e99a600188705d50977527f5"
+    },
+    {
+      "pr": 19,
+      "head": "c343f7dded47a67e385ab05b8bb46aed88444f15"
+    }
+  ],
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "arch": "AMD64",
+    "python": "3.12.3",
+    "sqlite": "3.45.1",
+    "git": "git version 2.54.0.windows.1"
+  },
+  "linux": {
+    "status": "LINUX_NOT_RUN",
+    "probes": {
+      "wsl": "only docker-desktop, WSL2 and stopped",
+      "hyper_v": "Get-VM returned Unspecified",
+      "other_local_commands": "qemu-system-x86_64, VBoxManage, vmrun and podman unavailable",
+      "main_github_workflows": "none"
+    },
+    "runbook": "sandbox/connector-release/README.md"
+  },
+  "expected": {
+    "repeatability": "all 12 declared blobs verified and two clean assemblies have the same digest",
+    "manifest_drift": "reject head, baseline, digest, path and mock-only policy changes before exposing a destination",
+    "ambiguous_json": "reject a duplicate key at any level",
+    "ref_movement": "reject a changed snapshot during capture",
+    "assembly_rejection": "reject unexpected and altered files and preserve any existing destination",
+    "offline_runtime": "runtime modules have LIVE_ENABLED=False, no audited live transport imports or URL literals, socket audit rejects socket events",
+    "assembled_unknown": "same job and receipt after reopening, one fake dispatch and one mock read, no late state change",
+    "merge_preview": "classify conflicts and separately audit shared metadata at current main and three PR heads"
+  },
+  "assembly": {
+    "manifest_sha256": "e3be32d934c03a66dd2fc0c018de015db96e304302293ef5820c208e016e0982",
+    "bundle_sha256": "a2ea777f2ea051ff69d75415e36920757e891f772545cb3e98521b19d42701d7",
+    "assemblies_equal": true,
+    "files_verified": 12,
+    "temporary_assemblies_removed": true
+  },
+  "test_delta": {
+    "run": 7,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": true,
+    "observed": {
+      "ambiguous_json": {
+        "duplicate_nested_key_rejected": true
+      },
+      "offline_runtime": {
+        "modules_checked": [
+          "offline_connector.py",
+          "channel_mocks.py",
+          "bridge.py"
+        ],
+        "socket_audit_denial_observed": true
+      },
+      "assembled_unknown": {
+        "state": "outcome_unknown",
+        "native_channel": "fixture",
+        "synthetic_http": 504,
+        "synthetic_records": 0,
+        "receipt_binding": {
+          "contract_version": 1,
+          "s3_request_sha256": "e7bd625ac6de4debcd5cd2819192071281a2116cab83f85cf8d531644c2731e1",
+          "native_request_sha256": "96e2556608675a12cd40594bc7bfce3da2098ce21c45679881d2f9f048ec7e8d",
+          "native_receipt_id": "receipt-dd85562b6c7f9fcd7d5a33d7f56738f8e5cc4a40437cca2140ef06ad85066835",
+          "result_sha256": "81d60785929f89ae04aa60b32006ab1947051b3ed60234ceb5f39f302c5fb01b",
+          "outcome": "outcome_unknown",
+          "binding_sha256": "7adf8e050c6e9f2a8432d8b84cd1f133ff6fb8002f0ff951c2db5b6bc3a4edfe"
+        },
+        "fake_dispatches": 1,
+        "synthetic_reads": 1,
+        "stable_after_reopen": true,
+        "late_settlement_rejected": true,
+        "external_side_effect": false,
+        "artifact_digest_unchanged": true,
+        "observed_fixture_journals": {
+          "state.sqlite": "delete",
+          "worker-lock.sqlite": "delete"
+        }
+      },
+      "assembly_rejection": {
+        "unexpected_file": true,
+        "changed_bytes": true,
+        "overwrite": true
+      },
+      "ref_movement": {
+        "simulated_tracking_ref_movement_rejected": true
+      },
+      "manifest_drift": {
+        "denied_before_destination_creation": [
+          "baseline_tree",
+          "source_head",
+          "content_digest",
+          "undeclared_path",
+          "duplicate_path",
+          "enable_network"
+        ]
+      },
+      "repeatability": {
+        "files": 12,
+        "bundle_sha256": "a2ea777f2ea051ff69d75415e36920757e891f772545cb3e98521b19d42701d7"
+      }
+    }
+  },
+  "merge_preview": {
+    "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "plan_pr6_head": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+    "steps": [
+      {
+        "pr": 10,
+        "head": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+        "merge_base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+        "input_tree_or_commit": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+        "preview_tree": "1b5dfc68d1c32c682619cbee8bccd9873f656a6c",
+        "functional_conflicts": [],
+        "shared_metadata_conflicts": [],
+        "other_conflicts": []
+      },
+      {
+        "pr": 13,
+        "head": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+        "merge_base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+        "input_tree_or_commit": "1b5dfc68d1c32c682619cbee8bccd9873f656a6c",
+        "preview_tree": "d2e23b3d0c9eaf41a9b3384823cab6da60424b98",
+        "functional_conflicts": [],
+        "shared_metadata_conflicts": [],
+        "other_conflicts": []
+      },
+      {
+        "pr": 19,
+        "head": "c343f7dded47a67e385ab05b8bb46aed88444f15",
+        "merge_base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+        "input_tree_or_commit": "d2e23b3d0c9eaf41a9b3384823cab6da60424b98",
+        "preview_tree": "d499e07ed390071156fe9cbb75b6770a5ef3fbe1",
+        "functional_conflicts": [],
+        "shared_metadata_conflicts": [],
+        "other_conflicts": []
+      }
+    ],
+    "status": "CLEAN_TEXT_PREVIEW",
+    "combined_tree": "d499e07ed390071156fe9cbb75b6770a5ef3fbe1",
+    "functional_blobs_unchanged": true,
+    "index_semantics": {
+      "duplicate_catalog_ids": [],
+      "new_missing_relative_index_links": [],
+      "preexisting_missing_relative_index_links": [],
+      "offline_task_catalog_status": {
+        "tasks/2026-11-23-eng-01a-s2-fake-channel-adapters.md": "ready_for_review",
+        "tasks/2026-11-23-eng-01a-s1-offline-connector-contract.md": "ready_for_review"
+      },
+      "s3_existing_paths_not_yet_indexed": [
+        "reports/2026-11-23-eng-01a-s3-integration-and-merge-preview.md",
+        "reports/evidence/2026-11-23-eng-01a-s3-integration.json",
+        "tasks/2026-11-23-eng-01a-s3-offline-integration.md"
+      ],
+      "plan_eng01a_stale_no_task_yet": true,
+      "plan_eng01a_mentions_s3": false
+    }
+  },
+  "release_file_sha256": {
+    "sandbox/connector-release/manifest.json": "482b281e451382816c86ba643439d4a05af9fa6884c8c2ecb072d8a00bf9af22",
+    "sandbox/connector-release/readiness_preview.py": "c25af9c50f750484d53bd1908422a125ab668ec0cf7aa75952b642352b2f1d3b",
+    "sandbox/connector-release/README.md": "5faf2c194d19ce4491ac12dc4bb9081fc3f39a1129e7a7daabc22dbe213c93fd",
+    "sandbox/connector-release/release_check.py": "4db78640e6c313dc70e90bc89ca2e6711fa1051cd3932739f33228454c30a501",
+    "sandbox/connector-release/test_release_check.py": "6588722e42d38ac704c1eaeec6d3cfc91d9eec75ec9f25e4cba0cb85082f68bc"
+  },
+  "limits": {
+    "kvm2_access": false,
+    "real_connector_access": false,
+    "paid_calls": 0,
+    "cloud_actions_dispatched": false,
+    "production_changes": false,
+    "gate_b_paid": "BLOCKED_PREFLIGHT",
+    "historical_suites_rerun": false
+  },
+  "verdict": "ENG01A_S4_MANIFEST_READY_LINUX_NOT_RUN",
+  "delta_status": "S4_RELEASE_MANIFEST_READY_LINUX_UNTESTED",
+  "next_owner": "ChatGPT Dieu phoi"
+}
