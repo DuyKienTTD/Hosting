@@ -226,3 +226,27 @@ Quy trình và các giới hạn: [Operating Protocol](../OPERATING_PROTOCOL.md)
 **Negative cases:** (a) A0 strategic delegation + missing provider credential = BLOCKED_ACCESS; (b) installed skill + no task scope = NOT_AUTHORIZED; (c) task work order + no recipient ACK = PREPARED_FOR_OWNER_FORWARD; (d) historical Hostinger survey + current PAUSED rule = HOLD; (e) Codex technical fit + no exception approval = CODEX_NOT_AUTHORIZED; (f) A0 Assistant review PASS + no A0 owner decision = PACKAGE_REVIEWED / OWNER_DECISION_PENDING; (g) newer candidate rule text + no effective merge/approval = NOT_EFFECTIVE.
 
 **Status:** `C-D2_DESIGN_CLARIFIED / COORDINATOR_DRAFT_ONLY / NOT_EFFECTIVE_RULE`. Effective main policy has not been changed by this clarification.
+
+
+### Current integrated roadmap status — reconciled after independent review (2026-11-24)
+
+This block is the **current status view**. Earlier C-D0/C-D1/C-D2/C-D4 and DGN intake paragraphs above are preserved as dated snapshots; do not read their old pending/awaiting language as current. They are not deleted or retroactively rewritten.
+
+| Workstream | Current status | Evidence / next action |
+|---|---|---|
+| C-D0 source provenance and original 32-ID inventory | `DONE_WITH_EVIDENCE` for source pin/uniqueness; full outcome coverage now in DGN-3 | WBS blob `87888dc88dc43f06cba3da13ef00fecd240562c6`; retain 32 IDs |
+| C-D1 actual DGN design handoffs | `DONE_WITH_RECEIPTS` for A1 DGN-2, A2 DGN-1 and Work feasibility only | A1 PR46/session handoff, A2 PR44/session handoff, Work report commit; do not infer ongoing work ACK from role ACK |
+| C-D2 Operating Model | `DESIGN_DRAFT_CLARIFIED / NOT_EFFECTIVE_RULE` | Authority precedence and Work owner-forward integrated; no effective rule change |
+| DGN-1 | `AUTHOR_COMPLETE / SOURCE_VERIFIED` | PR44 Draft, unmerged; no runtime UI |
+| DGN-2 | `AUTHOR_COMPLETE / SOURCE_VERIFIED` | PR46 Draft, unmerged; other-Agent self-session skills remain UNKNOWN/REPORTED |
+| Work feasibility | `ROADMAP_PARTIAL_BLOCKED` | Offline/DOM/SQLite and Playwright module presence documented; cross-session, RBAC and accessibility live UNKNOWN |
+| DGN-3 | `ROW_LEVEL_DESIGN_COMPLETE / AUTHOR_SELF_CHECK_ONLY` | 32 rows, 18 fields including owner/candidates/contributors; branch only |
+| DGN-4 | `ROW_LEVEL_MATRIX_COMPLETE_WITH_CORRECTIONS / AUTHOR_SELF_CHECK_ONLY` | 32 rows, owner/candidates/contributors/fallback type; branch only |
+| R1–R5, R7 | `INTEGRATED_ON_COORDINATOR_BRANCH` | Matrix/WBS corrections; current view here supersedes old grouped matrix status |
+| R6 Agent roadmap integration | `PENDING_REAL_AGENT_SELF_WRITES` | A1/A2/Work must each update own roadmap after receiving exact integration order; Coordinator must not edit their files |
+| DGN package | `NOT_ACCEPTED` | One independent package review + A0 final decision remains |
+| Execution readiness / product execution | `NOT_PASSED / HOLD` | No build, business pilot, live WP/Ads/media, VPS, paid, dispatch automation or merge |
+
+**Corrections made from independent review:** WBS now distinguishes exactly one `PRIMARY_OWNER_CANDIDATE`, executor candidates and contributors; Assignment Matrix uses `PRIMARY_OWNER`, `AGENT_CANDIDATES`, `CONTRIBUTORS`, `EXECUTION_FALLBACK`, `FALLBACK_TYPE` and explicit fallback activation. INF-03 has Coordinator as the sole design owner; G3-A1 has Work as the proposed independent QA owner and excludes A0 Assistant from execution ownership. Hostinger-paused rows state `NO_VERIFIED_EXECUTION_OWNER`. Consultant/reviewer roles are not represented as execution fallback. Work's Playwright Python/Node modules are recorded `AVAILABLE_IN_WORK_ENVIRONMENT` from 2026-11-23 18:07 UTC; axe-core remains `UNKNOWN_NOT_VERIFIED`; no accessibility test was run.
+
+**Supersession:** earlier `C-D4 preliminary assignment matrix — planning only` remains historical group summary and is superseded for row-level assignment by `program/ASSIGNMENT_MATRIX.md` on this branch. The 32-row WBS in `program/WORK_BREAKDOWN.md` supersedes the earlier grouped C-D3 screen mapping as the row-level source. Earlier pending statuses are snapshots, not current state.
