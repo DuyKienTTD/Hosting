@@ -18,13 +18,21 @@ approval_scope: governance_and_safe_offline_only
 |---|---|---|---|
 | A0 | Chủ dự án, người ra quyết định | quyền, ngân sách, publish, lựa chọn nghiệp vụ | Không phải agent |
 | Điều phối | ChatGPT Điều phối | điều hành, triage, GitHub governance, nghiệm thu, chọn agent | Không có quyền tự mở phiên agent hay phê duyệt chi phí |
-| **A1** | **ChatGPT Thông thường, phiên riêng** | công việc tài liệu/JSON/code nhỏ, metadata, QA nguồn, kế hoạch | Phải kiểm chứng GitHub/shell trong phiên; không tự chạy nền |
+| **A1** | **ChatGPT Thông thường, phiên riêng** | công việc tài liệu/JSON/code nhỏ, metadata, QA nguồn, kế hoạch | A1 tự báo cáo GitHub/Workspace/Ads/WordPress/media đã kết nối; từng task kiểm quyền thật, không tự chạy nền |
 | Work | ChatGPT Work | đa bước, browser/UI, source QA độc lập, kiểm thử offline | Theo quyền và công suất phiên; không QA code của mình |
 | Hermes | Hermes WebUI | code/validator offline phù hợp, media/content/business, schema và mock | Đúng profile/credential; không live/publish mặc định |
 | Hostinger | Hostinger Agent | VPS/hPanel/hosting, OPS, SEC, rollback/feasibility; offline tests nếu có sandbox | Không suy diễn quyền live |
 | **Codex — ngoại lệ** | Codex | case không thể làm bằng 4 lựa chọn trên (ví dụ race/fault phức tạp, low-level runtime) | **CODEX_NOT_AUTHORIZED** mặc định, cần chứng minh và A0 duyệt từng việc |
 
 **n8n là workflow engine, không tính là AI Agent.** A1 bổ sung chứ không đổi tên ChatGPT Điều phối hoặc Work.
+
+## A1 capability update (self-reported 2026-11-23)
+
+A1 **đã xác nhận nhận vai trò** và bàn giao capability survey cho Điều phối. GitHub (branch/commit/PR), Drive, Gmail, Calendar, WordPress staging/production, Google Ads read-only, Canva/HeyGen, vidIQ/YouTube và QA tooling được A1 **tự báo cáo đã kiểm tra**. Xem [hồ sơ A1](../agents/a1.md) để phân biệt từng scope `SELF_REPORTED_VERIFIED_BY_A1` với quyền ghi/chi phí `NOT_TESTED`; chưa có bằng chứng thực hiện task GOV02-QA01.
+
+**Routing mở rộng:** ưu tiên A1 cho Google Workspace, read-only Ads analysis, WordPress staging/SEO QA, GitHub technical QA và content analytics theo đúng task approval. Các thay đổi Ads, publish YouTube, production WP, AI media trả phí, email gửi ra ngoài vẫn có gate theo công việc; không gán cho A1 quyền production hoặc ngân sách tự động.
+
+**Handoff status:** `A1_ROLE_ACCEPTED_CAPABILITY_REPORTED` nhưng `A1-GOV02-QA01 = PREPARED_FOR_OWNER_FORWARD` cho tới task-specific ACK và PR/evidence. Không coi hồ sơ năng lực là code đã sửa.
 
 ## Thu hồi và chuyển việc Codex tại checkpoint
 
