@@ -133,6 +133,61 @@ class ValidatorTests(unittest.TestCase):
         self.manifest["packages"][0].update(self.pin("sample") | {"approval": "DRAFT", "pr_draft": True})
         self.verify_issue(self.manifest, "DRAFT_AS_APPROVED")
 
+    def second_package(self, *, report_id="report-sample", report_path="reports/other.md"):
+        """Pin a second package at a new Git snapshot, reusing or replacing its report path."""
+        self.write("tasks/other.md", "---\nid: other\nowner: codex\nstatus: ready_for_review\n---\n")
+        if report_path != REPORT:
+            self.write(report_path, f"---\nid: {report_id}\nstatus: current\n---\n\nFIXTURE_PASS\n")
+        self.write("reports/evidence/other.json", '{"verdict":"FIXTURE_PASS"}\n')
+        more_catalog = ("  - id: other\n    path: tasks/other.md\n"
+                        "  - id: other-evidence\n    path: reports/evidence/other.json\n")
+        if report_path != REPORT:
+            more_catalog += "  - id: other-report\n    path: reports/other.md\n"
+        self.write("CATALOG.yaml", CATALOG + more_catalog)
+        self.commit()
+        item = deepcopy(self.manifest["packages"][0])
+        item.update(self.pin("other") | {
+            "task_id": "other", "portfolio_id": "DEMO2", "pr": 11,
+            "task": self.blob("tasks/other.md"),
+            "report": self.blob(report_path),
+            "evidence": self.blob("reports/evidence/other.json"),
+        })
+        manifest = deepcopy(self.manifest)
+        manifest["packages"].append(item)
+        return manifest
+
+    def test_cross_package_document_id_collision(self):
+        manifest = self.second_package()
+        findings = [row for row in validate(manifest, self.git)["issues"]
+                    if row["code"] == "DUPLICATE_DOCUMENT_ID"]
+        self.assertEqual(len(findings), 1)
+        self.assertEqual(findings[0]["subject"], "report-sample")
+        self.assertEqual(findings[0]["severity"], "finding")
+        self.assertIn("reports/sample.md", findings[0]["detail"])
+        self.assertIn("reports/other.md", findings[0]["detail"])
+        self.assertFalse(any(row["code"] in {"DUPLICATE_TASK_ID", "DUPLICATE_CATALOG_ID"}
+                             for row in validate(manifest, self.git)["issues"]))
+
+    def test_repeated_path_in_multiple_snapshots_is_not_collision(self):
+        manifest = self.second_package(report_path=REPORT)
+        findings = [row for row in validate(manifest, self.git)["issues"]
+                    if row["code"] in {"DUPLICATE_DOCUMENT_ID", "DOCUMENT_ID_REUSED"}]
+        self.assertEqual(findings, [])
+
+    def test_different_document_ids_remain_valid(self):
+        manifest = self.second_package(report_id="report-other")
+        findings = [row for row in validate(manifest, self.git)["issues"]
+                    if row["code"] in {"DUPLICATE_DOCUMENT_ID", "DOCUMENT_ID_REUSED"}]
+        self.assertEqual(findings, [])
+
+    def test_within_package_document_id_reused_still_reported(self):
+        self.write(REPORT, "---\nid: sample\nstatus: current\n---\n\nFIXTURE_PASS\n")
+        self.commit()
+        self.manifest["packages"][0].update(self.pin("sample") | {"report": self.blob(REPORT)})
+        findings = [row["code"] for row in validate(self.manifest, self.git)["issues"]]
+        self.assertIn("DOCUMENT_ID_REUSED", findings)
+        self.assertIn("DUPLICATE_DOCUMENT_ID", findings)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)

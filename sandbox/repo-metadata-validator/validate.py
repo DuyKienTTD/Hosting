@@ -188,6 +188,7 @@ def validate(manifest, git):
                          "REFERENCED_SOURCE_MISSING", planning["blob"])
 
     candidates, known_portfolios, writers = set(), set(), defaultdict(list)
+    document_id_paths = defaultdict(set)
     for package in packages:
         task = package["task_id"]
         require(IDENTIFIER.fullmatch(task) and IDENTIFIER.fullmatch(package["portfolio_id"])
@@ -245,6 +246,7 @@ def validate(manifest, git):
                 issue("DOCUMENT_ID_REUSED", task, f"{seen_ids[doc_id]}, {path}", "finding")
             if doc_id:
                 seen_ids[doc_id] = path
+                document_id_paths[doc_id].add(path)
             if role == "evidence":
                 json.loads(text, object_pairs_hook=unique_keys)
                 if not isinstance(package["verdict"], str) or not re.search(
@@ -252,6 +254,9 @@ def validate(manifest, git):
                 ):
                     issue("VERDICT_NOT_SOURCED", task, package["verdict"])
 
+    for doc_id, paths in sorted(document_id_paths.items()):
+        if len(paths) > 1:
+            issue("DUPLICATE_DOCUMENT_ID", doc_id, ", ".join(sorted(paths)), "finding")
     for key, paths in sorted(catalog_ids.items()):
         if len(paths) > 1:
             issue("DUPLICATE_CATALOG_ID", key, ", ".join(sorted(paths)))
