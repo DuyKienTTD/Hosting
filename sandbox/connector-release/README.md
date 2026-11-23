@@ -20,7 +20,7 @@ uname -srm > "$run_dir/platform.txt"
 python3 -c 'import platform, sqlite3; print(platform.python_version(), sqlite3.sqlite_version)' >> "$run_dir/platform.txt"
 python3 -X utf8 -B sandbox/connector-release/release_check.py --evidence "$run_dir/assembly.json"
 python3 -X utf8 -B sandbox/connector-release/test_release_check.py --evidence "$run_dir/s4-delta.json"
-s3=c343f7dded47a67e385ab05b8bb46aed88444f15
+s3=$(python3 -c 'import json; print(next(p["head"] for p in json.load(open("sandbox/connector-release/manifest.json", encoding="utf-8"))["packages"] if p["name"] == "s3"))')
 git worktree add --detach "$run_dir/checkout" "$s3"
 (
   cd "$run_dir/checkout"
@@ -32,4 +32,4 @@ test -z "$(ls -A "$run_dir/fixtures")"
 printf 'Evidence directory: %s\n' "$run_dir"
 ```
 
-Verify that all eight S3 delta cases and the S4 delta pass. Check that the evidence records the two deliberate process exits with status 86, recovery of the pending job or receipt, exact source pins, no extra synthetic read or dispatch and no external side effect. Check that SQLite files were created under the private fixture directory and cleanup left it empty. Retain only redacted evidence and platform versions. If a command fails, record it and remove the owned worktree after the worker exits and the checkout is verified clean.
+Verify that the pinned S3 suite and the S4 delta pass. Check exit status 86 at the deliberate process crash points, rollback of the outbox and result association before commit, and replay of the same receipt after commit. An unbound delayed result must remain hidden and a settled 504 must retain its bound result. Verify exact source pins, no extra synthetic read or dispatch and no external side effect. Check that SQLite files were created under the private fixture directory and cleanup left it empty. Retain only redacted evidence and platform versions. If a command fails, record it and remove the owned worktree after the worker exits and the checkout is verified clean.

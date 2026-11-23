@@ -68,18 +68,18 @@
       "name": "s3",
       "pr": 19,
       "ref": "refs/remotes/origin/codex/eng-01a-s3-offline-integration-2026-11-23",
-      "head": "c343f7dded47a67e385ab05b8bb46aed88444f15",
+      "head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
       "prefix": "sandbox/connector-integration",
       "files": [
         {
           "path": "sandbox/connector-integration/README.md",
-          "git_blob_sha1": "5ceac7f8759ecbcaac828b8b0e23794f311fea06",
-          "content_sha256": "9a90be95d712040ac757db67b334e29ff2288236b8bba4c0937f78572893ab37"
+          "git_blob_sha1": "ab327ae4bb756bbf7b22b6926f34e6e6888502f7",
+          "content_sha256": "55a6b11b338ed7a24939a3839a92ea8d3d1d34162dcc4802f2655f9be6c59650"
         },
         {
           "path": "sandbox/connector-integration/bridge.py",
-          "git_blob_sha1": "f4f34acc1b4a6d29e6e0f3775bead5ec0e7989a5",
-          "content_sha256": "9b5055b974753408eaccac1b18a9db981eab901e131627f20a65b2cde6d33c25"
+          "git_blob_sha1": "f65a6f699e9fedc20c9869deea33edb7c20fa2b8",
+          "content_sha256": "0760b96a43bb92bdd5e72f190173220a7e34b29534a04f8924565e08c0766afc"
         },
         {
           "path": "sandbox/connector-integration/merge_preview.py",
@@ -93,8 +93,8 @@
         },
         {
           "path": "sandbox/connector-integration/test_integration.py",
-          "git_blob_sha1": "8fbe718e96d41786e63f9cc50426e6adbd89a5b7",
-          "content_sha256": "b894ece91b9f0acc06d7369efa906045d21cd199652451f7f5c3fc5f3cce7908"
+          "git_blob_sha1": "7bc35d40c317056d18c10bef9fdd47b2f6db3d98",
+          "content_sha256": "192fb372b4d71359b629fe5386894d7afb7ed7a7e2c0048d9281deae1e755f1b"
         }
       ]
     }
