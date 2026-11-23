@@ -1,6 +1,6 @@
 # ChatGPT Work — Roadmap UI, Integration & Independent Assurance
 
-**Owner:** ChatGPT Work | **ROADMAP_STATUS:** `PLANNED_NOT_ACKED` | **READ_SET:** existing PR31 Work QA assignment, program docs, offline connector release evidence, current UI PR16 and relevant policy; **WRITE_SET:** own roadmap + independent UI/integration branch after task assignment; Work QA verdicts as PR comments. **STOP:** cannot control sessions, tool not present, source drift, bad provenance, unapproved live/paid/publish.
+**Owner:** ChatGPT Work | **ROADMAP_STATUS:** `ROADMAP_PARTIAL_BLOCKED` | **READ_SET:** existing PR31 Work QA assignment, program docs, offline connector release evidence, current UI PR16 and relevant policy; **WRITE_SET:** own roadmap + independent UI/integration branch after task assignment; Work QA verdicts as PR comments. **STOP:** cannot control sessions, tool not present, source drift, bad provenance, unapproved live/paid/publish.
 
 | ID | Required skills | Task / measurable deliverable | Depends | Status | Evidence / UTC |
 |---|---|---|---|---|---|
@@ -22,3 +22,17 @@ Chủ roadmap cập nhật **chính file này** sau khi hoàn thành một đầ
 Nếu cuối roadmap có hạng mục thực sự không thể thực hiện sau các nỗ lực hợp lệ, phải sử dụng nguyên văn: **Đã làm hết công việc có thể làm, một số công việc chưa thể làm do "Bảo mật"/ "Giới hạn kỹ thuật".** Kèm từng lỗi, bước đã thử, bằng chứng và hướng khắc phục. Không suy diễn môi trường hay quyền chỉ từ tên tài khoản.
 
 Quy trình và các giới hạn: [Operating Protocol](../OPERATING_PROTOCOL.md). Quy tắc hiện hành trên main luôn có hiệu lực cho tới khi candidate được tích hợp hợp lệ.
+
+## DGN-FEASIBILITY — bàn giao thiết kế
+
+**Session ACK:** `TASK_ACKNOWLEDGED — DGN-FEASIBILITY`. **Source main:** `d549564de52429e777c68daf9df7a93df5f22f27`. Các mục PLANNED/HOLD phía trên là lịch sử thiết kế và không được kích hoạt bởi nghiên cứu này.
+
+| Phạm vi | Trạng thái | Kết quả / bước tiếp theo |
+|---|---|---|
+| DGN-1 · UI feasibility | DONE_WITH_EVIDENCE | Work Linux kiểm lại PR16 DOM contract 10/10 PASS, 7 kiểm tra bổ sung. A2 dùng ma trận màn hình, nguồn và acceptance để chốt đặc tả. Browser accessibility, RBAC và live data UNKNOWN. |
+| DGN-2 · Giao việc và trạng thái | DONE_WITH_EVIDENCE cho phương án thủ công | Git/derive PASS, SQLite fixture PASS. Điều phối dùng owner-forward, ACK thật, receipt theo attempt, append-only evidence và STOP/rollback có đối soát. |
+| Kết nối/dispatch/receipt tự động trên phiên hiện hữu | UNKNOWN · BLOCKED | Không có đích/kênh cross-session đã xác minh, STOP cấm điều khiển Agent khác. Giữ owner-forward cho đến khi có kênh hợp lệ và phép thử được giao riêng. |
+
+**Bằng chứng và giới hạn:** [Báo cáo DGN-FEASIBILITY](../../reports/2026-11-24-dgn-feasibility-work.md), quan sát 23/11/2026 18:07 UTC. **NEXT_OWNER:** A2 tiếp nhận UI feasibility, Chat Điều phối tiếp nhận operating model. Giữ nguyên quyền tác giả của A2, A1 và Điều phối. Không kích hoạt UI/CTRL/M1 hoặc cấp quyền live.
+
+**Đã làm hết công việc có thể làm, một số công việc chưa thể làm do "Bảo mật"/ "Giới hạn kỹ thuật".**
