@@ -1,43 +1,25 @@
-# Git knowledge normalization and measurable context efficiency
+# KNG-01 — canonical Git context and measured maintenance (CANDIDATE)
 
-Status: design/pilot required; NOT ALREADY OPTIMIZED. 2026-11-23.
+**Only active priority: KNG-01.** This file documents A1 author candidate, not independent Work QA or an effective main change. Source pins and authority are in [current.json](current.json); full mandatory rules remain read from effective main (see [entry](README.md)). Do not treat proposed state as live.
 
-## Initial document findings (read on PR31 head a770de80...)
-- README currently ~3.2k chars; PROJECT ~5.5k; ROADMAP ~4.2k; AGENTS ~10.8k; STATE is a historical-heavy living document; AGENT_WORKFLOW is long with multiple overrides.
-- Several current-vs-historical routing statements coexist across PROJECT/AGENTS/agent directory/master allocation and PR comments; seven status-related point-of-use fixes on PR31 D2–D7 demonstrate update amplification.
-- This *proves a need for source-of-truth and loading-path improvement*, but does not prove user token savings, comprehension speed, hallucination/error rate, or that all current docs are redundant. Do not certify 'fully optimized' without A/B evidence.
+## Source ownership, not duplicate status text
 
-## Canonical ownership of facts (proposed)
-| Data | Canonical source | Secondary artifacts must do |
+| Fact | Canonical owner/effective source | Candidate behavior |
 |---|---|---|
-| Product goal and scope | `PROJECT.md` plus approved charter | Link, do not copy old priorities |
-| Current user-facing feature scope | `program/PRODUCT_AND_UI.md` after adoption | Reference |
-| Security/mandatory rules | effective `rules/*` on main | Short pointer, do not paraphrase to weaken |
-| Per-agent work items and item status | `program/roadmaps/<agent>.md` after adoption | Link with exact item ID |
-| Work dependencies and skill IDs | `program/WORK_BREAKDOWN.md` | Refer stable IDs |
-| Agent skill/capability provenance | `program/SKILL_REGISTRY.md` | Link, do not duplicate install claims |
-| Tested facts | immutable dated reports + source ref/sha | State summary links to evidence |
-| Current integration state | minimized `STATE.md` snapshot derived from roadmaps + live checks | Never infer live from Git alone |
-| Execution event history | per-run append-only evidence, git comments/commit history | No repeated status narrative |
-| Runtime status | actual service/connector/ledger, with fresh timestamp | Git snapshots explicitly staleable |
+| Mandatory safety/security | `AGENTS.md`, `rules/AGENT_WORKFLOW.md`, `rules/REPOSITORY_SECURITY.md` on main | Read fully; never replace with summary |
+| Business goal | `PROJECT.md` on main | Link durable goal; separate current priority |
+| Current factual evidence | dated reports and immutable PR/commit hashes | Link; do not relabel historical snapshot LIVE |
+| Current priority and approved dispatch | A0 + coordinator decisions on PR39 | Route through `program/current.json` after approved integration |
+| Candidate task owner/dependency | WBS and agent-owned roadmap | Status changes only by assigned writer and actual ACK |
+| Effective catalog | `CATALOG.yaml` on main, PR31 pending | No dual-write without coordinator exclusive lease |
 
-## Context tiers
-**T0 ~ short navigation:** program README + roadmap frontmatter + required effective security rules.
-**T1:** just current item, immediate dependencies, source pins, required skills and approved acceptance.
-**T2:** linked report/source diff only where material.
-**T3:** legacy and chronological evidence on demand; no mass loading by default.
-**Mandatory security text remains fully authoritative.** Context packs are navigational, not a loophole to ignore rules.
+[Canonical inventory](kng/inventory.json) lists old Git blob IDs and KEEP/MERGE/ARCHIVE/DELETE with recoverability. [Migration registry](kng/migration.json) provides concrete point-of-use edits for README/PROJECT/STATE/AGENTS/CATALOG/workflow, held **PREVIEW_ONLY** until PR31 conflict resolution and authorized shared writer. No irreversible deletion now. Git history and evidence remain intact.
 
-## Acceptance test for optimization
-Measure a BEFORE baseline and AFTER experiment using at least three representative tasks: (1) normal content audit, (2) Git/docs code change, (3) security-sensitive VPS/production plan. Each agent must identify correct objective, owner, current action, prior evidence, STOP, allowed paths and restrictions using only documented entry path plus required rules.
-Measure tokenized input size with same tokenizer/method or byte count as explicitly marked proxy; read steps/time; factual recall/decision correctness; false DONE, unsafe permission inference, duplicated execution and link-resolution failures. Avoid guessed '30–50%' savings. PASS only when measurable context reduction has **zero critical safety or state errors**, provenance preserved and independent test passes. Otherwise rollback pilot and report failure.
+## Actual A1 measurement method
 
-## Migration phases (no delete)
-1. Inventory documents/paths/hashes, canonical ownership and duplicate claims. Include PR31 staged changes; preclude write collisions.
-2. Build a compact entry point + one pilot task pack with exact SHA/links; keep original files untouched.
-3. Test comprehension, task execution and QA against legacy; inspect diff, broken links, leakage, metadata/lost-evidence risk.
-4. Only then propose minimal edits to README/PROJECT/STATE/AGENTS/CATALOG/effective workflow, by sole writer after PR31 QA and merge sequencing are resolved.
-5. Retain history in dated reports and Git; no rewrite or loss of archive; confirm Git readback and targeted invariants.
+1. Freeze main/PR31/PR39 SHA, compare exact UTF-8 byte lengths of files on a fixed reading path, with no invented tokenizer output. Full five required main documents are an equal mandatory constant in before and after.
+2. Three tasks: business routine content audit; Git validator/code edit; security-sensitive VPS request. The before candidate navigation reads the whole initial PR39 program set; after reads this entry/current routing/A1 roadmap and only relevant WBS/skill or task evidence. Record all file paths and sizes rather than headline % alone.
+3. Independently graded comprehension/routing belongs to **Work**. A1 drafts scenarios/rubric only. Any false permission, wrong current owner, missing STOP/security full read, stale task or evidence loss is critical FAIL even if size falls.
+4. Write amplification: count *canonical manual file edits* for role change, task status, evidence acceptance and rule supersession. Candidate targets one record owner per fact and generated/linked summaries; legacy multi-file simultaneous edits held for coordinator migration.
 
-## Open risks
-Current source at PR31 HEAD still contains older PAUSED routing, while latest A0 directive resumes Hostinger. New roadmap describes prospective change; its *source* doesn't replace effective rules. The status migration must be atomic for point-of-use references to avoid stale text across seven files. 'Auto-update' means an agent actively writes to Git or through a verified service; a passive chat will not wake itself to change files.
+**Current implementation scope:** point-of-use KNG candidate links/registries/validator/tests are real branch changes; production `main` README/PROJECT/STATE/AGENTS/CATALOG/workflow changes are **preview only**. No claim that Git read-cost is fully optimized while main remains unchanged. Work to run blind baseline vs candidate independently after A1 commits the source.
