@@ -1,5 +1,9 @@
 # Lịch sử cập nhật
 
+## 2026-11-23
+
+- Nghiệm thu B2-O fake local tại `d95f161` và chuẩn bị B2-P preflight chỉ đọc.
+
 ## 2026-11-22
 
 - Phân vai WS-02: Hostinger Agent xác minh hiện trạng qua hPanel độc lập, Work soạn runbook và diễn tập. [Task Hostinger](tasks/2026-11-22-hostinger-ws02-infrastructure-baseline.md).
