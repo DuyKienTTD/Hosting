@@ -388,7 +388,7 @@ Every row defines exactly 18 fields: `WBS_ID | PRODUCT_OUTCOME | FEATURE/UI | WO
 - **ACCEPTANCE:** Restore synthetic/non-sensitive snapshot, integrity and service validation, logs; backup presence alone is not PASS.
 - **EVIDENCE_PROVENANCE:** Historical infra inventory; Work/A1 recovery design.
 - **STATUS:** HOLD_PAUSED_HOSTINGER.
-- **TARGET_ROADMAP:** No active roadmap until resume and ACK
+- **TARGET_ROADMAP:** No active roadmap until A0 resume and Hostinger ACK
 
 
 ### INF-03 — Define monitoring/alert thresholds, freshness, ownership, health-vs-inference semantics, redaction and incident/STOP path.
@@ -432,7 +432,7 @@ Every row defines exactly 18 fields: `WBS_ID | PRODUCT_OUTCOME | FEATURE/UI | WO
 - **ACCEPTANCE:** Synthetic workflow with dedupe, timeout, retry, STOP, restore and E2E evidence; no 24/7 claim without scheduler/alert evidence.
 - **EVIDENCE_PROVENANCE:** A1 Registry; Work report; historical n8n inventory.
 - **STATUS:** HOLD_PAUSED_HOSTINGER / NOT_AUTHORIZED.
-- **TARGET_ROADMAP:** No active roadmap until resume and ACK
+- **TARGET_ROADMAP:** No active roadmap until A0 resume and Hostinger ACK
 
 
 ### UI-01 — Build interactive sandbox prototype from A2 spec with source-linked tasks, roadmaps, skills, approvals, evidence and mobile layouts.
