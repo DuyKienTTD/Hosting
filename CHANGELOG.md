@@ -2,6 +2,9 @@
 
 ## 2026-11-23
 
+- **A1 capability update:** tiếp nhận ACK vai trò A1 cùng bản tự khảo sát GitHub, Google Workspace/Gmail/Calendar, WordPress, Ads read, Canva/HeyGen/vidIQ/YouTube và QA; phân biệt `SELF_REPORTED_VERIFIED_BY_A1` với task execution và quyền paid/production. Bổ sung hồ sơ [A1](agents/a1.md) và [allocation v2](tasks/2026-11-23-a1-cost-first-master-allocation.md). A1-GOV02-QA01 vẫn chờ ACK nhiệm vụ.
+
+
 - **A0 — cost-first agent allocation:** bổ sung **A1 (ChatGPT Thông thường, phiên riêng)**, phân biệt Điều phối/Work, đưa Codex về `CODEX_NOT_AUTHORIZED` mặc định, thu hồi các lệnh Codex đơn giản chưa thực hiện, giữ nguyên lịch sử PASS và gate paid/production. Xem [workflow §11](rules/AGENT_WORKFLOW.md), [allocation v2](tasks/2026-11-23-a1-cost-first-master-allocation.md), [A1](agents/a1.md) và [report](reports/2026-11-23-a1-codex-cost-reallocation.md). Các lệnh cần owner forward/ACK; PR governance chưa merge.
 
 
