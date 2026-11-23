@@ -250,3 +250,22 @@ This block is the **current status view**. Earlier C-D0/C-D1/C-D2/C-D4 and DGN i
 **Corrections made from independent review:** WBS now distinguishes exactly one `PRIMARY_OWNER_CANDIDATE`, executor candidates and contributors; Assignment Matrix uses `PRIMARY_OWNER`, `AGENT_CANDIDATES`, `CONTRIBUTORS`, `EXECUTION_FALLBACK`, `FALLBACK_TYPE` and explicit fallback activation. INF-03 has Coordinator as the sole design owner; G3-A1 has Work as the proposed independent QA owner and excludes A0 Assistant from execution ownership. Hostinger-paused rows state `NO_VERIFIED_EXECUTION_OWNER`. Consultant/reviewer roles are not represented as execution fallback. Work's Playwright Python/Node modules are recorded `AVAILABLE_IN_WORK_ENVIRONMENT` from 2026-11-23 18:07 UTC; axe-core remains `UNKNOWN_NOT_VERIFIED`; no accessibility test was run.
 
 **Supersession:** earlier `C-D4 preliminary assignment matrix — planning only` remains historical group summary and is superseded for row-level assignment by `program/ASSIGNMENT_MATRIX.md` on this branch. The 32-row WBS in `program/WORK_BREAKDOWN.md` supersedes the earlier grouped C-D3 screen mapping as the row-level source. Earlier pending statuses are snapshots, not current state.
+
+
+### R1–R7 corrections and Agent roadmap integration handoffs — current delivery (2026-11-24)
+
+**Correction readback pins (latest remote blobs):**
+- WBS `program/WORK_BREAKDOWN.md`: `11261e92d520e720d4798087d89f8269f8c19b20` — 32 unique detailed rows; one primary owner field per row; executor candidates and contributors separated; INF-03 = Coordinator design owner; G3-A1 = Work proposed independent QA owner; Hostinger-paused infrastructure rows = `NO_VERIFIED_EXECUTION_OWNER`; UI-01 records Playwright Python/Node modules available in Work Linux at 2026-11-23 18:07 UTC and axe-core `UNKNOWN_NOT_VERIFIED`.
+- Assignment `program/ASSIGNMENT_MATRIX.md`: `248947cd9d05bcfcd39e6e3ba12f298da57a1f3a` — 32 unique rows; `PRIMARY_OWNER / AGENT_CANDIDATES / CONTRIBUTORS / EXECUTION_FALLBACK / FALLBACK_TYPE / FALLBACK_ACTIVATION_CONDITION` are separate; INF-03 and G3-A1 owner ambiguity resolved; consultants/reviewers are not fallback executors; Playwright and axe-core statuses are separate.
+- Candidate Catalog `CATALOG.yaml`: `cacacf5ef42257fd698cf3bec87c1aa386cbc62b` — DGN-3, DGN-4 and three roadmap-integration work orders indexed; every prepared task has `dispatch_eligible: false`.
+
+**R1–R5 and R7:** corrected in the Coordinator candidate branch. **R6:** exact own-roadmap work orders are prepared, not sent. The Coordinator cannot write A1/A2/Work roadmaps. Three owner-specific work orders are:
+- [A1 roadmap integration](https://github.com/DuyKienTTD/Hosting/blob/coordinator/dgn3-dgn4-row-level-2026-11-24/tasks/2026-11-24-a1-dgn-roadmap-integration.md) — task commit `d355066915033c631c7d514115356b15d76c34dd`.
+- [A2 roadmap integration](https://github.com/DuyKienTTD/Hosting/blob/coordinator/dgn3-dgn4-row-level-2026-11-24/tasks/2026-11-24-a2-dgn-roadmap-integration.md) — task commit `c6ac08a8b642964289cb0db8270c2b91ef444670`.
+- [Work roadmap integration](https://github.com/DuyKienTTD/Hosting/blob/coordinator/dgn3-dgn4-row-level-2026-11-24/tasks/2026-11-24-work-dgn-roadmap-integration.md) — task commit `6e8364f3fad4518dd4914d0fec58dcff7bd8f547`.
+
+Each work order is design/roadmap maintenance only, defines exact WBS scope, first action, skills/tools, dependencies, READ/WRITE sets, permissions, acceptance, evidence, STOP and next owner. They preserve each Agent's sole-writer rights. **Handoff state for all three is `PREPARED_FOR_OWNER_FORWARD`; no SEND or ACK is claimed.** The current chat tools have not provided a verified mechanism to post to the target sessions. A0 must forward the three exact links once to the matching sessions. Agent self-write begins only after actual task ACK.
+
+**No role profile or Agent roadmap was edited by Coordinator.** A0 Assistant profile is readable at PR47 branch only; PR47 remains Draft/unmerged and is not an effective main profile. This Coordinator branch does not claim PR47 integration.
+
+**Current delivery status:** `R1–R5,R7=CORRECTED_ON_CANDIDATE_BRANCH`; `R6=PREPARED_FOR_OWNER_FORWARD`; `DGN3=ROW_LEVEL_DESIGN_COMPLETE`; `DGN4=ROW_LEVEL_MATRIX_COMPLETE_WITH_CONDITIONS`; `DGN_PACKAGE=NOT_ACCEPTED`; `EXECUTION_READINESS=NOT_PASSED`; `PRODUCT_EXECUTION=HOLD`.
