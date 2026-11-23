@@ -35,7 +35,7 @@
 
 - **Chủ dự án** quyết định mục tiêu, quyền, ngân sách và publish; tác nhân không tự cấp quyền.
 - **Mỗi task có 1 owner** chịu trách nhiệm kết quả, có thể có collaborators. Vai trò ưu tiên là gợi ý điều phối, không độc quyền một loại việc.
-- **ChatGPT** có thể tạo task/đánh giá bằng chứng; **A1/Work/Hermes/Hostinger** ưu tiên xử lý kỹ thuật theo khả năng; **Codex chỉ ngoại lệ theo chi phí**; **Hermes** ưu tiên reasoning và tác vụ dùng tools; **n8n** ưu tiên trigger/execution; **Hostinger** cung cấp platform và các thao tác trong hPanel được phê duyệt.
+- **ChatGPT** có thể tạo task/đánh giá bằng chứng; **A1/Work/Hermes** ưu tiên xử lý kỹ thuật theo khả năng; **Hostinger PAUSED**, chỉ xét lại nếu A0 resume và phiên Hostinger ACK; **Codex chỉ ngoại lệ theo chi phí**; **Hermes** ưu tiên reasoning và tác vụ dùng tools; **n8n** ưu tiên trigger/execution; **Hostinger là nhà cung cấp platform**, còn Hostinger Agent đang **PAUSED**, không được nhận lệnh thao tác hPanel.
 - Chuyển nhiệm vụ bằng URL task + trạng thái/đầu vào/tiêu chí nghiệm thu; nhận kết quả bằng URL report và commit. Không lấy lịch sử chat làm nguồn sự thật.
 - Dữ liệu sống (job state, retry, queue) đặt tại n8n/DB; GitHub lưu đặc tả, quyết định, mã nguồn, evidence đã khử nhạy cảm và báo cáo.
 - Nếu hai tác nhân cùng sửa, dùng file task riêng, branch/PR hoặc phối hợp trước commit. Không force-push, không tự viết đè báo cáo có ngày.
@@ -52,7 +52,7 @@ Mọi handoff phải có **một owner**, nguồn đầu vào, **bước bắt �
 
 | Nghiệp vụ | Owner ưu tiên | Thành phần hỗ trợ | Giới hạn |
 |---|---|---|---|
-| Nền tảng/API/triển khai VPS | Work/Hermes/Hostinger theo quyền và scope; Codex chỉ ngoại lệ | A1/ChatGPT | production changes cần quyền riêng và Codex cần A0 cost gate |
+| Nền tảng/API/triển khai VPS | Work/A1/Hermes chỉ được làm offline/source theo scope; **Hostinger PAUSED** | ChatGPT; Codex chỉ ngoại lệ có A0 duyệt | **Không triển khai VPS/live**; Hostinger cần A0 resume + ACK trước khi nhận việc |
 | Chiến lược, backlog, nghiệm thu | ChatGPT hoặc owner task được chỉ định | Codex, Hermes | không thành single point of failure 24/7 |
 | Video/content pipeline | Hermes | n8n, Codex, công cụ media | chi phí render và publish cần gate |
 | Ads/SEO analysis | Hermes hoặc ChatGPT | n8n, Codex, connectors | read-first, chỉ ghi khi có quyền |
