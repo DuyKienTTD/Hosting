@@ -1,13 +1,19 @@
 ---
 id: agent-codex
 type: knowledge
-status: current
+status: historical-capability-profile
 updated_at: 2026-11-21
 verified_at: 2026-11-21
 sensitivity: public-redacted
 ---
 
-# Codex — kỹ thuật, kiểm toán, xây dựng và triển khai
+# Codex — hồ sơ năng lực lịch sử / KNG CODEx_NOT_AUTHORIZED
+
+**Không phải nguồn phân công tác vụ hiện hành.** KNG-only routing đến từ [program/current.json](../program/current.json) sau A0-approved merge; trước đó quy tắc main và chỉ thị mới A0/Điều phối vẫn chi phối. Codex mặc định **NOT_AUTHORIZED**, không gọi mới, không dùng credit. [Bản PR31 đầy đủ bất biến](https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/agents/codex.md), blob `5bbcd6c64cc2ec9386100765f8d085847f1d8cfd`.
+
+> **Bản ghi quyết định cost-first PR31 (lịch sử, không tự tái kích hoạt):** năng lực cũ không phải ưu tiên giao mới. Codex là **exception-only**, `CODEX_NOT_AUTHORIZED` mặc định. Đọc [workflow §11](../rules/AGENT_WORKFLOW.md) và [allocation v2](../tasks/2026-11-23-a1-cost-first-master-allocation.md); mọi tác vụ code/validator/mock/docs đơn giản chuyển A1/Work/Hermes/Hostinger theo khả năng. Chỉ khi các phương án khác không thể hoàn thành có chứng cứ và A0 duyệt cost cap/task cụ thể mới gọi Codex. Không xóa hoặc phủ nhận evidence lịch sử.
+
+# Hồ sơ năng lực kỹ thuật lịch sử (không tự cấp quyền phân công)
 
 **Role ưu tiên:** software/infrastructure engineer; thiết kế, code, test và vận hành API, Docker, network, workflow, media-worker và CI khi task cấp đúng quyền. Hồ sơ là bằng chứng năng lực, không phải quyền production.
 
@@ -50,7 +56,7 @@ Nguồn: [Codex capability survey](../reports/2026-11-21-codex-capability-survey
 - Durable memory ngoài chat/Git, model/cost/quota và execution 24/7 khi app đóng: `UNKNOWN`.
 - Không có quyền tự sửa production chỉ vì từng đọc root Web Terminal.
 
-## Nhiệm vụ nên giao Codex
+## Năng lực lịch sử phù hợp với Codex — không phải giấy phép giao nhiệm vụ
 
 1. Code/API adapters/test harness/schema/migration có rollback.
 2. Docker, network, TLS, observability, security hardening theo task đã duyệt.
