@@ -1,0 +1,64 @@
+# DGN-4 — Row-level Assignment Matrix (Coordinator design candidate)
+
+**Status:** DGN4_ROW_LEVEL_DESIGN_CANDIDATE / NOT_DISPATCHED / PACKAGE_ACCEPTANCE_PENDING. One row per original WBS ID. Proposed owner is not an actual assignment, ACK, permission or task activation. All HOLD/paused/historical rows retain their status. No Agent may edit another Agent's roadmap.
+
+**Sources:** DGN-3 WBS candidate in this branch; DGN-1 PR44 head bf232a313c0dd696c4ae824c35e7d1ddfda1a613; DGN-2 PR46 head 070189b381dd3e17680c85fdff01e84978c0bf93; Work report 4309773bfc20a43970a6b773f352999ef09b77cf; effective main workflow rules. Capability and authorization are separate. Historical evidence is not current verification. No paid tools installed or used.
+
+| WBS_ID | PRIMARY_OWNER_CANDIDATE | REQUIRED_SKILL_IDS | CAPABILITY_EVIDENCE | EXECUTION_RIGHTS | ENVIRONMENT | COST_RISK | FALLBACK | INDEPENDENT_REVIEWER | TARGET_ROADMAP | STATUS |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| G0-01 | A2 | K-DOC,K-DATA,K-UX | PR44 author evidence; live business connectors UNKNOWN | Design only; no WP/Ads writes | ChatGPT/GitHub; sanitized docs | No paid design; future KPI source cost UNKNOWN | Coordinator integration; Work UX advice | Work feasibility; A0 package review | program/roadmaps/a2.md | DESIGN_DONE_AUTHOR_EVIDENCE |
+| G0-02 | A2 | K-UX,K-DOC,K-SEC,K-DATA | PR44 S01-S12; Work feasibility partial | Design only; no UI build | Markdown/GitHub; browser test future | Playwright/axe not installed | Work feasibility; A1 technical consult | A0 Assistant package review | program/roadmaps/a2.md | DESIGN_DONE_AUTHOR_EVIDENCE |
+| G0-03 | Coordinator | K-DOC,K-SCHEMA,K-DATA,K-SEC | Coordinator current design/Git evidence | Coordinator branch only | GitHub docs/graph | No paid; no main merge | A1 schema input | A0 Assistant package review | program/roadmaps/coordinator.md | IN_PROGRESS |
+| G1-01 | A1 | K-GIT,K-PY,K-DOC,K-DATA | Historical KNG evidence | Historical write set only | GitHub/offline source | No repeat cost | Coordinator provenance | Work historical QA | program/roadmaps/a1.md | HISTORICAL_COMPLETE |
+| G1-02 | A1 | K-GIT,K-SCHEMA,K-DOC | Historical KNG evidence | Historical write set only | GitHub/offline | No repeat cost | Coordinator | Work historical QA | program/roadmaps/a1.md | HISTORICAL_COMPLETE |
+| G1-03 | A1 | K-PY,K-SCHEMA,K-TEST,K-SEC,K-GIT | Historical KNG author evidence | Historical offline only | Python/Git objects | No external cost | Work historical QA | Work historical reviewer | program/roadmaps/a1.md | HISTORICAL_COMPLETE |
+| G1-04 | Work | K-QA,K-TEST,K-DATA,K-GIT | Historical Work QA PR43 | Historical QA only | Offline source-pinned harness | No paid inference | A1 author | Coordinator records lineage | program/roadmaps/work.md | HISTORICAL_COMPLETE |
+| G2-01 | Coordinator | K-DOC,K-SCHEMA,K-SEC,K-DATA | Coordinator design; A1/Work inputs verified | Coordinator branch only; no dispatcher | GitHub docs/state model | No paid; auto dispatch UNKNOWN | A1 schema consult | A0 Assistant package review | program/roadmaps/coordinator.md | IN_PROGRESS |
+| G2-02 | A1 | K-PY,K-SCHEMA,K-GIT,K-API,K-TEST,K-SEC | A1 DGN2 author; not implementation proof | Design only; future sandbox | Python/DB/API only after approval | API/runtime cost UNKNOWN | Work integration review | Coordinator policy; Work QA | program/roadmaps/a1.md | DESIGN_SPEC_REQUIRED_BUILD_HOLD |
+| G2-03 | Coordinator | K-SEC,K-QA,K-DOC,K-SCHEMA | Main rules, A1 registry, A2 approval UI | Coordinator branch; no effective rules edit | GitHub PR/policy fixtures | No paid; A0 reserved | A1 schema consult | A0 Assistant | program/roadmaps/coordinator.md | IN_PROGRESS |
+| G3-01 | A1 | K-DOC,K-GIT,K-DATA,K-SCHEMA,K-SEC | PR46 author evidence; 8 agents/20 K/19 S | A1 branch only | GitHub directory | No installs/spend | Coordinator consumes; A2 input | Work if separately assigned | program/roadmaps/a1.md | AUTHOR_COMPLETE |
+| G3-02 | Coordinator | K-GIT,K-DATA,K-SCHEMA,K-DOC,K-SEC | PR44/46/Work source comparison | Coordinator branch only | GitHub metadata | No merge/paid | A1 source evidence | A0 Assistant | program/roadmaps/coordinator.md | IN_PROGRESS |
+| G3-03 | Coordinator | K-GIT,K-SCHEMA,K-DOC,K-SEC,K-AUTO | Owner-forward; cross-session UNKNOWN | Coordinator roadmap; manual only | GitHub + manual forwarding | No dispatcher/API spend | Each Agent own roadmap | A0 Assistant | program/roadmaps/coordinator.md | PLANNED_NOT_DISPATCHED |
+| INF-01 | Hostinger (paused) | K-VPS,K-SEC,K-OBS,K-WP | Historical hPanel only; current session UNKNOWN | No current authorization | hPanel/SSH read-only if resumed | Cost UNKNOWN | A1 runbook; Codex not default | Work/A1 QA if activated | No active roadmap until A0 resume + ACK | HOLD_PAUSED_HOSTINGER |
+| INF-02 | Hostinger (paused) | K-VPS,K-BACKUP,K-TEST,K-SEC | Historical capability only | No restore permission | Isolated restore target required | Storage/compute UNKNOWN | A1 runbook design | Independent reviewer | No active roadmap until resume + ACK | HOLD_PAUSED_HOSTINGER |
+| INF-03 | Coordinator design / Hostinger paused ops | K-VPS,K-OBS,K-SEC,K-API | A1 S-OBS-STACK candidate; not installed | Design only | Architecture; future staging | Recurring cost UNKNOWN | A1 runbook | Work review | program/roadmaps/coordinator.md | DESIGN_CAN_PROCEED_LIVE_HOLD |
+| INF-04 | Hostinger (paused) | K-VPS,K-N8N,K-API,K-TEST,K-SEC,K-OBS | n8n current state UNKNOWN | No runtime mutation | Isolated n8n sandbox | API/runtime cost UNKNOWN | A1 schema design | Work QA | No active roadmap until resume + ACK | HOLD_PAUSED_HOSTINGER |
+| UI-01 | Work (proposed) | K-UX,K-BROW,K-PY,K-TEST,K-SEC | Work Linux/offline feasibility; no build permission | Build not authorized | Isolated sandbox, synthetic data | Playwright/axe not installed; cost UNKNOWN | A1 technical QA; A2 product acceptance | Reviewer other than Work | program/roadmaps/work.md | HOLD_PRODUCT_BUILD |
+| UI-02 | Work (proposed) | K-UX,K-API,K-TEST,K-SEC,K-SCHEMA,K-GIT | RBAC/backend UNKNOWN | Build/integration not authorized | Sandbox backend/test identity | Infrastructure/API cost UNKNOWN | A1 schema support | Reviewer other than Work | program/roadmaps/work.md | HOLD_PRODUCT_BUILD |
+| CTRL-01 | Work (research candidate) | K-BROW,K-AUTO,K-TEST,K-SEC,K-API | No verified session destination; S-AGENT-CONTROL candidate | No cross-session permission | Two synthetic test sessions | Runtime/API cost UNKNOWN | Coordinator manual owner-forward | Independent QA separate from Work author | program/roadmaps/work.md | BLOCKED_CHANNEL_UNKNOWN |
+| UC01-01 | A2 (proposed) | K-WP,K-SEO,K-DATA,K-SEC | A2 design author; live WP scope UNKNOWN | No read-only scope confirmed | WP connector/API or sanitized export | Connector/service cost UNKNOWN | Coordinator source design | Work QA; A1 only if independent | program/roadmaps/a2.md | HOLD_BUSINESS_PILOT |
+| UC01-02 | Work (proposed) | K-WP,K-PY,K-API,K-TEST,K-UX,K-DATA | Offline feasibility only; live WP/backend UNKNOWN | No pipeline build permission | Synthetic fixture/sandbox | Compute/storage UNKNOWN | A1 schema; A2 finding definition | Reviewer other than Work | program/roadmaps/work.md | HOLD_BUSINESS_PILOT |
+| GROW-01 | A2 (proposed) | K-ADS,K-DATA,K-SEC | A1 marketing connector untested; A2 session scope UNKNOWN | Ads/GA4 read scope unconfirmed | Authorized aggregate reporting | Subscription/API cost UNKNOWN | Coordinator KPI design | Work data QA if scoped | program/roadmaps/a2.md | HOLD_ANALYTICS_READ |
+| GROW-02 | A2 (proposed) | K-MEDIA,K-DOC,K-UX,K-SEC | A2 design; credits/rights UNKNOWN | Draft only; no render/publish | Licensed assets; sandbox | Credits/subscriptions UNKNOWN | Work UX feasibility | Independent rights reviewer | program/roadmaps/a2.md | HOLD_MEDIA_EXECUTION |
+| GROW-03 | Work (proposed) | K-DATA,K-ADS,K-API,K-UX,K-SEC | Work feasibility; live data/billing UNKNOWN | No live integration | Mock fixtures first | Subscription/compute UNKNOWN | A2 KPI definitions; A1 schema | Reviewer other than Work | program/roadmaps/work.md | HOLD_REPORTING_INTEGRATION |
+| REL-01 | Coordinator | K-QA,K-SEC,K-GIT,K-DATA,K-SCHEMA | Coordinator source reconciliation; A0 Assistant independent | Design review only; no merge | Pinned GitHub sources | No paid | A1/A2/Work deliverables | A0 Assistant; A0 final | program/roadmaps/coordinator.md | PLANNED |
+| REL-02 | A0 (reserved) | K-DOC,K-SEC | A0 decision authority | Owner decision only | Authenticated A0 channel | A0 sets ceiling | No Agent proxy | No Agent replaces owner | A0 owner decision | RESERVED_TO_A0 |
+| G3-A1 | Work or A0 Assistant (review candidate) | K-GIT,K-TEST,K-QA,K-SEC | A1 PR46 author; independent proof needed | Read-only review | Pinned PR46 | No paid smoke test | Independent reviewer | Not A1 | program/roadmaps/work.md | PLANNED_NOT_ACKED |
+| QA-U01 | A1 (proposed QA) | K-QA,K-SEO,K-DATA,K-WP | A1 WP connector visible-unverified | Read-only data after approval | Sanitized WP snapshot | No paid | Work if independent | Not A2 audit author | program/roadmaps/a1.md | HOLD_DEPENDENCY_UC01_01 |
+| EXIST-QA31 | Work (historical) | K-QA,K-GIT,K-SEC | Historical PR31/PR42 | Read-only history | GitHub history | No new spend | None; preserve history | Do not repeat completed review | program/roadmaps/work.md | HISTORICAL_PRESERVED |
+| SEC-H | Hostinger (paused) | K-SEC,K-VPS,K-BACKUP,K-OBS | Historical infra only | No SSH/firewall/DNS write | Redacted topology; staging later | Cost UNKNOWN | A1 static runbook | Work/A1 QA | No active roadmap until resume + ACK | HOLD_PAUSED_HOSTINGER |
+| WP-H | Hostinger (paused) | K-VPS,K-WP,K-OBS,K-SEC | Historical hPanel; current session UNKNOWN | No live diagnostic scope | Redacted logs; staging preferred | Cost UNKNOWN | A1 static review | Independent reviewer | No active roadmap until resume + ACK | HOLD_PAUSED_HOSTINGER |
+
+## Assignment rules
+
+- One proposed primary owner per WBS; fallback is contingency, not co-ownership or automatic reassignment.
+- Execution requires task-specific work order, actual recipient-session ACK, current capability and permission proof, and required A0 approval.
+- VERIFIED_THIS_SESSION applies only to the exact Agent/session/tool action evidenced. Historical/reported/visible-untested/installable states do not satisfy current execution rights.
+- Hostinger remains paused for new/unfinished tasks under effective main rules. Hermes remains cost-gated; Codex remains exception-only and not authorized absent specific A0 exception. A0 Assistant is independent reviewer, not dispatch owner or A0 proxy. n8n is runtime, not Agent.
+- Every assignment requires exact READ_SET/WRITE_SET, branch, FIRST_ACTION, environment, cost ceiling (or UNKNOWN/no paid action), acceptance, evidence path, STOP/rollback and next owner in recipient's own roadmap.
+- Reviewer cannot be artifact author. If no qualified reviewer is evidenced, record REVIEWER_CAPABILITY_UNKNOWN; do not fabricate availability.
+
+## Capability gaps and installation candidates
+
+No candidate is installed by DGN-2. Nine candidates remain optional: S-CI-SAFETY, S-UX-E2E, S-OBS-STACK, S-SCHEMA-TEST, S-WP-READ, S-ADS-GA4, S-MEDIA-GEN, S-AGENT-CONTROL and S-GITHUB-RULES. Install only when a WBS has a proven capability gap, complete preconditions/rights/data/cost/rollback and approval. Missing verified executor means CAPABILITY_GAP / NOT_DISPATCHED, not automatic Codex/Hermes assignment.
+
+## Coverage and integrity
+
+- [x] 32 original WBS IDs each appear exactly once.
+- [x] One proposed primary owner per row.
+- [x] Exact K-skill IDs mapped from A1 registry.
+- [x] Evidence confidence, rights, environment, cost, fallback, reviewer, roadmap and status recorded.
+- [x] Historical KNG and EXIST-QA31 preserved; no false activation.
+- [x] Product build, business pilot, live Ads/WP, media publish, Hostinger infra, paid inference, autonomous dispatch and merge remain HOLD.
+
+**Status:** DGN4_ROW_LEVEL_MATRIX_COMPLETE / AUTHOR_SELF_CHECK_ONLY / PACKAGE_ACCEPTANCE_PENDING. No task has been sent or ACKed by this matrix.
