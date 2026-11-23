@@ -359,12 +359,12 @@ NEXT_OWNER: A0_ASSISTANT_INDEPENDENT_PACKAGE_REVIEW
 **Next step:** submit this single integrated candidate for one independent package-level review by A0 Assistant, then A0 makes the final decision. No per-task microacceptance, no rework of author-complete outputs without a concrete defect, and no product execution or merge from this status alone.
 
 
-### Integrated package PR handoff — draft review candidate (2026-11-24)
+### Integrated package PR handoff — HISTORICAL INITIAL SNAPSHOT (superseded by review pin below)
 
 **Single integrated review candidate:** [PR #50 — HOSTING DGN-1..4 Integrated Design Package](https://github.com/DuyKienTTD/Hosting/pull/50).
 
-- State: Draft / Open / Unmerged; base `main@d549564de52429e777c68daf9df7a93df5f22f27`; head `ad03a4040262679974156991f0de5f81b929dfef`.
-- Branch: `coordinator/dgn-package-integration-2026-11-24`; ahead 34 / behind 0 at verification.
+- Historical source-time state only: Draft / Open / Unmerged; base `main@d549564de52429e777c68daf9df7a93df5f22f27`; head `ad03a4040262679974156991f0de5f81b929dfef`.
+- Branch: `coordinator/dgn-package-integration-2026-11-24`; ahead 34 / behind 0 at that initial verification. Later commits supersede this snapshot; do not treat this HEAD/count as current.
 - Changed files: 13, exactly the integrated design, roadmaps, catalog and three historical source work orders; no production/runtime files.
 - GitHub reports mergeable=true at the time of check. This is metadata only, not review PASS or merge authorization.
 - PR44 and PR46 remain separate Draft author PRs; PR48 and PR49 remain Draft stacked roadmap PRs; none was merged by this integration. PR50 is a consolidated snapshot for one package-level review.
@@ -385,3 +385,47 @@ After the initial package snapshot and before review, a targeted cross-source co
 - PR #50 includes 13 files: Product/UI, Skill Registry, Operating Model draft, WBS, Assignment Matrix, three Agent roadmaps, Coordinator roadmap, CATALOG and three prepared historical work orders. The PR is one integrated review candidate; individual source PRs remain unmerged.
 
 **Current verdict remains `INTEGRATED_CANDIDATE_NOT_ACCEPTED`.** The targeted structural checks do not replace independent review of product value, operating-model sufficiency, WBS execution readiness, per-row capability/rights, critical path, cost/STOP, and Agent roadmap usability. A0 Assistant must now conduct the single independent package review; A0 retains final decision. Product execution remains HOLD.
+
+
+### C1–C4 reconciliation — A0 independent review conditions (2026-11-24)
+
+**A0 Independent Advisor review:** `PASS_WITH_CONDITIONS`, GitHub review/comment ID `6028576006`, pinned to the then-current PR #50 HEAD `2b9f9402ff4a3ab43d1a66bc669b6e28c6092213`. [Open the recorded review](https://github.com/DuyKienTTD/Hosting/pull/50#issuecomment-6028576006). This review is not A0's reserved owner decision and does not authorize merge or execution.
+
+**C1 — WBS/Matrix status alignment: RESOLVED**
+- WBS G3-03 is `ROADMAP_INTEGRATION_3_OF_3_SOURCE_VERIFIED`; Assignment Matrix G3-03 carries the same state. It records source/roadmap integration only, not automated dispatch or activation of downstream tasks.
+- WBS REL-01 is `READY_FOR_A0_OWNER_DECISION`; Assignment Matrix REL-01 is `REVIEWED_WITH_CONDITIONS_A0_OWNER_DECISION_PENDING`. Both point to the same A0 review and pending owner decision.
+- G2-03 is explicitly retained as a parallel P0 control lane and a predecessor/gate for G2-02, UI-02 and REL-01. The logical dependency model has no duration data and is not represented as a dated CPM schedule.
+- INF-03 now distinguishes design/alert architecture that can proceed from live monitoring, which remains gated on A0 resuming Hostinger, a real Hostinger task ACK and INF-01 baseline; production recovery additionally needs INF-02 evidence.
+
+**C2 — Old R6 snapshots: RESOLVED**
+- The earlier `R6_A1/A2=PREPARED` and `PARTIAL_1_OF_3` block is explicitly labelled `HISTORICAL — SUPERSEDED` and preserved unchanged as a dated snapshot.
+- The current roadmap summary is `AGENT_ROADMAP_INTEGRATION=COMPLETE_3_OF_3`. No Agent roadmap was rewritten by Coordinator.
+- The initial PR handoff section with head `ad03a404...` is labelled as an initial historical snapshot; the independent review pin is recorded separately above.
+
+**C3 — Catalog provenance: RESOLVED**
+- `CATALOG.yaml` top-level `updated_at=2026-11-24`.
+- Coordinator roadmap is indexed as `coordinator-dgn-package-roadmap-2026-11-24` at `program/roadmaps/coordinator.md`.
+
+**C4 — Work-order handoff semantics: RESOLVED**
+- The three original task files retain `HANDOFF_STATE=PREPARED_FOR_OWNER_FORWARD` and `dispatch_eligible=false` as source-time preparation metadata. They are not rewritten to fabricate SENT/ACK.
+- The corresponding Catalog entries retain `status: prepared-owner-forward`; their `authoritative_for` descriptions now state explicitly that this is the work-order source-time state and that later recipient receipts are recorded in the respective Agent-owned roadmaps.
+- A1/A2/Work roadmaps retain their own recipient-side receipt/evidence. Coordinator treats those as owner-forward-reported and source-verified; it does not claim direct observation of transport or automated dispatch.
+
+**Latest package state after these corrections:**
+```yaml
+A0_INDEPENDENT_REVIEW: PASS_WITH_CONDITIONS
+A0_REVIEW_COMMENT: 6028576006
+C1_WBS_MATRIX_ALIGNMENT: RESOLVED
+C2_R6_HISTORICAL_SUPERSESSION: RESOLVED
+C3_CATALOG_PROVENANCE: RESOLVED
+C4_WORK_ORDER_HANDOFF_SEMANTICS: RESOLVED
+AGENT_ROADMAP_INTEGRATION: COMPLETE_3_OF_3_SOURCE_VERIFIED
+A0_OWNER_DECISION: PENDING
+DGN_PACKAGE: REVIEWED_WITH_CONDITIONS
+EXECUTION_READINESS: NOT_PASSED
+PRODUCT_EXECUTION: HOLD
+MAIN_MERGE: HOLD
+NEXT_OWNER: A0_OWNER_DECISION
+```
+
+The four documentary conditions are reconciled on this candidate branch. The PR head has moved since the A0 review pin because of these Coordinator-only corrections; A0's review remains anchored to `2b9f9402...`. Request one focused confirmation against the corrected C1–C4 diff before final owner decision. No A1/A2/Work rework is requested.
