@@ -14,6 +14,14 @@ entrypoints:
   change_history: CHANGELOG.md
 
 documents:
+  - id: hosting-progress-and-target-capabilities-2026-11-23
+    path: reports/2026-11-23-hosting-progress-and-target-capabilities.md
+    type: report
+    status: coordinator-estimate-pending-independent-qa
+    authoritative_for: project-portfolio-maturity-estimate-and-planned-user-facing-capabilities-as-of-2026-11-23
+    updated_at: 2026-11-23
+    sensitivity: public-redacted
+
   - id: agent-a1-chatgpt-standard
     path: agents/a1.md
     type: knowledge
