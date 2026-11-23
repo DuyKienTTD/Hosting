@@ -300,3 +300,58 @@ Each work order is design/roadmap maintenance only, defines exact WBS scope, fir
 **Coordinator acceptance of Work integration:** source/readback and scope checks PASS. This is not independent package QA, not final A0 acceptance, and not authorization to execute the future Work-owned HOLD items.
 
 **Current status:** `R6_WORK=COMPLETE_SOURCE_VERIFIED`; `R6_A1=PREPARED_FOR_OWNER_FORWARD`; `R6_A2=PREPARED_FOR_OWNER_FORWARD`; `AGENT_ROADMAP_INTEGRATION=PARTIAL_1_OF_3`; `DGN_PACKAGE=NOT_ACCEPTED`; `EXECUTION_READINESS=NOT_PASSED`; `PRODUCT_EXECUTION=HOLD`.
+
+
+### Integrated DGN package candidate — all Agent roadmaps reconciled (2026-11-24)
+
+**Package branch:** `coordinator/dgn-package-integration-2026-11-24`, created from the corrected Coordinator design branch. This is an integrated review snapshot only; it does not merge or activate any product work.
+
+**Integrated source artifacts and exact remote blobs:**
+- DGN-1 Product Charter & Operator UI: `program/PRODUCT_AND_UI.md`, blob `72678f795409e4bef4ebefb7d157439dd4adda05` (A2 PR44 source).
+- DGN-2 Agent Capability & Skills Directory: `program/SKILL_REGISTRY.md`, blob `6d79a1c5d11bab1ef03c55c68d2b8d55d32609bf` (A1 PR46 source).
+- DGN-2 Operating Model: `program/OPERATING_MODEL.md`, blob `b92995d89c90e257985120a2dbf015574767acd7` (Coordinator integrated draft; `NOT_EFFECTIVE_RULE`).
+- DGN-3 WBS: `program/WORK_BREAKDOWN.md`, blob `58f70698d2337c41524808a17dd1d9acaf5eb9ba` (32/32 original IDs, 18 fields per row; original KNG table retained as history).
+- DGN-4 Assignment Matrix: `program/ASSIGNMENT_MATRIX.md`, blob `d2cd89cfa43d45c4bee9b6743d18e755f2fec23c` (32/32 unique rows, exactly 15 columns each; one primary owner/candidate, contributors and fallback semantics separated).
+- Agent roadmaps: A1 `program/roadmaps/a1.md` blob `b5623c18d2e00c047d49eb61b65f8afb1c83c565`; A2 `program/roadmaps/a2.md` blob `2c54d2e491b73cdb9b3a3a0b3b012d0fb80536a9`; Work `program/roadmaps/work.md` blob `374670f5196b7d16c8473dfe5088fae09206103d`.
+- Catalog index: `CATALOG.yaml`, blob `2212ffde1241b5fbf8986ddbb0bf5ebb4d317b9e`.
+
+**Independent structural reconciliation performed by Coordinator:**
+- WBS: 32 headings, 32 unique original IDs.
+- Assignment Matrix: 32 data rows, 32 unique IDs, all rows exactly 15 columns.
+- Skill vocabulary: every K-* used in the 32-row Assignment Matrix resolves against the integrated DGN-2 registry; zero unknown skill IDs.
+- Roadmap ownership: A1, A2 and Work each have their own integrated roadmap; no Coordinator edits to their owned roadmap files.
+- PR #48 remains Draft/Open/Unmerged, based on A2 DGN-1 branch; PR #49 remains Draft/Open/Unmerged, based on A1 DGN-2 branch. Work roadmap is sourced from commit `fb8eb13bb095962564bc424f646939f87d449b45`. The integrated snapshot copies exact verified blobs; original author PRs remain unmerged and unchanged.
+
+**Roadmap handoff receipts:**
+- Work: `TASK_ACKNOWLEDGED — WORK-DGN-ROADMAP-INTEGRATION`, reported by owner-forward and recorded in Work roadmap; commit `fb8eb13bb095962564bc424f646939f87d449b45`.
+- A2: `TASK_ACKNOWLEDGED — A2-DGN-ROADMAP-INTEGRATION`, reported by owner-forward and recorded in A2 roadmap; PR #48 head `65459f15631c7f660dc4422edfca26e02203620a`.
+- A1: `TASK_ACKNOWLEDGED — A1-DGN-ROADMAP-INTEGRATION`, reported by owner-forward and recorded in A1 roadmap; PR #49 head `d4c4e30cf062693eaf0b3648442742e73c6a01d6`.
+- All three roadmap integrations are `SOURCE_VERIFIED` on the integrated branch. This verifies repository content; session transport is recorded as owner-forward evidence, not directly observed by Coordinator.
+
+**Remaining design limitations (not concealed as PASS):**
+- C-D2 Operating Model is an integrated design draft only; effective `main` workflow rules remain controlling. No rule amendment is made by this branch.
+- Agent-specific current capability for A0 Assistant, A2, Work, Hostinger, Hermes and Codex is not all independently self-verified in their own current sessions. Preserve REPORTED/UNKNOWN; do not infer from A1 registry.
+- Work cross-session control remains `UNKNOWN/BLOCKED_CHANNEL_UNKNOWN`; owner-forward is manual, not an automated dispatcher.
+- Playwright modules were observed in Work Linux at 2026-11-23 18:07 UTC; axe-core remains UNKNOWN; browser accessibility/screen-reader tests were not run.
+- Product UI remains NOT_BUILT. WordPress/Ads/GA4/media live reads/writes, VPS/production, paid APIs, Hostinger resume, Hermes new tasks, Codex and merge remain HOLD/NOT_AUTHORIZED.
+- WBS dependency graph is structurally mapped, but reliable calendar critical-path durations are not evidenced; dates remain UNKNOWN rather than invented.
+
+**Current program status:**
+```yaml
+KNG01: MAIN_VERIFIED
+DGN1: AUTHOR_COMPLETE_SOURCE_VERIFIED
+DGN2: AUTHOR_COMPLETE_SOURCE_VERIFIED
+DGN3: ROW_LEVEL_DESIGN_COMPLETE_SOURCE_VERIFIED
+DGN4: ROW_LEVEL_MATRIX_COMPLETE_SOURCE_VERIFIED
+C_D2: OPERATING_MODEL_DRAFT_NOT_EFFECTIVE_RULE
+A1_ROADMAP: SOURCE_VERIFIED
+A2_ROADMAP: SOURCE_VERIFIED
+WORK_ROADMAP: SOURCE_VERIFIED
+AGENT_ROADMAP_INTEGRATION: COMPLETE_3_OF_3
+DGN_PACKAGE: INTEGRATED_CANDIDATE_NOT_ACCEPTED
+EXECUTION_READINESS: NOT_PASSED
+PRODUCT_EXECUTION: HOLD
+NEXT_OWNER: A0_ASSISTANT_INDEPENDENT_PACKAGE_REVIEW
+```
+
+**Next step:** submit this single integrated candidate for one independent package-level review by A0 Assistant, then A0 makes the final decision. No per-task microacceptance, no rework of author-complete outputs without a concrete defect, and no product execution or merge from this status alone.
