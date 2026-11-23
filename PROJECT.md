@@ -33,6 +33,9 @@ Mục tiêu dài hạn là chu trình `nhận mục tiêu -> lập kế hoạch 
 
 ## Phân vai và cách phối hợp
 
+**Quy tắc hiện hành (A0, 2026-11-23):** A1 là ChatGPT Thông thường trong phiên riêng, khác Điều phối và Work. Việc thông thường — tài liệu, validation, code nhỏ, metadata, QA mock — ưu tiên Điều phối/A1/Work/Hermes/Hostinger theo quyền và chi phí. **Codex chỉ ngoại lệ** sau khi chứng minh tất cả lựa chọn khác không đủ năng lực và A0 duyệt cost/task; xem [workflow mục 11](rules/AGENT_WORKFLOW.md) và [allocation v2](tasks/2026-11-23-a1-cost-first-master-allocation.md). Đoạn phân vai cũ bên dưới chỉ mô tả lịch sử, không cho phép mặc định giao Codex.
+
+
 Xem [danh bạ tác nhân](agents/README.md). ChatGPT phụ trách tư vấn/đặc tả/review theo yêu cầu; Codex ưu tiên kỹ thuật/kiểm thử; Hermes ưu tiên AI reasoning/tool execution; n8n là workflow engine; Hostinger là nền tảng VPS, còn Hostinger Agent cần khảo sát năng lực độc lập. Phân vai mang tính ưu tiên, không khóa cứng; quyền production/chi phí do chủ dự án cấp cụ thể. Trong giai đoạn khảo sát, chủ dự án chuyển tiếp lời giao việc giữa các tác nhân. Tất cả bàn giao tài liệu và kết quả qua GitHub nếu có quyền, trạng thái job realtime qua n8n/DB khi đã triển khai.
 
 ## Tài liệu nào cần đọc?
