@@ -1,5 +1,5 @@
 schema_version: 1
-updated_at: 2026-11-22
+updated_at: 2026-11-23
 repository_visibility: public
 default_language: vi
 
@@ -1102,6 +1102,32 @@ documents:
     status: prepared
     authoritative_for: hostinger-ws02-read-only-infrastructure-baseline-scope
     updated_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: eng-01a-s1-offline-connector-contract
+    path: tasks/2026-11-23-eng-01a-s1-offline-connector-contract.md
+    type: task
+    status: ready_for_review
+    authoritative_for: eng-01a-s1-offline-fake-connector-scope
+    updated_at: 2026-11-23
+    sensitivity: public
+
+  - id: eng-01a-s1-offline-connector-contract-report
+    path: reports/2026-11-23-eng-01a-s1-offline-connector-contract.md
+    type: report
+    status: current
+    authoritative_for: eng-01a-s1-offline-contract-and-worker-recovery-results
+    updated_at: 2026-11-23
+    verified_at: 2026-11-23
+    sensitivity: public-redacted
+
+  - id: eng-01a-s1-offline-connector-contract-evidence
+    path: reports/evidence/2026-11-23-eng-01a-s1-offline-connector-contract.json
+    type: evidence
+    status: current
+    authoritative_for: eng-01a-s1-local-case-results-and-source-environment-digests
+    updated_at: 2026-11-23
+    verified_at: 2026-11-23
     sensitivity: public-redacted
 
 collections:

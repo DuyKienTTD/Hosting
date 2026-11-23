@@ -2,7 +2,7 @@
 id: current-state
 type: state
 status: current
-updated_at: 2026-11-22
+updated_at: 2026-11-23
 verified_at: 2026-11-21
 sensitivity: public-redacted
 ---
@@ -91,6 +91,8 @@ sensitivity: public-redacted
 - **2026-11-22 — Guard-only mount `GUARD_MOUNT_PASS`:** Kết nối lại KVM2 qua Chrome và recreate đúng sandbox Guard với mount chỉ đọc. Guard/proxy healthy, 18/18 phép thử cách ly sau recreate đạt, production HTTP 200/restart 0 và ledger khớp từng byte. Paid GATE B vẫn `BLOCKED_PREFLIGHT` cho đến bước provider preflight riêng. [Báo cáo](reports/2026-11-22-hermes-gate-b-guard-mount-results.md).
 
 ## Việc đang chờ
+
+- **ENG-01A-S1:** Codex báo `ENG01A_S1_OFFLINE_CONTRACT_PASS` sau 8/8 kiểm thử local, gồm crash/restart worker ở `working/sending`. Chờ ChatGPT Điều phối nghiệm thu. Connector thật `REAL_CONNECTOR_UNTESTED`. [Báo cáo](reports/2026-11-23-eng-01a-s1-offline-connector-contract.md).
 
 - **WS-02 — Hostinger Agent:** Xác minh baseline VPS, Docker và backup qua hPanel chỉ đọc theo PR riêng. Work tiếp tục runbook/diễn tập, Codex tiếp tục B2-O. Handoff `PREPARED_FOR_OWNER_FORWARD`. [Task Hostinger](tasks/2026-11-22-hostinger-ws02-infrastructure-baseline.md).
 
