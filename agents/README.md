@@ -2,6 +2,10 @@
 
 **Nguồn duy nhất về phân vai và năng lực**; đọc sau [AGENTS](../AGENTS.md), [PROJECT](../PROJECT.md) và [STATE](../STATE.md). Hồ sơ không thay thế việc kiểm tra quyền truy cập thật trong phiên đang chạy.
 
+## Phân công hiệu lực cho nhiệm vụ mới — A0 23/11/2026
+
+Theo [AGENT_WORKFLOW mục 12](../rules/AGENT_WORKFLOW.md), **ChatGPT thông thường là ưu tiên mặc định** cho nghiên cứu, viết thiết kế, review nguồn và tài liệu; **Work/A1** chỉ nhận việc độc lập khi mang thêm công cụ/bằng chứng hoặc separation of duties. **Hermes `HOLD_NO_NEW_TASKS`**, không giao lại drafting tương đương, ngoại lệ phải có hạn mức và A0 duyệt; **Hostinger `PAUSED`**, **Codex `NOT_AUTHORIZED`**. Mọi profile/ma trận cũ bên dưới là bản ghi năng lực lịch sử, không cấp quyền hiện tại. `A2` là tên phiên đề xuất, chưa phải Agent có ACK/hồ sơ riêng.
+
 ## Phân loại
 
 | Thành phần | Loại | Vai trò ưu tiên | Hồ sơ | Mức xác minh |
