@@ -1,5 +1,5 @@
 schema_version: 1
-updated_at: 2026-11-23
+updated_at: 2026-11-24
 repository_visibility: public
 default_language: vi
 
@@ -212,6 +212,15 @@ documents:
     status: current
     authoritative_for: chatgpt-role-capabilities
     updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: agent-a0-assistant-independent-reviewer
+    path: agents/a0-assistant.md
+    type: knowledge
+    status: current
+    authoritative_for: a0-independent-advisor-reviewer-role-boundaries-and-mandatory-pre-review-bootstrap
+    updated_at: 2026-11-24
+    verified_at: 2026-11-24
     sensitivity: public
 
   - id: agent-codex

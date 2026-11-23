@@ -1,5 +1,9 @@
 # Lịch sử cập nhật
 
+## 2026-11-24
+
+- Bổ sung hồ sơ chuẩn `agents/a0-assistant.md` theo chỉ định vai trò A0; bắt buộc Trợ lý A0 đọc hồ sơ này trước mọi lần đọc/thẩm định checkpoint, báo cáo, kế hoạch, roadmap, PR và bằng chứng HOSTING. Bổ sung link trong danh bạ Agent và CATALOG. Hồ sơ chỉ xác lập vai trò/tiêu chuẩn thẩm định, không cấp thêm quyền điều phối, merge, paid hoặc production.
+
 ## 2026-11-23
 
 - Nghiệm thu B2-O fake local tại `d95f161` và chuẩn bị B2-P preflight chỉ đọc.
