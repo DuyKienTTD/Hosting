@@ -25,7 +25,7 @@ Quy trình và các giới hạn: [Operating Protocol](../OPERATING_PROTOCOL.md)
 
 ## Pre-product design — A0 accepted PASS_WITH_CONDITIONS (2026-11-24)
 
-**Binding outcome:** Complete four design deliverables before any UI build, product development, M1 business pilot, WordPress/Ads/media writes or infrastructure activation. [A0 four-outcome directive](https://github.com/DuyKienTTD/Hosting/pull/43#issuecomment-7108702342). This coordinator planning branch does NOT dispatch other Agents, mutate existing roadmaps, change `main`, waive mandatory reads, or authorize spending. **Current coordinator roadmap status:** `C-D0_SOURCE_INVENTORY_PARTIAL / C-D1_PREPARED_FOR_OWNER_FORWARD / DGN1_TO_DGN4_NOT_ACCEPTED`.  Actual work status is `NOT_ACKED` for A1/A2/Work until their own sessions confirm. Last verified source baseline: merged-main `d549564de52429e777c68daf9df7a93df5f22f27`. Treat `program/current.json` and WBS KNG state on main as historically frozen premerge/source-time until legitimate future update; never rewrite history to claim a live dispatch.
+**Binding outcome:** Complete four design deliverables before any UI build, product development, M1 business pilot, WordPress/Ads/media writes or infrastructure activation. [A0 four-outcome directive](https://github.com/DuyKienTTD/Hosting/pull/43#issuecomment-7108702342). This coordinator planning branch does NOT dispatch other Agents, mutate existing roadmaps, change `main`, waive mandatory reads, or authorize spending. **Historical opening status snapshot — superseded by the current delivery-status block at the end of this roadmap:** `C-D0_SOURCE_INVENTORY_PARTIAL / C-D1_PREPARED_FOR_OWNER_FORWARD / DGN1_TO_DGN4_NOT_ACCEPTED`. At initial drafting, actual work status was `NOT_ACKED` for A1/A2/Work; subsequent session receipts and source updates are recorded in dated sections below. Last verified source baseline: merged-main `d549564de52429e777c68daf9df7a93df5f22f27`. Treat `program/current.json` and WBS KNG state on main as historically frozen premerge/source-time until legitimate future update; never rewrite history to claim a live dispatch.
 
 ### Four linked design deliverables, one package-level A0 + independent A0 Assistant acceptance
 
@@ -153,9 +153,9 @@ Quy trình và các giới hạn: [Operating Protocol](../OPERATING_PROTOCOL.md)
 
 **Outcome-level DGN-3 seed:** original WBS 32 IDs remain unaltered; after A1 verified capability registry, choose explicit new WBS IDs only for genuinely missing distinct deliverables (for example KPI provenance, authenticated grants/receipt store, backend RBAC, accessibility verification) where coverage by existing task is inadequate; mark duplicates/superseded scopes explicitly rather than cloning tasks. Each final row must map PRODUCT_OUTCOME, FEATURE/UI, deliverable, priority, skill IDs/minimum runtime, predecessor, permission/cost/STOP, acceptance+evidence and proposed one-owner fit. Draft is not a frozen/activated WBS.
 
-**DGN-2 observation, not completion decision:** a branch `a1/dgn2-capability-directory-2026-11-24` now exists and its `program/SKILL_REGISTRY.md` (blob `86d322d603b4be505e17147709d2fcc201cb2e7d`) and A1 roadmap (blob `cacc86278ce27ee9adc798f8ee024a523624025b`) are source-readable. Registry reports eight Agent role families, 22 canonical K IDs and proposed installation candidates with confidence boundaries, but **A1 final PR HEAD/ACK and final source readback have not been verified here**. Never promote other Agent skills from historical reports to current VERIFIED. C-D2 final rule integration and C-D3 freeze remain pending A1 handoff/capability reconciliation.
+**Historical pre-intake observation — superseded by the completed DGN-2 intake section immediately below:** a branch `a1/dgn2-capability-directory-2026-11-24` now exists and its `program/SKILL_REGISTRY.md` (blob `86d322d603b4be505e17147709d2fcc201cb2e7d`) and A1 roadmap (blob `cacc86278ce27ee9adc798f8ee024a523624025b`) are source-readable. Registry reports eight Agent role families, 22 canonical K IDs and proposed installation candidates with confidence boundaries, but **A1 final PR HEAD/ACK and final source readback have not been verified here**. Never promote other Agent skills from historical reports to current VERIFIED. C-D2 final rule integration and C-D3 freeze remain pending A1 handoff/capability reconciliation.
 
-**Coordinator next action:** use verified A2 charter and Work feasibility to prepare DGN-3; receive A1 final completion receipt, reconcile 20 historically used vs 22 canonical skills and source evidence, then finalize DGN-2/3/4 within separately authorized write-sets, with only one integrated independent package review. Product execution, paid APIs, merge/main, external account writes remain HOLD.
+**Historical next-action snapshot — superseded by the row-level DGN-3/DGN-4 delivery and current status block below:** use verified A2 charter and Work feasibility to prepare DGN-3; receive A1 final completion receipt, reconcile 20 historically used vs 22 canonical skills and source evidence, then finalize DGN-2/3/4 within separately authorized write-sets, with only one integrated independent package review. Product execution, paid APIs, merge/main, external account writes remain HOLD.
 
 
 ### DGN-2 A1 capability directory intake and WBS skill reconciliation (2026-11-24)
@@ -171,7 +171,11 @@ Quy trình và các giới hạn: [Operating Protocol](../OPERATING_PROTOCOL.md)
 **Independent acceptance remains package-level:** no PR46 review/merge or standalone A0 micro-gate was created. A0 Assistant + A0 review the complete DGN-1..4 package once; the source can be integrated for design now while DGN-2 remains `READY_FOR_ROADMAP_ACCEPTANCE` as A1's author verdict.
 
 
-### C-D4 preliminary assignment matrix — planning only (2026-11-24)
+### Historical C-D4 group-level assignment matrix — superseded by row-level DGN-4 (2026-11-24)
+
+**HISTORICAL / NOT CURRENT ROUTING:** This table is retained as the original group-level planning snapshot. It is superseded in full by the corrected row-level `program/ASSIGNMENT_MATRIX.md` blob `248947cd9d05bcfcd39e6e3ba12f298da57a1f3a`. In particular, the historical row listing `G1-01,G1-02,G1-03,G3-A1 | A1` does **not** assign G3-A1 to A1. Current proposed owner for G3-A1 is Work, with A1 as source author/respondent and A0 Assistant only as integrated-package reviewer. No old row in this snapshot dispatches or authorizes work.
+
+### C-D4 preliminary assignment matrix — planning only (historical source snapshot, 2026-11-24)
 
 **Purpose:** turn the frozen 32-row WBS into one accountable *proposed* owner per row, using the 20 canonical `K-*` skills and A1's evidence states. This is a planning matrix, not a session dispatch, new permission, or activation of any HOLD work. Original WBS IDs, dependencies, acceptance and historic owner fields remain unchanged until a separately authorized integrated WBS update.
 
@@ -197,7 +201,7 @@ Quy trình và các giới hạn: [Operating Protocol](../OPERATING_PROTOCOL.md)
 **DGN-4 completeness remaining:** final per-row capability evidence and current rights must be reconciled with recipient self-session ACK for each newly activated task; no current A1 directory entry can certify another Agent's live capability. The design matrix now covers all 32 original IDs at group level while preserving one proposed owner for each row. Convert to one-row-per-WBS machine-readable assignment matrix only within the authorized Coordinator integration write-set after package consistency review; do not alter frozen main WBS from this planning branch.
 
 
-### C-D3/DGN-3 and C-D4/DGN-4 — row-level delivery candidate (2026-11-24)
+### Initial C-D3/DGN-3 and C-D4/DGN-4 row-level delivery snapshot — superseded by R1–R7 correction readback below (2026-11-24)
 
 **Delivery created on isolated Coordinator branch** `coordinator/dgn3-dgn4-row-level-2026-11-24`, based on the accepted roadmap branch. No main write, merge, agent dispatch, paid call or product execution.
 
@@ -269,3 +273,30 @@ Each work order is design/roadmap maintenance only, defines exact WBS scope, fir
 **No role profile or Agent roadmap was edited by Coordinator.** A0 Assistant profile is readable at PR47 branch only; PR47 remains Draft/unmerged and is not an effective main profile. This Coordinator branch does not claim PR47 integration.
 
 **Current delivery status:** `R1–R5,R7=CORRECTED_ON_CANDIDATE_BRANCH`; `R6=PREPARED_FOR_OWNER_FORWARD`; `DGN3=ROW_LEVEL_DESIGN_COMPLETE`; `DGN4=ROW_LEVEL_MATRIX_COMPLETE_WITH_CONDITIONS`; `DGN_PACKAGE=NOT_ACCEPTED`; `EXECUTION_READINESS=NOT_PASSED`; `PRODUCT_EXECUTION=HOLD`.
+
+
+### Work roadmap integration receipt — source verified (2026-11-24)
+
+**Work handoff:** `TASK_ACKNOWLEDGED — WORK-DGN-ROADMAP-INTEGRATION` was forwarded into this Coordinator chat by the project owner. The Work roadmap itself records the same receipt. Classify the session ACK as `REPORTED_BY_OWNER_FORWARD + RECORDED_IN_AGENT_ROADMAP`; this Coordinator did not directly observe the original Work chat transport.
+
+**Remote source verification:**
+- Work branch: `work/dgn-feasibility`; branch HEAD equals `fb8eb13bb095962564bc424f646939f87d449b45`.
+- Commit author/committer: GitHub account `DuyKienTTD`; commit message `Integrate Work-owned DGN roadmap rows`.
+- Commit changes exactly one file: `program/roadmaps/work.md`; no other path changed.
+- Work roadmap blob at that commit: `374670f5196b7d16c8473dfe5088fae09206103d`; remote readback verified.
+- Work roadmap records `READY_FOR_ROADMAP_ACCEPTANCE` **for roadmap integration only**. Its historical feasibility evidence and `G1-04/EXIST-QA31` remain preserved. It adds UI-01, UI-02, CTRL-01, UC01-02, GROW-03 and G3-A1 with the correct HOLD/BLOCKED/PLANNED boundaries. Playwright Python/Node availability is time-stamped to 2026-11-23 18:07 UTC; axe-core remains `UNKNOWN_NOT_VERIFIED`; accessibility/browser/screen-reader tests remain unrun.
+- Work keeps `UI-01/UI-02/UC01-02/GROW-03=HOLD`, `CTRL-01=BLOCKED_CHANNEL_UNKNOWN`, and `G3-A1=PLANNED_NOT_ACKED`; no product build, live RBAC, cross-session dispatch, paid API, deployment or merge was performed.
+
+**Source-pin discrepancy reconciled:** The Work work order was created against Coordinator roadmap blob `469c215d0147a9daee6e6335cad607520be98954`. Before Work completed, Coordinator updated its roadmap to blob `9930a86b5a768f79194e6433b28f5f88232e4e4a` on commit `80dfb3b854025691c19257f31644b624aa60e7d4`. Work detected the mismatch and records that it read the later blob. The WBS blob `11261e92d520e720d4798087d89f8269f8c19b20` and Assignment Matrix blob `248947cd9d05bcfcd39e6e3ba12f298da57a1f3a` match the pinned work-order sources. This is a benign Coordinator-document update between preparation and execution, not a Work write-set violation. The historical work order remains unchanged.
+
+**R6 integration status:**
+- Work: `ROADMAP_UPDATED_SOURCE_VERIFIED / READY_FOR_ROADMAP_ACCEPTANCE` (roadmap integration scope only).
+- A1: `PREPARED_FOR_OWNER_FORWARD`; branch HEAD remains DGN-2 head `070189b381dd3e17680c85fdff01e84978c0bf93`; no integration ACK/commit observed.
+- A2: `PREPARED_FOR_OWNER_FORWARD`; branch HEAD remains DGN-1 head `bf232a313c0dd696c4ae824c35e7d1ddfda1a613`; no integration ACK/commit observed.
+- Therefore `AGENT_ROADMAP_INTEGRATION=PARTIAL (1/3)`, not complete.
+
+**G3-A1 owner conflict:** The only A1-as-owner occurrence is in the historical group-level table explicitly marked above as superseded. Current WBS and Assignment Matrix row-level sources both assign Work as proposed independent QA owner; A1 remains source author/respondent. A0 Assistant is the package reviewer, not execution owner. No G3-A1 QA work is activated by this roadmap integration receipt.
+
+**Coordinator acceptance of Work integration:** source/readback and scope checks PASS. This is not independent package QA, not final A0 acceptance, and not authorization to execute the future Work-owned HOLD items.
+
+**Current status:** `R6_WORK=COMPLETE_SOURCE_VERIFIED`; `R6_A1=PREPARED_FOR_OWNER_FORWARD`; `R6_A2=PREPARED_FOR_OWNER_FORWARD`; `AGENT_ROADMAP_INTEGRATION=PARTIAL_1_OF_3`; `DGN_PACKAGE=NOT_ACCEPTED`; `EXECUTION_READINESS=NOT_PASSED`; `PRODUCT_EXECUTION=HOLD`.
