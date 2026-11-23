@@ -26,7 +26,18 @@ def assess_release(snapshot, *, approval=None, remote=None,
     This is a decision helper, not a deployment/merge/dispatch authority.
     """
     fail = lambda why: ReleaseAssessment('NOT_EFFECTIVE', why)
-    gate = snapshot.get('release_gate', {})
+    # Validate structure before invoking external approval/remote callbacks.
+    if not isinstance(snapshot, dict):
+        return fail('INVALID_SNAPSHOT_TYPE')
+    gate = snapshot.get('release_gate')
+    if not isinstance(gate, dict):
+        return fail('INVALID_RELEASE_GATE_TYPE')
+    agents = snapshot.get('agent_status')
+    if not isinstance(agents, dict):
+        return fail('INVALID_AGENT_STATUS_TYPE')
+    qa = snapshot.get('last_work_source_qa')
+    if not isinstance(qa, dict):
+        return fail('INVALID_WORK_SOURCE_QA_TYPE')
     if snapshot.get('record_kind') != 'KNG_RELEASE_SOURCE_SNAPSHOT' or gate.get('phase') != 'PREMERGE_CANDIDATE' or gate.get('status') != 'NOT_EFFECTIVE':
         return fail('INVALID_SOURCE_PHASE')
     if snapshot.get('source_authority') != 'main_effective_rules_until_verified_activation':
@@ -34,12 +45,11 @@ def assess_release(snapshot, *, approval=None, remote=None,
     if any(snapshot.get(k) is not False for k in
            ('production_authorized', 'merge_authorized', 'codex_authorized')):
         return fail('UNSAFE_PERMISSION')
-    if (snapshot.get('agent_status', {}).get('Work') != 'QA_COMPLETE_NO_NEW_TASK'
+    if (agents.get('Work') != 'QA_COMPLETE_NO_NEW_TASK'
             or snapshot.get('work_ack') != 'UNKNOWN'
             or snapshot.get('work_ack_task_id') is not None
             or snapshot.get('work_ack_receipt') is not None):
         return fail('UNRECONCILED_WORK_STATE')
-    qa = snapshot.get('last_work_source_qa', {})
     if (qa.get('actor') != 'Work'
             or qa.get('task_id') != 'WORK-KNG01-PR42-FINAL-FIXTURE-MICRO-RECHECK'
             or qa.get('verdict') != 'KNG01_PR42_SOURCE_QA_PASS_WITH_FINAL_GATES'

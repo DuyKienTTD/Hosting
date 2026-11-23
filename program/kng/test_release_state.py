@@ -69,4 +69,32 @@ class Gate(unittest.TestCase):
     def test_untrusted_approval_exception(self):
         def fail(_):raise RuntimeError('remote denied')
         self.assertEqual('A0_APPROVAL_UNVERIFIED',run(va=fail).reason)
+class MalformedSnapshot(unittest.TestCase):
+    def assert_invalid(self, value, reason):
+        calls=[]
+        def a(_):calls.append('approval');return True
+        def r(_):calls.append('remote');return True
+        result=run(s=value,va=a,vr=r)
+        self.assertEqual(('NOT_EFFECTIVE', reason),(result.state,result.reason))
+        self.assertIsNone(result.effective_source)
+        self.assertEqual([],calls)
+    def test_top_level_null_or_wrong_type(self):
+        for value in (None, [], 'text', 1, True):
+            with self.subTest(value=value):self.assert_invalid(value,'INVALID_SNAPSHOT_TYPE')
+    def test_release_gate_null_wrong_type_or_missing(self):
+        for value in (None, [], 'text', 1, False):
+            with self.subTest(value=value):
+                s=copy.deepcopy(SNAP);s['release_gate']=value;self.assert_invalid(s,'INVALID_RELEASE_GATE_TYPE')
+        s=copy.deepcopy(SNAP);s.pop('release_gate');self.assert_invalid(s,'INVALID_RELEASE_GATE_TYPE')
+    def test_agent_status_null_wrong_type_or_missing(self):
+        for value in (None, [], 'text', 1, False):
+            with self.subTest(value=value):
+                s=copy.deepcopy(SNAP);s['agent_status']=value;self.assert_invalid(s,'INVALID_AGENT_STATUS_TYPE')
+        s=copy.deepcopy(SNAP);s.pop('agent_status');self.assert_invalid(s,'INVALID_AGENT_STATUS_TYPE')
+    def test_last_work_source_qa_null_wrong_type_or_missing(self):
+        for value in (None, [], 'text', 1, False):
+            with self.subTest(value=value):
+                s=copy.deepcopy(SNAP);s['last_work_source_qa']=value;self.assert_invalid(s,'INVALID_WORK_SOURCE_QA_TYPE')
+        s=copy.deepcopy(SNAP);s.pop('last_work_source_qa');self.assert_invalid(s,'INVALID_WORK_SOURCE_QA_TYPE')
+
 if __name__=='__main__':unittest.main()
