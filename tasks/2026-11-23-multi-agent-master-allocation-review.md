@@ -27,73 +27,102 @@ Năm workstream đang có: **WS-01 governance; WS-02 infrastructure reliability;
 
 Phân biệt: **Hermes Agent WebUI** (có công cụ và đã thử GitHub) khác **Hermes auxiliary/runtime production** (chưa có paid E2E hoàn tất); **Hostinger Agent** khác nền tảng Hostinger; **n8n không phải AI Agent**, là execution plane cần owner kỹ thuật quản lý. **ChatGPT Work** là môi trường tác vụ trong ChatGPT, chưa có hồ sơ năng lực/ACK riêng trong repo; phân công dưới đây là **provisional**, phải tự xác minh phiên GitHub, quyền đọc/ghi và giới hạn.
 
-## 3. Bản đồ thế mạnh và giới hạn — cần từng Agent xác nhận
+## 3. Bản đồ năng lực — tổng hợp ACK theo bằng chứng
 
-| Agent | Sở trường phù hợp đã ghi nhận | Chưa chứng minh / không tự cấp quyền | Khối công việc ưu tiên | Trạng thái xác nhận kế hoạch |
+Cả ba phản hồi đã đọc bản `PR6@e5f702e`. Nguồn: [Codex ACK](https://github.com/DuyKienTTD/Hosting/pull/6#issuecomment-7089255768), [Work ACK](https://github.com/DuyKienTTD/Hosting/pull/6#issuecomment-7089269400), [Hermes report](https://github.com/DuyKienTTD/Hosting/blob/45b4032bb2f57e779a22d62f505ebefb387f29c9/reports/2026-11-23-hermes-pr6-master-allocation-review.md). **ACK là cho việc thẩm định tài liệu**, không phải ACK thực thi các task được liệt kê.
+
+| Agent | Năng lực phù hợp / phạm vi đã nhận | Giới hạn / tải đã ACK | Trạng thái |
+|---|---|---|---|
+| ChatGPT Điều phối | Governance, mục tiêu/KPI, phân loại dữ liệu liên kênh, nghiệm thu, quyết định AI-03 | Không tự chạy nền hoặc có quyền VPS; không tự duyệt tác động chi phí/production | AUTHOR_INTEGRATING |
+| Codex | AI-02/B2-P candidate fake và code review; ENG-01 adapter/mock; OPS-01 sandbox kỹ thuật, validator sau khi có suất | **1 gói kỹ thuật active/phiên** hoặc 1–2 việc đọc nhỏ; KVM2 read permission chưa kiểm trong review; không tự QA độc lập mã của mình | ACK_ACCEPT_WITH_CHANGES |
+| Hermes WebUI | BIZ-01 discovery, GROW-01 briefs/drafts, semantic review, nghiên cứu tools và reporting | **1 gói chính** hoặc 1 gói + 1 consult nhỏ; không live connector, publish, paid inference hay hPanel | ACK_ACCEPT_WITH_CHANGES; report commit `45b4032` |
+| ChatGPT Work | AI-01 QA độc lập, INF-02 runbook, sau đó UX/GOV/QA/tracking plan khi có suất | **1 review chính + 1 deliverable đọc/draft hẹp/phiên**; GitHub read/comment đã kiểm trong review; chưa có quyền KVM2/hPanel; cần lưu capability theo phiên, survey repo riêng chưa có | ACK_ACCEPT_WITH_CHANGES |
+| Hostinger Agent | INF-01 hPanel/VPS; đề xuất SEC-01 hạ tầng, SEC-02 restore/hardening, OPS-01 runbook hPanel | Hồ sơ lịch sử có; **chưa có ACK PR #6**, không khẳng định capacity mới | PENDING_HOSTINGER_ACK |
+| n8n (thành phần) | Webhook/schedule/runtime state khi workflow được triển khai | Không phải AI Agent; Codex sở hữu phần kỹ thuật, không có chữ ký agent | NOT_APPLICABLE |
+
+**Giải quyết bất đồng GOV-02:** Codex đề xuất tách tài liệu governance (ChatGPT) và validator thực thi (Codex khi rảnh); Hermes đề xuất Codex primary cho validator/CI. Do đó coi GOV-02 là **portfolio umbrella**, owner ChatGPT cho scope/acceptance, owner Codex chỉ cho **gói kỹ thuật validator** khi có slot, Work reviewer độc lập theo phiên. Không tạo task kỹ thuật mới từ bảng này.
+
+**Work capability:** ACK trực tiếp 23/11 đã chứng minh quyền đọc và bình luận GitHub, năng lực rà soát tài liệu và tự xác nhận công suất tại phiên đó. Không còn coi Work là `PENDING_AGENT_ACK`; việc thiếu hồ sơ capability bền vững trong repo vẫn là gap GOV-01. Quyền hay capacity phiên tiếp theo phải kiểm lại.
+
+## 4. Master backlog đã điều chỉnh sau phản biện
+
+**Quy tắc mỗi dòng:** `source` là path task đã tồn tại hoặc `NO_TASK_YET` (portfolio, không phải ready implementation). **Owner dưới đây là phân bổ kế hoạch, không thay đổi owner/status metadata task gốc.** Phải tạo handoff riêng và có ACK thực thi trước khi coi một công việc đang chạy. Không sinh task mới cho những phần Gate B, WS-02 đã được đặc tả.
+
+| ID | Đầu ra chính và nguồn (existing_task_path hoặc NO_TASK_YET) | Owner kế hoạch / hỗ trợ | Phụ thuộc để bắt đầu hoặc nghiệm thu | Nhịp / trạng thái |
 |---|---|---|---|---|
-| ChatGPT Điều phối | Mục tiêu, kiến trúc nghiệp vụ, backlog, thiết kế acceptance, review evidence, Git docs | Không chạy nền, không VPS shell tự động, không phê duyệt chi phí thay owner | WS-01, nghiệm thu chéo, dependency/capacity | DRAFT_AUTHOR_ONLY |
-| Codex | Code/API/Compose/Docker, test/mock/E2E, rollback và Git; phiên khảo sát có công cụ kỹ thuật | Quyền VPS theo phiên; không có Ads/media API production đã kiểm, không tự đổi production | WS-03 kỹ thuật, CI/test, adapter và UI sau gate | PENDING_AGENT_ACK |
-| Hermes Agent (WebUI) | Research, reasoning, tools, content/media brief, Git reporting; khảo sát có 55 skills | Không chứng minh Ads/YouTube/WordPress connector live hoặc automation 24/7; Hermes auxiliary ≠ WebUI | WS-04 discovery/content, QA nghiệp vụ, schema/tool research | PENDING_AGENT_ACK |
-| Hostinger Agent | hPanel, VPS/backup/domain/DNS/WordPress account inventory, tài liệu hosting, Git | Không điều khiển Hermes/n8n private nếu chưa có tool; không tự deploy production | WS-02 baseline, WS-05 hạ tầng, web hosting | PENDING_AGENT_ACK |
-| ChatGPT Work | Được đề xuất làm reviewer nguồn và viết runbook/đánh giá độc lập theo task hiện hành | Chưa có capability survey độc lập; quyền truy cập theo phiên phải ACK | QA độc lập B2, runbook WS-02, ma trận kiểm thử/UX audit | PENDING_CAPABILITY_SURVEY_AND_ACK |
-| n8n (thành phần) | Trigger, webhook, scheduling, execution state, connector theo workflow | Production hiện 0 workflows/MCP tắt trong audit; không có khả năng tự nghiệm thu Git | Runtime cho WS-03/04 khi workflow đã được triển khai an toàn | NOT_AN_AGENT; Codex owner kỹ thuật |
+| GOV-01 | Đồng thuận master allocation, kiểm đủ task/CATALOG, capability log; `tasks/2026-11-23-multi-agent-master-allocation-review.md` (PR #6) | ChatGPT / tất cả | Phản hồi Hostinger để chốt; 3 ACK đã nhận | W0 IN_PROGRESS_PLAN; chưa merge |
+| GOV-02 | Metadata/traceability vs validator/CI: `tasks/2026-11-21-repository-operating-plan.md` (scope cha); gói validator `NO_TASK_YET` | ChatGPT governance / Codex technical khi có slot; Work QA | GOV-01; GitHub controls cần kiểm quyền riêng | W1 draft; không lấn AI-02 |
+| INF-01 | Baseline hPanel VPS, Docker, TLS, firewall, backup: `tasks/2026-11-22-hostinger-ws02-infrastructure-baseline.md` | Hostinger Agent | Quyền hPanel read-only trong phiên, ACK thực thi | W0 PREPARED |
+| INF-02 | Monitoring/triage runbook + 3 ca giả: `tasks/2026-11-22-work-ws02-monitoring-and-triage.md` | Work | Work capacity: sau/nhẹ cùng AI-01; không chờ INF-01 | W0 PREPARED |
+| AI-01 | Work O1–O4 QA B2-O: `tasks/2026-11-22-work-b2-n-independent-contract-qa.md`, [PR #4](https://github.com/DuyKienTTD/Hosting/pull/4) | Work / ChatGPT nghiệm thu | `d95f161` và review findings PR #5; không rerun B2-N | W0 ưu tiên Work; verdict runtime PENDING |
+| AI-02 | B2-P preflight chỉ đọc + fake-only candidate: `tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md`, [PR #5](https://github.com/DuyKienTTD/Hosting/pull/5) | Codex / Hostinger hỗ trợ baseline | Triaging 3 findings PR #5; quyền KVM2 nếu cần; không apply | W0 PREPARED; Codex slot kỹ thuật |
+| AI-03 | Quyết định GO/NO_GO cho fixture KVM2 fake: `tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md` (milestone điều phối, không task mới) | ChatGPT / Work reviewer | AI-01 verdict + AI-02 evidence + health/headroom hiện hành phù hợp từ INF-01 hoặc nguồn đã kiểm | W1 WAITING_EVIDENCE |
+| AI-03F | **Milestone tách biệt**: nếu AI-03 GO, fixture KVM2 fake-only và rollback, theo task Gate B hiện hữu, **cần scope/approval riêng** | Codex / ChatGPT review | AI-03 GO + preflight + quyền/runtime ownership/rollback | CONDITIONAL_NOT_AUTHORIZED_BY_PLAN |
+| AI-04 | Real IPC/ledger/Guard/paid Hermes preflight qua Gate B gốc: `tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md`; Guard hardening liên quan `tasks/2026-11-21-hermes-gate-b-guard-transaction-hardening.md` | Codex kỹ thuật / ChatGPT gate; Hostinger/Hermes tư vấn | AI-03F nếu được mở, ADR-P0-003, mọi cost/safety/credential gates | BLOCKED_PREFLIGHT; không phát sinh paid |
+| SEC-01 | Threat model, phân loại dữ liệu, RBAC, retention/consent: `NO_TASK_YET` (dùng security review hiện có) | ChatGPT policy/data / Hostinger hạ tầng sau ACK; Codex application consult, Work QA | Tài liệu bảo mật hiện hành; read-only draft có thể làm sớm | W1 song song |
+| SEC-02 | Hardening và restore/backup không phá hủy: `NO_TASK_YET` | Hostinger Agent đề xuất / Codex technical review | INF-01, phần SEC-01 liên quan; approval riêng trước live restore/hardening | W2, chưa quyền thực thi |
+| BIZ-01 | Kênh Ads/GA4/WordPress/WooCommerce/email/Reach/YouTube/TikTok/Meta/media, capability + scope: `NO_TASK_YET` | Hermes discovery/draft / Hostinger WordPress metadata | Sources/docs, no account write; connector live chưa verified | W0 độc lập; Hermes đã nhận phù hợp về năng lực |
+| BIZ-02 | Use-case/ROI/KPI, business priority và audience: `NO_TASK_YET` | ChatGPT / Hermes | Có thể draft từ PROJECT; khóa feasibility sau BIZ-01 | W1 draft song song |
+| UX-01 | Operator UI, permissions/approval/agent flow, mock: `NO_TASK_YET` | ChatGPT user stories / Work thiết kế khi có slot, Codex feasibility | GOV-01, BIZ-02 user stories; SEC-01 permission gate khi chốt | W1 draft; Work chưa nhận thêm slot |
+| ENG-01A | Connector contracts, schema, durable state, idempotency, fake adapters: `NO_TASK_YET` | Codex / Hermes semantics, Work independent QA | BIZ-02 use-case input, SEC-01 safety; **KHÔNG** cần AI-04; Codex slot sau AI-02 hoặc handoff phù hợp | W1/W2 OFFLINE_DESIGN_PERMITTED_AFTER_TASK |
+| ENG-01B | Các connector/real Hermes route, account IO: `NO_TASK_YET` | Codex / owner tài khoản | ENG-01A, từng connector scope/consent/approval; **chỉ** tuyến dùng paid Hermes cần AI-04 | W2 CONDITIONAL; không account write |
+| GROW-01 | Media/SEO/social content brief, editorial QA, rights/publish gates: `NO_TASK_YET` | Hermes discovery/draft / ChatGPT business review | Draft được từ BIZ-02; SEC-01 rights/consent trước khi sẵn sàng publish | W1 độc lập, không render/publish |
+| GROW-02A | Event dictionary, attribution/UTM, consent, tracking plan + mock report: `NO_TASK_YET` | ChatGPT / Work khi có slot, Hermes support | BIZ-02, BIZ-01 feasibility cho kênh; không cần ENG-01 | W1 offline draft |
+| GROW-02B | Scheduled attribution/report pipeline qua dữ liệu thật: `NO_TASK_YET` | Codex / Work QA | ENG-01B hoặc connector read đã duyệt, account scope/consent, rollback | W2 CONDITIONAL |
+| OPS-01A | SLO proposals, cảnh báo/incident runbook, health/alert mock: `NO_TASK_YET` (tận dụng INF-02) | Hostinger hạ tầng sau ACK / ChatGPT review; Work runbook | INF-02, historical signal; chưa cần ENG-01 | W1 offline |
+| OPS-01B | Monitoring/scheduler/replay và escalation live: `NO_TASK_YET` | Codex kỹ thuật / Hostinger hPanel operations | INF-01 và fresh baseline, ENG-01 nếu giám sát callback, change approval + rollback | W2 CONDITIONAL |
+| QA-01 | Review độc lập đúng SHA/environment theo mỗi release: `NO_TASK_YET` (QA hiện hữu AI-01 là phần cụ thể) | Work theo slot / ChatGPT review chỉ khi độc lập tác giả | Deliverable tương ứng; không QA cùng mã tự viết, không rerun PASS thiếu change trigger | Theo release, tránh lấp slot Work |
 
-Nếu Agent thiếu quyền/công cụ, ghi `BLOCKED_ACCESS` đúng mục, đề xuất hoán đổi theo năng lực thay vì tiếp tục giao vì mục tiêu chia đều. Mỗi Agent báo **công suất đồng thời ước tính theo task/phiên**, thời gian khả dụng thực tế (nếu biết), constraints và loại đầu ra kiểm chứng được. Không suy luận một Agent online 24/7.
+### Đối chiếu task và trạng thái còn lệch
 
-## 4. Master backlog — đề xuất; không mở task trùng
+- Ba Agent đã cùng chỉ ra **17 task path tại snapshot main vs 15 path được index**. Kiểm tra file `CATALOG.yaml` xác nhận thiếu đúng hai đường dẫn: `tasks/2026-11-21-repository-operating-plan.md`, `tasks/2026-11-21-hermes-gate-b-guard-transaction-hardening.md`. Chỉ cập nhật CATALOG/STATE/CHANGELOG ở bước hợp nhất đã kiểm diff; **không tạo task thay thế**.
+- `B2-M` có evidence canary fake PASS trong STATE nhưng task metadata Work chưa đồng bộ; không giao lại canary chỉ vì index cũ. P0 Level 1 structural PASS không đồng nghĩa toàn task gốc complete; Provider E2E PASS khác Hermes real paid E2E đang blocked.
+- Guard hardening `ready_for_code_and_mock` có phần lịch sử đã được remediation/H6 thực hiện. Codex đối chiếu residual theo diff, không chạy lại luồng đã PASS nếu không có delta.
+- ENG-01 cần test delta worker restart khi job ở `working/sending`; B2-N restart Hermes và B2-O restart receiver không tự chứng minh nhánh này. Đưa vào acceptance của ENG-01A/B khi thực sự triển khai.
+- WS-02/GATE B có task gốc; các dòng `NO_TASK_YET` chỉ là đề mục kế hoạch, không được coi là READY_EXECUTION.
 
-Mỗi dòng có một owner chịu trách nhiệm; `||` nghĩa là có thể chạy đồng thời với dòng cùng wave nếu không tranh chấp WRITE_SET, runtime, ngân sách hoặc approval. Trạng thái kế hoạch không thay trạng thái thực trong task gốc.
-
-| ID / WS | Công việc và nguồn | Owner / hỗ trợ | Dependency và gate | Wave / song song | Trạng thái tại snapshot / đầu ra nghiệm thu |
-|---|---|---|---|---|---|
-| GOV-01 / 01 | Rà soát đủ backlog, năng lực, cân tải, nhất trí kế hoạch (tài liệu này) | ChatGPT / tất cả Agent | Rule ACK từng bên; owner final review | W0 || mọi task read-only đã có | DRAFT; sign-off matrix + issue list |
-| GOV-02 / 01 | Chuẩn metadata task/report, link state/catalog, validator/CI đề xuất ([Operating Plan](2026-11-21-repository-operating-plan.md)) | ChatGPT Work (đề xuất) / Codex | Work survey; GitHub policy/change approval nếu bật CI | W1 || INF-01, AI-02 | PLANNED; validator spec/test fixtures; không sửa rule trước review |
-| INF-01 / 02 | hPanel baseline KVM2/health/Docker/firewall/HTTPS/backup ([task](2026-11-22-hostinger-ws02-infrastructure-baseline.md)) | Hostinger Agent | Có quyền đọc hPanel; không đổi runtime | W0 || AI-01, INF-02 | PREPARED_FOR_OWNER_FORWARD; PR riêng, VERIFIED_LIVE theo từng tín hiệu |
-| INF-02 / 02 | Monitoring/triage runbook và 3 ca giả ([task](2026-11-22-work-ws02-monitoring-and-triage.md)) | ChatGPT Work | Work capability + GitHub; không đợi INF-01 | W0 || INF-01, AI-01 | PREPARED_FOR_OWNER_FORWARD; runbook + PR riêng |
-| AI-01 / 03 | Work review O1–O4 B2-O trên PR #4 (đã có task và tiêu chí) | ChatGPT Work | B2-O `d95f161`, review comments PR #5 | W0 || INF-01/02, AI-02 | PENDING; verdict evidence, không chạy lại B2-N đã PASS |
-| AI-02 / 03 | Codex B2-P KVM2 **read-only preflight + fake-only candidate** ([Gate B task](2026-11-21-hermes-gate-b-one-shot-paid-e2e.md)) | Codex / Hostinger cung cấp baseline | Review ba comment PR #5; chỉ đọc KVM2 nếu có quyền; không up/apply | W0 || INF-01/02, AI-01 | PREPARED_FOR_OWNER_FORWARD; rendered no-overlap/health/owner/rollback |
-| AI-03 / 03 | Review và quyết định có mở fixture KVM2 hay không | ChatGPT / Codex, Work | AI-01 + AI-02; INF-01 khi liên quan health/headroom | W1 sau gate | BLOCKED_BY_EVIDENCE; quyết định riêng; giữ live NO_GO |
-| AI-04 / 03 | Real IPC/ledger/bridge/Guard/paid preflight; điều kiện một Hermes paid attempt | Codex / Hostinger, Hermes; ChatGPT review | AI-03, ADR-P0-003, tất cả safety/cost gates | W2 **không** song song với thay đổi production/KVM2 | BLOCKED_PREFLIGHT; không dispatch/retry provider |
-| SEC-01 / 05 | Threat model, data classification, secrets/retention, RBAC, public Git safety | Hostinger Agent (infra) / ChatGPT Work (independent review), Codex | Dùng security review hiện có; read-only | W1 || GOV-02, BIZ-01 | PLANNED; ma trận risk/owner/approval; không hardening live |
-| SEC-02 / 05 | Kế hoạch hardening, backup restore drill không phá hủy | Hostinger Agent / Codex review | INF-01 + SEC-01 + approval riêng mọi action live | W2 sau gate | PLANNED; runbook + rollback, không apply |
-| BIZ-01 / 04 | Khảo sát có chứng cứ các kênh Ads, WordPress, YouTube, TikTok, Meta, media, GA4: API/tools, scope/quota | Hermes Agent / Hostinger (WP), ChatGPT tổng hợp | Chỉ đọc docs/metadata đã được phép; chưa phải kết nối account | W0 || AI-01/02, INF-01/02 | PLANNED; capability matrix per platform, VERIFIED/DOCUMENTED/UNKNOWN |
-| BIZ-02 / 04 | Business use-case backlog: media, ads measurement, SEO, ecommerce, reporting; KPI/acceptance ưu tiên | ChatGPT / Hermes, Work | PROJECT + BIZ-01 cho feasibility; có thể lập bản draft trước | W1 || SEC-01, GOV-02 | PLANNED; workflow opportunity register, không Ads/website write |
-| UX-01 / 03/04 | Operator UI/agent workflow designer: thông tin, role/permissions, trạng thái, audit, approval, mock | ChatGPT Work (đề xuất) / Hermes UX review, Codex feasibility | GOV-01 + user stories BIZ-02; Work capability survey | W1 || SEC-01 | PLANNED; wireframe/spec độc lập, không tự triển khai UI live |
-| ENG-01 / 03 | Kiến trúc connector, durable job state, event/deadline/callback, monitoring, n8n workflows | Codex / Hermes (semantic), Work QA | AI-03/04 theo scope; BIZ-01; security model | W2 theo từng connector sau gate | PLANNED; sandbox tests, không tích hợp account nếu thiếu quyền |
-| GROW-01 / 04 | Media/content preproduction và SEO/social briefs, mẫu QA/publish workflow | Hermes Agent / ChatGPT Work QA | BIZ-02; assets/copyright/permissions | W1 || SEC-01/UX-01 | PLANNED; brief, draft, rubric; chưa tạo chi phí/publish |
-| GROW-02 / 04 | Đo attribution, source/lead, quảng cáo và báo cáo dashboard theo dữ liệu có quyền | ChatGPT Work (đề xuất) / Hermes, Codex | BIZ-01, consent/access, BIZ-02, ENG-01 nếu tự động | W2 || một số media draft | PLANNED; tracking plan, mock report; không thay Google Ads |
-| OPS-01 / 02/03 | Scheduler, alerting, on-call/escalation, replay và incident log | Codex / Hostinger, Work | INF-01/02, ENG-01, gate của từng environment | W2 sau gate | PLANNED; sandbox implementation + monitoring evidence |
-| QA-01 / cross | Regression, adversarial negative cases, UX/security QA độc lập mỗi release | ChatGPT Work / ChatGPT final gate | Mỗi deliverable cần phiên/đầu vào cụ thể; không tự chạy production | Mọi wave, không block việc độc lập khác | PLANNED; review matrix theo diff, không lặp PASS |
-
-**Danh sách trên là portfolio dự kiến, không khẳng định đã liệt kê hết mọi task trong CATALOG.** Trước baseline final: so khớp mọi `tasks/` có status `ready/in_progress/blocked/prepared`; gắn `existing_task_path`, owner, dependencies và tiến độ thật; tạo dòng bổ sung nếu thiếu, không tạo task mới khi task gốc bao phủ. Các công việc kinh doanh giai đoạn 2 vẫn là backlog thiết kế, chưa ủy quyền kết nối/publish.
-
-## 5. Dependency graph và phân luồng
+## 5. Dependency graph đã nới khóa paid
 
 ```mermaid
 flowchart LR
-  G["GOV-01: capacity + agent signoff"] --> G2["GOV-02: governance templates"]
-  I1["INF-01: Hostinger baseline"] --> S2["SEC-02: restore/hardening proposal"]
-  I2["INF-02: Work monitoring runbook"] --> O1["OPS-01: monitoring deployment"]
-  A1["AI-01: Work B2-O QA"] --> A3{"AI-03: integration GO/NO_GO"}
-  A2["AI-02: Codex B2-P preflight"] --> A3
-  I1 --> A3
-  A3 --> A4["AI-04: conditional real preflight"]
-  H["BIZ-01: Hermes platform discovery"] --> B["BIZ-02: use-case backlog"]
-  B --> U["UX-01: operator UI design"]
-  B --> E["ENG-01: API/workflow integration"]
-  A4 --> E
-  E --> O1
-  B --> C["GROW-01: content/media drafts"]
-  E --> M["GROW-02: attribution/reporting automation"]
+  GOV["GOV-01 consensus"] --> G2["GOV-02 governance/validator later"]
+  INF["INF-01 Hostinger baseline"] --> SEC2["SEC-02 restoration/hardening design"]
+  W["INF-02 Work runbook"] --> OP1["OPS-01A mock monitoring design"]
+  A1["AI-01 Work QA"] --> GATE{"AI-03 review GO/NO_GO"}
+  A2["AI-02 Codex B2-P"] --> GATE
+  INF -. "health/headroom where applicable" .-> GATE
+  GATE --> FIX["AI-03F separate authorization + fake fixture"]
+  FIX --> PAID["AI-04 conditional paid preflight"]
+  B1["BIZ-01 Hermes capability research"] --> B2["BIZ-02 feasibility freeze"]
+  B2 --> UX["UX-01 UI design"]
+  B2 --> ENGA["ENG-01A offline schemas + fake adapters"]
+  B2 --> GR["GROW-01 Hermes briefs"]
+  B2 --> TRACK["GROW-02A tracking plan"]
+  SEC["SEC-01 policy/rights"] --> UX
+  SEC --> ENGA
+  SEC --> GR
+  ENGA --> ENGB["ENG-01B authorized real connectors"]
+  PAID -. "only real Hermes paid path" .-> ENGB
+  ENGB --> OPB["OPS-01B authorized runtime"]
+  ENGB --> REPORT["GROW-02B data automation"]
 ```
 
-**W0 ngay trong quyền có sẵn:** GOV-01 (ChatGPT), AI-01 và INF-02 (Work, hai đầu ra độc lập nhưng cần tự báo giới hạn công suất), AI-02 (Codex), INF-01 (Hostinger), BIZ-01 (Hermes). **W1:** GOV-02, SEC-01, BIZ-02, UX-01, GROW-01. **W2:** AI-04, SEC-02, ENG-01, OPS-01, GROW-02 phụ thuộc gate cụ thể. Không được diễn giải W2 là permission để triển khai.
+**Đường găng duy nhất của Gate B:** PR #5 finding disposition + B2-P preflight + Work O1–O4 + relevant headroom → AI-03 decision → nếu GO, AI-03F fake fixture **riêng có gate** → AI-04 mới xét real preflight. Đây không phải blocker cho ENG-01A, UX offline, Hermes briefs hoặc GROW-02A.
 
-## 6. Cân tải và chống điểm nghẽn
+**Wave W0 khả thi về nội dung:** GOV-01, AI-01, AI-02, INF-01, INF-02, BIZ-01. Work có **AI-01 là nhiệm vụ chính**, INF-02 có thể là deliverable phụ hẹp; không xếp GOV-02/UX-01/GROW-02A/QA-01 vào active queue Work cùng lúc. Codex chỉ có AI-02 active package; ENG-01A/validator được xếp kế tiếp theo slot. Hermes có BIZ-01 phù hợp, GROW-01 không buộc phải active cùng lúc.
 
-Đặt **owner duy nhất** cho mỗi task, tối đa **1 task thực thi rủi ro cao hoặc 2 task read-only/draft đang active mỗi Agent** như ngưỡng điều phối **đề xuất**, không phải năng lực đo được. Agent tự ghi mức thực tế qua ACK; ChatGPT điều chỉnh wave, không ép nhận task ngoài thế mạnh. Reviewer phải khác implementer cho các gate quan trọng; nếu same platform không độc lập thật phải công bố. Work có hai nhiệm vụ W0 đang có; **không giao GOV-02/UX-01/QA-01 đồng thời cho Work** trước khi Work hoàn thành/ACK công suất. Codex giữ AI-02, không ôm SEC-01 hay tài liệu BIZ-01. Hermes có đường việc giá trị độc lập ngay W0 (BIZ-01); Hostinger có INF-01. ChatGPT không thay Codex viết mã hay Hostinger đo hPanel.
+**Wave W1 có thể soạn sớm:** SEC-01, BIZ-02 draft, GROW-01 brief, UX user stories, ENG-01A architecture design, GROW-02A measurement plan, OPS-01A mock alerting. Chỉ task nào đã có đặc tả/ACK mới chuyển từ plan sang execution.
 
-Mỗi review capacity ghi: `max_concurrent`, `session_access`, `skills_verified_with_evidence`, `willing_to_own`, `cannot_own`, `dependencies`, `alternative_owner`. Nếu Agent không có session được khởi tạo, trạng thái `PREPARED_FOR_OWNER_FORWARD`, không tự nói agent đang rảnh/đang làm.
+**Wave W2:** AI-03F, AI-04, SEC-02 live drill, ENG-01B, OPS-01B, GROW-02B. Mỗi hoạt động side-effect cần preflight/approval riêng, không lấy wave làm ủy quyền.
+
+## 6. Cân tải và quyền sở hữu
+
+- **Codex:** 1 gói kỹ thuật chính/phiên, không đồng thời AI-02 + ENG-01B + OPS-01B + GOV-02 CI. Chỉ nhận gói mới khi slot trống hoặc chủ động đổi ưu tiên có ACK. Reviewer phải độc lập với implementer.
+- **Work:** 1 review chính (AI-01) + 1 deliverable đọc hẹp (INF-02). UX/GOV/QA/GROW sau đó, không biến Work thành nút nghẽn mới.
+- **Hermes:** 1 package discovery/draft chính (BIZ-01), tối đa 1 consult nhỏ nếu phù hợp; GROW-01 có thể lấy dữ liệu BIZ-01 sau milestone khả dụng.
+- **Hostinger:** chưa có verdict/capacity PR #6; chỉ giữ đề xuất INF-01 và SEC/OPS hạ tầng. Phải ACK trước khi coi owner mới được chấp nhận.
+- **ChatGPT:** giữ plan/KPI/data policy/approval coordination; không nhận phần shell/Compose/hPanel hoặc tự nhận quyền triển khai.
+- **Khả năng song song dựa trên quyền và write-set, không phải ép cân bằng theo số dòng**. Giữ ít nhất một nhánh nghiệp vụ độc lập với Gate B và một nhánh hạ tầng/giám sát độc lập khi có Agent online. Không cam kết Agent thực thi nền.
 
 ## 7. ĐẶC TẢ CHUNG DUY NHẤT — gửi nguyên văn cùng một URL cho mọi Agent
 
@@ -159,16 +188,18 @@ NEXT_OWNER: chatgpt
 
 Chỉ khi cả bốn Agent trả verdict hoặc blocker cụ thể, ChatGPT mới hợp nhất các đề xuất, tạo bản phân công `APPROVED_ALLOCATION` khi các owner liên quan chấp nhận nhiệm vụ và mọi conflict đã giải quyết. Nếu chưa đủ thì `PARTIALLY_VALIDATED`. Không yêu cầu lượt “Codex review trước” hay bốn prompt riêng; chủ dự án chỉ cần **chuyển cùng URL PR #6 và chỉ dẫn “Thực hiện §7”** tới các phiên Agent có thể sử dụng.
 
-### Ma trận xác nhận — chưa giả định đã giao
+### Ma trận xác nhận — thời điểm tổng hợp 23/11/2026
 
-| Agent | Trạng thái | Nơi trả kết quả |
+| Agent | Trạng thái | Bằng chứng |
 |---|---|---|
-| Codex | PENDING_NOT_SENT | Comment/review PR #6 |
-| Hermes WebUI | PENDING_NOT_SENT | Comment/review PR #6 |
-| Hostinger Agent | PENDING_NOT_SENT | Comment/review PR #6 |
-| ChatGPT Work | PENDING_NOT_SENT | Comment/review PR #6 |
-| ChatGPT Điều phối | AUTHOR / AWAITING_REVIEWS | Tích hợp sau khi nhận |
-| n8n | NOT_AN_AGENT | Kiểm thử bởi owner kỹ thuật tương lai |
+| Codex | `ACKNOWLEDGED / ACCEPT_WITH_CHANGES` (review tài liệu) | [Comment](https://github.com/DuyKienTTD/Hosting/pull/6#issuecomment-7089255768), reviewed `e5f702e` |
+| ChatGPT Work | `ACKNOWLEDGED / ACCEPT_WITH_CHANGES` (review tài liệu và capability phiên) | [Comment](https://github.com/DuyKienTTD/Hosting/pull/6#issuecomment-7089269400), reviewed `e5f702e` |
+| Hermes WebUI | `ACKNOWLEDGED / ACCEPT_WITH_CHANGES` (report độc lập) | [Report commit `45b4032`](https://github.com/DuyKienTTD/Hosting/commit/45b4032bb2f57e779a22d62f505ebefb387f29c9), reviewed `e5f702e`; **chưa phải comment PR #6 của Hermes** |
+| Hostinger Agent | `PENDING_ACK` | Chưa thấy ACK trên PR #6 tại thời điểm tổng hợp |
+| ChatGPT Điều phối | `PARTIALLY_VALIDATED / INTEGRATING` | Chủ trì sửa plan theo 3 phản hồi |
+| n8n | `NOT_AN_AGENT` | Codex sẽ xác minh execution plane khi có workflow |
+
+**Phạm vi sign-off:** ba reviewer đã review **head cũ** `e5f702e`. Những thay đổi trong bản hợp nhất này là phản hồi có lý do; không được ghi họ đã đọc/ACK head mới. Khi nhận phản hồi Hostinger, chỉ yêu cầu xác nhận delta **ảnh hưởng đến quyền owner của Agent**, không bắt mọi Agent review lại toàn bộ nếu không thay đổi phần họ đã nghiệm thu.
 
 ## 9. Không thay đổi các bất biến hiện có
 
