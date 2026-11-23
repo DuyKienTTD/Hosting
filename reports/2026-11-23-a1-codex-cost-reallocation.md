@@ -18,3 +18,7 @@ owner: chatgpt
 **Năng lực A1:** profile là capability đề xuất, `GITHUB_WRITE` và `PYTHON_RUN` chưa được thử trong phiên A1; việc tạo profile không chứng minh Agent đã tạo hoặc đang thực hiện.
 
 **Kiểm soát:** thay đổi trong Git là nguồn tài liệu đề xuất; chưa tác động VPS, Ads, billing, production hay PR implementation. Cần độc lập review trước khi merge. `NEXT_OWNER=ChatGPT Điều phối`.
+
+## A1 capability follow-up — 2026-11-23
+
+A1 đã ACK **vai trò** và báo cáo trực tiếp rằng GitHub, Drive, Gmail, Calendar, WordPress production/staging, Google Ads read, Canva, HeyGen, vidIQ/YouTube và QA/tooling đã kết nối. Những phép thử do A1 tự báo cáo được ghi `SELF_REPORTED_VERIFIED_BY_A1`, không phải điều phối đã lặp lại độc lập. Google Ads write, Google Cloud Shell, YouTube publish end-to-end, WordPress production write, video paid render, GitHub Python runner theo chính task chưa được chứng minh. A1-GOV02-QA01 chưa có ACK task ID hoặc commit/test mới. Không phát sinh external action hoặc billing.
