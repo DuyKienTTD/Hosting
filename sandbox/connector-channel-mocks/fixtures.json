@@ -1,0 +1,26 @@
+{
+  "observed_at": "2026-11-23T09:00:00Z",
+  "ga4": [
+    {"date": "2026-11-20", "source": "demo-search", "channel": "organic_search", "sessions": 12, "engaged_sessions": 8, "conversions": 2},
+    {"date": "2026-11-20", "source": "demo-letter", "channel": "email", "sessions": 5, "engaged_sessions": 4, "conversions": 1},
+    {"date": "2026-11-21", "source": "demo-search", "channel": "organic_search", "sessions": 15, "engaged_sessions": 10, "conversions": 3},
+    {"date": "2026-11-22", "source": "demo-direct", "channel": "direct", "sessions": 4, "engaged_sessions": 2, "conversions": 0}
+  ],
+  "wp_woo": [
+    {"resource": "site", "id": "fake-site-en", "locale": "en", "title": "Demo Store", "updated_at": "2026-11-18T00:00:00Z"},
+    {"resource": "site", "id": "fake-site-vi", "locale": "vi", "title": "Cửa hàng mẫu", "updated_at": "2026-11-18T00:00:00Z"},
+    {"resource": "posts", "id": "fake-post-en-a", "locale": "en", "title": "Demo article A", "updated_at": "2026-11-19T00:00:00Z"},
+    {"resource": "posts", "id": "fake-post-en-b", "locale": "en", "title": "Demo article B", "updated_at": "2026-11-21T00:00:00Z"},
+    {"resource": "posts", "id": "fake-post-en-c", "locale": "en", "title": "Demo article C", "updated_at": "2026-11-21T00:00:00Z"},
+    {"resource": "posts", "id": "fake-post-vi-a", "locale": "vi", "title": "Bài mẫu A", "updated_at": "2026-11-22T00:00:00Z"},
+    {"resource": "posts", "id": "fake-post-vi-b", "locale": "vi", "title": "Bài mẫu B", "updated_at": "2026-11-22T00:00:00Z"},
+    {"resource": "pages", "id": "fake-page-en-a", "locale": "en", "title": "Demo page", "updated_at": "2026-11-20T00:00:00Z"},
+    {"resource": "pages", "id": "fake-page-en-b", "locale": "en", "title": "Demo page B", "updated_at": "2026-11-22T00:00:00Z"},
+    {"resource": "pages", "id": "fake-page-vi-a", "locale": "vi", "title": "Trang mẫu", "updated_at": "2026-11-20T00:00:00Z"},
+    {"resource": "pages", "id": "fake-page-vi-b", "locale": "vi", "title": "Trang mẫu B", "updated_at": "2026-11-22T00:00:00Z"},
+    {"resource": "products", "id": "fake-product-en-a", "locale": "en", "title": "Demo product", "updated_at": "2026-11-20T00:00:00Z", "price_minor": 1200, "currency": "USD"},
+    {"resource": "products", "id": "fake-product-en-b", "locale": "en", "title": "Demo product B", "updated_at": "2026-11-22T00:00:00Z", "price_minor": 1500, "currency": "USD"},
+    {"resource": "products", "id": "fake-product-vi-a", "locale": "vi", "title": "Sản phẩm mẫu", "updated_at": "2026-11-22T00:00:00Z", "price_minor": 49000, "currency": "VND"},
+    {"resource": "products", "id": "fake-product-vi-b", "locale": "vi", "title": "Sản phẩm mẫu B", "updated_at": "2026-11-22T00:00:00Z", "price_minor": 55000, "currency": "VND"}
+  ]
+}

@@ -4,6 +4,8 @@
 
 - Nghiệm thu B2-O fake local tại `d95f161` và chuẩn bị B2-P preflight chỉ đọc.
 
+- ENG-01A-S2 đạt 7/7 test delta cho GA4 và WordPress/WooCommerce synthetic reads. Chờ ChatGPT Điều phối nghiệm thu, connector thật chưa thử. [Báo cáo](reports/2026-11-23-eng-01a-s2-fake-channel-adapters.md).
+
 ## 2026-11-22
 
 - Phân vai WS-02: Hostinger Agent xác minh hiện trạng qua hPanel độc lập, Work soạn runbook và diễn tập. [Task Hostinger](tasks/2026-11-22-hostinger-ws02-infrastructure-baseline.md).

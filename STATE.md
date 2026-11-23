@@ -2,7 +2,7 @@
 id: current-state
 type: state
 status: current
-updated_at: 2026-11-22
+updated_at: 2026-11-23
 verified_at: 2026-11-21
 sensitivity: public-redacted
 ---
@@ -178,6 +178,8 @@ sensitivity: public-redacted
 - Chưa cập nhật hệ điều hành hoặc reboot.
 - Provider E2E và GATE A mock đã có evidence. **GATE B đã được phê duyệt có điều kiện** cho tối đa đúng một Hermes Agent paid call; vẫn chờ Codex chạy/ghi evidence, không được tự đổi guard hay dùng adapter OpenAI trực tiếp để thay bằng chứng Hermes.
 - Chưa kết nối/xác minh Google Ads, GA4, WordPress/WooCommerce, YouTube, TikTok, Meta, Kling, HeyGen hoặc ElevenLabs.
+
+- **ENG-01A-S2:** Codex báo `ENG01A_S2_CHANNEL_MOCK_PASS` sau 7/7 test delta Windows, chờ ChatGPT Điều phối nghiệm thu. GA4 và WP/Woo thật chưa thử, `LINUX_NOT_RUN / INTEGRATION_PENDING_PR10`. [Báo cáo](reports/2026-11-23-eng-01a-s2-fake-channel-adapters.md).
 
 ## Tài liệu tiếp theo
 

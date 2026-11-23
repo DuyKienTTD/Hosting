@@ -1,0 +1,269 @@
+{
+  "task_id": "ENG-01A-S2",
+  "owner": "codex",
+  "observed_date_ict": "2026-11-23",
+  "recorded_utc": "2026-11-23T03:34:58.477312+00:00",
+  "base_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "rules_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "rule_blobs": {
+    "AGENTS.md": "cb6a8af9d2634cc4eb959132d6c3f2fafcbfaf35",
+    "PROJECT.md": "c645aa2df0b6cbad1f854dd4d10c6bf15553b0f6",
+    "GOALS_AND_ROADMAP.md": "27b7624733a52ddb64b61e81ddbd487d45b5119e",
+    "rules/AGENT_WORKFLOW.md": "69ec0db902f457f06dd547dae171220331df0f5e",
+    "rules/REPOSITORY_SECURITY.md": "c24d608036b11dcd3fafcaefbefa23fdb591990e",
+    "STATE.md": "c8e8941aa1418f70ed9542063f0485a129739d25",
+    "CATALOG.yaml": "719c9c5d2832382285d732b9ad21f55d8c163733",
+    "agents/codex.md": "f718889f8f4d369bb1e301b9cd006e64bf312f73"
+  },
+  "assignment": "https://github.com/DuyKienTTD/Hosting/pull/10#issuecomment-7090796992",
+  "assignment_ack": "EXECUTE_RECEIVED_AND_ACKNOWLEDGED_2026_11_23",
+  "task_spec_commit": "e431722cd3d52a0d920c112bf041cbc0fc0ae6c3",
+  "upstream": {
+    "plan_pr6": "cdf0aed51965465601320fd57623a84065ad9c5b",
+    "s1_pr10": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+    "biz01_pr12": "8c821bbf1842eccb8519127f54ba7673965276d5"
+  },
+  "source": {
+    "sandbox/connector-channel-mocks/channel_mocks.py": {
+      "git_blob": "bfda39bf3ac07aba09009462bb60620970a31951",
+      "checked_out_sha256": "249d5cb3b5906b371e88cb76ad9e4340346250504968c6b15a477d437d1533f0"
+    },
+    "sandbox/connector-channel-mocks/fixtures.json": {
+      "git_blob": "ec30d2dd9d2fb9a0dbd0b6179d0a424321fdd166",
+      "checked_out_sha256": "38274001930d99999c69325e64b854e57e8a849bb0def49b9a3765bfde745ba7"
+    },
+    "sandbox/connector-channel-mocks/test_channel_mocks.py": {
+      "git_blob": "a92040a0b2ccdabe60d09305415bd16973d88314",
+      "checked_out_sha256": "e2447525fc354044423197d2653acefa901618569dbb61fc0391b13069130307"
+    }
+  },
+  "source_manifest_sha256": "01cd28a60f002e872b61f05a6f2aa63be2b419892ba2f2d936a5451e06c36ffd",
+  "environment": {
+    "os": "Windows",
+    "os_release": "11",
+    "machine": "AMD64",
+    "python": "3.12.3",
+    "implementation": "CPython",
+    "utf8_mode": true,
+    "dependencies": "Python standard library",
+    "storage": "packaged UTF-8 JSON; no SQLite, network or persistent state"
+  },
+  "environment_sha256": "78da68c567c4463dcc57d0e2fb6af89f7fb45fce21688e6fe9c2cd1e566650e2",
+  "observed": "deterministic synthetic GA4 aggregates and WordPress/Woo reads with negative cases and no network",
+  "expected": "bounded reporting, scoped pagination, normalized provenance, offline fail-closed",
+  "test_command": "python -X utf8 -B sandbox/connector-channel-mocks/test_channel_mocks.py --evidence <temp-path>",
+  "tests_run": 7,
+  "cases": {
+    "wp_pagination": {
+      "expected": "stable same-snapshot cursor, exclusive watermark with tie-breaker, no skips",
+      "observed": {
+        "page_ids": [
+          "fake-post-en-a",
+          "fake-post-en-b",
+          "fake-post-en-c"
+        ],
+        "repeat_equal": true,
+        "stale_cursor_status": 409,
+        "malformed_status": 422,
+        "incremental_ids": [
+          "fake-post-en-c"
+        ],
+        "terminal_watermark": {
+          "updated_at": "2026-11-21T00:00:00Z",
+          "source_record_id": "fake-post-en-c"
+        }
+      }
+    },
+    "read_faults_isolation": {
+      "expected": "403/429/404/unknown omit rows and cannot advance local read state",
+      "observed": {
+        "faults": {
+          "forbidden": {
+            "status": 403,
+            "outcome": "failed"
+          },
+          "quota": {
+            "status": 429,
+            "outcome": "failed"
+          },
+          "delayed": {
+            "status": 504,
+            "outcome": "outcome_unknown"
+          },
+          "missing": {
+            "status": 404,
+            "outcome": "failed"
+          }
+        },
+        "before_after_equal": true,
+        "response_mutation_isolated": true
+      }
+    },
+    "ga4_valid": {
+      "expected": "three attributed aggregates in inclusive period; deterministic repeat",
+      "observed": {
+        "rows": [
+          [
+            "2026-11-20",
+            "email",
+            5,
+            1
+          ],
+          [
+            "2026-11-20",
+            "organic_search",
+            12,
+            2
+          ],
+          [
+            "2026-11-21",
+            "organic_search",
+            15,
+            3
+          ]
+        ],
+        "unique_source_records": 2,
+        "report_sha256": "93d864511a3044f477ffb1db14031a91f7581eef7cbaf298580f426afb176581"
+      }
+    },
+    "ga4_validation": {
+      "expected": "invalid field/date/budget returns 422; empty valid report returns 200",
+      "observed": {
+        "rejected": [
+          "bool_budget",
+          "date_format",
+          "dimension",
+          "duplicate_metric",
+          "future_period",
+          "impossible_date",
+          "long_period",
+          "metric",
+          "over_budget",
+          "reverse_period"
+        ],
+        "rejection_status": 422,
+        "empty_count": 0
+      }
+    },
+    "normalized_schema": {
+      "expected": "four normalized types with declared provenance and no lead/account identity",
+      "observed": {
+        "record_types": [
+          "campaign_source",
+          "channel_event",
+          "content_asset",
+          "product"
+        ],
+        "inconsistent_rows_rejected": 7
+      }
+    },
+    "offline_boundary": {
+      "expected": "no socket or write method; remote and credential configuration fail closed",
+      "observed": {
+        "imports": [
+          "datetime",
+          "hashlib",
+          "json",
+          "pathlib",
+          "re"
+        ],
+        "live_enabled": false,
+        "remote_config_denied": true,
+        "credential_config_denied": true,
+        "socket_audit_self_check": "denied"
+      }
+    },
+    "wp_resource_locale": {
+      "expected": "four read resources in EN and VI; lists paginate, currencies preserved",
+      "observed": {
+        "source_record_ids": {
+          "site:en": [
+            "fake-site-en"
+          ],
+          "posts:en": [
+            "fake-post-en-a",
+            "fake-post-en-b"
+          ],
+          "pages:en": [
+            "fake-page-en-a",
+            "fake-page-en-b"
+          ],
+          "products:en": [
+            "fake-product-en-a",
+            "fake-product-en-b"
+          ],
+          "site:vi": [
+            "fake-site-vi"
+          ],
+          "posts:vi": [
+            "fake-post-vi-a",
+            "fake-post-vi-b"
+          ],
+          "pages:vi": [
+            "fake-page-vi-a",
+            "fake-page-vi-b"
+          ],
+          "products:vi": [
+            "fake-product-vi-a",
+            "fake-product-vi-b"
+          ]
+        },
+        "prices": [
+          {
+            "value": 1200,
+            "currency": "USD",
+            "unit": "minor_currency_unit"
+          },
+          {
+            "value": 49000,
+            "currency": "VND",
+            "unit": "minor_currency_unit"
+          }
+        ]
+      }
+    }
+  },
+  "test_repro": {
+    "different_working_directory_same_evidence": true,
+    "s1_historical_suite_rerun": false
+  },
+  "source_audit": {
+    "imports_in_code_and_tests": [
+      "argparse",
+      "ast",
+      "channel_mocks",
+      "datetime",
+      "hashlib",
+      "json",
+      "pathlib",
+      "re",
+      "sys",
+      "unittest"
+    ],
+    "live_enabled": false,
+    "network_oauth_credential_imports": 0,
+    "network_socket_audit_hook_in_suite": true,
+    "opened_account_or_endpoint": false
+  },
+  "verdict": "ENG01A_S2_CHANNEL_MOCK_PASS",
+  "limitations": {
+    "ga4": "REAL_GA4_UNTESTED",
+    "wordpress_woo": "REAL_WP_WOO_UNTESTED",
+    "linux": "LINUX_NOT_RUN",
+    "linux_reason": "Only docker-desktop distro listed by WSL; Docker excluded",
+    "integration": "INTEGRATION_PENDING_PR10",
+    "s1_imported": false,
+    "s1_job_dispatch_receipt_tests": "NOT_APPLICABLE_TO_STATELESS_S2_READS"
+  },
+  "scope_counters": {
+    "runtime_network_requests": 0,
+    "paid_or_provider_calls": 0,
+    "kvm2_accesses": 0,
+    "real_credentials_used": 0,
+    "production_mutations": 0,
+    "usd": 0
+  },
+  "paid_gate_b": "BLOCKED_PREFLIGHT",
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}
