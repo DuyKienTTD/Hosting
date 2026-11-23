@@ -6,6 +6,12 @@ Các hướng dẫn này áp dụng cho toàn bộ repository.
 
 **Mục 11 [AGENT_WORKFLOW](rules/AGENT_WORKFLOW.md) có hiệu lực ưu tiên** khi tài liệu cũ gợi ý giao Codex theo thói quen. **A1 là ChatGPT Thông thường ở phiên riêng**, khác ChatGPT Điều phối và ChatGPT Work; xem [hồ sơ A1](agents/a1.md) và [master allocation v2](tasks/2026-11-23-a1-cost-first-master-allocation.md). Điều phối phải tự thực hiện hoặc giao A1/Work/Hermes/Hostinger nếu đủ năng lực/công cụ, Codex chỉ còn ngoại lệ theo gate chi phí có A0 duyệt. **Thu hồi phần giao Codex đơn giản chưa làm**, không xóa kết quả lịch sử. Mọi lệnh GitHub vẫn `PREPARED_FOR_OWNER_FORWARD` cho tới khi Agent ACK; không tự tạo phiên A1. Không có quyền mới cho paid, live, production, merge.
 
+## A0 override — Hostinger PAUSED / A1 OPS D2 (2026-11-23)
+
+**Hostinger Agent đang PAUSED:** không gửi thêm việc hoặc cho phép nối lại các work order SEC/OPS; [OPS pause](https://github.com/DuyKienTTD/Hosting/pull/24#issuecomment-7093337445), [SEC pause](https://github.com/DuyKienTTD/Hosting/pull/29#issuecomment-7093338761). Chỉ thị tạm dừng đã đăng trên GitHub, **chưa phải ACK của phiên Hostinger**; lịch sử và bằng chứng đã bàn giao được giữ nguyên. Chỉ A0 mới cho phép tiếp tục và cần Agent ACK mới.
+
+**A1 là sole writer của OPS-01A/S2-D2**, qua [đặc tả A1](https://github.com/DuyKienTTD/Hosting/pull/24#issuecomment-7093346631): branch riêng stacked trên PR #24 tại `e9c2d8f759850ea9c654de7e103549e041f66679`, **không ghi vào branch Hostinger**; chờ A1 ACK và sau đó Work QA độc lập. A1 đã có role ACK và source/task evidence PR #32/#33; PR #32 Work QA offline PASS_WITH_LIMITS, PR #33 Hermes QA proposal PASS_WITH_LIMITS (không đồng nghĩa Phase B/merge). Codex vẫn exception-only.
+
 ## Mục tiêu
 
 Trước khi nhận việc mới, nắm mục tiêu doanh nghiệp tại [PROJECT.md](PROJECT.md). Đặc tả và kết quả trao đổi qua GitHub theo [rules/AGENT_WORKFLOW.md](rules/AGENT_WORKFLOW.md): task được commit trước khi giao; báo cáo, bằng chứng được commit/push sau khi thực hiện; tin nhắn chỉ dẫn URL và kết quả ngắn. Dùng `tasks/` cho đặc tả và `reports/` cho kết quả. Các giới hạn nhiệm vụ là ràng buộc, còn cách triển khai là linh hoạt.
@@ -18,7 +24,7 @@ Mỗi tác nhân phải tham khảo [agents/README.md](agents/README.md) và h�
 
 **Quy tắc điều phối do chủ dự án phê duyệt ngày 2026-11-21:** [AGENT_WORKFLOW mục 7](rules/AGENT_WORKFLOW.md) có hiệu lực cho ChatGPT, Codex, Hermes, Hostinger Agent và mọi agent tham gia. **Mỗi task mới phải đọc lại** `AGENTS.md`, `rules/AGENT_WORKFLOW.md`, `rules/REPOSITORY_SECURITY.md`, `STATE.md`, `CATALOG.yaml`, hồ sơ agent và task. Ghi commit quy tắc đã đọc trong ACK/report.
 
-**Trước giao thực thi:** ChatGPT nghiên cứu nguồn công khai chính thức, đối chiếu trạng thái/bằng chứng; chủ động xin báo cáo Hostinger Agent về VPS/network/hPanel và Hermes về runtime/inference khi phù hợp, trước khi giao Codex code/test/deploy. Đặc tả phải có **bước đầu tiên cụ thể, file/endpoint/môi trường, dependency, owner duy nhất, quyền, kiểm thử/STOP, đường dẫn đầu ra và next owner**; không chỉ nói “làm đi”. Không giả định đã giao việc qua GitHub nếu agent chưa thật sự nhận.
+**Trước giao thực thi:** ChatGPT nghiên cứu nguồn công khai chính thức, đối chiếu trạng thái/bằng chứng; chủ động xin báo cáo Hostinger Agent về VPS/network/hPanel và Hermes về runtime/inference khi phù hợp, trước khi đề xuất giao **bất kỳ Agent** code/test/deploy; Codex chỉ exception-only theo A0 cost gate. Đặc tả phải có **bước đầu tiên cụ thể, file/endpoint/môi trường, dependency, owner duy nhất, quyền, kiểm thử/STOP, đường dẫn đầu ra và next owner**; không chỉ nói “làm đi”. Không giả định đã giao việc qua GitHub nếu agent chưa thật sự nhận.
 
 **Chuyền bóng rõ ràng:** `PREPARED → SENT → ACKNOWLEDGED → IN_PROGRESS → DONE/BLOCKED/NEEDS_OWNER_DECISION`; mỗi lượt giao nêu `from_agent, to_agent, why, first_action, inputs, limits, acceptance, artifact, next_owner`. Nếu thiếu kênh giao trực tiếp, ghi `PREPARED_FOR_OWNER_FORWARD` để chủ dự án chuyển.
 
