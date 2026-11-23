@@ -216,7 +216,7 @@ Chủ dự án chỉ thị: **“Bước tiếp theo ủy quyền cho bạn toà
 ### 11.1. Sáu vai trò không được nhầm lẫn
 - **A0:** chủ dự án phê duyệt quyền, ngân sách và hành động có tác động.
 - **ChatGPT Điều phối:** phân công, governance, review và đề xuất; không tự ký duyệt thay A0.
-- **A1 = ChatGPT Thông thường:** phiên chat riêng do chủ dự án chuyển đặc tả; không phải Điều phối hoặc Work và không chạy nền. Profile: [agents/a1.md](../agents/a1.md).
+- **A1 = ChatGPT Thông thường:** phiên chat riêng do chủ dự án chuyển đặc tả; không phải Điều phối hoặc Work và không chạy nền. Profile: [agents/a1.md](https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/agents/a1.md).
 - **ChatGPT Work:** kiểm thử, browser/UX và triển khai nhiều bước khi có công cụ trong phiên.
 - **Hermes WebUI:** business/content/agent semantics, validator/mock và code offline nếu có tool.
 - **Hostinger Agent:** hPanel/VPS/hosting/OPS/SEC, read-only hoặc thay đổi có approval riêng.
@@ -237,11 +237,11 @@ Chủ dự án chỉ thị: **“Bước tiếp theo ủy quyền cho bạn toà
 6. Chỉ tiêu điều phối là **chi phí + rủi ro + thời gian + chất lượng**; không tối ưu chỉ theo số task. Ghi `COST_ROUTING` trong đặc tả: agent được chọn, lựa chọn rẻ hơn được đối chiếu, vì sao chọn và trạng thái quyền.
 
 ### 11.3. Bản phân công nguồn có hiệu lực
-[Master allocation v2](../tasks/2026-11-23-a1-cost-first-master-allocation.md) thay cho **các đề xuất phân vai Codex chung chung** trong PR #6 và profile cũ; mọi test/approval cụ thể ở task gốc vẫn giữ nguyên. Phần nào chưa bắt đầu chỉ thay phân công; phần đã PASS giữ evidence. A1 đã ACK vai trò và các nhiệm vụ đã bàn giao PR #32/#33; mỗi nhiệm vụ **mới** vẫn `PREPARED_FOR_OWNER_FORWARD` cho đến khi A1 ACK chính xác task đó. Quy tắc này không cấp GitHub credential, VPS access, production, paid inference hay merge.
+[Master allocation v2](https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/tasks/2026-11-23-a1-cost-first-master-allocation.md) thay cho **các đề xuất phân vai Codex chung chung** trong PR #6 và profile cũ; mọi test/approval cụ thể ở task gốc vẫn giữ nguyên. Phần nào chưa bắt đầu chỉ thay phân công; phần đã PASS giữ evidence. A1 đã ACK vai trò và các nhiệm vụ đã bàn giao PR #32/#33; mỗi nhiệm vụ **mới** vẫn `PREPARED_FOR_OWNER_FORWARD` cho đến khi A1 ACK chính xác task đó. Quy tắc này không cấp GitHub credential, VPS access, production, paid inference hay merge.
 
 ## 12. HISTORICAL PRE-KNG ROUTING (2026-11-23; retain safeguards, task evidence and cost gates; priority superseded by §13)
 
-**Áp dụng cho giao việc mới sau chỉ thị A0 ngày 23/11/2026; không xóa hoặc diễn giải lại nghiệm thu lịch sử.** Mục 12 là override mới hơn phần phân vai/ưu tiên tại mục 7 và 11 khi khác nhau. [Đánh giá tiến độ có căn cứ](../reports/2026-11-23-hosting-progress-and-target-capabilities.md) chỉ là ước lượng điều phối, không phải chứng nhận readiness.
+**Áp dụng cho giao việc mới sau chỉ thị A0 ngày 23/11/2026; không xóa hoặc diễn giải lại nghiệm thu lịch sử.** Mục 12 là override mới hơn phần phân vai/ưu tiên tại mục 7 và 11 khi khác nhau. [Đánh giá tiến độ có căn cứ](https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/reports/2026-11-23-hosting-progress-and-target-capabilities.md) chỉ là ước lượng điều phối, không phải chứng nhận readiness.
 
 1. **Default = ChatGPT thông thường tự làm.** Điều phối đọc nguồn, nghiên cứu, viết đặc tả, phân tích mã tĩnh, tạo ma trận QA, cập nhật tài liệu và tổng hợp báo cáo trực tiếp bằng công cụ có thật và trong WRITE_SET đã cấp. Không tạo thêm phiên/agent chỉ để chuyển tiếp nhiệm vụ tương đương. A1 là phiên ChatGPT thường riêng, sử dụng khi có lý do phân chia đầu ra và chủ dự án thật sự chuyển tin nhắn; tên `A2` chưa phải vai trò/agent được đăng ký, không tự suy ra đã kích hoạt.
 2. **Chỉ giao Agent khi có năng lực bổ sung rõ ràng:** Work cho browser, Linux/fixture, công việc đa bước hoặc reviewer độc lập; A1 cho kiểm thử/QA độc lập hoặc tác vụ có write-set riêng. Quyết định phải nêu `WHY_DELEGATE`, công cụ thực sự cần, tác giả/reviewer, phạm vi nhỏ nhất, kết quả cũ có thể tái sử dụng, `MAX_COST_OR_CALL_CAP` nếu có rủi ro tính phí, và `STOP`. Không tự QA độc lập tác phẩm của chính mình.

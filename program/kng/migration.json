@@ -74,7 +74,7 @@
       "operation": "append one controlling KNG supersession pointer and clarify old routing as historical, not replace safety guard",
       "source_ref": "PR31@a770de80a2467ca1789c820b63416209cf53b7d1",
       "integration_authority": "https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192",
-      "result_blob": "1ca02f2f83e699c49ba991ddcfb4e1916eda4d1e"
+      "result_blob": "5c7f961dece217cf920d9693ce35f1eeeefbee46"
     }
   ],
   "delete_candidates": [],

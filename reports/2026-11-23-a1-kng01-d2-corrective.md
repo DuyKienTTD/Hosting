@@ -46,13 +46,13 @@ sensitivity: public-redacted
 
 ## FIX C — same Work Q0 input paths, measured before/after
 
-Work frozen **9 common complete file reads / 139,996 UTF-8 bytes**, then fixed R/G/S suffix in exact Q0 order. Candidate D2 reads corresponding **9 full integrated files / 112,606 bytes**, **plus 1 full `program/current.json` / 2,751 bytes** to bind new authority, then **same exact suffix Git blobs**. No shortened section slices, tokenizer estimates or substituted candidate evidence.
+Work frozen **9 common complete file reads / 139,996 UTF-8 bytes**, then fixed R/G/S suffix in exact Q0 order. Candidate D2 reads corresponding **9 full integrated files / 112,849 bytes**, **plus 1 full `program/current.json` / 2,751 bytes** to bind new authority, then **same exact suffix Git blobs**. No shortened section slices, tokenizer estimates or substituted candidate evidence.
 
 | Q0 fixed task | BEFORE steps / bytes | Candidate AFTER steps / bytes | Byte delta | Author comprehension |
 | --- | ---: | ---: | ---: | --- |
-| R WS-04 read-only SEO backlog | 11 / 149,148 | **12 / 124,509** | −24,639 (−16.52%) | **NOT_SCORED** |
-| G WS-01 Git/docs proposal | 12 / 151,686 | **13 / 127,047** | −24,639 (−16.24%) | **NOT_SCORED** |
-| S WS-02 n8n readiness/production STOP | 15 / 197,424 | **16 / 172,785** | −24,639 (−12.48%) | **NOT_SCORED** |
+| R WS-04 read-only SEO backlog | 11 / 149,148 | **12 / 124,752** | −24,396 (−16.36%) | **NOT_SCORED** |
+| G WS-01 Git/docs proposal | 12 / 151,686 | **13 / 127,290** | −24,396 (−16.08%) | **NOT_SCORED** |
+| S WS-02 n8n readiness/production STOP | 15 / 197,424 | **16 / 173,028** | −24,396 (−12.36%) | **NOT_SCORED** |
 
 Full source path/ref/blob/byte ledger and unchanged Q0 suffixes in [machine Q0 evidence](evidence/2026-11-23-a1-kng01-d2-q0-metrics.json). This **source byte improvement** is author measurement, not an independent 18/18 comprehension pass, not a change in effective main. Work must do a fresh blind 3×6 decision/rubric and 0 critical wrong-authority/STOP errors.
 

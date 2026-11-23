@@ -71,8 +71,8 @@
     },
     {
       "path": "rules/AGENT_WORKFLOW.md",
-      "blob": "1ca02f2f83e699c49ba991ddcfb4e1916eda4d1e",
-      "bytes": 46062,
+      "blob": "5c7f961dece217cf920d9693ce35f1eeeefbee46",
+      "bytes": 46305,
       "ref": "candidate_unmerged_git_blob"
     },
     {
@@ -108,7 +108,7 @@
       "before_steps": 11,
       "before_bytes": 149148,
       "after_steps": 12,
-      "after_bytes": 124509,
+      "after_bytes": 124752,
       "after_common_paths": [
         "README.md",
         "PROJECT.md",
@@ -135,7 +135,7 @@
           "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
         }
       ],
-      "bytes_saved": 24639,
+      "bytes_saved": 24396,
       "context_method": "exact UTF8 bytes of full pinned file blobs, 10 candidate common files then same Q0 source suffix",
       "comprehension_18_point_score": "NOT_SCORED_BY_A1_AUTHOR",
       "fresh_blind_test": "NOT_RUN"
@@ -147,7 +147,7 @@
       "before_steps": 12,
       "before_bytes": 151686,
       "after_steps": 13,
-      "after_bytes": 127047,
+      "after_bytes": 127290,
       "after_common_paths": [
         "README.md",
         "PROJECT.md",
@@ -180,7 +180,7 @@
           "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
         }
       ],
-      "bytes_saved": 24639,
+      "bytes_saved": 24396,
       "context_method": "exact UTF8 bytes of full pinned file blobs, 10 candidate common files then same Q0 source suffix",
       "comprehension_18_point_score": "NOT_SCORED_BY_A1_AUTHOR",
       "fresh_blind_test": "NOT_RUN"
@@ -192,7 +192,7 @@
       "before_steps": 15,
       "before_bytes": 197424,
       "after_steps": 16,
-      "after_bytes": 172785,
+      "after_bytes": 173028,
       "after_common_paths": [
         "README.md",
         "PROJECT.md",
@@ -243,7 +243,7 @@
           "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
         }
       ],
-      "bytes_saved": 24639,
+      "bytes_saved": 24396,
       "context_method": "exact UTF8 bytes of full pinned file blobs, 10 candidate common files then same Q0 source suffix",
       "comprehension_18_point_score": "NOT_SCORED_BY_A1_AUTHOR",
       "fresh_blind_test": "NOT_RUN"
@@ -332,10 +332,10 @@
   ],
   "measurement": {
     "baseline_common_bytes": 139996,
-    "after_nine_common_bytes": 112606,
+    "after_nine_common_bytes": 112849,
     "after_tenth_current_bytes": 2751,
-    "after_ten_common_bytes": 115357,
-    "delta_bytes": -24639,
+    "after_ten_common_bytes": 115600,
+    "delta_bytes": -24396,
     "units": "UTF-8_BYTES_NOT_BILLABLE_TOKENS",
     "source": "Work Q0 fixed R/G/S paths and actual remote candidate blob content"
   },
