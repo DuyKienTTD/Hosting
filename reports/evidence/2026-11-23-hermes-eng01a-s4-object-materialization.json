@@ -1,0 +1,121 @@
+{
+  "task": "HERMES-ENG01A-S4-OFFLINE-OBJECT-TRANSFER-FEASIBILITY",
+  "pins": {
+    "refs/remotes/origin/main": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "refs/remotes/origin/codex/eng-01a-s1-offline-contract-2026-11-23": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+    "refs/remotes/origin/codex/eng-01a-s2-fake-channel-adapters-2026-11-23": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+    "refs/remotes/origin/codex/eng-01a-s3-offline-integration-2026-11-23": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+    "refs/remotes/origin/codex/eng-01a-s4-linux-release-readiness-2026-11-23": "272855817cffe5334757fcf3a64cfae750b3b119"
+  },
+  "bundle_path": "/data/cache/scratch/eng01a_s4_bundle_20261123/eng01a_s4_pinned_git_objects.bundle",
+  "bundle_size_bytes": 1123945,
+  "bundle_sha256": "6068605c0c5bdeef9b70c867dec64fb31492b6c0671ec05875a3c58d7f995503",
+  "bundle_verify": "/data/cache/scratch/eng01a_s4_bundle_20261123/eng01a_s4_pinned_git_objects.bundle is okay\nThe bundle contains these 5 refs:\ne385c1bea2070973e3007e5717f7e980348d6ab3 refs/remotes/origin/main\n79dfe8aae5c30d4e896c29333e0296ada1671b7e refs/remotes/origin/codex/eng-01a-s1-offline-contract-2026-11-23\n0235b5f9bb38d0d7e99a600188705d50977527f5 refs/remotes/origin/codex/eng-01a-s2-fake-channel-adapters-2026-11-23\n17ac45c1350776614e00ef0e14bdaf52b382b6ba refs/remotes/origin/codex/eng-01a-s3-offline-integration-2026-11-23\n272855817cffe5334757fcf3a64cfae750b3b119 refs/remotes/origin/codex/eng-01a-s4-linux-release-readiness-2026-11-23\nThe bundle records a complete history.\nThe bundle uses this hash algorithm: sha1",
+  "fsck_connectivity": "notice: HEAD points to an unborn branch (master)",
+  "clone_refs_verified": {
+    "refs/remotes/origin/main": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "refs/remotes/origin/codex/eng-01a-s1-offline-contract-2026-11-23": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+    "refs/remotes/origin/codex/eng-01a-s2-fake-channel-adapters-2026-11-23": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+    "refs/remotes/origin/codex/eng-01a-s3-offline-integration-2026-11-23": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+    "refs/remotes/origin/codex/eng-01a-s4-linux-release-readiness-2026-11-23": "272855817cffe5334757fcf3a64cfae750b3b119"
+  },
+  "source_blobs": [
+    {
+      "path": "sandbox/connector-contracts/README.md",
+      "blob": "aab487f7126dba44528ec688312da6f6328ad92d",
+      "content_sha256": "7e435c0b40d4afe0f5cecd471a14430d3edf2cc8c5d57ac2f9503dc7a27fa4d0",
+      "bytes": 4591
+    },
+    {
+      "path": "sandbox/connector-contracts/offline_connector.py",
+      "blob": "2bbfb4ef308e39ea1b548f22553c673d3a684a97",
+      "content_sha256": "d85e49241b14f2f3b2ab7aac72341361cc1e1d0ed52239dc907ca4b284889647",
+      "bytes": 14066
+    },
+    {
+      "path": "sandbox/connector-contracts/test_offline_connector.py",
+      "blob": "657a4d5931c9391e88b121f7b22d873cb7120fc0",
+      "content_sha256": "ac61b3bdedf26261d27350a1a97c936d57d59ea9168e008f7501050f9b851410",
+      "bytes": 11911
+    },
+    {
+      "path": "sandbox/connector-channel-mocks/README.md",
+      "blob": "168b8eef420f89c63115b2a7ba798933932373e7",
+      "content_sha256": "abff4bcfbac77258dad17980379b07ba545e6dd4a42908ec90824f6e1597d1c7",
+      "bytes": 4995
+    },
+    {
+      "path": "sandbox/connector-channel-mocks/channel_mocks.py",
+      "blob": "bfda39bf3ac07aba09009462bb60620970a31951",
+      "content_sha256": "249d5cb3b5906b371e88cb76ad9e4340346250504968c6b15a477d437d1533f0",
+      "bytes": 11337
+    },
+    {
+      "path": "sandbox/connector-channel-mocks/fixtures.json",
+      "blob": "ec30d2dd9d2fb9a0dbd0b6179d0a424321fdd166",
+      "content_sha256": "38274001930d99999c69325e64b854e57e8a849bb0def49b9a3765bfde745ba7",
+      "bytes": 2766
+    },
+    {
+      "path": "sandbox/connector-channel-mocks/test_channel_mocks.py",
+      "blob": "a92040a0b2ccdabe60d09305415bd16973d88314",
+      "content_sha256": "e2447525fc354044423197d2653acefa901618569dbb61fc0391b13069130307",
+      "bytes": 13721
+    },
+    {
+      "path": "sandbox/connector-integration/README.md",
+      "blob": "ab327ae4bb756bbf7b22b6926f34e6e6888502f7",
+      "content_sha256": "55a6b11b338ed7a24939a3839a92ea8d3d1d34162dcc4802f2655f9be6c59650",
+      "bytes": 6090
+    },
+    {
+      "path": "sandbox/connector-integration/bridge.py",
+      "blob": "f65a6f699e9fedc20c9869deea33edb7c20fa2b8",
+      "content_sha256": "0760b96a43bb92bdd5e72f190173220a7e34b29534a04f8924565e08c0766afc",
+      "bytes": 11772
+    },
+    {
+      "path": "sandbox/connector-integration/merge_preview.py",
+      "blob": "d8e122c98cc095644f42cffdc66b91bcd4387707",
+      "content_sha256": "91bfe218f499355106a68883e090cca432171c188612f5be73ed95bdad819a09",
+      "bytes": 3587
+    },
+    {
+      "path": "sandbox/connector-integration/pinned_sources.py",
+      "blob": "78bc55a75782c5ea2905b0efa5d12abd3ff9ef27",
+      "content_sha256": "2d69db9f56a3cf9a3fdd2d6f9a067c44296d5561225f1633c4eaae8b175c8756",
+      "bytes": 1926
+    },
+    {
+      "path": "sandbox/connector-integration/test_integration.py",
+      "blob": "7bc35d40c317056d18c10bef9fdd47b2f6db3d98",
+      "content_sha256": "192fb372b4d71359b629fe5386894d7afb7ed7a7e2c0048d9281deae1e755f1b",
+      "bytes": 24632
+    }
+  ],
+  "source_checks_passed": 12,
+  "reachable_object_count": 1910,
+  "sensitive_path_candidates_count": 3,
+  "git_version": "git version 2.47.3",
+  "ack": "EXECUTE HERMES-ENG01A-S4-OFFLINE-OBJECT-TRANSFER-FEASIBILITY",
+  "status": "LOCAL_BUNDLE_VERIFIED_TRANSFER_NOT_AUTHORIZED",
+  "verdict": "ENG01A_S4_MATERIALIZATION_BLOCKED_WITH_PLAN",
+  "transfer": {
+    "actual_destination": null,
+    "status": "NO_VERIFIED_CROSS_ENVIRONMENT_CHANNEL",
+    "proposal": "Coordinator obtain explicit A0-approved private file-transfer path to A1 isolated Linux runtime; verify SHA-256 and ref/12 blobs at receipt; no upload of bundle to public repository. Alternatively select approved isolated Linux runner with Git source access."
+  },
+  "bundle_scope": "Complete original commit ancestry and full Git trees, not source-only; no rewritten refs or lineage.",
+  "safety": {
+    "name_only_sensitive_path_candidates": [
+      "sandbox/p0-hermes-gate-a/compose.h4-provider-secret.yaml",
+      "sandbox/p0-hermes-gate-a/secrets",
+      "sandbox/p0-hermes-gate-a/secrets/.gitignore"
+    ],
+    "automated_content_patterns_examined": "766 reachable blobs; no regex matches for private-key block, GitHub PAT, long credential assignment, credential URL",
+    "automated_scan_limit": "heuristic; not proof history has no sensitive data; no public upload",
+    "source_branch_changes": 0,
+    "remote_bundle_upload": false
+  },
+  "linux_release_qa": "NOT_RUN_BY_HERMES"
+}
