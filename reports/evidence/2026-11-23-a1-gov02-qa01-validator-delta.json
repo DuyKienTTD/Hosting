@@ -1,0 +1,107 @@
+{
+  "task_id": "A1-GOV02-QA01",
+  "agent": "A1",
+  "mode": "EXECUTE",
+  "status": "AUTHOR_TESTED_PENDING_INDEPENDENT_QA",
+  "verdict": "A1_GOV02_QA01_SOURCE_AND_TARGETED_TESTS_PASS",
+  "read_set": {
+    "main_and_rules_commit": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "pr28_source_commit": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+    "pr31_unmerged_commit": "f03dc7e8d9cd88f425b1f04ac7908a3de5d64060",
+    "work_finding_comment_id": 7092060267,
+    "validator_original_blob": "61494de3a5b4909a10a3ed46a02bf49b86129db9",
+    "tests_original_blob": "6c2be47ac3bd7e726f20680717d223da9ca1243f"
+  },
+  "write_set": [
+    "sandbox/repo-metadata-validator/validate.py",
+    "sandbox/repo-metadata-validator/test_validate.py",
+    "reports/2026-11-23-a1-gov02-qa01-validator-delta.md",
+    "reports/evidence/2026-11-23-a1-gov02-qa01-validator-delta.json"
+  ],
+  "expected_observed": [
+    {
+      "scenario": "cross-package distinct path collision",
+      "expected": "one DUPLICATE_DOCUMENT_ID finding, report-sample",
+      "before_fix": "0; FAIL AssertionError: 0 != 1",
+      "after_fix": "1; PASS"
+    },
+    {
+      "scenario": "same path repeated across source snapshots",
+      "expected": "no collision",
+      "observed": "no collision; PASS"
+    },
+    {
+      "scenario": "different frontmatter document IDs",
+      "expected": "no collision",
+      "observed": "no collision; PASS"
+    },
+    {
+      "scenario": "within-package duplicate",
+      "expected": "retain DOCUMENT_ID_REUSED and add new finding",
+      "observed": "both present; PASS"
+    },
+    {
+      "scenario": "missing report/evidence/source",
+      "expected": "existing MISSING_*/REFERENCED_SOURCE_MISSING",
+      "observed": "PASS"
+    },
+    {
+      "scenario": "wrong tree/blob SHA or unavailable commit",
+      "expected": "SHA_DRIFT/SOURCE_UNAVAILABLE",
+      "observed": "PASS"
+    },
+    {
+      "scenario": "valid fixture",
+      "expected": "no issues; 3 sources, 3 artifacts",
+      "observed": "PASS"
+    }
+  ],
+  "tests": {
+    "baseline_reproduction": {
+      "tests_run": 1,
+      "failures": 1,
+      "expected_failure": true,
+      "exit_code": 1
+    },
+    "post_fix": {
+      "tests_run": 7,
+      "failures": 0,
+      "errors": 0,
+      "exit_code": 0,
+      "elapsed_seconds": 0.617
+    },
+    "python_compile": "PASS",
+    "git_diff_check": "PASS",
+    "added_line_sensitive_string_scan": "PASS",
+    "historical_author_suite": "NOT_RUN",
+    "full_source_manifest_audit": "NOT_RUN",
+    "work_independent_qa": "PENDING"
+  },
+  "runtime": {
+    "os": "Linux",
+    "python": "3.13.5",
+    "git": "2.47.3",
+    "github_clone": "BLOCKED_DNS",
+    "fixture_source_integrity": "EXACT_GIT_BLOB_SHA_MATCH",
+    "push_method": "GitHub connector Git objects/ref API"
+  },
+  "new_git_blobs": {
+    "validator": "7fd6579cf3081385251ff1906177284c274d83e9",
+    "tests": "8efc3966134b2c88030b714fda4a718b624ee939"
+  },
+  "do_not_touch": [
+    "main",
+    "PR28 branch",
+    "PR30",
+    "STATE.md",
+    "CATALOG.yaml",
+    "CHANGELOG.md",
+    "production",
+    "paid APIs",
+    "merge"
+  ],
+  "next_owner": "ChatGPT Điều phối",
+  "independent_reviewer": "ChatGPT Work",
+  "production_authority": false,
+  "codex_authorized": false
+}
