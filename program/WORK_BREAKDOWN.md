@@ -72,6 +72,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-DOC,K-DATA,K-UX
 - **MINIMUM_TOOL_CAPABILITY:** GitHub source read/branch/diff/readback; Markdown/spec review; no business connector required for design.
 - **PRIMARY_OWNER_CANDIDATE:** A2; Coordinator integrates
+- **AGENT_CANDIDATES:** A2
+- **CONTRIBUTORS:** Coordinator (integration owner)
 - **PREDECESSORS:** Existing PROJECT/ROADMAP; DGN-1.
 - **ENVIRONMENT_DATA_ACCESS:** ChatGPT + isolated Git branch; sanitized project context only.
 - **RISK_COST_STOP:** No live KPI baseline; future data access/cost UNKNOWN. STOP on unsupported metric claims or unauthorized private data.
@@ -92,6 +94,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-UX,K-DOC,K-SEC,K-DATA
 - **MINIMUM_TOOL_CAPABILITY:** GitHub docs and source traceability; future browser/DOM harness not required for design.
 - **PRIMARY_OWNER_CANDIDATE:** A2 sole product/UI writer; Work read-only consultant
+- **AGENT_CANDIDATES:** A2
+- **CONTRIBUTORS:** Work (feasibility consultant)
 - **PREDECESSORS:** G0-01; Work DGN-FEASIBILITY.
 - **ENVIRONMENT_DATA_ACCESS:** Design branch; future UI test environment separately authorized.
 - **RISK_COST_STOP:** Accessibility, browser RBAC and live UI remain UNKNOWN. No build/deploy.
@@ -112,6 +116,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-DOC,K-SCHEMA,K-DATA,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** GitHub docs, dependency graph and state modelling; no runtime required.
 - **PRIMARY_OWNER_CANDIDATE:** Coordinator
+- **AGENT_CANDIDATES:** Coordinator
+- **CONTRIBUTORS:** A1 (schema consultant)
 - **PREDECESSORS:** G0-01,G0-02; DGN-2; Work feasibility.
 - **ENVIRONMENT_DATA_ACCESS:** Coordinator design branch; public Git sources only.
 - **RISK_COST_STOP:** Historic HOLD not activated; future costs UNKNOWN. STOP at unapproved live/paid work.
@@ -132,6 +138,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-GIT,K-PY,K-DOC,K-DATA
 - **MINIMUM_TOOL_CAPABILITY:** GitHub source/blobs; local Git/Python only for concrete delta.
 - **PRIMARY_OWNER_CANDIDATE:** A1 historical owner
+- **AGENT_CANDIDATES:** A1 (historical)
+- **CONTRIBUTORS:** None; historical
 - **PREDECESSORS:** PR31/KNG baseline.
 - **ENVIRONMENT_DATA_ACCESS:** Historical KNG evidence; no new live access.
 - **RISK_COST_STOP:** No PASS rerun absent change trigger; no archive/delete without retention/reference audit.
@@ -152,6 +160,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-GIT,K-SCHEMA,K-DOC
 - **MINIMUM_TOOL_CAPABILITY:** GitHub source and offline schema validation only on change trigger.
 - **PRIMARY_OWNER_CANDIDATE:** A1 historical owner
+- **AGENT_CANDIDATES:** A1 (historical)
+- **CONTRIBUTORS:** None; historical
 - **PREDECESSORS:** G1-01.
 - **ENVIRONMENT_DATA_ACCESS:** Historical KNG source.
 - **RISK_COST_STOP:** No duplicate optimization or paid benchmark rerun absent measured trigger.
@@ -172,6 +182,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-PY,K-SCHEMA,K-TEST,K-SEC,K-GIT
 - **MINIMUM_TOOL_CAPABILITY:** Python/Git objects/offline fixtures; no external service.
 - **PRIMARY_OWNER_CANDIDATE:** A1 historical author; Work historical QA
+- **AGENT_CANDIDATES:** A1 (historical)
+- **CONTRIBUTORS:** Work (historical independent reviewer)
 - **PREDECESSORS:** G1-02.
 - **ENVIRONMENT_DATA_ACCESS:** Offline/local and GitHub read-only.
 - **RISK_COST_STOP:** No broad rerun unless source/code changed; no secrets in fixtures/logs.
@@ -192,6 +204,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-QA,K-TEST,K-DATA,K-GIT
 - **MINIMUM_TOOL_CAPABILITY:** Independent Work session and source-pinned offline harness.
 - **PRIMARY_OWNER_CANDIDATE:** Work historical reviewer; Coordinator records lineage
+- **AGENT_CANDIDATES:** Work (historical)
+- **CONTRIBUTORS:** Coordinator (lineage only)
 - **PREDECESSORS:** G1-02,G1-03.
 - **ENVIRONMENT_DATA_ACCESS:** Offline QA only.
 - **RISK_COST_STOP:** No rerun of historical PASS absent change trigger; reviewer differs from author.
@@ -212,6 +226,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-DOC,K-SCHEMA,K-SEC,K-DATA
 - **MINIMUM_TOOL_CAPABILITY:** GitHub docs and state-machine modelling; no dispatcher build.
 - **PRIMARY_OWNER_CANDIDATE:** Coordinator
+- **AGENT_CANDIDATES:** Coordinator
+- **CONTRIBUTORS:** A1 (schema consultant); Work (feasibility input)
 - **PREDECESSORS:** G0-03; DGN-1; DGN-2; Work feasibility.
 - **ENVIRONMENT_DATA_ACCESS:** Coordinator design branch; no live session control.
 - **RISK_COST_STOP:** Owner-forward only is currently verified; auto session dispatch/receipt UNKNOWN. STOP on missing ACK or uncertain side effect.
@@ -232,6 +248,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-PY,K-SCHEMA,K-GIT,K-API,K-TEST,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Design: docs/schema. Future build: isolated backend, DB, migration/test runner and authenticated Git/session adapter.
 - **PRIMARY_OWNER_CANDIDATE:** A1 schema/technical candidate; Coordinator owns operating contract
+- **AGENT_CANDIDATES:** A1
+- **CONTRIBUTORS:** Coordinator (operating contract); Work (integration consultant)
 - **PREDECESSORS:** G2-01,G1-03; Work feasibility; G2-03.
 - **ENVIRONMENT_DATA_ACCESS:** Offline design; future sandbox with synthetic records only.
 - **RISK_COST_STOP:** Cross-session connector and paid/API costs UNKNOWN. STOP before live ledger/provider callback without scope, backup and rollback.
@@ -252,6 +270,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-SEC,K-QA,K-DOC,K-SCHEMA
 - **MINIMUM_TOOL_CAPABILITY:** GitHub PR review, versioned docs, negative policy fixtures; no main rule mutation.
 - **PRIMARY_OWNER_CANDIDATE:** Coordinator; A0 approval authority
+- **AGENT_CANDIDATES:** Coordinator
+- **CONTRIBUTORS:** A1 (schema consultant); A0 (reserved approver, not contributor)
 - **PREDECESSORS:** G2-01,G0-03.
 - **ENVIRONMENT_DATA_ACCESS:** Coordinator branch; synthetic examples.
 - **RISK_COST_STOP:** A0 retains paid/production/publish/deploy/merge decisions. No skill possession implies permission.
@@ -272,6 +292,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-DOC,K-GIT,K-DATA,K-SCHEMA,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** GitHub branch/diff/readback; each Agent must self-survey for fresh capability claims.
 - **PRIMARY_OWNER_CANDIDATE:** A1 DGN-2 owner; A2 consult
+- **AGENT_CANDIDATES:** A1
+- **CONTRIBUTORS:** A2 (product requirements); Work (review only if separately assigned)
 - **PREDECESSORS:** G0-01; DGN-1; agent profiles; Work report.
 - **ENVIRONMENT_DATA_ACCESS:** A1 isolated branch; other Agent profiles remain historical/REPORTED unless self-confirmed.
 - **RISK_COST_STOP:** No installation, paid spend, permission uplift or dispatch; A1 cannot verify other sessions.
@@ -292,6 +314,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-GIT,K-DATA,K-SCHEMA,K-DOC,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** GitHub PR/branch metadata, source comparison and deterministic ID/dependency inventory.
 - **PRIMARY_OWNER_CANDIDATE:** Coordinator
+- **AGENT_CANDIDATES:** Coordinator
+- **CONTRIBUTORS:** A1 (source evidence)
 - **PREDECESSORS:** G0-03,G1-01,G3-01; DGN-1/DGN-2.
 - **ENVIRONMENT_DATA_ACCESS:** Coordinator integration branch; GitHub read; no merge.
 - **RISK_COST_STOP:** PR status is not Agent ACK; preserve HOLD; no unnecessary PR consolidation or source deletion.
@@ -312,6 +336,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-GIT,K-SCHEMA,K-DOC,K-SEC,K-AUTO
 - **MINIMUM_TOOL_CAPABILITY:** GitHub branch/PR/readback; owner-forward is manual; no cross-session dispatcher verified.
 - **PRIMARY_OWNER_CANDIDATE:** Coordinator issues; each Agent sole-writes its roadmap
+- **AGENT_CANDIDATES:** Coordinator
+- **CONTRIBUTORS:** Each recipient Agent, sole-writer of own roadmap after ACK
 - **PREDECESSORS:** G2-01,G2-02,G3-02.
 - **ENVIRONMENT_DATA_ACCESS:** Per-Agent branch and file; manual handoff; no credentials.
 - **RISK_COST_STOP:** No cross-Agent roadmap edits; PR/comment not SENT/ACK; Codex exception-only, Hermes cost-gated, Hostinger paused.
@@ -332,6 +358,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-VPS,K-SEC,K-OBS,K-WP
 - **MINIMUM_TOOL_CAPABILITY:** Hostinger hPanel/authorized SSH or read-only telemetry; verify identity/version.
 - **PRIMARY_OWNER_CANDIDATE:** Hostinger Agent proposed specialist
+- **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
+- **CONTRIBUTORS:** None; A1 may provide static notes only if separately assigned
 - **PREDECESSORS:** Existing inventory; separate A0 resume + Hostinger ACK.
 - **ENVIRONMENT_DATA_ACCESS:** Provider/VPS read-only; no secrets in Git.
 - **RISK_COST_STOP:** Hostinger PAUSED for new/unfinished tasks under main rules; cost UNKNOWN. STOP any mutation/restart/production access.
@@ -352,6 +380,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-VPS,K-BACKUP,K-TEST,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Authorized backup inventory, isolated restore target and integrity tools.
 - **PRIMARY_OWNER_CANDIDATE:** Hostinger Agent proposed; A1 runbook design fallback
+- **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
+- **CONTRIBUTORS:** A1 (runbook design only; not restore execution)
 - **PREDECESSORS:** INF-01.
 - **ENVIRONMENT_DATA_ACCESS:** Isolated restore environment; data minimization.
 - **RISK_COST_STOP:** Hostinger paused; no restore permission; costs UNKNOWN. STOP if no backup, isolation or rollback.
@@ -372,6 +402,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-VPS,K-OBS,K-SEC,K-API
 - **MINIMUM_TOOL_CAPABILITY:** Architecture now; future metrics collector/dashboard/alert route in staging.
 - **PRIMARY_OWNER_CANDIDATE:** Coordinator design; Hostinger proposed infra owner (paused)
+- **AGENT_CANDIDATES:** Coordinator (design deliverable)
+- **CONTRIBUTORS:** Hostinger Agent (future operational specialist only after A0 resume + task ACK)
 - **PREDECESSORS:** INF-01; INF-02 before production recovery claims.
 - **ENVIRONMENT_DATA_ACCESS:** Design docs; future staging runtime.
 - **RISK_COST_STOP:** Hostinger paused; recurring cost UNKNOWN. STOP before opening ports/public endpoints or external alerts.
@@ -392,6 +424,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-VPS,K-N8N,K-API,K-TEST,K-SEC,K-OBS
 - **MINIMUM_TOOL_CAPABILITY:** n8n sandbox, database, workflow export/import, signed webhook, synthetic trigger and logs.
 - **PRIMARY_OWNER_CANDIDATE:** Hostinger proposed infra owner (paused); A1 schema support
+- **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
+- **CONTRIBUTORS:** A1 (schema consultant only)
 - **PREDECESSORS:** INF-02,INF-03,G2-02.
 - **ENVIRONMENT_DATA_ACCESS:** Isolated non-production; synthetic data.
 - **RISK_COST_STOP:** Hostinger paused; n8n live state and cost UNKNOWN. STOP on production webhook, paid API or untested retry.
@@ -412,6 +446,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-UX,K-BROW,K-PY,K-TEST,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Work Linux/browser or approved local UI runtime; synthetic fixtures; future Playwright/axe only if installed/approved.
 - **PRIMARY_OWNER_CANDIDATE:** Work proposed builder; A2 product input; A1 independent code QA
+- **AGENT_CANDIDATES:** Work
+- **CONTRIBUTORS:** A2 (product input); A1 (technical consultant/reviewer)
 - **PREDECESSORS:** G0-02,G2-02,G2-03.
 - **ENVIRONMENT_DATA_ACCESS:** Offline/mock or isolated sandbox; no live provider data.
 - **RISK_COST_STOP:** Product build not authorized by design gate; tool/CI cost UNKNOWN. STOP before external writes, live data or deployment.
@@ -432,6 +468,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-UX,K-API,K-TEST,K-SEC,K-SCHEMA,K-GIT
 - **MINIMUM_TOOL_CAPABILITY:** Authenticated backend/API, database, test identity provider, migrations, audit and negative auth tests.
 - **PRIMARY_OWNER_CANDIDATE:** Work proposed integrator; A1 schema support; Coordinator policy
+- **AGENT_CANDIDATES:** Work
+- **CONTRIBUTORS:** A1 (schema consultant); Coordinator (policy input)
 - **PREDECESSORS:** UI-01,G2-02,G2-03,INF-03.
 - **ENVIRONMENT_DATA_ACCESS:** Sandbox first, synthetic data.
 - **RISK_COST_STOP:** RBAC/live integration UNKNOWN; costs UNKNOWN. STOP on privilege bypass, unbounded spend or missing rollback.
@@ -452,6 +490,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-BROW,K-AUTO,K-TEST,K-SEC,K-API
 - **MINIMUM_TOOL_CAPABILITY:** Verified destination and authorized browser/API adapter, isolated state store, two synthetic sessions, kill switch.
 - **PRIMARY_OWNER_CANDIDATE:** Work research/test owner; Coordinator owns handoff semantics
+- **AGENT_CANDIDATES:** Work
+- **CONTRIBUTORS:** Coordinator (handoff semantics only)
 - **PREDECESSORS:** G2-01,G2-02,G3-03; separate A0 test authorization.
 - **ENVIRONMENT_DATA_ACCESS:** Isolated test sessions only; no business payload.
 - **RISK_COST_STOP:** Channel UNKNOWN; no auto-dispatch authorization. STOP if destination, identity, consent, receipt, cost or kill switch unverified.
@@ -472,6 +512,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-WP,K-SEO,K-DATA,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Verified WordPress connector/API read-only scope or sanitized export; source snapshot.
 - **PRIMARY_OWNER_CANDIDATE:** A2 business owner candidate; Work QA
+- **AGENT_CANDIDATES:** A2
+- **CONTRIBUTORS:** Work (independent reviewer)
 - **PREDECESSORS:** G0-01; separate read-only account authorization.
 - **ENVIRONMENT_DATA_ACCESS:** Staging or authorized read-only source; sanitize identifiers.
 - **RISK_COST_STOP:** A2 live connector/scope UNKNOWN. STOP if only write/admin scope or PII exposure.
@@ -492,6 +534,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-WP,K-PY,K-API,K-TEST,K-UX,K-DATA
 - **MINIMUM_TOOL_CAPABILITY:** Synthetic fixture first; future worker/API with versioned schema and trace.
 - **PRIMARY_OWNER_CANDIDATE:** Work pipeline candidate; A2 defines finding acceptance; A1 schema support
+- **AGENT_CANDIDATES:** Work
+- **CONTRIBUTORS:** A2 (acceptance definition); A1 (schema consultant)
 - **PREDECESSORS:** UC01-01,UI-01,G2-02.
 - **ENVIRONMENT_DATA_ACCESS:** Offline fixture/sandbox; read-only source only after approval.
 - **RISK_COST_STOP:** Live WP/backend scope UNKNOWN; cost UNKNOWN. STOP on writes, missing trace or unbounded retry.
@@ -512,6 +556,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-ADS,K-DATA,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Google Ads/GA4 read-only connector/API, consent and metric dictionary, bounded date range.
 - **PRIMARY_OWNER_CANDIDATE:** A2 business analytics owner candidate; Work data QA
+- **AGENT_CANDIDATES:** A2
+- **CONTRIBUTORS:** Work (data QA only)
 - **PREDECESSORS:** G0-01; consent and read-only access.
 - **ENVIRONMENT_DATA_ACCESS:** Authorized aggregate reporting only; no campaign mutation.
 - **RISK_COST_STOP:** Connector identity/scope/consent/cost UNKNOWN. STOP before bid/budget changes or customer-level export.
@@ -532,6 +578,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-MEDIA,K-DOC,K-UX,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Asset library/source links, licensed/consented assets, draft sandbox.
 - **PRIMARY_OWNER_CANDIDATE:** A2 content workflow owner candidate; Work UX review
+- **AGENT_CANDIDATES:** A2
+- **CONTRIBUTORS:** Work (UX review only)
 - **PREDECESSORS:** G0-01,G2-03.
 - **ENVIRONMENT_DATA_ACCESS:** Draft-only design; render/publish are separate paid/rights gates.
 - **RISK_COST_STOP:** Credits/subscriptions/publishing rights UNKNOWN. STOP before paid generation, unconsented voice/image or publication.
@@ -552,6 +600,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-DATA,K-ADS,K-API,K-UX,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Read-only connectors/versioned imports, data dictionary, time-zone alignment, freshness monitor and fixtures.
 - **PRIMARY_OWNER_CANDIDATE:** Work integration candidate; A2 owns KPI definitions; Coordinator policy
+- **AGENT_CANDIDATES:** Work
+- **CONTRIBUTORS:** A2 (KPI definitions); Coordinator (policy)
 - **PREDECESSORS:** GROW-01,UI-02,G2-02.
 - **ENVIRONMENT_DATA_ACCESS:** Mock fixtures first; later authorized read-only connectors.
 - **RISK_COST_STOP:** Live sources/billing APIs UNKNOWN; subscription/compute cost UNKNOWN. STOP if UNKNOWN becomes zero or data crosses tenant.
@@ -572,6 +622,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-QA,K-SEC,K-GIT,K-DATA,K-SCHEMA
 - **MINIMUM_TOOL_CAPABILITY:** GitHub source SHA/diff/readback; reviewer not author; package matrix; no deployment.
 - **PRIMARY_OWNER_CANDIDATE:** Coordinator integration owner; A0 Assistant independent reviewer (self-session capability confirmation required)
+- **AGENT_CANDIDATES:** Coordinator
+- **CONTRIBUTORS:** A0 Assistant (independent reviewer, not execution owner)
 - **PREDECESSORS:** DGN-1,DGN-2,DGN-3,DGN-4; roadmap-level handoffs or justified partial blockers.
 - **ENVIRONMENT_DATA_ACCESS:** Design branches/PRs; read-only evidence.
 - **RISK_COST_STOP:** Coordinator cannot self-review as independent. No merge authority. A0 Assistant live session evidence not yet available.
@@ -592,6 +644,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-DOC,K-SEC (decision authority, not technical execution)
 - **MINIMUM_TOOL_CAPABILITY:** Authenticated A0 decision tied to exact candidate/tree SHA, scope, conditions and expiry.
 - **PRIMARY_OWNER_CANDIDATE:** A0 sole decision owner
+- **AGENT_CANDIDATES:** None (A0 is decision authority, not Agent)
+- **CONTRIBUTORS:** None
 - **PREDECESSORS:** REL-01.
 - **ENVIRONMENT_DATA_ACCESS:** Owner-controlled decision channel.
 - **RISK_COST_STOP:** No Agent may impersonate A0 or infer approval from silence, PR, mergeability or author status.
@@ -612,6 +666,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-GIT,K-TEST,K-QA,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Pinned GitHub blobs and targeted evidence checks; read-only.
 - **PRIMARY_OWNER_CANDIDATE:** Work independent reviewer candidate; A1 remains author
+- **AGENT_CANDIDATES:** Work
+- **CONTRIBUTORS:** A1 (source author/factual response only)
 - **PREDECESSORS:** G1-03,G3-01.
 - **ENVIRONMENT_DATA_ACCESS:** Read-only PR/source review.
 - **RISK_COST_STOP:** A1 cannot self-certify; Work DGN feasibility report is not automatically QA of PR46; separate ACK required.
@@ -632,6 +688,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-QA,K-SEO,K-DATA,K-WP
 - **MINIMUM_TOOL_CAPABILITY:** Sanitized source snapshot or authorized read-only WP access; sampling protocol.
 - **PRIMARY_OWNER_CANDIDATE:** A1 QA candidate; Work alternative if independent of author
+- **AGENT_CANDIDATES:** A1
+- **CONTRIBUTORS:** Work (independent reviewer only if separately scoped)
 - **PREDECESSORS:** UC01-01.
 - **ENVIRONMENT_DATA_ACCESS:** Read-only dataset; no write access.
 - **RISK_COST_STOP:** No audit exists until UC01-01 authorized/completed; A1 WP connector visible-unverified.
@@ -652,6 +710,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-QA,K-GIT,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Pinned PR31 diff/comments and exact historical QA artifact.
 - **PRIMARY_OWNER_CANDIDATE:** Work historical owner; Coordinator records lineage
+- **AGENT_CANDIDATES:** Work (historical)
+- **CONTRIBUTORS:** Coordinator (lineage only)
 - **PREDECESSORS:** PR31 pinned assignment.
 - **ENVIRONMENT_DATA_ACCESS:** Read-only GitHub evidence.
 - **RISK_COST_STOP:** No new task ACK or duplicate QA; no repeat of historical PASS without material change.
@@ -672,6 +732,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-SEC,K-VPS,K-BACKUP,K-OBS
 - **MINIMUM_TOOL_CAPABILITY:** Provider/hPanel/VPS read-only topology; official docs; isolated validation later.
 - **PRIMARY_OWNER_CANDIDATE:** Hostinger proposed specialist (paused); A1 static runbook fallback
+- **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
+- **CONTRIBUTORS:** A1 (static runbook consultant only)
 - **PREDECESSORS:** INF-01.
 - **ENVIRONMENT_DATA_ACCESS:** Redacted topology; staging first.
 - **RISK_COST_STOP:** Hostinger PAUSED; no SSH/firewall/DNS changes; STOP absent verified topology, backup and rollback.
@@ -692,6 +754,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **REQUIRED_SKILL_IDS:** K-VPS,K-WP,K-OBS,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Read-only hPanel/web logs or sanitized trace; staging reproduction if available.
 - **PRIMARY_OWNER_CANDIDATE:** Hostinger proposed specialist (paused); Coordinator/A1 static review only
+- **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
+- **CONTRIBUTORS:** A1 (static evidence consultant only)
 - **PREDECESSORS:** INF-01; existing incident evidence; UC01-01 is not a live-access grant.
 - **ENVIRONMENT_DATA_ACCESS:** Read-only diagnostic scope; redact logs.
 - **RISK_COST_STOP:** Hostinger PAUSED; no production restart/plugin change. STOP if secrets/PII exposed or only write credential exists.
@@ -747,7 +811,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 ## DGN-3 design completeness checks
 
 - [x] All 32 original WBS IDs retained exactly once; no new ID without gap.
-- [x] Every row contains all 16 canonical fields.
+- [x] Every row contains all 18 canonical fields, with one primary owner candidate, separate executor candidates and non-owner contributors.
 - [x] S01–S12 and J01–J05 mapped; T01–T24 remain DESIGN_ONLY.
 - [x] All 20 original WBS K-skill IDs resolve to A1's canonical registry.
 - [x] KNG/PR31 evidence preserved; HOLD not activated.
