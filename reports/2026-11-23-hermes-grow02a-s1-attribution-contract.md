@@ -123,7 +123,7 @@ Lệnh đã chạy: `python3 -B sandbox/grow02a-offline-validator/validate.py` (
 
 ## Nguồn
 - [Lệnh PR #20](https://github.com/DuyKienTTD/Hosting/pull/20#issuecomment-7091269345)
-- [BIZ-02 PR #20, commit fcdc0f8](https://github.com/DuyKienTTD/Hosting/commit/fcdc0f898b13b19a42a000d84c8ac4632de1806b)
-- [BIZ-01 PR #12](https://github.com/DuyKienTTD/Hosting/commit/8c821bbf1842eccb8519127f54ba7673965276d5)
-- [GROW-01 PR #18](https://github.com/DuyKienTTD/Hosting/commit/3c8cb40357ee23d13a2c1aa7e07e6848ff5256dd)
+- [BIZ-02 branch commit fcdc0f8; lệnh gốc PR #18](https://github.com/DuyKienTTD/Hosting/commit/fcdc0f898b13b19a42a000d84c8ac4632de1806b)
+- [BIZ-01 branch commit 8c821bb](https://github.com/DuyKienTTD/Hosting/commit/8c821bbf1842eccb8519127f54ba7673965276d5)
+- [GROW-01 branch commit 3c8cb40; lệnh gốc PR #12](https://github.com/DuyKienTTD/Hosting/commit/3c8cb40357ee23d13a2c1aa7e07e6848ff5256dd)
 - [ENG-01A S2 PR #13](https://github.com/DuyKienTTD/Hosting/pull/13), [S3 PR #19](https://github.com/DuyKienTTD/Hosting/pull/19), [UX-01 S2 PR #16](https://github.com/DuyKienTTD/Hosting/pull/16)

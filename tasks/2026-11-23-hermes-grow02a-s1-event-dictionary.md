@@ -19,9 +19,9 @@ next_owner: chatgpt
 
 | Hạng mục | Trạng thái | Bằng chứng | Test delta |
 |---|---|---|---|
-| BIZ-01 discovery | DONE_REPORTED/ACCEPTED_WITH_LIMITS | PR #12 `8c821bb` | Không khảo sát lại API |
-| GROW-01 draft/rights gate | DONE_REPORTED/ACCEPTED_WITH_LIMITS | PR #18 `3c8cb40` | Không rerun fixture |
-| BIZ-02 use cases/16 KPI/5 A0 choices | DONE_REPORTED/ACCEPTED_WITH_LIMITS | PR #20 `fcdc0f8` | Chỉ mapping, không sửa definition |
+| BIZ-01 discovery | DONE_REPORTED/ACCEPTED_WITH_LIMITS | branch `hermes/biz-01-integration-matrix-2026-11-23` commit `8c821bb` | Không khảo sát lại API |
+| GROW-01 draft/rights gate | DONE_REPORTED/ACCEPTED_WITH_LIMITS | branch `hermes/grow-01-s1-editorial-packages-2026-11-23` commit `3c8cb40`; lệnh ở PR #12 | Không rerun fixture |
+| BIZ-02 use cases/16 KPI/5 A0 choices | DONE_REPORTED/ACCEPTED_WITH_LIMITS | branch `hermes/biz-02-s1-priorities-kpi-draft-2026-11-23` commit `fcdc0f8`; lệnh ở PR #18 | Chỉ mapping, không sửa definition |
 | GROW-02A event contract | NOT_RUN trước lượt này | Không có path/branch trùng sau fetch | Sinh dictionary và kiểm định offline |
 
 - **READ_SET:** PR #20 comment; `AGENTS.md`, `PROJECT.md`, `GOALS_AND_ROADMAP.md`, `rules/AGENT_WORKFLOW.md` §§7–10, `rules/REPOSITORY_SECURITY.md`, `STATE.md`, `CATALOG.yaml`, `agents/hermes.md`; refs PR #6/#12/#18/#20/#13/#19/#16.

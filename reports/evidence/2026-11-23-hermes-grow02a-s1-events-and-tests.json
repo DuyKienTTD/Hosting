@@ -516,7 +516,7 @@
       "gap": "synthetic job/ref only",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -537,7 +537,7 @@
       "gap": "synthetic duration only",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -559,7 +559,7 @@
       "gap": "GAP: reviewed-record count and denominator fixture inventory require separate mock snapshot, event alone insufficient",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -581,7 +581,7 @@
       "gap": "human confirmed unique gaps and resolution version required",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -603,7 +603,7 @@
       "gap": "QA field completeness remains package metadata, not event-derived",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -624,7 +624,7 @@
       "gap": "decision must include returned-for-rework code in future approved schema; GAP in current draft",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -645,7 +645,7 @@
       "gap": "count all checked URLs incl invalid; never count impressions",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -667,7 +667,7 @@
       "gap": "consented CRM reviewed-lead denominator requires separate approved CRM source; no GA4 join",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -688,7 +688,7 @@
       "gap": "GA4 aggregate with and without channel tag; read permission unknown",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -709,7 +709,7 @@
       "gap": "GA4 engaged_sessions and sessions from same property/window",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -731,7 +731,7 @@
       "gap": "GAP: real rights/business/tech/channel signoffs not present in offline event",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -750,7 +750,7 @@
       "gap": "GAP: authorized platform attempts and confirmed post IDs absent; must not infer from handoff",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -771,7 +771,7 @@
       "gap": "GAP: current name refers synthetic inquiry fixtures; future event is restricted and not emitted; use synthetic fixture set only",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -793,7 +793,7 @@
       "gap": "human-reviewed inquiry denominator must come from consented sales system",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -812,7 +812,7 @@
       "gap": "GAP: Ads proposal/submitted/review decision source absent and approval unknown",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     },
     {
@@ -833,7 +833,7 @@
       "gap": "GAP: approved campaign spend/currency and lawful attribution policy absent; cannot join GA4 aggregate to person",
       "zero_denominator": "UNKNOWN (undefined), never 0%",
       "source_refs": [
-        "BIZ-02/S1 PR #20"
+        "BIZ-02/S1 branch commit fcdc0f898b13b19a42a000d84c8ac4632de1806b; assignment PR #18"
       ]
     }
   ],
