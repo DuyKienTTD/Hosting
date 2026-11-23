@@ -1158,6 +1158,49 @@ documents:
     updated_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: dgn3-row-level-wbs-candidate-2026-11-24
+    path: program/WORK_BREAKDOWN.md
+    type: knowledge
+    status: candidate-not-dispatched
+    authoritative_for: coordinator-branch-row-level-wbs-design-candidate-not-effective-main
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: dgn4-row-level-assignment-matrix-candidate-2026-11-24
+    path: program/ASSIGNMENT_MATRIX.md
+    type: knowledge
+    status: candidate-not-dispatched
+    authoritative_for: coordinator-branch-row-level-assignment-candidate-not-effective-main
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: a1-dgn-roadmap-integration-2026-11-24
+    path: tasks/2026-11-24-a1-dgn-roadmap-integration.md
+    type: task
+    status: prepared-owner-forward
+    dispatch_eligible: false
+    authoritative_for: a1-own-roadmap-integration-work-order-not-sent-or-acked
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: a2-dgn-roadmap-integration-2026-11-24
+    path: tasks/2026-11-24-a2-dgn-roadmap-integration.md
+    type: task
+    status: prepared-owner-forward
+    dispatch_eligible: false
+    authoritative_for: a2-own-roadmap-integration-work-order-not-sent-or-acked
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: work-dgn-roadmap-integration-2026-11-24
+    path: tasks/2026-11-24-work-dgn-roadmap-integration.md
+    type: task
+    status: prepared-owner-forward
+    dispatch_eligible: false
+    authoritative_for: work-own-roadmap-integration-work-order-not-sent-or-acked
+    updated_at: 2026-11-24
+    sensitivity: public
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
