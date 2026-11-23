@@ -210,3 +210,25 @@ Chủ dự án chỉ thị: **“Bước tiếp theo ủy quyền cho bạn toà
 - **Không tự bãi bỏ ràng buộc an toàn:** giữ nguyên STOP, least-privilege, separation of duties, không tiết lộ secret, không sửa production hoặc real ledger nếu không chứng minh rollback/invariants, không tự tăng ngân sách, không retry paid. Một phê duyệt có điều kiện trước đây chỉ được sử dụng khi mọi preflight tương ứng PASS; không coi ủy quyền điều phối là bằng chứng kỹ thuật hay quyền truy cập.
 - **Chỉ hỏi chủ dự án khi thực sự không thể tự tiếp tục hợp lệ**, chủ yếu là credential, bảo mật, xác thực/chấp thuận quyền trong hệ thống ngoài mà các tác nhân không được cấp, hoặc quyết định phải do chủ tài khoản thực hiện. Trong trường hợp đó báo rõ blocker, nguồn chứng cứ, lựa chọn tối thiểu và vẫn hoàn thành mọi phần an toàn độc lập; không gửi câu hỏi xin phép cho công việc đã nằm trong ủy quyền này.
 - **Quyết định phải tồn tại trên GitHub:** cập nhật task hiện hành với một owner thực thi, READ_SET/WRITE_SET/DO_NOT_TOUCH, first safe action, preflight, tests, rollback, STOP, acceptance, next owner; phân biệt quyết định phân công với bằng chứng tác nhân đã nhận. Giữ lịch sử nghiệm thu, không mở task trùng lặp hoặc chạy lại historical PASS vô lý.
+
+## 11. A0 APPROVED — A1 và cost-first routing, Codex ngoại lệ (2026-11-23)
+
+### 11.1. Sáu vai trò không được nhầm lẫn
+- **A0:** chủ dự án phê duyệt quyền, ngân sách và hành động có tác động.
+- **ChatGPT Điều phối:** phân công, governance, review và đề xuất; không tự ký duyệt thay A0.
+- **A1 = ChatGPT Thông thường:** phiên chat riêng do chủ dự án chuyển đặc tả; không phải Điều phối hoặc Work và không chạy nền. Profile: [agents/a1.md](../agents/a1.md).
+- **ChatGPT Work:** kiểm thử, browser/UX và triển khai nhiều bước khi có công cụ trong phiên.
+- **Hermes WebUI:** business/content/agent semantics, validator/mock và code offline nếu có tool.
+- **Hostinger Agent:** hPanel/VPS/hosting/OPS/SEC, read-only hoặc thay đổi có approval riêng.
+- **Codex:** *exception-only* cho việc đã chứng minh không lựa chọn nào bên trên thực hiện đủ an toàn/chính xác trong công cụ hiện tại. **n8n không phải AI Agent.**
+
+### 11.2. Quy tắc giao việc tiết kiệm chi phí (bắt buộc)
+1. Điều phối tự làm trực tiếp bằng công cụ hiện hữu khi scope đơn giản và có quyền. Nếu phải giao, trước hết thử **A1/Work/Hermes/Hostinger** theo năng lực phù hợp, *không ép thứ tự cứng nếu kỹ năng/quyền không khớp*.
+2. **Codex không mặc định sở hữu code, Python, API, JSON, CI hay Git.** Nếu agent khác có thể làm, phải giao agent đó; dùng reviewer khác tác giả.
+3. Chỉ đề xuất Codex khi có `ALTERNATIVES_CHECKED` (từng agent và bằng chứng thử/thiếu quyền), `WHY_ONLY_CODEX` (nút thắt kỹ thuật không thể chuyển), `MAX_SCOPE`, `ESTIMATED_COST_OR_CALL_CAP`, `STOP`, `ACCEPTANCE`, `INDEPENDENT_REVIEWER`, `A0_APPROVAL_ID`. Thiếu một mục → `CODEX_NOT_AUTHORIZED`. Không tự gửi lệnh Codex khi chưa được A0 duyệt chi phí cụ thể.
+4. **Thu hồi các lệnh Codex chưa thực thi thuộc loại đơn giản**, chuyển owner bằng task/handoff mới; không xóa code/report đã có, không lặp PASS lịch sử, không ghi nhận ACK chưa có. Lệnh đang chạy ở phiên ngoài cần chủ dự án chuyển thông báo thu hồi, xác nhận ACK; comment GitHub không tự dừng runtime.
+5. Ví dụ Codex có thể **đề xuất ngoại lệ** (không phải tự cấp quyền): xử lý race/crash multi-process có test isolation chưa agent nào tái hiện được; tích hợp kernel/Compose/network đặc thù có toolchain mà agent khác thiếu; migration critical có rollback đã được A0 duyệt. Việc đặc thù vẫn cần chứng minh actual capability/gates, không suy ra từ danh xưng.
+6. Chỉ tiêu điều phối là **chi phí + rủi ro + thời gian + chất lượng**; không tối ưu chỉ theo số task. Ghi `COST_ROUTING` trong đặc tả: agent được chọn, lựa chọn rẻ hơn được đối chiếu, vì sao chọn và trạng thái quyền.
+
+### 11.3. Bản phân công nguồn có hiệu lực
+[Master allocation v2](../tasks/2026-11-23-a1-cost-first-master-allocation.md) thay cho **các đề xuất phân vai Codex chung chung** trong PR #6 và profile cũ; mọi test/approval cụ thể ở task gốc vẫn giữ nguyên. Phần nào chưa bắt đầu chỉ thay phân công; phần đã PASS giữ evidence. A1 là `PREPARED_FOR_OWNER_FORWARD` đến khi chủ dự án chuyển URL và A1 ACK. Quy tắc này không cấp GitHub credential, VPS access, production, paid inference hay merge.
