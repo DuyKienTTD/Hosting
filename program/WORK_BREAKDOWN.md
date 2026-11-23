@@ -340,10 +340,10 @@ Every row defines exactly 18 fields: `WBS_ID | PRODUCT_OUTCOME | FEATURE/UI | WO
 - **CONTRIBUTORS:** Each recipient Agent, sole-writer of own roadmap after ACK
 - **PREDECESSORS:** G2-01,G2-02,G3-02.
 - **ENVIRONMENT_DATA_ACCESS:** Per-Agent branch and file; manual handoff; no credentials.
-- **RISK_COST_STOP:** No cross-Agent roadmap edits; PR/comment not SENT/ACK; Codex exception-only, Hermes cost-gated, Hostinger paused.
+- **RISK_COST_STOP:** No cross-Agent roadmap edits; owner-forward receipts are recorded in each Agent's own roadmap; no automated dispatcher is proven. Roadmap-maintenance ACKs do not activate downstream operational tasks. Codex remains exception-only, Hermes cost-gated, Hostinger paused.
 - **ACCEPTANCE:** Every eligible WBS routes to one roadmap with FIRST_ACTION, skills/tools, dependencies, READ/WRITE, cost/STOP, acceptance/evidence and next action.
-- **EVIDENCE_PROVENANCE:** A1/A2/Work roadmaps; Work feasibility.
-- **STATUS:** PLANNED_NOT_DISPATCHED.
+- **EVIDENCE_PROVENANCE:** A1 PR49 head `d4c4e30cf062693eaf0b3648442742e73c6a01d6`; A2 PR48 head `65459f15631c7f660dc4422edfca26e02203620a`; Work commit `fb8eb13bb095962564bc424f646939f87d449b45`; recipient roadmap receipts are source-verified in the integrated package.
+- **STATUS:** ROADMAP_INTEGRATION_3_OF_3_SOURCE_VERIFIED.
 - **TARGET_ROADMAP:** program/roadmaps/coordinator.md
 
 
@@ -404,9 +404,9 @@ Every row defines exactly 18 fields: `WBS_ID | PRODUCT_OUTCOME | FEATURE/UI | WO
 - **PRIMARY_OWNER_CANDIDATE:** Coordinator
 - **AGENT_CANDIDATES:** Coordinator (design only); Hostinger Agent (future operations only after A0 resume and task ACK)
 - **CONTRIBUTORS:** Hostinger Agent is not an active contributor while paused; future operational specialist only after separate resume/ACK
-- **PREDECESSORS:** INF-01; INF-02 before production recovery claims.
+- **PREDECESSORS:** Design can proceed from documented architecture without live access; live monitoring requires A0 resume, Hostinger task ACK and INF-01 current baseline; production recovery claims additionally require INF-02 restore evidence.
 - **ENVIRONMENT_DATA_ACCESS:** Design docs; future staging runtime.
-- **RISK_COST_STOP:** Hostinger paused; recurring cost UNKNOWN. STOP before opening ports/public endpoints or external alerts.
+- **RISK_COST_STOP:** Architecture/alert design may proceed now; live monitoring remains HOLD until A0 resumes Hostinger, Hostinger ACKs a scoped task and INF-01 baseline is verified. Recovery claims additionally require INF-02. Recurring cost UNKNOWN; STOP before opening ports/public endpoints or external alerts.
 - **ACCEPTANCE:** Runbook identifies signal/source/freshness/threshold/route/owner/escalation/recovery; synthetic fault test before live claims.
 - **EVIDENCE_PROVENANCE:** A1 S-OBS-STACK candidate; Work stale/UNKNOWN UI findings.
 - **STATUS:** DESIGN_CAN_PROCEED / LIVE_INFRA_HOLD.
@@ -628,8 +628,8 @@ Every row defines exactly 18 fields: `WBS_ID | PRODUCT_OUTCOME | FEATURE/UI | WO
 - **ENVIRONMENT_DATA_ACCESS:** Design branches/PRs; read-only evidence.
 - **RISK_COST_STOP:** Coordinator cannot self-review as independent. No merge authority. A0 Assistant live session evidence not yet available.
 - **ACCEPTANCE:** Eight package properties: UI→WBS, skill evidence, one owner/fallback, actionable roadmaps, evidence/SHA/time, no conflicts, no unauthorized effects, clear next action/STOP.
-- **EVIDENCE_PROVENANCE:** A0 directive; PR44/46; Work report; Agent roadmap receipts.
-- **STATUS:** PLANNED; package gate not met.
+- **EVIDENCE_PROVENANCE:** A0 Independent review comment `6028576006` (`PASS_WITH_CONDITIONS`) pinned to PR #50 HEAD `2b9f9402ff4a3ab43d1a66bc669b6e28c6092213`; C1-C4 coordinator reconciliations are recorded in the current integrated branch; A0 owner decision remains pending.
+- **STATUS:** READY_FOR_A0_OWNER_DECISION.
 - **TARGET_ROADMAP:** program/roadmaps/coordinator.md
 
 
@@ -787,13 +787,15 @@ Every row defines exactly 18 fields: `WBS_ID | PRODUCT_OUTCOME | FEATURE/UI | WO
 
 ## Dependency graph and critical path
 
-**Core design/roadmap path:** G0-01 → G0-02 → G0-03 → G2-01 → G2-02 → G3-02 → G3-03 → REL-01 → REL-02. G3-01 (DGN-2) is author-complete and feeds G3-02/G3-03. G2-03 is a parallel P0 control lane after G2-01 and a prerequisite for UI-02 and REL-01.
+**Schedule qualification:** this is a logical dependency/critical-path model only. No task-duration estimates or calendar dates are evidenced; it is not a dated CPM schedule and no elapsed-time forecast is implied.
+
+**Core design/roadmap path:** G0-01 → G0-02 → G0-03 → G2-01. G2-03 is a parallel P0 control-design lane after G2-01 and is also an explicit predecessor/gate for G2-02, UI-02 and REL-01. G2-02 proceeds only after G1-03, G2-01 and G2-03; then G3-02 → G3-03 → REL-01 → REL-02. G3-01 (DGN-2) is author-complete and feeds G3-02/G3-03.
 
 **Future UI path:** G0-02 + G2-02 + G2-03 → UI-01 → UI-02 → UC01-02 / GROW-03.
 
 **Business paths after separate release:** G0-01 + authorized read-only source → UC01-01 → QA-U01 + UC01-02; G0-01 + consent/source access → GROW-01 → GROW-03; G0-01 + G2-03 → GROW-02.
 
-**Infrastructure path:** INF-01 → INF-02 and INF-03 in parallel → INF-04; SEC-H follows INF-01. WP-H requires authorized read-only diagnostics and INF-01, not WordPress mutation.
+**Infrastructure path:** INF-03 architecture/alert design can proceed now without live infrastructure access. Live monitoring depends on A0 resuming Hostinger, a real Hostinger task ACK and the INF-01 current baseline; restore/recovery claims additionally require INF-02 evidence. INF-04 remains downstream of INF-02/INF-03 and separately gated. SEC-H follows INF-01. WP-H requires authorized read-only diagnostics and INF-01, not WordPress mutation.
 
 **Session controller:** G2-01 + G2-02 + G3-03 + verified supported channel + separate A0 test authority → CTRL-01. Without channel, status stays BLOCKED_CHANNEL_UNKNOWN and owner-forward remains fallback.
 
