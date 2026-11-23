@@ -1,16 +1,81 @@
 {
   "schema_version": 1,
-  "implementation_status": "CANDIDATE_PROGRAM_NORMALIZED_SHARED_FILES_PREVIEW_ONLY",
-  "source_base": "22d741e3f1dd325540932dea63c3a6da635113c3",
+  "implementation_status": "APPLIED_ON_ISOLATED_D2_BRANCH_NOT_MAIN",
+  "source_base": "68780956eab29581bd3dab5acc6924093c4019a7",
   "pr31_conflict_head": "a770de80a2467ca1789c820b63416209cf53b7d1",
-  "applied_candidate_files": ["program/README.md","program/KNOWLEDGE_OPTIMIZATION.md","program/OPERATING_PROTOCOL.md","program/WORK_BREAKDOWN.md","program/roadmaps/a1.md","program/current.json","program/kng/inventory.json","program/kng/migration.json","program/kng/validate.py","program/kng/test_validate.py"],
+  "applied_candidate_files": [
+    "program/README.md",
+    "program/KNOWLEDGE_OPTIMIZATION.md",
+    "program/OPERATING_PROTOCOL.md",
+    "program/WORK_BREAKDOWN.md",
+    "program/roadmaps/a1.md",
+    "program/current.json",
+    "program/kng/inventory.json",
+    "program/kng/migration.json",
+    "program/kng/validate.py",
+    "program/kng/test_validate.py"
+  ],
   "proposed_updates": [
-    {"path":"README.md","base_blob":"d86b4644a0781213b7007d9fc672c0881be36f59","execution":"PREVIEW_ONLY_SHARED_WRITER_GATE","pr31_conflict_review":"PR31 does not edit README; semantic authority links require coordinated integration","operation":"replace long stale live/authority shortcut with single KNG entry pointer and link full mandatory rules"},
-    {"path":"PROJECT.md","base_blob":"c645aa2df0b6cbad1f854dd4d10c6bf15553b0f6","execution":"PREVIEW_ONLY_SHARED_WRITER_GATE","pr31_conflict_review":"PR31 changes PROJECT.md; rebase exact latest content before any write","operation":"separate durable long-term product vision from present KNG-only priority in one short status link"},
-    {"path":"STATE.md","base_blob":"c8e8941aa1418f70ed9542063f0485a129739d25","execution":"PREVIEW_ONLY_SHARED_WRITER_GATE","pr31_conflict_review":"PR31 changes STATE.md; preserve historical checkpoint and evidence; add single canonical current-pointer","operation":"replace repeated current agent/task rollups by references; retain chronological source evidence"},
-    {"path":"AGENTS.md","base_blob":"cb6a8af9d2634cc4eb959132d6c3f2fafcbfaf35","execution":"PREVIEW_ONLY_SHARED_WRITER_GATE","pr31_conflict_review":"PR31 changes AGENTS.md; mandatory full-read policy remains until approved effective rule","operation":"replace duplicated operative routing paragraphs with pointer to authoritative priority; never weaken full security rules"},
-    {"path":"CATALOG.yaml","base_blob":"719c9c5d2832382285d732b9ad21f55d8c163733","execution":"PREVIEW_ONLY_SHARED_WRITER_GATE","pr31_conflict_review":"PR31 adds index entries; preserve every accepted ID/path, index only adopted KNG artifacts","operation":"add one canonical registry index entry after merge; eliminate competing active status titles, no historical deletion"},
-    {"path":"rules/AGENT_WORKFLOW.md","base_blob":"69ec0db902f457f06dd547dae171220331df0f5e","execution":"PREVIEW_ONLY_SHARED_WRITER_GATE","pr31_conflict_review":"PR31 modifies rule; reconcile §11 and new KNG override without overwriting","operation":"append one controlling KNG supersession pointer and clarify old routing as historical, not replace safety guard"}
+    {
+      "path": "README.md",
+      "base_blob": "d86b4644a0781213b7007d9fc672c0881be36f59",
+      "execution": "APPLIED_ISOLATED_INTEGRATION",
+      "pr31_conflict_review": "PR31 does not edit README; semantic authority links require coordinated integration",
+      "operation": "replace long stale live/authority shortcut with single KNG entry pointer and link full mandatory rules",
+      "source_ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "integration_authority": "https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192",
+      "result_blob": "72aaedbba8a3df2bdfdf8ee79f8092be101a4692"
+    },
+    {
+      "path": "PROJECT.md",
+      "base_blob": "bf8b107f7a36dd81d02f859d6a8d5e499d9c83a6",
+      "execution": "APPLIED_ISOLATED_INTEGRATION",
+      "pr31_conflict_review": "PR31 changes PROJECT.md; rebase exact latest content before any write",
+      "operation": "separate durable long-term product vision from present KNG-only priority in one short status link",
+      "source_ref": "PR31@a770de80a2467ca1789c820b63416209cf53b7d1",
+      "integration_authority": "https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192",
+      "result_blob": "576a8fe62373fca5e21511a7278fcbe3df3ce399"
+    },
+    {
+      "path": "STATE.md",
+      "base_blob": "53d6d79aa6fd9a952ea6ceab8679104da77a597c",
+      "execution": "APPLIED_ISOLATED_INTEGRATION",
+      "pr31_conflict_review": "PR31 changes STATE.md; preserve historical checkpoint and evidence; add single canonical current-pointer",
+      "operation": "replace repeated current agent/task rollups by references; retain chronological source evidence",
+      "source_ref": "PR31@a770de80a2467ca1789c820b63416209cf53b7d1",
+      "integration_authority": "https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192",
+      "result_blob": "19fb3aa33c29e9ef97576f64a59f19cc6398f7ad"
+    },
+    {
+      "path": "AGENTS.md",
+      "base_blob": "ecdb1fbaefd06448e3f7734c5eb2deea70a471d4",
+      "execution": "APPLIED_ISOLATED_INTEGRATION",
+      "pr31_conflict_review": "PR31 changes AGENTS.md; mandatory full-read policy remains until approved effective rule",
+      "operation": "replace duplicated operative routing paragraphs with pointer to authoritative priority; never weaken full security rules",
+      "source_ref": "PR31@a770de80a2467ca1789c820b63416209cf53b7d1",
+      "integration_authority": "https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192",
+      "result_blob": "fd8a911f60bab82e3ac81509e4d87bb8d4e0cc90"
+    },
+    {
+      "path": "CATALOG.yaml",
+      "base_blob": "60f56a30524f330c51621592b63d6cc626025fc0",
+      "execution": "APPLIED_ISOLATED_INTEGRATION",
+      "pr31_conflict_review": "PR31 adds index entries; preserve every accepted ID/path, index only adopted KNG artifacts",
+      "operation": "add one canonical registry index entry after merge; eliminate competing active status titles, no historical deletion",
+      "source_ref": "PR31@a770de80a2467ca1789c820b63416209cf53b7d1",
+      "integration_authority": "https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192",
+      "result_blob": "bf24d5726c8518617f02777aec6d271723946358"
+    },
+    {
+      "path": "rules/AGENT_WORKFLOW.md",
+      "base_blob": "3412e222364489e290be012f073f98f3ed77e3d3",
+      "execution": "APPLIED_ISOLATED_INTEGRATION",
+      "pr31_conflict_review": "PR31 modifies rule; reconcile §11 and new KNG override without overwriting",
+      "operation": "append one controlling KNG supersession pointer and clarify old routing as historical, not replace safety guard",
+      "source_ref": "PR31@a770de80a2467ca1789c820b63416209cf53b7d1",
+      "integration_authority": "https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192",
+      "result_blob": "1ca02f2f83e699c49ba991ddcfb4e1916eda4d1e"
+    }
   ],
   "delete_candidates": [],
   "physical_deletions": 0,

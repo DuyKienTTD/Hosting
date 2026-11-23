@@ -19,7 +19,7 @@
   "work_ack": "UNKNOWN",
   "agent_status": {
     "A1": "KNG_ONLY",
-    "Work": "KNG_INDEPENDENT_QA_PENDING_ACK",
+    "Work": "KNG_D2_TARGETED_REQA_PENDING_ACK",
     "A2": "ON_HOLD_DEPENDENCY_KNG01",
     "Hostinger": "ON_HOLD_DEPENDENCY_KNG01",
     "Hermes": "ON_HOLD_DEPENDENCY_KNG01",
@@ -39,5 +39,45 @@
     "program/roadmaps/work.md"
   ],
   "coordinator_readback_required": true,
-  "status_note": "KNG implementation draft only. No Work KNG QA ACK asserted; PR31 is unmerged. Original evidence remains on main and prior PRs."
+  "status_note": "KNG D2 isolated candidate only; Work D1 completed with findings and D2 independent review not yet ACK. PR31 and PR39 unmerged.",
+  "work_ack_task_id": "WORK-KNG01-TARGETED-D2-REQA",
+  "work_ack_receipt": null,
+  "last_work_qa_d1": {
+    "status": "NEEDS_A1_FIX",
+    "url": "https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098400020",
+    "source_sha": "68780956eab29581bd3dab5acc6924093c4019a7"
+  },
+  "technical_routing": {
+    "general_technical": "ChatGPT_Standard_A1_WHEN_ASSIGNED",
+    "platform_api_vps": "HOSTINGER_ON_HOLD_NO_NEW_TASK"
+  },
+  "current_handoffs": {
+    "WS-02": {
+      "source_task": "tasks/2026-11-22-work-ws02-monitoring-and-triage.md",
+      "status": "PREPARED_FOR_OWNER_FORWARD",
+      "ack_receipt": null,
+      "scope": "HISTORICAL_PRE_KNG_NO_DISPATCH"
+    }
+  },
+  "acceptance_index": {
+    "WS-02": {
+      "review_state": "UNKNOWN_NEW_REPORT",
+      "last_evidence": null,
+      "live_state": "UNKNOWN"
+    }
+  },
+  "integration": {
+    "mode": "D2_ISOLATED_INTEGRATION_NOT_EFFECTIVE",
+    "grant_url": "https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192",
+    "branch": "a1/kng01-shared-integration-d2-2026-11-23",
+    "allowed_common_paths": [
+      "README.md",
+      "PROJECT.md",
+      "STATE.md",
+      "AGENTS.md",
+      "CATALOG.yaml",
+      "rules/AGENT_WORKFLOW.md"
+    ],
+    "pr31_head": "a770de80a2467ca1789c820b63416209cf53b7d1"
+  }
 }

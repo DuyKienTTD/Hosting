@@ -12,6 +12,8 @@
 | REL-01 | K-QA,K-SEC,K-GIT | Collect agent roadmap-level handoffs and issue integrated factual verdict | all ready roadmaps | PLANNED | — |
 | REL-02 | K-SEC,K-DOC | Present owner A0 one portfolio decision and approvals only for material exceptions | REL-01 | PLANNED | — |
 
+**KNG-01 priority override (2026-11-23):** All unrelated roadmap feature items are ON_HOLD_DEPENDENCY_KNG01 until Work independent QA, coordinator integration, A0-authorized merge and a new dispatch/actual ACK. Historical PLANNED items remain proposals, not current task orders.
+
 **Completion:** one compact integrated portfolio milestone report and only evidence-backed remaining blocker list. Do not replicate every agent's per-item status in seven different files. A0 and coordinator never need to accept safe routine roadmap items separately.
 ## Cách tự cập nhật
 

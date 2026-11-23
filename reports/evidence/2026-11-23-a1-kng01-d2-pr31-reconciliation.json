@@ -1,0 +1,107 @@
+{
+  "task": "A1-KNG01-GIT-NORMALIZATION-D1",
+  "phase": "D2",
+  "pr31_source_sha": "a770de80a2467ca1789c820b63416209cf53b7d1",
+  "pr40_base_sha": "68780956eab29581bd3dab5acc6924093c4019a7",
+  "applicable_shared": [
+    {
+      "path": "AGENTS.md",
+      "pr31_blob": "ecdb1fbaefd06448e3f7734c5eb2deea70a471d4",
+      "integrated_blob": "fd8a911f60bab82e3ac81509e4d87bb8d4e0cc90",
+      "disposition": "MIGRATED_FROM_FULL_PR31_SOURCE_WITH_IMMUTABLE_HISTORIC_REF",
+      "preserved_full_source_url": "https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/AGENTS.md"
+    },
+    {
+      "path": "PROJECT.md",
+      "pr31_blob": "bf8b107f7a36dd81d02f859d6a8d5e499d9c83a6",
+      "integrated_blob": "576a8fe62373fca5e21511a7278fcbe3df3ce399",
+      "disposition": "MIGRATED_FROM_FULL_PR31_SOURCE_WITH_IMMUTABLE_HISTORIC_REF",
+      "preserved_full_source_url": "https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/PROJECT.md"
+    },
+    {
+      "path": "STATE.md",
+      "pr31_blob": "53d6d79aa6fd9a952ea6ceab8679104da77a597c",
+      "integrated_blob": "19fb3aa33c29e9ef97576f64a59f19cc6398f7ad",
+      "disposition": "MIGRATED_FROM_FULL_PR31_SOURCE_WITH_IMMUTABLE_HISTORIC_REF",
+      "preserved_full_source_url": "https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/STATE.md"
+    },
+    {
+      "path": "CATALOG.yaml",
+      "pr31_blob": "60f56a30524f330c51621592b63d6cc626025fc0",
+      "integrated_blob": "bf24d5726c8518617f02777aec6d271723946358",
+      "disposition": "MIGRATED_FROM_FULL_PR31_SOURCE_WITH_IMMUTABLE_HISTORIC_REF",
+      "preserved_full_source_url": "https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/CATALOG.yaml"
+    },
+    {
+      "path": "rules/AGENT_WORKFLOW.md",
+      "pr31_blob": "3412e222364489e290be012f073f98f3ed77e3d3",
+      "integrated_blob": "1ca02f2f83e699c49ba991ddcfb4e1916eda4d1e",
+      "disposition": "MIGRATED_FROM_FULL_PR31_SOURCE_WITH_IMMUTABLE_HISTORIC_REF",
+      "preserved_full_source_url": "https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/rules/AGENT_WORKFLOW.md"
+    }
+  ],
+  "nonshared_outside_exclusive_write_set": [
+    {
+      "path": "CHANGELOG.md",
+      "pr31_blob": "01b74d225eb0952e165a1a85dda4c5e166fa8ced",
+      "disposition": "NONSHARED_PR31_SOURCE_PRESERVED_ON_ORIGINAL_PR31_ONLY_NOT_INTEGRATED",
+      "next_owner": "Chat Điều phối assigns future nonconflicting integration; A1 D2 NOT authorized to edit",
+      "source_url": "https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/CHANGELOG.md"
+    },
+    {
+      "path": "agents/README.md",
+      "pr31_blob": "3c8a50a8b07a53bd28414a049cd5f5c366005913",
+      "disposition": "NONSHARED_PR31_SOURCE_PRESERVED_ON_ORIGINAL_PR31_ONLY_NOT_INTEGRATED",
+      "next_owner": "Chat Điều phối assigns future nonconflicting integration; A1 D2 NOT authorized to edit",
+      "source_url": "https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/agents/README.md"
+    },
+    {
+      "path": "agents/a1.md",
+      "pr31_blob": "bf393da8f437a60e1a1267a2697083f1d2437345",
+      "disposition": "NONSHARED_PR31_SOURCE_PRESERVED_ON_ORIGINAL_PR31_ONLY_NOT_INTEGRATED",
+      "next_owner": "Chat Điều phối assigns future nonconflicting integration; A1 D2 NOT authorized to edit",
+      "source_url": "https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/agents/a1.md"
+    },
+    {
+      "path": "agents/codex.md",
+      "pr31_blob": "5bbcd6c64cc2ec9386100765f8d085847f1d8cfd",
+      "disposition": "NONSHARED_PR31_SOURCE_PRESERVED_ON_ORIGINAL_PR31_ONLY_NOT_INTEGRATED",
+      "next_owner": "Chat Điều phối assigns future nonconflicting integration; A1 D2 NOT authorized to edit",
+      "source_url": "https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/agents/codex.md"
+    },
+    {
+      "path": "reports/2026-11-23-a1-codex-cost-reallocation.md",
+      "pr31_blob": "63cbd02fc3796e89b757806102103d83e691f424",
+      "disposition": "NONSHARED_PR31_SOURCE_PRESERVED_ON_ORIGINAL_PR31_ONLY_NOT_INTEGRATED",
+      "next_owner": "Chat Điều phối assigns future nonconflicting integration; A1 D2 NOT authorized to edit",
+      "source_url": "https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/reports/2026-11-23-a1-codex-cost-reallocation.md"
+    },
+    {
+      "path": "reports/2026-11-23-hosting-progress-and-target-capabilities.md",
+      "pr31_blob": "5c741b70b2eb3bbcf4cde5d4db2aff7535279b3e",
+      "disposition": "NONSHARED_PR31_SOURCE_PRESERVED_ON_ORIGINAL_PR31_ONLY_NOT_INTEGRATED",
+      "next_owner": "Chat Điều phối assigns future nonconflicting integration; A1 D2 NOT authorized to edit",
+      "source_url": "https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/reports/2026-11-23-hosting-progress-and-target-capabilities.md"
+    },
+    {
+      "path": "tasks/2026-11-23-a1-cost-first-master-allocation.md",
+      "pr31_blob": "210680eb45288d792a4a6b9134ada678b20f94da",
+      "disposition": "NONSHARED_PR31_SOURCE_PRESERVED_ON_ORIGINAL_PR31_ONLY_NOT_INTEGRATED",
+      "next_owner": "Chat Điều phối assigns future nonconflicting integration; A1 D2 NOT authorized to edit",
+      "source_url": "https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/tasks/2026-11-23-a1-cost-first-master-allocation.md"
+    }
+  ],
+  "additional_readme": {
+    "path": "README.md",
+    "base": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "source_blob": "d86b4644a0781213b7007d9fc672c0881be36f59",
+    "integrated_blob": "72aaedbba8a3df2bdfdf8ee79f8092be101a4692"
+  },
+  "security_rules": {
+    "source_policy_not_weakened": true,
+    "pr31_workflow_full_text_pinned": true,
+    "pr31_historical_status_readback": true,
+    "private_secrets_in_public_repo": false
+  },
+  "condition": "No PR31 branch modification, no main merge, no claim seven nonshared paths merged. Coordinator must sequence them before effective main integration."
+}

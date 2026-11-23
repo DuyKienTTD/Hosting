@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "description": "Pinned GitHub object claims. Default validator independently resolves commit-tree-path-blob using Git. No live Git graph => PROVENANCE_UNVERIFIED.",
+  "refs": {
+    "main": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "PR31": "a770de80a2467ca1789c820b63416209cf53b7d1",
+    "PR39": "22d741e3f1dd325540932dea63c3a6da635113c3"
+  },
+  "sources": {
+    "effective_rules": {
+      "path": "AGENTS.md",
+      "blob": "cb6a8af9d2634cc4eb959132d6c3f2fafcbfaf35",
+      "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "commit": "e385c1bea2070973e3007e5717f7e980348d6ab3"
+    },
+    "priority_routing": {
+      "path": "program/README.md",
+      "blob": "ff884c634fdd6029ab637c816ee332f42b863d96",
+      "ref": "PR39@22d741e3f1dd325540932dea63c3a6da635113c3",
+      "commit": "22d741e3f1dd325540932dea63c3a6da635113c3"
+    },
+    "technical_rules": {
+      "path": "rules/AGENT_WORKFLOW.md",
+      "blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+      "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "commit": "e385c1bea2070973e3007e5717f7e980348d6ab3"
+    },
+    "current_state": {
+      "path": "STATE.md",
+      "blob": "c8e8941aa1418f70ed9542063f0485a129739d25",
+      "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "commit": "e385c1bea2070973e3007e5717f7e980348d6ab3"
+    },
+    "catalog_document_ids": {
+      "path": "CATALOG.yaml",
+      "blob": "719c9c5d2832382285d732b9ad21f55d8c163733",
+      "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "commit": "e385c1bea2070973e3007e5717f7e980348d6ab3"
+    },
+    "business_charter": {
+      "path": "PROJECT.md",
+      "blob": "c645aa2df0b6cbad1f854dd4d10c6bf15553b0f6",
+      "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "commit": "e385c1bea2070973e3007e5717f7e980348d6ab3"
+    },
+    "cost_first_candidate": {
+      "path": "rules/AGENT_WORKFLOW.md",
+      "blob": "3412e222364489e290be012f073f98f3ed77e3d3",
+      "ref": "PR31@a770de80a2467ca1789c820b63416209cf53b7d1",
+      "commit": "a770de80a2467ca1789c820b63416209cf53b7d1"
+    },
+    "legacy_program_parallel_dispatch": {
+      "path": "program/WORK_BREAKDOWN.md",
+      "blob": "60beab3ad23abf7c67adf288dc0c213c14befcfe",
+      "ref": "PR39@22d741e3f1dd325540932dea63c3a6da635113c3",
+      "commit": "22d741e3f1dd325540932dea63c3a6da635113c3"
+    },
+    "hostinger_resumption_claim": {
+      "path": "program/roadmaps/hostinger.md",
+      "blob": "8cdd0c2ff570416d2f1428276f8a4b1a2f58613f",
+      "ref": "PR39@22d741e3f1dd325540932dea63c3a6da635113c3",
+      "commit": "22d741e3f1dd325540932dea63c3a6da635113c3"
+    },
+    "agent_role_reassignment": {
+      "path": "program/roadmaps/a1.md",
+      "blob": "c1e75f566a1c346f12a38bfad2ca399baddaa050",
+      "ref": "PR39@22d741e3f1dd325540932dea63c3a6da635113c3",
+      "commit": "22d741e3f1dd325540932dea63c3a6da635113c3"
+    },
+    "security_boundary": {
+      "path": "rules/REPOSITORY_SECURITY.md",
+      "blob": "c24d608036b11dcd3fafcaefbefa23fdb591990e",
+      "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "commit": "e385c1bea2070973e3007e5717f7e980348d6ab3"
+    },
+    "historical_evidence": {
+      "path": "STATE.md",
+      "blob": "c8e8941aa1418f70ed9542063f0485a129739d25",
+      "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "commit": "e385c1bea2070973e3007e5717f7e980348d6ab3"
+    }
+  },
+  "migration_bases": {
+    "README.md": {
+      "commit": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "blob": "d86b4644a0781213b7007d9fc672c0881be36f59"
+    },
+    "PROJECT.md": {
+      "commit": "a770de80a2467ca1789c820b63416209cf53b7d1",
+      "blob": "bf8b107f7a36dd81d02f859d6a8d5e499d9c83a6"
+    },
+    "STATE.md": {
+      "commit": "a770de80a2467ca1789c820b63416209cf53b7d1",
+      "blob": "53d6d79aa6fd9a952ea6ceab8679104da77a597c"
+    },
+    "AGENTS.md": {
+      "commit": "a770de80a2467ca1789c820b63416209cf53b7d1",
+      "blob": "ecdb1fbaefd06448e3f7734c5eb2deea70a471d4"
+    },
+    "CATALOG.yaml": {
+      "commit": "a770de80a2467ca1789c820b63416209cf53b7d1",
+      "blob": "60f56a30524f330c51621592b63d6cc626025fc0"
+    },
+    "rules/AGENT_WORKFLOW.md": {
+      "commit": "a770de80a2467ca1789c820b63416209cf53b7d1",
+      "blob": "3412e222364489e290be012f073f98f3ed77e3d3"
+    }
+  },
+  "work_ack_receipt": null
+}

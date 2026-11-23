@@ -6,7 +6,7 @@ A1 owns implementation in its own branch. Work owns independent baseline/final Q
 
 ## Effective authority and control
 
-**Read full mandatory main rules:** [AGENTS](../AGENTS.md), [workflow](../rules/AGENT_WORKFLOW.md), [security](../rules/REPOSITORY_SECURITY.md), [STATE](../STATE.md), [CATALOG](../CATALOG.yaml). PR31 draft and this proposal do not override them. Work writes independent QA evidence. No paid, production, VPS, live connector, merge, shared metadata update or destructive history rewrite under KNG candidate scope.
+**Read full mandatory main rules:** [AGENTS](../AGENTS.md), [workflow](../rules/AGENT_WORKFLOW.md), [security](../rules/REPOSITORY_SECURITY.md), [STATE](../STATE.md), [CATALOG](../CATALOG.yaml). PR31 draft and this proposal do not override them. Work writes independent QA evidence. No paid, production, VPS, live connector, merge or destructive history rewrite. **Exception confined to six common paths on isolated D2 branch only**, authorized by [director](https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192), never PR31/main.
 
 ## Data lifecycle
 

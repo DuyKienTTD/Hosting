@@ -1,5 +1,5 @@
 schema_version: 1
-updated_at: 2026-11-22
+updated_at: 2026-11-23
 repository_visibility: public
 default_language: vi
 
@@ -8,12 +8,64 @@ entrypoints:
   project_charter: PROJECT.md
   task_handoff_rules: rules/AGENT_WORKFLOW.md
   current_state: STATE.md
+  knowledge_current_routing: program/current.json
+  knowledge_wbs: program/WORK_BREAKDOWN.md
   agent_rules: AGENTS.md
   agent_capability_directory: agents/README.md
   contribution_workflow: CONTRIBUTING.md
   change_history: CHANGELOG.md
 
 documents:
+  # KNG:BEGIN_GENERATED_REPORTS
+  # KNG:END_GENERATED_REPORTS
+  - id: kng01-current-routing-candidate
+    path: program/current.json
+    type: knowledge
+    status: candidate-not-main-effective
+    authoritative_for: kng01-routing-only-after-authorized-adoption
+    updated_at: 2026-11-23
+    sensitivity: public-redacted
+
+  - id: kng01-normalization-d2-source-validation
+    path: program/kng/validate.py
+    type: script
+    status: candidate-test-only
+    authoritative_for: kng01-source-pin-and-ack-contract-validator
+    updated_at: 2026-11-23
+    sensitivity: public
+
+  - id: hosting-progress-and-target-capabilities-2026-11-23
+    path: reports/2026-11-23-hosting-progress-and-target-capabilities.md
+    type: report
+    status: coordinator-estimate-pending-independent-qa
+    authoritative_for: project-portfolio-maturity-estimate-and-planned-user-facing-capabilities-as-of-2026-11-23
+    updated_at: 2026-11-23
+    sensitivity: public-redacted
+
+  - id: agent-a1-chatgpt-standard
+    path: agents/a1.md
+    type: knowledge
+    status: current
+    authoritative_for: a1-standard-chatgpt-agent-role-capability-boundaries
+    updated_at: 2026-11-23
+    sensitivity: public
+
+  - id: ttd-a1-cost-first-master-allocation-2026-11-23
+    path: tasks/2026-11-23-a1-cost-first-master-allocation.md
+    type: task
+    status: proposed_governance_with_agent_evidence
+    authoritative_for: agent-a1-work-assignment-cost-first-codex-exception-gate
+    updated_at: 2026-11-23
+    sensitivity: public
+
+  - id: report-2026-11-23-a1-codex-cost-reallocation
+    path: reports/2026-11-23-a1-codex-cost-reallocation.md
+    type: report
+    status: proposed_for_review
+    authoritative_for: owner-ordered-reallocation-and-codex-dispatch-holds
+    updated_at: 2026-11-23
+    sensitivity: public
+
   - id: current-vps-inventory
     path: inventory/current-vps-state.md
     type: inventory

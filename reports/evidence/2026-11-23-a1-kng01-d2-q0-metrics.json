@@ -1,0 +1,362 @@
+{
+  "task": "A1-KNG01-GIT-NORMALIZATION-D1",
+  "phase": "D2-CORRECTIVE",
+  "status": "AUTHOR_D2_CANDIDATE",
+  "pins": {
+    "main": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "pr31": "a770de80a2467ca1789c820b63416209cf53b7d1",
+    "pr39": "22d741e3f1dd325540932dea63c3a6da635113c3",
+    "pr40": "68780956eab29581bd3dab5acc6924093c4019a7"
+  },
+  "environment": {
+    "python": "3.13.5",
+    "git": "2.47.3",
+    "container_git_clone": "BLOCKED_DNS",
+    "remote_verified_source_blobs": 18,
+    "remote_method": "GitHub authenticated commit+path to actual Git blob SHA, distinct from local Git commit/tree graph"
+  },
+  "author_tests": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s program/kng -p test_validate.py -v",
+    "run": 29,
+    "pass": 29,
+    "fail": 0,
+    "error": 0,
+    "scope": "candidate source tests on isolated fixture; real synthetic Git commit/blob verification in test_real_commit_blob_and_mutated_sha; no full Hosting local git graph"
+  },
+  "work_four_regressions": [
+    "test_work_ack_requires_receipt_and_state",
+    "test_source_sha_valid_but_wrong",
+    "test_recovery_ref_plausible_nonexistent_commit",
+    "test_migration_base_valid_but_wrong"
+  ],
+  "additional": [
+    "test_missing_git_objects_fail_closed",
+    "test_claim_v_evidence_consistency",
+    "test_duplicate_catalog_id",
+    "test_lock_pin_mutation",
+    "test_missing_provenance_lock",
+    "test_real_commit_blob_and_mutated_sha",
+    "test_generated_view_is_idempotent_and_requires_receipt"
+  ],
+  "candidate_files": [
+    {
+      "path": "README.md",
+      "blob": "72aaedbba8a3df2bdfdf8ee79f8092be101a4692",
+      "bytes": 1555,
+      "ref": "candidate_unmerged_git_blob"
+    },
+    {
+      "path": "PROJECT.md",
+      "blob": "576a8fe62373fca5e21511a7278fcbe3df3ce399",
+      "bytes": 3641,
+      "ref": "candidate_unmerged_git_blob"
+    },
+    {
+      "path": "STATE.md",
+      "blob": "19fb3aa33c29e9ef97576f64a59f19cc6398f7ad",
+      "bytes": 3384,
+      "ref": "candidate_unmerged_git_blob"
+    },
+    {
+      "path": "CATALOG.yaml",
+      "blob": "bf24d5726c8518617f02777aec6d271723946358",
+      "bytes": 41600,
+      "ref": "candidate_unmerged_git_blob"
+    },
+    {
+      "path": "AGENTS.md",
+      "blob": "fd8a911f60bab82e3ac81509e4d87bb8d4e0cc90",
+      "bytes": 3668,
+      "ref": "candidate_unmerged_git_blob"
+    },
+    {
+      "path": "rules/AGENT_WORKFLOW.md",
+      "blob": "1ca02f2f83e699c49ba991ddcfb4e1916eda4d1e",
+      "bytes": 46062,
+      "ref": "candidate_unmerged_git_blob"
+    },
+    {
+      "path": "rules/REPOSITORY_SECURITY.md",
+      "blob": "c24d608036b11dcd3fafcaefbefa23fdb591990e",
+      "bytes": 1310,
+      "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
+    },
+    {
+      "path": "agents/README.md",
+      "blob": "4a748220b74feff358d40bf46aa32d79406e47c2",
+      "bytes": 6469,
+      "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
+    },
+    {
+      "path": "agents/chatgpt.md",
+      "blob": "97071fc9e39d314791710a645868cd63878d5afb",
+      "bytes": 4917,
+      "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
+    },
+    {
+      "path": "program/current.json",
+      "blob": "42f561e37bd8938c435ac4709ad19292e2fdef3b",
+      "bytes": 2751,
+      "ref": "candidate_unmerged_git_blob"
+    }
+  ],
+  "q0_scenarios": [
+    {
+      "id": "R",
+      "prompt": "Routine WS-04 SEO brief",
+      "source_qa": "https://github.com/DuyKienTTD/Hosting/pull/39#issuecomment-7097774156",
+      "before_steps": 11,
+      "before_bytes": 149148,
+      "after_steps": 12,
+      "after_bytes": 124509,
+      "after_common_paths": [
+        "README.md",
+        "PROJECT.md",
+        "STATE.md",
+        "CATALOG.yaml",
+        "AGENTS.md",
+        "rules/AGENT_WORKFLOW.md",
+        "rules/REPOSITORY_SECURITY.md",
+        "agents/README.md",
+        "agents/chatgpt.md",
+        "program/current.json"
+      ],
+      "after_suffix": [
+        {
+          "path": "tasks/2026-11-21-repository-operating-plan.md",
+          "bytes": 4027,
+          "blob": "4181e7311ddbc6c8b3493470d9ff778e199cb503",
+          "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
+        },
+        {
+          "path": "GOALS_AND_ROADMAP.md",
+          "bytes": 5125,
+          "blob": "27b7624733a52ddb64b61e81ddbd487d45b5119e",
+          "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
+        }
+      ],
+      "bytes_saved": 24639,
+      "context_method": "exact UTF8 bytes of full pinned file blobs, 10 candidate common files then same Q0 source suffix",
+      "comprehension_18_point_score": "NOT_SCORED_BY_A1_AUTHOR",
+      "fresh_blind_test": "NOT_RUN"
+    },
+    {
+      "id": "G",
+      "prompt": "Git/docs WS-01 template plan",
+      "source_qa": "https://github.com/DuyKienTTD/Hosting/pull/39#issuecomment-7097774156",
+      "before_steps": 12,
+      "before_bytes": 151686,
+      "after_steps": 13,
+      "after_bytes": 127047,
+      "after_common_paths": [
+        "README.md",
+        "PROJECT.md",
+        "STATE.md",
+        "CATALOG.yaml",
+        "AGENTS.md",
+        "rules/AGENT_WORKFLOW.md",
+        "rules/REPOSITORY_SECURITY.md",
+        "agents/README.md",
+        "agents/chatgpt.md",
+        "program/current.json"
+      ],
+      "after_suffix": [
+        {
+          "path": "tasks/2026-11-21-repository-operating-plan.md",
+          "bytes": 4027,
+          "blob": "4181e7311ddbc6c8b3493470d9ff778e199cb503",
+          "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
+        },
+        {
+          "path": "rules/MULTI_AGENT_COLLABORATION.md",
+          "bytes": 4526,
+          "blob": "29668ca6386b38850768e0077721985db22a8d9f",
+          "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "bytes": 3137,
+          "blob": "02ce8d779a4d9645045d869eba1f005abc83c965",
+          "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
+        }
+      ],
+      "bytes_saved": 24639,
+      "context_method": "exact UTF8 bytes of full pinned file blobs, 10 candidate common files then same Q0 source suffix",
+      "comprehension_18_point_score": "NOT_SCORED_BY_A1_AUTHOR",
+      "fresh_blind_test": "NOT_RUN"
+    },
+    {
+      "id": "S",
+      "prompt": "Security WS-02 n8n readiness mock",
+      "source_qa": "https://github.com/DuyKienTTD/Hosting/pull/39#issuecomment-7097774156",
+      "before_steps": 15,
+      "before_bytes": 197424,
+      "after_steps": 16,
+      "after_bytes": 172785,
+      "after_common_paths": [
+        "README.md",
+        "PROJECT.md",
+        "STATE.md",
+        "CATALOG.yaml",
+        "AGENTS.md",
+        "rules/AGENT_WORKFLOW.md",
+        "rules/REPOSITORY_SECURITY.md",
+        "agents/README.md",
+        "agents/chatgpt.md",
+        "program/current.json"
+      ],
+      "after_suffix": [
+        {
+          "path": "tasks/2026-11-22-work-ws02-monitoring-and-triage.md",
+          "bytes": 4684,
+          "blob": "eb170fa97ff80049eeb4996f49afc5aef1cf95ec",
+          "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
+        },
+        {
+          "path": "GOALS_AND_ROADMAP.md",
+          "bytes": 5125,
+          "blob": "27b7624733a52ddb64b61e81ddbd487d45b5119e",
+          "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
+        },
+        {
+          "path": "tasks/2026-11-21-repository-operating-plan.md",
+          "bytes": 4027,
+          "blob": "4181e7311ddbc6c8b3493470d9ff778e199cb503",
+          "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
+        },
+        {
+          "path": "inventory/current-vps-state.md",
+          "bytes": 13613,
+          "blob": "69ae6543cc921ca9163356a2db8770db23fb7bb3",
+          "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
+        },
+        {
+          "path": "reports/2026-11-21-n8n-hermes-integration-audit.md",
+          "bytes": 26709,
+          "blob": "0a098d516d7e0c8fdeb10cd090bb076554334eb2",
+          "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
+        },
+        {
+          "path": "reports/2026-11-21-vps-security-review.md",
+          "bytes": 3270,
+          "blob": "36cf3504cb1b67c0eed853dac141b156de684d25",
+          "ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3"
+        }
+      ],
+      "bytes_saved": 24639,
+      "context_method": "exact UTF8 bytes of full pinned file blobs, 10 candidate common files then same Q0 source suffix",
+      "comprehension_18_point_score": "NOT_SCORED_BY_A1_AUTHOR",
+      "fresh_blind_test": "NOT_RUN"
+    }
+  ],
+  "q0_maintenance": [
+    {
+      "fixture": "Q0_technical_routing_general_and_platform",
+      "before": {
+        "files": 3,
+        "fields": 4
+      },
+      "after_proposed": {
+        "files": 1,
+        "fields": 2
+      },
+      "manual_target": [
+        "program/current.json: technical_routing.general_technical",
+        "program/current.json: technical_routing.platform_api_vps"
+      ],
+      "derived_or_historical": [
+        "PROJECT current route replaced by link",
+        "agents/README PR31 retained as historical directory; no active authority"
+      ],
+      "limitations": "Semantic edit simulation only; cannot edit original agents/README or PR31 with this authority"
+    },
+    {
+      "fixture": "Q0_WS02_ACK_following_real_receipt",
+      "before": {
+        "files": 4,
+        "fields": 5
+      },
+      "after_proposed": {
+        "files": 1,
+        "fields": 2
+      },
+      "manual_target": [
+        "program/current.json: current_handoffs.WS-02.status",
+        "program/current.json: current_handoffs.WS-02.ack_receipt"
+      ],
+      "derived_or_historical": [
+        "STATE generated via derive.py",
+        "CATALOG legacy status is an at-source snapshot; task frontmatter is historical until authorized migration"
+      ],
+      "limitations": "No real WS02 ACK exists; synthetic test requires receipt shape, real event must be independently authenticated"
+    },
+    {
+      "fixture": "Q0_WS02_new_paper_report_accepted_not_live",
+      "before": {
+        "files": 4,
+        "fields": 5
+      },
+      "after_proposed": {
+        "files": 2,
+        "fields": 4
+      },
+      "manual_target": [
+        "reports/<date>-work-ws02-...: acceptance disposition and evidence pointer (2 fields)",
+        "program/current.json: acceptance_index.WS-02.review_state and last_evidence (2 fields)"
+      ],
+      "derived_or_historical": [
+        "STATE and CATALOG record derived by derive.py after evidence reference"
+      ],
+      "limitations": "Only synthetic proof; no actual WS02 report accepted"
+    },
+    {
+      "fixture": "Q0_new_secret_handling_clause_affects_quickstart",
+      "before": {
+        "files": 4,
+        "fields": 4
+      },
+      "after_proposed": {
+        "files": 2,
+        "fields": 2
+      },
+      "manual_target": [
+        "rules/REPOSITORY_SECURITY.md: operative new clause",
+        "dated immutable evidence/changelog event: accepted rule change"
+      ],
+      "derived_or_historical": [
+        "README links to complete rule with no duplicate clause text",
+        "CATALOG stable security document ID/scope unchanged when rule is within same scope"
+      ],
+      "limitations": "Hypothetical rule adoption only, actual repository security policy unchanged; specific expanded authoritative_for scope may require one extra catalog edit"
+    }
+  ],
+  "measurement": {
+    "baseline_common_bytes": 139996,
+    "after_nine_common_bytes": 112606,
+    "after_tenth_current_bytes": 2751,
+    "after_ten_common_bytes": 115357,
+    "delta_bytes": -24639,
+    "units": "UTF-8_BYTES_NOT_BILLABLE_TOKENS",
+    "source": "Work Q0 fixed R/G/S paths and actual remote candidate blob content"
+  },
+  "wbs": {
+    "id_count": 32,
+    "original_fields": [
+      "gate",
+      "deliverable",
+      "required_skills",
+      "owner",
+      "dependencies",
+      "acceptance"
+    ],
+    "preserved": true
+  },
+  "migration": {
+    "applied_on_isolated_branch": true,
+    "main_effective": false,
+    "full_pr31_5_common_blobs_input": true,
+    "pr31_7_other_paths_not_integrated_yet": true
+  },
+  "work_final_qa": "NOT_RUN",
+  "verdict": "AUTHOR_CANDIDATE_PENDING_TARGETED_INDEPENDENT_REQA"
+}

@@ -1,86 +1,23 @@
-# Hướng dẫn cho tác nhân
+# Hướng dẫn Agent — KNG-01 current authority
 
-Các hướng dẫn này áp dụng cho toàn bộ repository.
+**Effective after separate approved merge only.** The original full PR31 AGENTS guidance and history are retained verbatim by Git at [PR31 `a770de80`](https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/AGENTS.md), blob `ecdb1fbaefd06448e3f7734c5eb2deea70a471d4`. Dated OPS/SEC/Cost-first decisions there are historical evidence, **not** current permission for new dispatch.
 
-## Mục tiêu
+## Before every task (mandatory)
 
-Trước khi nhận việc mới, nắm mục tiêu doanh nghiệp tại [PROJECT.md](PROJECT.md). Đặc tả và kết quả trao đổi qua GitHub theo [rules/AGENT_WORKFLOW.md](rules/AGENT_WORKFLOW.md): task được commit trước khi giao; báo cáo, bằng chứng được commit/push sau khi thực hiện; tin nhắn chỉ dẫn URL và kết quả ngắn. Dùng `tasks/` cho đặc tả và `reports/` cho kết quả. Các giới hạn nhiệm vụ là ràng buộc, còn cách triển khai là linh hoạt.
+Read **in full** `AGENTS.md`, `rules/AGENT_WORKFLOW.md`, `rules/REPOSITORY_SECURITY.md`, `STATE.md`, `CATALOG.yaml`, agent profile and exact task; pin source/rules SHA. Preserve actual role ACK and evidence. [PROJECT](PROJECT.md) is long-term goal, [README](README.md) quick navigation, [current routing](program/current.json) is candidate source once approved.
 
-Giữ repository thành nguồn thông tin chung, ngắn gọn và đáng tin cậy để tác nhân mới có thể bắt đầu làm việc mà không phải đọc toàn bộ lịch sử chat.
+## Current priority / ownership
 
-Mỗi tác nhân phải tham khảo [agents/README.md](agents/README.md) và hồ sơ chính mình trước khi nhận việc. Không coi **Hostinger** (nền tảng) là một AI Agent; khả năng của **Hostinger Agent** cần khảo sát riêng. Hồ sơ chỉ ghi năng lực và bằng chứng, không tự tạo quyền truy cập. Khi giao việc cho tác nhân khác, xem hồ sơ của họ và kiểm tra quyền phiên hiện tại. Nhiệm vụ khảo sát: [TTD-AGENT-CAPABILITY-SURVEY-001](tasks/2026-11-21-agent-capability-survey.md). Chủ dự án có thể chuyển tiếp câu hỏi và báo cáo giữa các tác nhân; không đòi kết nối trực tiếp giữa các agent.
+**KNG-01 ONLY** until independent Work QA, coordinator conflict resolution and **A0-authorized merge**. Chat Điều phối = project/program director; A1 = sole KNG implementation writer; Work = independent reviewer (current D2 re-QA ACK pending); A2/Hostinger/Hermes = hold new unrelated tasks; Codex = NOT_AUTHORIZED. Hostinger prior resumption, old Codex routing, A1 OPS ownership and historical work statuses are **past-snapshot facts**, not current task permissions. [Pinned A0/director roadmap](https://github.com/DuyKienTTD/Hosting/pull/39#issuecomment-7097692066), [D2 write grant](https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192).
 
-## Bắt buộc trước khi giao việc hoặc nhận việc
+## Execution, evidence and STOP
 
-**Quy tắc điều phối do chủ dự án phê duyệt ngày 2026-11-21:** [AGENT_WORKFLOW mục 7](rules/AGENT_WORKFLOW.md) có hiệu lực cho ChatGPT, Codex, Hermes, Hostinger Agent và mọi agent tham gia. **Mỗi task mới phải đọc lại** `AGENTS.md`, `rules/AGENT_WORKFLOW.md`, `rules/REPOSITORY_SECURITY.md`, `STATE.md`, `CATALOG.yaml`, hồ sơ agent và task. Ghi commit quy tắc đã đọc trong ACK/report.
+Each task needs `TASK_ID, OWNER, MODE, FIRST_ACTION, BASE_SHA, READ_SET, WRITE_SET, DO_NOT_TOUCH, TEST_DELTA, INVARIANTS, STOP, ACCEPTANCE, EVIDENCE, NEXT_OWNER`. Branch-specific exclusive writer, no overlap or surprise source edits; read full changed source, compare exact diff, run targeted positive/negative tests, push and verify GitHub remote SHA. Do not self-certify author code as independent QA. A GitHub PR/comment is PREPARED, not external Agent SENT/ACK unless separately evidenced. Never claim real runtime state from offline test/dated report.
 
-**Trước giao thực thi:** ChatGPT nghiên cứu nguồn công khai chính thức, đối chiếu trạng thái/bằng chứng; chủ động xin báo cáo Hostinger Agent về VPS/network/hPanel và Hermes về runtime/inference khi phù hợp, trước khi giao Codex code/test/deploy. Đặc tả phải có **bước đầu tiên cụ thể, file/endpoint/môi trường, dependency, owner duy nhất, quyền, kiểm thử/STOP, đường dẫn đầu ra và next owner**; không chỉ nói “làm đi”. Không giả định đã giao việc qua GitHub nếu agent chưa thật sự nhận.
+Security rules and risk gates are binding: no secrets/private data in public Git; no production/VPS, paid API, Ads budget, deployment, account permission or publication without task-specific approval, preflight and rollback. STOP conflicting operations, continue unrelated safe work. No automatic merge, force-push, destructive history rewrite or Codex dispatch. KNG roadmap-level QA does not waive security/release gates. The operative [full workflow](rules/AGENT_WORKFLOW.md) and [repository security](rules/REPOSITORY_SECURITY.md) remain required.
 
-**Chuyền bóng rõ ràng:** `PREPARED → SENT → ACKNOWLEDGED → IN_PROGRESS → DONE/BLOCKED/NEEDS_OWNER_DECISION`; mỗi lượt giao nêu `from_agent, to_agent, why, first_action, inputs, limits, acceptance, artifact, next_owner`. Nếu thiếu kênh giao trực tiếp, ghi `PREPARED_FOR_OWNER_FORWARD` để chủ dự án chuyển.
+## Data ownership and update amplification
 
-**Mọi quy tắc mới của chủ dự án phải được cập nhật ngay vào `rules/`, đồng bộ entrypoint, `CATALOG.yaml`, `CHANGELOG.md`, commit/push/read-back.** Lời nói trong chat không phải kho tri thức bền vững. Quy tắc mới không tự cấp thêm quyền production/paid API.
+Single candidate routing register: [program/current.json](program/current.json). Task ACK/receipt is an immutable dated event; source task and CATALOG entries become indexed snapshots, not independent manually maintained current status after approved KNG integration. `STATE.md` displays the current program snapshot plus provenance, not a second authoritative history. CATALOG keeps stable IDs and paths. Rules are authoritative in `rules/`; quick-start only links to them without copying clause text. Preserve all evidence through immutable PR/source SHA and append-only dated reports.
 
-## Thực thi liền mạch trong phạm vi đã phê duyệt
-
-**BẮT BUỘC áp dụng [AGENT_WORKFLOW mục 9](rules/AGENT_WORKFLOW.md):** chủ động hoàn thành toàn bộ phần hợp lệ có thể tiếp tục; điều kiện chưa kiểm tra là việc cần làm, không mặc nhiên là blocker. Chỉ dừng side effect khi safety/approval gate chưa PASS; handoff BLOCKED phải có blocker cụ thể. Không mở rộng quyền, không tự retry paid API và không giả định phiên chạy 24/7.
-
-## Ủy quyền điều phối liên tục (chủ dự án 2026-11-22)
-
-Theo [AGENT_WORKFLOW mục 10](rules/AGENT_WORKFLOW.md), ChatGPT tự quyết định và điều phối bước kế tiếp trong ranh giới task/ADR/an toàn đã có, không hỏi lại phê duyệt hình thức. Chỉ chuyển tới chủ dự án khi phát sinh vấn đề bảo mật/credential/quyền truy cập mà không tác nhân nào có hoặc nghĩa vụ chỉ chủ tài khoản thực hiện được. Không suy diễn quyền VPS/provider/production từ việc điều phối; mọi thay đổi phải có preflight, rollback, bằng chứng và STOP. Git commit `PREPARED` không phải Codex ACK.
-
-## Bảo toàn tài liệu và chống làm lại
-
-**BẮT BUỘC đọc và áp dụng [AGENT_WORKFLOW mục 8](rules/AGENT_WORKFLOW.md)** cho mọi nhiệm vụ: đọc **đủ** tài liệu liên quan (không dự đoán từ preview/truncated result), đối chiếu evidence công việc đã PASS, chỉ chạy lại khi có `change_trigger`/thiếu bằng chứng, và giới hạn file/section được sửa bằng `READ_SET`, `WRITE_SET`, `DO_NOT_TOUCH` cùng `INVARIANTS`.
-
-Trước update: fetch phiên bản remote mới nhất, đọc toàn bộ tài liệu sắp sửa, xác minh owner/status/approval và base SHA, tạo patch tối thiểu, review **toàn bộ diff/deletions**. Sau commit/push: đọc lại từ remote và xác minh trường bất biến cùng nội dung liên quan. Không đổi metadata task mẹ khi chỉ được giao nhiệm vụ tư vấn. Khi bị truncation/không đọc được toàn bộ: đánh `PARTIAL_READ`, không tự kết luận hoặc ghi đè.
-
-Mỗi đặc tả phải nêu đã làm gì, evidence nào còn áp dụng, test delta nào thật sự cần và phạm vi thao tác của agent. Ưu tiên định danh ổn định, dữ liệu tách theo trách nhiệm để khoanh vùng lỗi; không ghi secret trên Git public. Quy tắc này không chứng minh branch protection/CI đã bật và không tự cấp quyền chi phí/production.
-
-## Thứ tự đọc bắt buộc
-
-1. `README.md` — phạm vi và bản đồ repository.
-2. `STATE.md` — trạng thái hiện tại, rủi ro và việc đang chờ.
-3. `CATALOG.yaml` — tài liệu có thẩm quyền và vị trí cần đọc.
-4. Tài liệu liên quan trực tiếp đến nhiệm vụ.
-5. `rules/REPOSITORY_SECURITY.md` trước mọi commit hoặc push.
-
-Không đọc toàn bộ `reports/` hoặc `archive/` nếu `CATALOG.yaml` không chỉ tới đó.
-
-## Quy tắc nguồn sự thật
-
-- Hệ thống trực tiếp là nguồn sự thật cho trạng thái thay đổi theo thời gian.
-- `inventory/` là bản ghi hiện tại gần nhất, không thay thế việc xác minh live trước thao tác rủi ro.
-- `STATE.md` là bản tóm tắt nhanh, không chứa toàn bộ chi tiết.
-- Báo cáo có ngày trong `reports/` là bằng chứng lịch sử; tạo báo cáo mới thay vì sửa lại quá khứ, trừ khi sửa lỗi thực tế.
-- `knowledge/` chứa kiến thức bền vững; không đặt số liệu vận hành dễ lỗi thời ở đây.
-- Nếu hai tài liệu mâu thuẫn, ưu tiên tài liệu có `status: current` và `verified_at` mới hơn, sau đó xác minh live.
-
-## Tìm thông tin nhanh
-
-- Dùng `rg` hoặc `rg --files` trước khi duyệt thủ công.
-- Tìm ID tài liệu trong `CATALOG.yaml`.
-- Tìm trạng thái hiện tại trong `STATE.md` và `inventory/`.
-- Tìm lịch sử thay đổi trong `CHANGELOG.md` và `reports/`.
-- Tìm quy trình thao tác trong `runbooks/`.
-
-## Khi thêm hoặc thay đổi thông tin
-
-1. Phân loại tài liệu đúng thư mục.
-2. Dùng tên file chữ thường, dấu gạch ngang; báo cáo có ngày theo `YYYY-MM-DD-chu-de.md`.
-3. Thêm metadata theo mẫu tương ứng trong `templates/`; file chỉ mục và entrypoint được miễn metadata.
-4. Cập nhật `CATALOG.yaml` nếu tài liệu là mới, đổi trạng thái hoặc thay thế tài liệu khác.
-5. Cập nhật `STATE.md` nếu trạng thái vận hành, rủi ro hoặc việc đang chờ thay đổi.
-6. Cập nhật `CHANGELOG.md` cho mọi thay đổi có ý nghĩa.
-7. Kiểm tra bí mật, liên kết và `git diff --cached` trước khi push.
-
-## An toàn
-
-- Repository là công khai. Không commit bí mật hoặc định danh máy chủ thật.
-- Không sao chép `.env`, log thô, database dump, backup hoặc output chứa token.
-- Chỉ ghi tên biến môi trường; không ghi giá trị.
-- Không mô tả một thay đổi là đã hoàn tất nếu chưa có bằng chứng xác minh.
-- Không dùng tài liệu cũ làm quyền cho một hành động phá hủy; quyền phải đến từ yêu cầu hiện tại của người dùng.
-
-## Tiêu chuẩn hoàn thành
-
-Một nhiệm vụ cập nhật tri thức chỉ hoàn tất khi tài liệu đúng thư mục, metadata và catalog nhất quán, không có bí mật, changelog đã cập nhật, working tree sạch và commit đã có trên remote được yêu cầu.
+Change effective rules only with coordinator exclusivity and A0's applicable approval. NEVER infer new permissions from status or a document index. For historical detailed workflow and prior required read/update rules see pinned PR31 source above; the current §13 in `rules/AGENT_WORKFLOW.md` clarifies approved KNG routing precedence.
