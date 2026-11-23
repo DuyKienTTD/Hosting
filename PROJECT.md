@@ -1,6 +1,6 @@
 # TTD METAL — Tổng quan dự án AI Automation
 
-**Điểm bắt đầu cho mọi tác nhân** | Cập nhật: 2026-11-21
+**Business charter (long-term).** KNG-01-only is the pinned release-source priority, not proof of live task or merge authority.
 
 ## Dự án để làm gì?
 
@@ -15,49 +15,18 @@ Các luồng ưu tiên:
 
 Mục tiêu dài hạn là chu trình `nhận mục tiêu -> lập kế hoạch -> chọn công cụ -> thực hiện -> kiểm thử -> báo cáo -> cải thiện`, với quyền và hạn mức rõ ràng.
 
-## Hạ tầng đã biết (bằng chứng theo đợt kiểm kê 2026-11-21)
+## Ưu tiên trong nguồn snapshot (23/11/2026; kiểm chứng hiệu lực theo bối cảnh)
 
-- Hostinger VPS KVM 2 ở Kuala Lumpur; Ubuntu 24.04.4 LTS, 2 vCPU, 8 GB RAM, 100 GB SSD.
-- n8n và Hermes Agent **đã cài và đang chạy qua Docker Compose tại thời điểm kiểm kê**. Không cài lại trước khi kiểm tra.
-- Docker, PostgreSQL, Nginx cùng các dịch vụ hệ thống: đọc chi tiết trong [kiểm kê VPS](inventory/current-vps-state.md).
-- Hai service production vẫn ở Docker networks riêng. P0 có n8n sandbox và GATE A gồm Hermes auxiliary, authenticated bridge, private guard, provider mock trên các internal network; chưa có luồng paid Hermes end-to-end production-ready.
-- Có tồn đọng hardening VPS; đọc [đánh giá bảo mật](reports/2026-11-21-vps-security-review.md). Chưa tự ý thực hiện thay đổi production.
+**KNG-01 ONLY** trong snapshot nguồn; A0/Điều phối đã tạm dừng G0/UC01/UI/Ads/media/infra tại thời điểm ghi. [Nguồn định tuyến](program/current.json) chưa có hiệu lực khi PR43 còn Draft. Ngay cả sau merge, chỉ coi KNG có hiệu lực nếu có phê duyệt A0 cho đúng commit/tree và [remote main readback đã xác minh](program/kng/release_state.py); nếu thiếu thì **NOT_EFFECTIVE** và dừng giao việc mới. Work đã hoàn thành QA source PR42, không có ACK nhiệm vụ mới. Mỗi task thực tế phải có chỉ thị và ACK riêng; GitHub comment không kích hoạt Agent.
 
-## Chúng ta đang ở đâu?
+## Nguồn có thẩm quyền và trạng thái
 
-- **Đã có:** hạ tầng VPS, bản kiểm kê, quy tắc an toàn, hệ thống tri thức GitHub, n8n `2.45.7`, Hermes `0.22.5` và [kiểm toán live hai chiều](reports/2026-11-21-n8n-hermes-integration-audit.md).
-- **Đã xác minh:** hai runtime production độc lập khỏe; P0 Mức 1 structural E2E 9/9; Provider E2E real GPT-6 Luna PASS; GATE A Hermes auxiliary/guard/bridge mock E2E, no-bypass và rollback PASS.
-- **Chưa hoàn tất:** paid Hermes Agent E2E, monitoring dài hạn và connector marketing; Hermes production không bị thay thế, n8n production MCP vẫn tắt và production có 0 workflow.
-- **Công việc kỹ thuật ưu tiên kế tiếp:** chủ dự án quyết định có phê duyệt GATE B cho đúng một paid Hermes call qua guard và shared atomic ledger hay không. GATE A không tự trao quyền này.
-- Đây là định hướng; **chưa phải phê duyệt** để sửa cấu hình VPS, quảng cáo, website, publish video hay phát sinh chi phí.
+- [README](README.md) → [AGENTS](AGENTS.md) → [workflow](rules/AGENT_WORKFLOW.md) và [bảo mật](rules/REPOSITORY_SECURITY.md) → [STATE](STATE.md) → [CATALOG](CATALOG.yaml). Đọc đầy đủ quy tắc hiệu lực và đúng task trước khi viết.
+- Các mục tiêu dài hạn ở trên **không phải** lệnh triển khai production hay tăng ngân sách. A0 giữ quyền phê duyệt merge, paid, production và xuất bản.
+- Lịch sử trạng thái/ưu tiên của PR31 được bảo toàn tại [PROJECT.md@PR31](https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/PROJECT.md), blob `bf8b107f7a36dd81d02f859d6a8d5e499d9c83a6`. Bản này đã ghi các thông tin host/service tại lần kiểm tra 21/11/2026; không suy ra tình trạng live ngày 23/11.
+- [Inventory VPS](inventory/current-vps-state.md) và [báo cáo bảo mật](reports/2026-11-21-vps-security-review.md) là bằng chứng theo thời điểm; xác minh live riêng trước mọi quyết định sản xuất.
+- A1 thực thi KNG code trên nhánh cô lập; Work độc lập QA; Chat Điều phối chịu trách nhiệm tích hợp. Hermes HOLD, Codex NOT_AUTHORIZED, Hostinger và A2 không nhận feature task mới khi KNG còn mở.
 
-## Phân vai và cách phối hợp
+## Lưu hồ sơ
 
-Xem [danh bạ tác nhân](agents/README.md). ChatGPT phụ trách tư vấn/đặc tả/review theo yêu cầu; Codex ưu tiên kỹ thuật/kiểm thử; Hermes ưu tiên AI reasoning/tool execution; n8n là workflow engine; Hostinger là nền tảng VPS, còn Hostinger Agent cần khảo sát năng lực độc lập. Phân vai mang tính ưu tiên, không khóa cứng; quyền production/chi phí do chủ dự án cấp cụ thể. Trong giai đoạn khảo sát, chủ dự án chuyển tiếp lời giao việc giữa các tác nhân. Tất cả bàn giao tài liệu và kết quả qua GitHub nếu có quyền, trạng thái job realtime qua n8n/DB khi đã triển khai.
-
-## Tài liệu nào cần đọc?
-
-1. [README](README.md) — bản đồ repository.
-2. [STATE](STATE.md) — trạng thái và vướng mắc cập nhật thường xuyên.
-3. [CATALOG](CATALOG.yaml) — xác định tài liệu có thẩm quyền.
-4. [AGENTS](AGENTS.md) và [Quy ước giao/bàn giao](rules/AGENT_WORKFLOW.md) — cách nhận việc, ghi kết quả và phối hợp.
-5. [Kiểm kê VPS](inventory/current-vps-state.md) — bối cảnh kỹ thuật, [Bảo mật](reports/2026-11-21-vps-security-review.md) khi cần.
-6. Sau đó đọc **task cụ thể** trong `tasks/`; không cần đọc mọi report cũ.
-
-## Quy trình đơn giản
-
-- **Giao việc:** đặc tả trên GitHub -> gửi link cho tác nhân.
-- **Làm việc:** truy cập đúng nguồn, tự chọn cách làm trong giới hạn được giao, lưu bằng chứng.
-- **Bàn giao:** commit/push báo cáo vào `reports/`, cập nhật `STATE.md` khi cần -> trả link ngắn.
-- Mọi kết luận phải tách **thực tế đã kiểm thử**, **ước tính**, **kế hoạch**, **chưa xác minh**.
-
-## Không gian tài liệu
-
-- `tasks/`: đặc tả/công việc đang và sẽ thực hiện.
-- `reports/`: báo cáo, kết quả test, checkpoint có ngày.
-- `inventory/`: tình trạng hệ thống hiện hành.
-- `knowledge/`, `runbooks/`, `decisions/`: tri thức, vận hành, quyết định.
-- `rules/`: giới hạn chung.
-- `scripts/`: công cụ có thể xem và kiểm tra.
-
-**Không đưa bí mật hoặc dữ liệu nhạy cảm chưa được xử lý vào Git public.** Xem chính sách hiện hữu.
+`tasks/` giao việc và tiêu chí; `reports/` và Git objects lưu evidence; `program/` lưu candidate định tuyến/roadmap; `rules/` là điều kiện an toàn bắt buộc. Repo **public**: tuyệt đối không đưa bí mật/PII, .env, dump, backup lên Git.
