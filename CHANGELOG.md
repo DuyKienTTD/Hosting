@@ -2,6 +2,9 @@
 
 ## 2026-11-23
 
+- **A0 — cost-first agent allocation:** bổ sung **A1 (ChatGPT Thông thường, phiên riêng)**, phân biệt Điều phối/Work, đưa Codex về `CODEX_NOT_AUTHORIZED` mặc định, thu hồi các lệnh Codex đơn giản chưa thực hiện, giữ nguyên lịch sử PASS và gate paid/production. Xem [workflow §11](rules/AGENT_WORKFLOW.md), [allocation v2](tasks/2026-11-23-a1-cost-first-master-allocation.md), [A1](agents/a1.md) và [report](reports/2026-11-23-a1-codex-cost-reallocation.md). Các lệnh cần owner forward/ACK; PR governance chưa merge.
+
+
 - Nghiệm thu B2-O fake local tại `d95f161` và chuẩn bị B2-P preflight chỉ đọc.
 
 ## 2026-11-22
