@@ -83,14 +83,15 @@ Runbook **không cấp quyền publish**. Nếu credential, quyền, claim hoặ
 
 Một package chỉ được coi là `APPROVED` khi đủ:
 - approved brief
-- approved assets or approved placeholders for draft-only review
+- assets có provenance, quyền sử dụng và consent đã được duyệt; **placeholder synthetic chỉ đủ cho `DRAFT/NEEDS_REVIEW`, không thay quyền sử dụng tài sản thật**
 - approved script/storyboard
 - QA pass signed by correct reviewers
-- channel login/permission owner identified
+- channel permission được account owner xác minh (biết tên owner thôi chưa đủ)
 - publish method identified (manual export hoặc connector tương lai)
 - event/UTM naming present
 
 Nếu thiếu bất kỳ mục nào ở trên, package không được rời `NEEDS_REVIEW/BLOCKED`.
+`APPROVED` trong fixture kiểm thử chỉ là trạng thái **giả lập**, không phải chữ ký duyệt nội dung hay quyền xuất bản thật. Trong GROW-01/S1, cả ba package thật vẫn `DRAFT`.
 
 ## Gate 7 — Scheduled/published by separately authorized connector
 

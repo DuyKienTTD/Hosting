@@ -391,11 +391,85 @@
     "At least one negative tabletop blocker example recorded",
     "Evidence shows 0 publish, 0 paid render, 0 account mutation"
   ],
+  "package_review_state": {
+    "P1-short-vi-craftsmanship": "DRAFT",
+    "P2-install-howto-en": "DRAFT",
+    "P3-landing-brief-envi": "DRAFT"
+  },
+  "gate_fixture_policy": {
+    "type": "offline tabletop proposal, not a deployed connector or publication gate",
+    "decision_order": [
+      "rights_status != approved OR technical_claim_status != approved => BLOCKED",
+      "requested_transition == PUBLISHED => BLOCKED in GROW-01/S1 regardless of approvals",
+      "any missing signoff for business, consent, channel, cost or final publication => NEEDS_REVIEW",
+      "otherwise requested_transition == APPROVED => APPROVED only in synthetic fixture"
+    ],
+    "synthetic_approved_is_not_human_signoff": true
+  },
+  "gate_fixture_cases": [
+    {
+      "id": "F1-rights-missing",
+      "package_id": "P1-short-vi-craftsmanship",
+      "rights_status": "unknown",
+      "technical_claim_status": "approved",
+      "signoffs": {"business": true, "consent": true, "channel": true, "cost": true, "final_publication": true},
+      "requested_transition": "APPROVED",
+      "expected_status": "BLOCKED",
+      "observed_status": "BLOCKED"
+    },
+    {
+      "id": "F2-engineer-missing",
+      "package_id": "P2-install-howto-en",
+      "rights_status": "approved",
+      "technical_claim_status": "unknown",
+      "signoffs": {"business": true, "consent": true, "channel": true, "cost": true, "final_publication": true},
+      "requested_transition": "APPROVED",
+      "expected_status": "BLOCKED",
+      "observed_status": "BLOCKED"
+    },
+    {
+      "id": "F3-account-unknown",
+      "package_id": "P3-landing-brief-envi",
+      "rights_status": "approved",
+      "technical_claim_status": "approved",
+      "signoffs": {"business": true, "consent": true, "channel": false, "cost": true, "final_publication": true},
+      "requested_transition": "APPROVED",
+      "expected_status": "NEEDS_REVIEW",
+      "observed_status": "NEEDS_REVIEW"
+    },
+    {
+      "id": "F4-publish-out-of-scope",
+      "package_id": "P1-short-vi-craftsmanship",
+      "rights_status": "approved",
+      "technical_claim_status": "approved",
+      "signoffs": {"business": true, "consent": true, "channel": true, "cost": true, "final_publication": true},
+      "requested_transition": "PUBLISHED",
+      "expected_status": "BLOCKED",
+      "observed_status": "BLOCKED"
+    },
+    {
+      "id": "F5-all-synthetic-signoffs",
+      "package_id": "P1-short-vi-craftsmanship",
+      "rights_status": "approved",
+      "technical_claim_status": "approved",
+      "signoffs": {"business": true, "consent": true, "channel": true, "cost": true, "final_publication": true},
+      "requested_transition": "APPROVED",
+      "expected_status": "APPROVED",
+      "observed_status": "APPROVED"
+    }
+  ],
+  "fixture_test_execution": {
+    "method": "offline Python stdlib evaluator on synthetic JSON cases; no connector/runtime invocation",
+    "scope": "5 synthetic cases plus completeness/ID/capability checks for 3 existing packages",
+    "result": "PASS_OFFLINE_ONLY",
+    "human_approvals_granted": false,
+    "publication_gate_deployed": false
+  },
   "negative_tabletop_test": {
     "scenario": "P2 draft receives a request to add exact anchor spacing and claim universal fit, while no engineer approval or approved hardware spec exists.",
     "expected": "Package status must become BLOCKED and cannot transition to APPROVED or PUBLISHED.",
-    "observed": "Blocked path defined in report/runbook and technical fields remain REQUIRES_PRODUCT_ENGINEER_APPROVAL.",
-    "result": "PASS"
+    "observed": "Original 8113c33 evidence described a stop rule, not an executed gate; resumed offline fixture F2 exercises the proposed rule without live publish.",
+    "result": "PASS_OFFLINE_FIXTURE_ONLY"
   },
   "no_side_effects_evidence": {
     "publish_count": 0,
