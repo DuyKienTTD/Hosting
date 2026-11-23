@@ -55,6 +55,7 @@ documents:
     type: task
     status: archived-inactive-not-dispatchable
     authoritative_for: historical-pr31-allocation-archive-not-operational-task-authority
+    # Original task frontmatter remains byte-exact PR31 evidence; catalog excludes it from dispatch.
     updated_at: 2026-11-23
     dispatch_eligible: false
     sensitivity: public
@@ -216,8 +217,8 @@ documents:
   - id: agent-codex
     path: agents/codex.md
     type: knowledge
-    status: current
-    authoritative_for: codex-role-capabilities
+    status: historical-capability-profile-non-routing
+    authoritative_for: codex-capability-evidence-not-current-work-dispatch
     updated_at: 2026-11-21
     verified_at: 2026-11-21
     sensitivity: public-redacted
