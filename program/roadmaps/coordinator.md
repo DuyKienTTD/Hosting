@@ -272,7 +272,7 @@ Each work order is design/roadmap maintenance only, defines exact WBS scope, fir
 
 **No role profile or Agent roadmap was edited by Coordinator.** A0 Assistant profile is readable at PR47 branch only; PR47 remains Draft/unmerged and is not an effective main profile. This Coordinator branch does not claim PR47 integration.
 
-**Current delivery status:** `R1–R5,R7=CORRECTED_ON_CANDIDATE_BRANCH`; `R6=PREPARED_FOR_OWNER_FORWARD`; `DGN3=ROW_LEVEL_DESIGN_COMPLETE`; `DGN4=ROW_LEVEL_MATRIX_COMPLETE_WITH_CONDITIONS`; `DGN_PACKAGE=NOT_ACCEPTED`; `EXECUTION_READINESS=NOT_PASSED`; `PRODUCT_EXECUTION=HOLD`.
+**Current delivery status:** `R1–R5,R7=CORRECTED_ON_CANDIDATE_BRANCH`; `R6=COMPLETE_3_OF_3_SOURCE_VERIFIED`; `DGN3=ROW_LEVEL_DESIGN_COMPLETE`; `DGN4=ROW_LEVEL_MATRIX_COMPLETE_WITH_CONDITIONS`; `DGN_PACKAGE=REVIEWED_WITH_CONDITIONS_A0_OWNER_DECISION_PENDING`; `EXECUTION_READINESS=NOT_PASSED`; `PRODUCT_EXECUTION=HOLD`.
 
 
 ### Work roadmap integration receipt — source verified (2026-11-24)
