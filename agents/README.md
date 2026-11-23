@@ -7,9 +7,11 @@
 | Thành phần | Loại | Vai trò ưu tiên | Hồ sơ | Mức xác minh |
 |---|---|---|---|---|
 | ChatGPT Điều phối | AI trợ lý tương tác | tư vấn, đặc tả, phân tích, điều phối bằng GitHub | [chatgpt](chatgpt.md) | GitHub write/read đã thử trong phiên; thực thi nền chưa có |
-| **A1 — ChatGPT Thông thường** | AI trợ lý phiên riêng | tài liệu, Git metadata, validator/fixtures/code nhỏ nếu tool verified | [a1](a1.md) | phiên A1 chưa ACK; công cụ GitHub/shell UNKNOWN |\n| ChatGPT Work | Agent thực hiện đa bước | source QA độc lập, browser/UX, offline integration | [chatgpt](chatgpt.md) (profile Work riêng pending) | bằng chứng qua PR review; quyền từng phiên |\n| Codex | Tác nhân kỹ thuật **ngoại lệ chi phí** | chỉ case đặc thù đã chứng minh các Agent khác không làm được | [codex](codex.md) | CODEX_NOT_AUTHORIZED cho lệnh mới nếu chưa được A0 duyệt chi phí |
+| **A1 — ChatGPT Thông thường** | AI trợ lý phiên riêng | GitHub/metadata, validator, code offline, QA độc lập theo task | [a1](a1.md) | Role ACK; PR #32 author delta, Work QA offline PASS_WITH_LIMITS; PR #33 proposal review PASS_WITH_LIMITS | 
+| ChatGPT Work | Agent thực hiện đa bước | source QA độc lập, browser/UX, offline integration | [chatgpt](chatgpt.md) (profile Work riêng pending) | QA PR #32 và PR #24 đã có evidence; quyền theo phiên |
+| Codex | Tác nhân kỹ thuật **ngoại lệ chi phí** | chỉ case đặc thù đã chứng minh các Agent khác không làm được | [codex](codex.md) | CODEX_NOT_AUTHORIZED cho lệnh mới nếu chưa được A0 duyệt chi phí |
 | Hermes | AI agent trên VPS/WebUI | suy luận, tools, memory, thực thi tác vụ | [hermes](hermes.md) | capability survey hoàn tất; E2E với n8n chưa chạy |
-| Hostinger | Nhà cung cấp / control plane + Hostinger Agent | Cloud Hosting, WordPress, domain/DNS/email, VPS/Docker/backup | [hostinger](hostinger.md) | khảo sát account inventory + GitHub PASS; thao tác theo quyền/approval |
+| Hostinger | Nhà cung cấp / control plane + Hostinger Agent | hPanel/VPS/DNS, capability lịch sử (không giao mới) | [hostinger](hostinger.md) | **PAUSED theo A0**, chưa ACK thông báo; mọi thay đổi tiếp tục bị chặn |
 | n8n | Workflow engine, **không phải AI agent** | trigger, connectors, schedule, job state | [n8n](n8n.md) | service healthy, 0 workflow, MCP tắt |
 
 **Hostinger Agent** là trợ lý AI có giao diện trong hPanel, phải khảo sát riêng; không đồng nhất với Hostinger là nhà cung cấp hoặc với quyền root/VPS. Các hồ sơ là **bản ghi năng lực** không phải lệnh cấp quyền.
@@ -22,6 +24,12 @@
 - `BLOCKED`: chưa thể thử do thiếu quyền/cấu hình/đầu vào.
 - `UNKNOWN`: chưa biết; không được suy diễn.
 - `PLANNED`: mục tiêu tương lai, không phải năng lực hiện tại.
+
+## Lệnh tạm dừng Hostinger và phân công mới (A0, 2026-11-23)
+
+**HOSTINGER_AGENT_PAUSED:** đình chỉ giao mới và thu hồi lệnh chưa thực thi; [OPS pause PR #24](https://github.com/DuyKienTTD/Hosting/pull/24#issuecomment-7093337445), [SEC pause PR #29](https://github.com/DuyKienTTD/Hosting/pull/29#issuecomment-7093338761). Hostinger chưa ACK việc tạm dừng qua phiên riêng; không khẳng định runtime đã dừng. Năng lực Hostinger vẫn là hồ sơ lịch sử, **không phải owner đang sẵn sàng**. Tiếp tục chỉ khi A0 tái cấp quyền và phiên Agent ACK.
+
+**OPS-01A/S2-D2:** [A1 là writer duy nhất](https://github.com/DuyKienTTD/Hosting/pull/24#issuecomment-7093346631), branch A1 riêng **stacked trên PR #24 tại HEAD `e9c2d8f759850ea9c654de7e103549e041f66679`**, không sửa branch Hostinger. A1 task execution còn chờ ACK/bàn giao mới; Work QA độc lập sau A1. Lịch sử Hostinger D1 và Work QA 18 nhóm vẫn giữ nguyên.
 
 ## Cách phối hợp
 
@@ -36,7 +44,7 @@
 
 ## Điều phối nghiên cứu trước thực thi
 
-**Bắt buộc đọc** [AGENTS](../AGENTS.md), [AGENT_WORKFLOW mục 7](../rules/AGENT_WORKFLOW.md), [quy tắc bảo mật](../rules/REPOSITORY_SECURITY.md), [STATE](../STATE.md), [CATALOG](../CATALOG.yaml), hồ sơ của mình và task trước khi nhận việc. Thứ tự ưu tiên: ChatGPT tổng hợp nguồn chính thức + evidence; Hostinger Agent khảo sát VPS/hPanel/network/hosting; Hermes khảo sát agent/inference/tools/serialized request; Codex viết code, chạy test, deploy sandbox/rollback; n8n thực thi workflow khi đã bật. **Phân vai dựa trên năng lực và quyền được chứng minh trong phiên, không độc quyền.**
+**Bắt buộc đọc** [AGENTS](../AGENTS.md), [AGENT_WORKFLOW mục 7 và 11](../rules/AGENT_WORKFLOW.md), [quy tắc bảo mật](../rules/REPOSITORY_SECURITY.md), [STATE](../STATE.md), [CATALOG](../CATALOG.yaml), hồ sơ của mình và task trước khi nhận việc. **Lưu ý lịch sử:** hướng dẫn trước 23/11 từng mặc định giao Codex việc code/test/deploy và Hostinger khảo sát VPS. **Không áp dụng cho lệnh mới.** Hiện tại Điều phối đối chiếu nguồn/evidence, A1/Work/Hermes đảm nhiệm phần việc phù hợp, Hostinger Agent **PAUSED** theo chỉ thị A0 và Codex **exception-only** có phê duyệt chi phí; n8n chỉ thực thi workflow đã bật. **Phân vai dựa trên năng lực, quyền và trạng thái phiên được chứng minh.**
 
 Mọi handoff phải có **một owner**, nguồn đầu vào, **bước bắt đầu cụ thể**, bằng chứng nghiệm thu, giới hạn quyền, next owner và trạng thái `PREPARED/SENT/ACKNOWLEDGED/IN_PROGRESS/DONE/BLOCKED`. GitHub task đã commit chỉ là `PREPARED`, chưa phải đã gửi/nhận. Nếu phải chuyển tiếp thủ công, báo `PREPARED_FOR_OWNER_FORWARD` và cung cấp thông điệp rõ người nhận. Người nhận đọc lại quy tắc và ghi rule commit đã dùng trong ACK/report.
 
@@ -49,8 +57,8 @@ Mọi handoff phải có **một owner**, nguồn đầu vào, **bước bắt �
 | Video/content pipeline | Hermes | n8n, Codex, công cụ media | chi phí render và publish cần gate |
 | Ads/SEO analysis | Hermes hoặc ChatGPT | n8n, Codex, connectors | read-first, chỉ ghi khi có quyền |
 | Scheduled reporting | n8n workflow + owner nghiệp vụ | Hermes, DB | n8n điều phối, không tự suy luận |
-| Backup, network, VPS ops | Hostinger Agent; Work/Hermes nếu offline phù hợp | A1/ChatGPT; Codex ngoại lệ | tránh mất kết nối/downtime |
-| Cloud Hosting, domain, DNS, email, backup inventory | Hostinger Agent | Codex, ChatGPT | chỉ thao tác khi tool/quyền đã kiểm chứng |
+| Backup, network, VPS ops | **PAUSED** đối với Hostinger; Work/A1/Hermes chỉ được làm offline/source trong scope hiện có | ChatGPT; Codex exception-only | không có lệnh live VPS/backup, tránh downtime |
+| Cloud Hosting, domain, DNS, email, backup inventory | **Hostinger PAUSED** (owner tương lai sau A0 resume) | ChatGPT/A1 read-only nếu có quyền riêng | không triển khai live hoặc tiếp nhận work Hostinger đang bị thu hồi |
 
 ## Nguồn xác minh
 
@@ -60,4 +68,4 @@ Mọi handoff phải có **một owner**, nguồn đầu vào, **bước bắt �
 - [VPS inventory](../inventory/current-vps-state.md)
 - [Hostinger account/capability inventory](../reports/2026-11-21-hostinger-account-capability-inventory.md)
 
-**Ghi chú áp dụng:** phân vai legacy trong các dòng cũ chỉ là lịch sử; [workflow mục 11](../rules/AGENT_WORKFLOW.md) và [allocation v2](../tasks/2026-11-23-a1-cost-first-master-allocation.md) kiểm soát lệnh mới. A1 chưa có năng lực GitHub/shell được xác minh trong phiên A1; không gán nhiệm vụ đã nhận khi chưa ACK.
+**Ghi chú áp dụng:** phân vai legacy trong các dòng cũ chỉ là lịch sử; [workflow mục 11](../rules/AGENT_WORKFLOW.md) và [allocation v2](../tasks/2026-11-23-a1-cost-first-master-allocation.md) kiểm soát lệnh mới. A1 đã ROLE_ACK và TASK_ACK cho PR #32/#33, có commit/QA evidence; ACK nhiệm vụ mới vẫn bắt buộc. Hostinger PAUSED: không nhận nhiệm vụ mới hoặc tiếp tục work cũ khi chưa có chỉ thị A0 và ACK.
