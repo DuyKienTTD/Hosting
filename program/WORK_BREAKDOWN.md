@@ -624,7 +624,7 @@ Every row defines exactly 18 fields: `WBS_ID | PRODUCT_OUTCOME | FEATURE/UI | WO
 - **PRIMARY_OWNER_CANDIDATE:** Coordinator
 - **AGENT_CANDIDATES:** Coordinator
 - **CONTRIBUTORS:** A0 Assistant (independent reviewer, not execution owner)
-- **PREDECESSORS:** DGN-1,DGN-2,DGN-3,DGN-4; roadmap-level handoffs or justified partial blockers.
+- **PREDECESSORS:** DGN-1,DGN-2,DGN-3,DGN-4,G2-03; roadmap-level handoffs or justified partial blockers.
 - **ENVIRONMENT_DATA_ACCESS:** Design branches/PRs; read-only evidence.
 - **RISK_COST_STOP:** Coordinator cannot self-review as independent. No merge authority. A0 Assistant live session evidence not yet available.
 - **ACCEPTANCE:** Eight package properties: UI→WBS, skill evidence, one owner/fallback, actionable roadmaps, evidence/SHA/time, no conflicts, no unauthorized effects, clear next action/STOP.
