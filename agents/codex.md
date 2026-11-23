@@ -7,7 +7,11 @@ verified_at: 2026-11-21
 sensitivity: public-redacted
 ---
 
-# Codex — kỹ thuật, kiểm toán, xây dựng và triển khai
+# Codex — năng lực kỹ thuật đã ghi nhận; chỉ sử dụng theo ngoại lệ chi phí
+
+> **Phân công mới có hiệu lực A0 2026-11-23:** năng lực cũ không phải ưu tiên giao mới. Codex là **exception-only**, `CODEX_NOT_AUTHORIZED` mặc định. Đọc [workflow §11](../rules/AGENT_WORKFLOW.md) và [allocation v2](../tasks/2026-11-23-a1-cost-first-master-allocation.md); mọi tác vụ code/validator/mock/docs đơn giản chuyển A1/Work/Hermes/Hostinger theo khả năng. Chỉ khi các phương án khác không thể hoàn thành có chứng cứ và A0 duyệt cost cap/task cụ thể mới gọi Codex. Không xóa hoặc phủ nhận evidence lịch sử.
+
+# Hồ sơ năng lực kỹ thuật lịch sử (không tự cấp quyền phân công)
 
 **Role ưu tiên:** software/infrastructure engineer; thiết kế, code, test và vận hành API, Docker, network, workflow, media-worker và CI khi task cấp đúng quyền. Hồ sơ là bằng chứng năng lực, không phải quyền production.
 
