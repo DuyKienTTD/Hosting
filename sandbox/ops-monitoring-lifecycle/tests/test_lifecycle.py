@@ -27,12 +27,12 @@ class D1(unittest.TestCase):
   x=Lifecycle(); x.ingest(s('a',1)); x.ingest(s('b',1)); x.ingest(s('c',1)); self.assertNotEqual(x.state,'OPEN')
  def test_open_899_900_901_are_notification_only(self):
   for delta,kind,emitted in ((899,'SUPPRESSED_COOLDOWN',False),(900,'NOTIFICATION',True),(901,'NOTIFICATION',True)):
-   x=Lifecycle(); batch(x,0); events=batch(x,delta); self.assertEqual(events,[kind]); self.assertEqual(x.incident_seq,1); self.assertEqual(events[0],kind); self.assertEqual(x.last_alert_ts is not None,True)
+   x=Lifecycle(); batch(x,0); events=batch(x,delta); self.assertEqual([e['kind'] for e in events],[kind]); self.assertEqual(x.incident_seq,1); self.assertEqual(events[0]['notification_emitted'],emitted)
  def test_recovered_boundaries_start_new_incident(self):
   for delta,emitted in ((899,False),(900,True),(901,True)):
-   x=Lifecycle(); batch(x,0); batch(x,10,'good','g'); old_alert=x.last_alert_ts; batch(x,delta,'bad','r'); self.assertEqual(x.state,'OPEN'); self.assertEqual(x.incident_seq,2); self.assertEqual(x.last_alert_ts != old_alert,emitted)
+   x=Lifecycle(); batch(x,0); batch(x,10,'good','g'); old_alert=x.last_alert_ts; events=batch(x,delta,'bad','r'); self.assertEqual([e['kind'] for e in events],['OPEN']); self.assertEqual(x.state,'OPEN'); self.assertEqual(x.incident_seq,2); self.assertEqual(x.last_alert_ts != old_alert,emitted)
  def test_wrong_source_future_does_not_poison_corrected_timestamp(self):
-  x=Lifecycle(); before=x.control_snapshot(); x.ingest(s('x',999,source='wrong')); self.assertEqual(before,x.control_snapshot()); self.assertEqual(batch(x,1),['OPEN'])
+  x=Lifecycle(); before=x.control_snapshot(); x.ingest(s('x',999,source='wrong')); self.assertEqual(before,x.control_snapshot()); self.assertEqual([e['kind'] for e in batch(x,1)],['OPEN'])
  def test_pinned_s1_composition_fixture(self):
   s1=PinnedS1Evaluator(); x=Lifecycle(); events=[]
   for i in range(3): bad,good=s1.evaluate('bad'); events+=x.ingest(s(i,i))
