@@ -14,7 +14,7 @@ RELS=['program/kng/validate.py','program/kng/test_validate.py','program/current.
       'program/WORK_BREAKDOWN.md','program/roadmaps/a1.md',
       'program/PRODUCT_AND_UI.md','program/SKILL_REGISTRY.md','program/roadmaps/work.md',
       'README.md','program/kng/select_task.py','program/kng/test_select_task.py','program/kng/derive.py','reports/evidence/2026-11-23-a1-kng01-d2-q0-metrics.json',
-      'AGENTS.md','PROJECT.md','STATE.md','CATALOG.yaml',
+      'agents/README.md','AGENTS.md','PROJECT.md','STATE.md','CATALOG.yaml',
       'rules/AGENT_WORKFLOW.md','rules/REPOSITORY_SECURITY.md']
 class Contract(unittest.TestCase):
     def setUp(self):
