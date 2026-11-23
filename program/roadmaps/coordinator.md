@@ -370,3 +370,16 @@ NEXT_OWNER: A0_ASSISTANT_INDEPENDENT_PACKAGE_REVIEW
 **Review scope requested:** assess DGN-1 Product Charter/UI; DGN-2 capability directory and Operating Model draft; DGN-3 all 32 WBS rows; DGN-4 all 32 assignment rows; A1/A2/Work self-owned roadmap integration; source provenance, dependencies, capability/permission boundaries, fallback, cost, STOP and readiness. A0 Assistant must use its current role profile and effective main rules before review. This Coordinator has performed source/structure reconciliation, not independent QA of its own integrated package.
 
 **Verdict remains:** `DGN_PACKAGE=INTEGRATED_CANDIDATE_NOT_ACCEPTED`; `EXECUTION_READINESS=NOT_PASSED`; `PRODUCT_EXECUTION=HOLD`. No merge, build, paid operation, live account action or rule activation is requested by this PR.
+
+
+### Post-integration structural reconciliation — latest source pins (2026-11-24)
+
+After the initial package snapshot and before review, a targeted cross-source comparison found minor documentation alignment issues (G2-03 owner annotation, REL-02 skill annotation, and paused Hostinger roadmap target wording). These were corrected in the WBS only; no new WBS ID or permission was added.
+
+- Latest WBS blob: `a882ea636368af9cd2c13aa86c9def080dda91aa` — 32/32 unique rows, 18 fields each; G2-03 sole proposed owner is Coordinator, A0 remains reserved approval authority; REL-02 skill IDs match canonical K-ID syntax; paused Hostinger target-roadmap wording aligned with Assignment Matrix.
+- Assignment Matrix blob: `d2cd89cfa43d45c4bee9b6743d18e755f2fec23c` — 32/32 unique rows, all exactly 15 columns.
+- Reconciliation: WBS and Matrix skill IDs match per row after the targeted fixes; all matrix K-* IDs resolve against the 20-ID DGN-2 dictionary; no missing/unknown K-ID.
+- Integrated package PR #50 head now `15e58562eee503d203c47b9d4880d614ecf7ba17`, Draft/Open/Unmerged, base main `d549564de52429e777c68daf9df7a93df5f22f27`. GitHub REST reports `mergeable_state=clean`; connector mergeability field was stale/false on one read, so do not treat that stale field as a conflict. No merge performed.
+- PR #50 includes 13 files: Product/UI, Skill Registry, Operating Model draft, WBS, Assignment Matrix, three Agent roadmaps, Coordinator roadmap, CATALOG and three prepared historical work orders. The PR is one integrated review candidate; individual source PRs remain unmerged.
+
+**Current verdict remains `INTEGRATED_CANDIDATE_NOT_ACCEPTED`.** The targeted structural checks do not replace independent review of product value, operating-model sufficiency, WBS execution readiness, per-row capability/rights, critical path, cost/STOP, and Agent roadmap usability. A0 Assistant must now conduct the single independent package review; A0 retains final decision. Product execution remains HOLD.
