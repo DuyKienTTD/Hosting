@@ -17,6 +17,84 @@ WS02_ACTOR = 'Work'
 WS02_ID = 'WS-02'
 D2_WORK_ID = 'WORK-KNG01-D2-TARGETED-INDEPENDENT-REQA'
 
+# F4: exhaustive admitted outer states. Transition to a trusted status additionally
+# requires an independent, pinned authority decision below.
+WS02_HANDOFF_STATES = frozenset({'UNKNOWN', 'PREPARED_FOR_OWNER_FORWARD', 'ACKNOWLEDGED'})
+WS02_REVIEW_STATES = frozenset({'UNKNOWN_NEW_REPORT', 'PENDING_REVIEW', 'REJECTED_PAPER_EXERCISE', 'ACCEPTED_PAPER_EXERCISE'})
+
+# F5 TRUST ROOT: only coordinator/A0-reviewed, immutable decision pins belong here.
+# No operational WS-02 ACK or acceptance was approved. NEVER populate this table
+# from current.json, a Git author name, an arbitrary repository, or report fields.
+# An entry binds event_id to an authorized approval object AND exact subject.
+# Tests may inject an isolated, synthetic trust table using mock.patch.dict;
+# such a fixture is not an A0 or operational approval.
+TRUSTED_DECISIONS = {}
+TRUSTED_REVIEWERS = frozenset({'A0', 'Chat Điều phối'})
+
+
+def _pin(e):
+    if not isinstance(e, dict):
+        raise ValueError('AUTHORITY_UNVERIFIED: pinned object missing')
+    return tuple(e.get(k) for k in ('commit', 'path', 'git_blob'))
+
+
+def _authorized(root, kind, claim, subject):
+    """An existing Git blob is only a *claim*. Authorization must be anchored in
+    an independently reviewed, non-data-derived exact pin. Fail closed.
+
+    Registry entries are code-reviewed trust anchors; an unsigned self-proclaimed
+    approval Git object alone cannot grant permissions. Pinning the approval
+    requires an A0/coordinator governance decision outside this data path.
+    """
+    code = 'ACK_RECEIPT_MISMATCH' if kind.endswith('ACK') else 'ACCEPTANCE_PROVENANCE_INVALID'
+    event_id = claim.get('event_id') if isinstance(claim, dict) else None
+    if not isinstance(event_id, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._:-]{5,127}', event_id):
+        raise ValueError(code + ': AUTHORITY_UNVERIFIED: immutable event id missing')
+    anchor = TRUSTED_DECISIONS.get((kind, event_id))
+    if not isinstance(anchor, dict):
+        raise ValueError(code + ': AUTHORITY_UNVERIFIED: no independently approved authority pin')
+    if _pin(claim) != _pin(anchor.get('subject')) or _pin(subject) != _pin(anchor.get('subject')):
+        raise ValueError(code + ': AUTHORITY_UNVERIFIED: subject differs from independently approved pin')
+    approval = anchor.get('approval')
+    if _pin(approval) != _pin(claim.get('approval_ref')):
+        raise ValueError(code + ': AUTHORITY_UNVERIFIED: approval pin differs')
+    if anchor.get('reviewer') not in TRUSTED_REVIEWERS:
+        raise ValueError(code + ': AUTHORITY_UNVERIFIED: reviewer not authorized')
+    if _pin(approval) == _pin(subject):
+        raise ValueError(code + ': AUTHORITY_UNVERIFIED: self-approval forbidden')
+    raw = _git_evidence(root, approval, code)
+    try:
+        decision = json.loads(raw)
+    except (json.JSONDecodeError, TypeError) as exc:
+        raise ValueError(code + ': AUTHORITY_UNVERIFIED: invalid approval record') from exc
+    required = {
+        'event_id': event_id,
+        'kind': kind,
+        'reviewer': anchor['reviewer'],
+        'decision': 'AUTHORIZED_ACK' if kind.endswith('ACK') else 'ACCEPTED_PAPER_EXERCISE',
+        'task_id': WS02_ID if kind != 'WORK_D2_ACK' else D2_WORK_ID,
+        'actor': WS02_ACTOR,
+        'subject': subject,
+    }
+    if any(decision.get(k) != v for k, v in required.items()):
+        raise ValueError(code + ': AUTHORITY_UNVERIFIED: approval does not bind event, task, actor and subject')
+    return True
+
+
+def _validate_outer(j):
+    """All outer statuses are validated before any materialization or file IO."""
+    handoff = j.get('current_handoffs', {}).get('WS-02', {})
+    review = j.get('acceptance_index', {}).get('WS-02', {})
+    if not isinstance(handoff, dict) or handoff.get('status', 'UNKNOWN') not in WS02_HANDOFF_STATES:
+        raise ValueError('WS02_STATUS_INVALID: unsupported outer handoff status')
+    if not isinstance(review, dict) or review.get('review_state', 'UNKNOWN_NEW_REPORT') not in WS02_REVIEW_STATES:
+        raise ValueError('WS02_REVIEW_STATE_INVALID: unsupported outer review state')
+    # Completed ACK and paper acceptance must be backed by exact vetted events.
+    if handoff.get('status') == 'ACKNOWLEDGED' and handoff.get('scope') == 'HISTORICAL_PRE_KNG_NO_DISPATCH':
+        raise ValueError('ACK_RECEIPT_MISMATCH: frozen pre-KNG lane cannot transition without a new dispatch')
+    if review.get('review_state') in {'PENDING_REVIEW', 'REJECTED_PAPER_EXERCISE'} and review.get('last_evidence') is not None:
+        raise ValueError('ACCEPTANCE_PROVENANCE_INVALID: pending/rejected status cannot emit accepted evidence')
+
 
 def source(root):
     return json.loads((Path(root) / 'program/current.json').read_text(encoding='utf8'))
@@ -67,6 +145,7 @@ def _receipt(root, handoff):
         if receipt['immutable_evidence_url'] != expected_url:
             raise ValueError('ACK_RECEIPT_MISMATCH: URL not bound to exact commit/path')
     raw = _git_evidence(root, receipt, 'ACK_RECEIPT_MISMATCH')
+    _authorized(root, 'WS02_ACK', receipt, {k: receipt.get(k) for k in ('commit', 'path', 'git_blob')})
     try:
         observed = json.loads(raw)
     except (json.JSONDecodeError, TypeError) as exc:
@@ -118,6 +197,7 @@ def _accepted_report(root, record):
     if report.get('task_id') != WS02_ID or report.get('actor') != WS02_ACTOR or report.get('disposition') != 'ACCEPTED_PAPER_EXERCISE':
         raise ValueError('ACCEPTANCE_PROVENANCE_INVALID: task/actor/disposition mismatch')
     raw = _git_evidence(root, report, 'ACCEPTANCE_PROVENANCE_INVALID')
+    _authorized(root, 'WS02_ACCEPTANCE', report, {k: report.get(k) for k in ('commit', 'path', 'git_blob')})
     if not raw.strip():
         raise ValueError('ACCEPTANCE_PROVENANCE_INVALID: empty report')
     # Evidence must be machine-verifiable rather than accepted by filename alone.
@@ -125,12 +205,17 @@ def _accepted_report(root, record):
     required = {'task_id': WS02_ID, 'actor': WS02_ACTOR, 'disposition': 'ACCEPTED_PAPER_EXERCISE', 'path': path}
     if any(observed.get(k) != v for k, v in required.items()):
         raise ValueError('ACCEPTANCE_PROVENANCE_INVALID: source disposition mismatch')
-    if observed.get('evidence_ref') != report.get('evidence_ref') or not observed.get('evidence_ref'):
-        raise ValueError('ACCEPTANCE_PROVENANCE_INVALID: source evidence ref missing/mismatched')
+    ref = report.get('evidence_ref')
+    if not isinstance(ref, dict) or observed.get('evidence_ref') != ref:
+        raise ValueError('ACCEPTANCE_PROVENANCE_INVALID: report evidence ref must be an exact object pin')
+    evidence_bytes = _git_evidence(root, ref, 'ACCEPTANCE_PROVENANCE_INVALID')
+    if not evidence_bytes.strip():
+        raise ValueError('ACCEPTANCE_PROVENANCE_INVALID: evidence content empty')
     return report
 
 
 def verified_views(root, j):
+    _validate_outer(j)
     pins = (j['main_sha'], j['pr31_sha'])
     if not all(isinstance(x, str) and SHA.fullmatch(x) for x in pins):
         raise ValueError('PROVENANCE_UNVERIFIED: invalid source pins')
@@ -150,6 +235,7 @@ def verified_views(root, j):
             'event': 'ACK', 'status': 'ACKNOWLEDGED'}.items()):
             raise ValueError('ACK_RECEIPT_MISMATCH: Work D2 task/actor/event/status mismatch')
         raw = _git_evidence(root, work_receipt, 'ACK_RECEIPT_MISMATCH')
+        _authorized(root, 'WORK_D2_ACK', work_receipt, {k: work_receipt.get(k) for k in ('commit', 'path', 'git_blob')})
         try:
             observed = json.loads(raw)
         except (json.JSONDecodeError, TypeError) as exc:

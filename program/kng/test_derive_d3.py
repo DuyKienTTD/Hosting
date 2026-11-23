@@ -63,15 +63,13 @@ class D3Evidence(unittest.TestCase):
   evidence=self.commit('reports/receipt.json',payload)
   self.data['current_handoffs']['WS-02']={'source_task':WS02_TASK,'status':'ACKNOWLEDGED','ack_receipt':{**payload,**evidence}}
   self.persist()
-  self.assertTrue(run(self.root,True));self.assertTrue(run(self.root,False));self.assertIn('VERIFIED_REFERENCE',(self.root/'STATE.md').read_text())
-  before=self.snapshots();self.assertTrue(run(self.root,True));self.assertEqual(before,self.snapshots())
+  self.fails_without_writes('AUTHORITY_UNVERIFIED')  # D4: blob alone is not approval
  def test_real_report_success_idempotent(self):
   name='reports/2026-paper.json';payload={'task_id':'WS-02','actor':'Work','disposition':'ACCEPTED_PAPER_EXERCISE','path':name,'evidence_ref':'sha-verified-paper'}
   evidence=self.commit(name,payload)
   self.data['acceptance_index']['WS-02']={'review_state':'ACCEPTED_PAPER_EXERCISE','last_evidence':{**payload,**evidence}}
   self.persist()
-  self.assertTrue(run(self.root,True));self.assertTrue(run(self.root,False));self.assertIn('accepted-paper-exercise-not-live',(self.root/'CATALOG.yaml').read_text())
-  before=self.snapshots();self.assertTrue(run(self.root,True));self.assertEqual(before,self.snapshots())
+  self.fails_without_writes('AUTHORITY_UNVERIFIED')  # D4: independent reviewer approval is required
  def test_real_markdown_report_frontmatter(self):
   name='reports/approved.md'
   content='---\ntask_id: WS-02\nactor: Work\ndisposition: ACCEPTED_PAPER_EXERCISE\npath: reports/approved.md\nevidence_ref: paper-sha\n---\n\n# QA evidence\n'
@@ -81,7 +79,7 @@ class D3Evidence(unittest.TestCase):
   evidence={'path':name,'commit':cmd(self.root,'rev-parse','HEAD'),'git_blob':cmd(self.root,'rev-parse','HEAD:'+name),'task_id':'WS-02','actor':'Work','disposition':'ACCEPTED_PAPER_EXERCISE','evidence_ref':'paper-sha'}
   self.data['acceptance_index']['WS-02']={'review_state':'ACCEPTED_PAPER_EXERCISE','last_evidence':evidence}
   self.persist()
-  self.assertTrue(run(self.root,True));self.assertTrue(run(self.root,False))
+  self.fails_without_writes('AUTHORITY_UNVERIFIED')  # D4: author Git metadata does not confer authority
  def test_cli_rejects_invalid_without_writes(self):
   self.data['acceptance_index']['WS-02']={'review_state':'UNKNOWN_NEW_REPORT','last_evidence':{'path':'reports/absent.md','git_blob':'0'*40}}
   self.persist();before=self.snapshots()
@@ -94,6 +92,6 @@ class D3Evidence(unittest.TestCase):
   name='reports/wrong.json';payload={'task_id':'WS-02','actor':'Work','disposition':'PENDING','path':name,'evidence_ref':'real-doc'}
   evidence=self.commit(name,payload)
   self.data['acceptance_index']['WS-02']={'review_state':'ACCEPTED_PAPER_EXERCISE','last_evidence':{**payload,**evidence,'disposition':'ACCEPTED_PAPER_EXERCISE'}}
-  self.fails_without_writes('source disposition mismatch')
+  self.fails_without_writes('AUTHORITY_UNVERIFIED')
 
 if __name__=='__main__':unittest.main()
