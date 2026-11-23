@@ -1,0 +1,1 @@
+{"fixture_id":"backup_overdue","samples":[{"sample_id":"b-01","source":"synthetic","resource_alias":"kvm2","environment":"synthetic","probe_origin":"fixture","observed_at_utc":"2026-01-01T00:01:00Z","measure_name":"backup_age_hours","value":193,"unit":"hours","schedule_verified":true,"health_status":"observed","freshness":"fresh"}]}
