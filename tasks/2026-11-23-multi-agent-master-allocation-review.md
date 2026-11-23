@@ -11,6 +11,15 @@ approval_scope: planning_and_read_only_review_only
 
 # DRAFT — Kế hoạch công việc tổng thể và phân bổ theo năng lực Agent
 
+## A0 OVERRIDE 2026-11-23: A1 & cost-first routing
+
+**Authoritative newer allocation proposal:** [PR #31](https://github.com/DuyKienTTD/Hosting/pull/31), [cost-first master allocation v2](https://github.com/DuyKienTTD/Hosting/blob/governance/a1-cost-first-reallocation-2026-11-23/tasks/2026-11-23-a1-cost-first-master-allocation.md), [workflow §11](https://github.com/DuyKienTTD/Hosting/blob/governance/a1-cost-first-reallocation-2026-11-23/rules/AGENT_WORKFLOW.md).
+
+Per A0 owner directive, **A1 = ChatGPT Thông thường in a separate session**, not ChatGPT Điều phối or Work; Codex is **exception-only**. Any Codex-as-default role in the historical matrix, dependency graph, waves, §§3–7 below is **SUPERSEDED_FOR_NEW_ASSIGNMENTS**; preserve the sections for historic review and source SHA provenance only. Unstarted simple Codex assignments are withdrawn; completed PRs/evidence stay intact. GOV-02/S1 cross-package-ID fix -> A1 (fallback Hermes), Work review; GOV-02/S2 Phase B Codex -> CANCELLED, keep Phase A PR #30. **Do not interpret this PR #6 addendum as a new Codex instruction, Agent ACK or production/paid approval.**
+
+Effective dispatch requirements for future Codex: `ALTERNATIVES_CHECKED | WHY_ONLY_CODEX | MAX_SCOPE | ESTIMATED_COST_OR_CALL_CAP | STOP | INDEPENDENT_REVIEWER | A0_APPROVAL_ID`. Missing any => `CODEX_NOT_AUTHORIZED`. Agent A1 still requires owner-forward + ACK + session capability test. Main and PR #31 remain unmerged; reconcile source/metadata before merging.
+
+
 **Base snapshot của đợt thẩm định:** `main@a22516aa9e5940baccc37ab2edf9eeed2ccc3d93` (23/11/2026). **Sau ACK, main đã tiến tới `e385c1bea2070973e3007e5717f7e980348d6ab3`**, chứa Hostinger report; PR #6 vẫn có base SHA cũ, phải reconcile drift trước merge. **Bốn Agent đã ACK phản biện; PR còn ở trạng thái DRAFT, chưa có phê duyệt cuối cùng hoặc quyền production/paid API.** ChatGPT chịu trách nhiệm hợp nhất; từng tác nhân chỉ xác nhận phần thuộc năng lực/quyền phiên của mình. Chủ dự án phê chuẩn baseline cuối cùng sau vòng đối chiếu.
 
 ## 1. Mục tiêu và nguồn
