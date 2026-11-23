@@ -4,11 +4,14 @@
 
 **KNG-01 ONLY:** A1 viết code/tích hợp trên nhánh được giao; Work QA độc lập; Điều phối điều hành, A0 duyệt cuối. Không tự kích hoạt G0/UC01/infra/media/Ads, Hostinger hay Codex. Quyền kỹ thuật từ hồ sơ là session-scoped, không phải authorization. Không coi GitHub comment là Work ACK, không xác nhận production/live từ dữ liệu ngày 23/11.
 
+**Bắt buộc với phiên HOSTING:** Trợ lý A0 độc lập phải đọc [hồ sơ vai trò](a0-assistant.md) đầu tiên trước khi đọc hoặc thẩm định checkpoint, báo cáo, kế hoạch, roadmap, PR hay bằng chứng dự án.
+
 ## Danh bạ năng lực (snapshot PR31 — KHÔNG phải current dispatch)
 
 | Thành phần | Loại | Năng lực lịch sử | Hồ sơ | Mức xác minh |
 |---|---|---|---|---|
 | ChatGPT Điều phối | AI trợ lý tương tác | tư vấn, đặc tả, phân tích, điều phối bằng GitHub | [chatgpt](chatgpt.md) | GitHub write/read đã thử trong phiên; thực thi nền chưa có |
+| **Trợ lý A0 độc lập** | Reviewer/representative độc lập cho A0; không phải Điều phối | Nghiên cứu, phản biện, thẩm định roadmap và kết quả cấp gói | [a0-assistant](a0-assistant.md) | Vai trò do A0 chỉ định; quyền và khả năng theo nhiệm vụ/phiên thực tế |
 | **A1 — ChatGPT Thông thường** | AI trợ lý phiên riêng | GitHub/metadata, validator, code offline, QA độc lập theo task | [a1](a1.md) | Role ACK; PR #32 author delta, Work QA offline PASS_WITH_LIMITS; PR #33 proposal review PASS_WITH_LIMITS | 
 | ChatGPT Work | Agent thực hiện đa bước | source QA độc lập, browser/UX, offline integration | [chatgpt](chatgpt.md) (profile Work riêng pending) | QA PR #32 và PR #24 đã có evidence; quyền theo phiên |
 | Codex | Tác nhân kỹ thuật **ngoại lệ chi phí** | chỉ case đặc thù đã chứng minh các Agent khác không làm được | [codex](codex.md) | CODEX_NOT_AUTHORIZED cho lệnh mới nếu chưa được A0 duyệt chi phí |
