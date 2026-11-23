@@ -1,5 +1,5 @@
 schema_version: 1
-updated_at: 2026-11-22
+updated_at: 2026-11-23
 repository_visibility: public
 default_language: vi
 
@@ -14,6 +14,30 @@ entrypoints:
   change_history: CHANGELOG.md
 
 documents:
+  - id: agent-a1-chatgpt-standard
+    path: agents/a1.md
+    type: knowledge
+    status: current
+    authoritative_for: a1-standard-chatgpt-agent-role-capability-boundaries
+    updated_at: 2026-11-23
+    sensitivity: public
+
+  - id: ttd-a1-cost-first-master-allocation-2026-11-23
+    path: tasks/2026-11-23-a1-cost-first-master-allocation.md
+    type: task
+    status: proposed_reallocation_pending_agent_ack
+    authoritative_for: agent-a1-work-assignment-cost-first-codex-exception-gate
+    updated_at: 2026-11-23
+    sensitivity: public
+
+  - id: report-2026-11-23-a1-codex-cost-reallocation
+    path: reports/2026-11-23-a1-codex-cost-reallocation.md
+    type: report
+    status: proposed_for_review
+    authoritative_for: owner-ordered-reallocation-and-codex-dispatch-holds
+    updated_at: 2026-11-23
+    sensitivity: public
+
   - id: current-vps-inventory
     path: inventory/current-vps-state.md
     type: inventory
