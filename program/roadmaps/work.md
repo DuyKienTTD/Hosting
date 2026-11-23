@@ -12,7 +12,9 @@
 | UC01-02 | K-WP,K-API,K-TEST,K-UX | Turn A2 real read-only gap audit into repeatable UI/worker flow, show bounded failures | UC01-01,UI-01 | PLANNED | — |
 | GROW-03 | K-DATA,K-ADS,K-API,K-UX | Prove cross-channel reporting integration with sourced quality/freshness, distinguish mock vs live | GROW-01,UI-02 | PLANNED | — |
 
-**Completion:** a running prototype/workflow with clear environment, checks, actual receipts and independent QA for any Work-authored material code by another qualified agent. **A GitHub notification is not session ACK.** Complete existing PR31 QA before conflicting governance review, but independent UI work may proceed if no writer conflict.
+**KNG-01 priority override (2026-11-23):** All unrelated roadmap feature items are ON_HOLD_DEPENDENCY_KNG01 until Work independent QA, coordinator integration, A0-authorized merge and a new dispatch/actual ACK. Historical PLANNED items remain proposals, not current task orders.
+
+**Completion:** a running prototype/workflow with clear environment, checks, actual receipts and independent QA for any Work-authored material code by another qualified agent. **A GitHub notification is not session ACK.** Complete existing PR31 QA before conflicting governance review, and independent UI development is now ON_HOLD_DEPENDENCY_KNG01; only scoped KNG QA may proceed after real session ACK.
 ## Cách tự cập nhật
 
 Chủ roadmap cập nhật **chính file này** sau khi hoàn thành một đầu việc: chuyển `PLANNED → IN_PROGRESS → DONE_WITH_EVIDENCE`, ghi `EVIDENCE` (commit/PR/log/source link), `UTC`, kết quả PASS/FAIL và lỗi thực tế. Không yêu cầu A0/Điều phối nghiệm thu từng dòng. Chỉ thông báo một lần khi roadmap đạt `READY_FOR_ROADMAP_ACCEPTANCE` hoặc `ROADMAP_PARTIAL_BLOCKED`. Nếu còn công việc an toàn độc lập, phải làm tiếp. Không đẩy secret hoặc PII lên Git.

@@ -1,6 +1,6 @@
 # Hostinger Agent — Roadmap Infrastructure & Reliability
 
-**Owner:** Hostinger Agent | **ROADMAP_STATUS:** `PLANNED_NOT_ACKED`. A0 resumed general new-task assignment 2026-11-23; **old PR24/29 frozen branches remain frozen** pending exact owner reassignment. **READ_SET:** inventory/current-vps-state, existing Hostinger survey, backup/security findings, OPS/SEC evidence; **WRITE_SET:** own roadmap, dated sanitized infra reports and approved sandbox/infra scoped changes in separate branch. **STOP:** no backup/rollback, private key exposure, public access drift, production disruption, missing explicit task-level risk gate.
+**Owner:** Hostinger Agent | **ROADMAP_STATUS:** `PLANNED_NOT_ACKED`. Historical PR39 snapshot: A0 previously resumed general tasks, now **superseded by KNG-01-only hold**; old PR24/29 frozen branches remain frozen pending exact reownership. **No Hostinger dispatch while KNG gate is open.** **READ_SET:** inventory/current-vps-state, existing Hostinger survey, backup/security findings, OPS/SEC evidence; **WRITE_SET:** own roadmap, dated sanitized infra reports and approved sandbox/infra scoped changes in separate branch. **STOP:** no backup/rollback, private key exposure, public access drift, production disruption, missing explicit task-level risk gate.
 
 | ID | Required skills | Task / measurable deliverable | Depends | Status | Evidence / UTC |
 |---|---|---|---|---|---|
@@ -10,6 +10,8 @@
 | INF-04 | K-VPS,K-N8N,K-API,K-TEST | Sandbox-only orchestration infrastructure and durable health/recovery path with rollback | INF-02,INF-03 | PLANNED | — |
 | SEC-H | K-SEC,K-VPS,K-BACKUP | Risk-ranked hardening work package for root SSH, exposed ports, firewall, version pins, backups | INF-01 | PLANNED | — |
 | WP-H | K-VPS,K-WP,K-OBS | Diagnose read-only source of product HTTP500/errors if reproduced; no destructive changes | UC01-01 observations | PLANNED | — |
+
+**KNG-01 priority override (2026-11-23):** All unrelated roadmap feature items are ON_HOLD_DEPENDENCY_KNG01 until Work independent QA, coordinator integration, A0-authorized merge and a new dispatch/actual ACK. Historical PLANNED items remain proposals, not current task orders.
 
 **Completion:** evidence-backed backup/restore and monitoring operations, remaining unsafe changes precisely gated; no automatic paid Gate B, no production deployment from general owner authorization alone.
 ## Cách tự cập nhật

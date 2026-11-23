@@ -1,0 +1,137 @@
+{
+  "task": "A1-KNG01-GIT-NORMALIZATION-D1",
+  "phase": "D2",
+  "checks": [
+    {
+      "kind": "inventory",
+      "key": "effective_rules",
+      "source_ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "path": "AGENTS.md",
+      "verified_git_blob": "cb6a8af9d2634cc4eb959132d6c3f2fafcbfaf35"
+    },
+    {
+      "kind": "inventory",
+      "key": "priority_routing",
+      "source_ref": "PR39@22d741e3f1dd325540932dea63c3a6da635113c3",
+      "path": "program/README.md",
+      "verified_git_blob": "ff884c634fdd6029ab637c816ee332f42b863d96"
+    },
+    {
+      "kind": "inventory",
+      "key": "technical_rules",
+      "source_ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "path": "rules/AGENT_WORKFLOW.md",
+      "verified_git_blob": "69ec0db902f457f06dd547dae171220331df0f5e"
+    },
+    {
+      "kind": "inventory",
+      "key": "current_state",
+      "source_ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "path": "STATE.md",
+      "verified_git_blob": "c8e8941aa1418f70ed9542063f0485a129739d25"
+    },
+    {
+      "kind": "inventory",
+      "key": "catalog_document_ids",
+      "source_ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "path": "CATALOG.yaml",
+      "verified_git_blob": "719c9c5d2832382285d732b9ad21f55d8c163733"
+    },
+    {
+      "kind": "inventory",
+      "key": "business_charter",
+      "source_ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "path": "PROJECT.md",
+      "verified_git_blob": "c645aa2df0b6cbad1f854dd4d10c6bf15553b0f6"
+    },
+    {
+      "kind": "inventory",
+      "key": "cost_first_candidate",
+      "source_ref": "PR31@a770de80a2467ca1789c820b63416209cf53b7d1",
+      "path": "rules/AGENT_WORKFLOW.md",
+      "verified_git_blob": "3412e222364489e290be012f073f98f3ed77e3d3"
+    },
+    {
+      "kind": "inventory",
+      "key": "legacy_program_parallel_dispatch",
+      "source_ref": "PR39@22d741e3f1dd325540932dea63c3a6da635113c3",
+      "path": "program/WORK_BREAKDOWN.md",
+      "verified_git_blob": "60beab3ad23abf7c67adf288dc0c213c14befcfe"
+    },
+    {
+      "kind": "inventory",
+      "key": "hostinger_resumption_claim",
+      "source_ref": "PR39@22d741e3f1dd325540932dea63c3a6da635113c3",
+      "path": "program/roadmaps/hostinger.md",
+      "verified_git_blob": "8cdd0c2ff570416d2f1428276f8a4b1a2f58613f"
+    },
+    {
+      "kind": "inventory",
+      "key": "agent_role_reassignment",
+      "source_ref": "PR39@22d741e3f1dd325540932dea63c3a6da635113c3",
+      "path": "program/roadmaps/a1.md",
+      "verified_git_blob": "c1e75f566a1c346f12a38bfad2ca399baddaa050"
+    },
+    {
+      "kind": "inventory",
+      "key": "security_boundary",
+      "source_ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "path": "rules/REPOSITORY_SECURITY.md",
+      "verified_git_blob": "c24d608036b11dcd3fafcaefbefa23fdb591990e"
+    },
+    {
+      "kind": "inventory",
+      "key": "historical_evidence",
+      "source_ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "path": "STATE.md",
+      "verified_git_blob": "c8e8941aa1418f70ed9542063f0485a129739d25"
+    },
+    {
+      "kind": "migration_base",
+      "key": "README.md",
+      "source_ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "path": "README.md",
+      "verified_git_blob": "d86b4644a0781213b7007d9fc672c0881be36f59"
+    },
+    {
+      "kind": "migration_base",
+      "key": "PROJECT.md",
+      "source_ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "path": "PROJECT.md",
+      "verified_git_blob": "c645aa2df0b6cbad1f854dd4d10c6bf15553b0f6"
+    },
+    {
+      "kind": "migration_base",
+      "key": "STATE.md",
+      "source_ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "path": "STATE.md",
+      "verified_git_blob": "c8e8941aa1418f70ed9542063f0485a129739d25"
+    },
+    {
+      "kind": "migration_base",
+      "key": "AGENTS.md",
+      "source_ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "path": "AGENTS.md",
+      "verified_git_blob": "cb6a8af9d2634cc4eb959132d6c3f2fafcbfaf35"
+    },
+    {
+      "kind": "migration_base",
+      "key": "CATALOG.yaml",
+      "source_ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "path": "CATALOG.yaml",
+      "verified_git_blob": "719c9c5d2832382285d732b9ad21f55d8c163733"
+    },
+    {
+      "kind": "migration_base",
+      "key": "rules/AGENT_WORKFLOW.md",
+      "source_ref": "main@e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "path": "rules/AGENT_WORKFLOW.md",
+      "verified_git_blob": "69ec0db902f457f06dd547dae171220331df0f5e"
+    }
+  ],
+  "verified": 18,
+  "total": 18,
+  "method": "Authenticated Github fetch_file(path,exact pinned commit) returned actual Git blob SHA matching each source; separately checked via connector in A1 D2; local full Git object graph unavailable",
+  "local_full_git_validation": "NOT_RUN_PROVENANCE_UNVERIFIED",
+  "note": "This is remote source-object check, not a local git fsck or full ancestry verification"
+}
