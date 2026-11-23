@@ -2,6 +2,10 @@
 
 Các hướng dẫn này áp dụng cho toàn bộ repository.
 
+## A0 cập nhật — ChatGPT Standard trước, Hermes tạm ngừng giao mới (23/11/2026)
+
+**Áp dụng [AGENT_WORKFLOW mục 12](rules/AGENT_WORKFLOW.md)** khi phân công mới: ChatGPT thông thường tự nghiên cứu, soạn đặc tả, phân tích và cập nhật tài liệu trong quyền thực tế; A1/Work chỉ khi thêm bằng chứng hoặc QA độc lập. **Hermes = HOLD_NO_NEW_TASKS** do rủi ro chi phí, chỉ ngoại lệ được A0 chấp thuận bằng giới hạn; **Hostinger PAUSED, Codex NOT_AUTHORIZED** tiếp tục. Tách `MOCK/OFFLINE_PASS` khỏi `LIVE_READY`, không đếm PR draft hoặc ma trận `DESIGNED_NOT_RUN` thành chức năng triển khai. [Báo cáo tiến độ dự án](reports/2026-11-23-hosting-progress-and-target-capabilities.md) là ước lượng có trọng số, không chứng nhận go-live. GitHub comment không tự kích hoạt agent.
+
 ## Ưu tiên phân công hiện hành — A1 và Codex ngoại lệ (A0, 2026-11-23)
 
 **Mục 11 [AGENT_WORKFLOW](rules/AGENT_WORKFLOW.md) có hiệu lực ưu tiên** khi tài liệu cũ gợi ý giao Codex theo thói quen. **A1 là ChatGPT Thông thường ở phiên riêng**, khác ChatGPT Điều phối và ChatGPT Work; xem [hồ sơ A1](agents/a1.md) và [master allocation v2](tasks/2026-11-23-a1-cost-first-master-allocation.md). Điều phối phải tự thực hiện hoặc giao A1/Work/Hermes nếu đủ năng lực/công cụ (**Hostinger PAUSED**, chỉ tiếp tục khi A0 resume và Agent ACK), Codex chỉ còn ngoại lệ theo gate chi phí có A0 duyệt. **Thu hồi phần giao Codex đơn giản chưa làm**, không xóa kết quả lịch sử. Mọi lệnh GitHub vẫn `PREPARED_FOR_OWNER_FORWARD` cho tới khi Agent ACK; không tự tạo phiên A1. Không có quyền mới cho paid, live, production, merge.
