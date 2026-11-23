@@ -1,5 +1,5 @@
 schema_version: 1
-updated_at: 2026-11-22
+updated_at: 2026-11-23
 repository_visibility: public
 default_language: vi
 
@@ -200,6 +200,32 @@ documents:
     status: current
     authoritative_for: n8n-workflow-engine-capabilities
     updated_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: eng-01a-s2-fake-channel-adapters
+    path: tasks/2026-11-23-eng-01a-s2-fake-channel-adapters.md
+    type: task
+    status: ready_for_review
+    authoritative_for: eng-01a-s2-synthetic-read-scope
+    updated_at: 2026-11-23
+    sensitivity: public
+
+  - id: eng-01a-s2-fake-channel-adapters-report
+    path: reports/2026-11-23-eng-01a-s2-fake-channel-adapters.md
+    type: report
+    status: current
+    authoritative_for: eng-01a-s2-fake-ga4-wordpress-woo-read-and-mapping-results
+    updated_at: 2026-11-23
+    verified_at: 2026-11-23
+    sensitivity: public-redacted
+
+  - id: eng-01a-s2-fake-channel-adapters-evidence
+    path: reports/evidence/2026-11-23-eng-01a-s2-fake-channel-adapters.json
+    type: evidence
+    status: current
+    authoritative_for: eng-01a-s2-delta-cases-and-source-environment-digests
+    updated_at: 2026-11-23
+    verified_at: 2026-11-23
     sensitivity: public-redacted
 
   - id: hostinger-account-capability-inventory-2026-11-21
