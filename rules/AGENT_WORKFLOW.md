@@ -222,8 +222,14 @@ Chủ dự án chỉ thị: **“Bước tiếp theo ủy quyền cho bạn toà
 - **Hostinger Agent:** hPanel/VPS/hosting/OPS/SEC, read-only hoặc thay đổi có approval riêng.
 - **Codex:** *exception-only* cho việc đã chứng minh không lựa chọn nào bên trên thực hiện đủ an toàn/chính xác trong công cụ hiện tại. **n8n không phải AI Agent.**
 
+### 11.1a. A0 override mới hơn — Hostinger PAUSED (2026-11-23)
+
+- **Hostinger Agent = PAUSED_FOR_NEW_AND_UNFINISHED_TASKS.** Không điều phối bất kỳ phần việc mới hoặc chưa thực thi nào cho Agent này, kể cả `SEC-02/S3-P0-R1`, `OPS-01A/S2-D2`, hoặc sửa frontmatter PR24. Lệnh pause đã ghi [PR24](https://github.com/DuyKienTTD/Hosting/pull/24#issuecomment-7093337445) và [PR29](https://github.com/DuyKienTTD/Hosting/pull/29#issuecomment-7093338761); **chưa có ACK phiên Hostinger**, không mạo nhận runtime đã dừng. Giữ nguyên evidence đã có.
+- **Sole writer thay thế:** A1 nhận `OPS-01A/S2-D2` trên **nhánh riêng stacked vào PR24** (PR24 HEAD pin `e9c2d8f759850ea9c654de7e103549e041f66679`), tuyệt đối không push/force-push lên nhánh Hostinger. [Đặc tả A1](https://github.com/DuyKienTTD/Hosting/pull/24#issuecomment-7093346631). Work QA độc lập sau khi A1 bàn giao.
+- Năng lực hPanel/VPS của Hostinger trong hồ sơ là **bằng chứng lịch sử, không phải quyền giao việc hiện hành**. Chỉ tiếp tục khi **A0 chỉ thị resume + Hostinger ACK** và có owner được phân công lại; mọi gate VPS/production và 5 SEC work orders vẫn `NOT_AUTHORIZED`.
+
 ### 11.2. Quy tắc giao việc tiết kiệm chi phí (bắt buộc)
-1. Điều phối tự làm trực tiếp bằng công cụ hiện hữu khi scope đơn giản và có quyền. Nếu phải giao, trước hết thử **A1/Work/Hermes/Hostinger** theo năng lực phù hợp, *không ép thứ tự cứng nếu kỹ năng/quyền không khớp*.
+1. Điều phối tự làm trực tiếp bằng công cụ hiện hữu khi scope đơn giản và có quyền. Nếu phải giao, trước hết thử **A1/Work/Hermes** theo năng lực phù hợp; **Hostinger đang PAUSED** nên chỉ được xem xét sau chỉ thị A0 resume, *không ép thứ tự cứng nếu kỹ năng/quyền không khớp*.
 2. **Codex không mặc định sở hữu code, Python, API, JSON, CI hay Git.** Nếu agent khác có thể làm, phải giao agent đó; dùng reviewer khác tác giả.
 3. Chỉ đề xuất Codex khi có `ALTERNATIVES_CHECKED` (từng agent và bằng chứng thử/thiếu quyền), `WHY_ONLY_CODEX` (nút thắt kỹ thuật không thể chuyển), `MAX_SCOPE`, `ESTIMATED_COST_OR_CALL_CAP`, `STOP`, `ACCEPTANCE`, `INDEPENDENT_REVIEWER`, `A0_APPROVAL_ID`. Thiếu một mục → `CODEX_NOT_AUTHORIZED`. Không tự gửi lệnh Codex khi chưa được A0 duyệt chi phí cụ thể.
 4. **Thu hồi các lệnh Codex chưa thực thi thuộc loại đơn giản**, chuyển owner bằng task/handoff mới; không xóa code/report đã có, không lặp PASS lịch sử, không ghi nhận ACK chưa có. Lệnh đang chạy ở phiên ngoài cần chủ dự án chuyển thông báo thu hồi, xác nhận ACK; comment GitHub không tự dừng runtime.
@@ -231,4 +237,4 @@ Chủ dự án chỉ thị: **“Bước tiếp theo ủy quyền cho bạn toà
 6. Chỉ tiêu điều phối là **chi phí + rủi ro + thời gian + chất lượng**; không tối ưu chỉ theo số task. Ghi `COST_ROUTING` trong đặc tả: agent được chọn, lựa chọn rẻ hơn được đối chiếu, vì sao chọn và trạng thái quyền.
 
 ### 11.3. Bản phân công nguồn có hiệu lực
-[Master allocation v2](../tasks/2026-11-23-a1-cost-first-master-allocation.md) thay cho **các đề xuất phân vai Codex chung chung** trong PR #6 và profile cũ; mọi test/approval cụ thể ở task gốc vẫn giữ nguyên. Phần nào chưa bắt đầu chỉ thay phân công; phần đã PASS giữ evidence. A1 là `PREPARED_FOR_OWNER_FORWARD` đến khi chủ dự án chuyển URL và A1 ACK. Quy tắc này không cấp GitHub credential, VPS access, production, paid inference hay merge.
+[Master allocation v2](../tasks/2026-11-23-a1-cost-first-master-allocation.md) thay cho **các đề xuất phân vai Codex chung chung** trong PR #6 và profile cũ; mọi test/approval cụ thể ở task gốc vẫn giữ nguyên. Phần nào chưa bắt đầu chỉ thay phân công; phần đã PASS giữ evidence. A1 đã ACK vai trò và các nhiệm vụ đã bàn giao PR #32/#33; mỗi nhiệm vụ **mới** vẫn `PREPARED_FOR_OWNER_FORWARD` cho đến khi A1 ACK chính xác task đó. Quy tắc này không cấp GitHub credential, VPS access, production, paid inference hay merge.
