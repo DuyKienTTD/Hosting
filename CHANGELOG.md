@@ -2,6 +2,8 @@
 
 ## 2026-11-23
 
+- Hermes hoàn tất BIZ-01 discovery read-only, lập ma trận tích hợp Google Ads, GA4, WordPress/WooCommerce, YouTube, TikTok, Meta, Hostinger Mail/Reach và media tools; phân biệt `DOCUMENTED` với `VERIFIED` và bàn giao report/evidence cho ChatGPT Điều phối.
+
 - Nghiệm thu B2-O fake local tại `d95f161` và chuẩn bị B2-P preflight chỉ đọc.
 
 ## 2026-11-22

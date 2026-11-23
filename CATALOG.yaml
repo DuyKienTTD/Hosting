@@ -1,5 +1,5 @@
 schema_version: 1
-updated_at: 2026-11-22
+updated_at: 2026-11-23
 repository_visibility: public
 default_language: vi
 
@@ -14,6 +14,24 @@ entrypoints:
   change_history: CHANGELOG.md
 
 documents:
+  - id: hermes-biz-01-channel-capability-matrix-2026-11-23
+    path: reports/2026-11-23-hermes-biz-01-channel-capability-matrix.md
+    type: report
+    status: complete
+    authoritative_for: hermes-read-only-discovery-matrix-for-hosting-channel-integrations-on-2026-11-23
+    updated_at: 2026-11-23
+    verified_at: 2026-11-23
+    sensitivity: public-redacted
+
+  - id: hermes-biz-01-channel-capability-matrix-evidence-2026-11-23
+    path: reports/evidence/2026-11-23-hermes-biz-01-channel-capability-matrix.json
+    type: evidence
+    status: complete
+    authoritative_for: machine-readable-evidence-for-hermes-biz-01-channel-capability-matrix-on-2026-11-23
+    updated_at: 2026-11-23
+    verified_at: 2026-11-23
+    sensitivity: public-redacted
+
   - id: current-vps-inventory
     path: inventory/current-vps-state.md
     type: inventory

@@ -1,0 +1,162 @@
+{
+  "id": "hermes-biz-01-channel-capability-matrix-evidence-2026-11-23",
+  "task_id": "BIZ-01",
+  "agent": "Hermes WebUI",
+  "checked_at": "2026-11-23T03:20:06Z",
+  "assignment_commit": "cdf0aed51965465601320fd57623a84065ad9c5b",
+  "base_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "repo_paths_read": [
+    "AGENTS.md",
+    "rules/AGENT_WORKFLOW.md",
+    "rules/REPOSITORY_SECURITY.md",
+    "STATE.md",
+    "CATALOG.yaml",
+    "agents/hermes.md",
+    "tasks/2026-11-23-multi-agent-master-allocation-review.md",
+    "reports/2026-11-21-hostinger-account-capability-inventory.md",
+    "reports/2026-11-21-hermes-capability-survey.md"
+  ],
+  "session_capabilities": {
+    "github_push_repo": "VERIFIED_IN_SESSION",
+    "web_search_extract": "VERIFIED_IN_SESSION",
+    "browser_automation": "VERIFIED_IN_SESSION",
+    "live_business_connectors": "UNVERIFIED_ACCOUNT_ACCESS",
+    "paid_api_calls": "NOT_USED",
+    "production_writes": "NOT_USED"
+  },
+  "channels": [
+    {
+      "name": "google_ads",
+      "status": ["DOCUMENTED", "UNVERIFIED_ACCOUNT_ACCESS", "NOT_APPROVED_FOR_WRITE"],
+      "auth": ["Google Cloud project", "Google Ads manager account", "OAuth 2.0 / service account", "access level"],
+      "limits_or_costs": ["Test 15000 ops/day", "Explorer 2880 production ops/day", "Basic 15000 ops/day", "Standard unlimited ops/day"],
+      "verified_directly": false,
+      "recommended_now": "reporting and keyword-research design only"
+    },
+    {
+      "name": "ga4_data_api",
+      "status": ["DOCUMENTED", "UNVERIFIED_ACCOUNT_ACCESS"],
+      "auth": ["Google Cloud project", "OAuth 2.0 or API key"],
+      "limits_or_costs": ["200000 tokens/day per standard property", "40000 tokens/hour", "10 concurrent requests/property"],
+      "verified_directly": false,
+      "recommended_now": "read-only KPI and attribution reporting"
+    },
+    {
+      "name": "wordpress_rest_api",
+      "status": ["DOCUMENTED", "VERIFIED_IN_PROJECT", "UNVERIFIED_ACCOUNT_ACCESS"],
+      "auth": ["cookie + nonce", "Application Passwords over HTTPS", "optional OAuth/JWT plugins"],
+      "limits_or_costs": ["no separate API pricing captured"],
+      "verified_directly": true,
+      "verified_evidence": ["Hostinger inventory confirms multiple WordPress sites in account"],
+      "recommended_now": "endpoint and content-sync design, read-only first"
+    },
+    {
+      "name": "woocommerce_rest_api",
+      "status": ["DOCUMENTED", "UNVERIFIED_ACCOUNT_ACCESS"],
+      "auth": ["Consumer Key", "Consumer Secret", "Read/Write/Read-Write permissions"],
+      "limits_or_costs": ["secret shown only once"],
+      "verified_directly": false,
+      "recommended_now": "offline contract design for products/orders/customers"
+    },
+    {
+      "name": "youtube_data_api",
+      "status": ["DOCUMENTED", "UNVERIFIED_ACCOUNT_ACCESS", "NOT_APPROVED_FOR_WRITE"],
+      "auth": ["API key for public data", "OAuth 2.0 for private/write scopes"],
+      "limits_or_costs": ["100 search.list/day", "100 videos.insert/day", "10000 combined units/day for other endpoints"],
+      "verified_directly": false,
+      "recommended_now": "upload and metadata workflow design only"
+    },
+    {
+      "name": "tiktok_content_posting_api",
+      "status": ["DOCUMENTED", "UNVERIFIED_ACCOUNT_ACCESS", "NOT_APPROVED_FOR_WRITE"],
+      "auth": ["registered app", "Content Posting API enabled", "video.publish scope", "user access token + open ID"],
+      "limits_or_costs": ["unaudited clients restricted to private viewing mode until audit"],
+      "verified_directly": false,
+      "recommended_now": "approval checklist and posting design only"
+    },
+    {
+      "name": "meta_page_feed",
+      "status": ["DOCUMENTED", "UNVERIFIED_ACCOUNT_ACCESS", "NOT_APPROVED_FOR_WRITE"],
+      "auth": ["page access token", "pages_read_engagement", "pages_read_user_content", "page task rights"],
+      "limits_or_costs": ["max 100 posts with limit field per request"],
+      "verified_directly": false,
+      "recommended_now": "page-post workflow and approval design only"
+    },
+    {
+      "name": "hostinger_mail_api",
+      "status": ["DOCUMENTED", "VERIFIED_IN_PROJECT", "UNVERIFIED_ACCOUNT_ACCESS"],
+      "auth": ["Bearer API key"],
+      "limits_or_costs": ["429 on excessive requests", "Starter 1000 emails/day/mailbox", "Standard/Premium 3000 emails/day/mailbox"],
+      "verified_directly": true,
+      "verified_evidence": ["Inventory confirms 4 active Hostinger Email services"],
+      "recommended_now": "design inbox/send workflows; do not activate tokens in this task"
+    },
+    {
+      "name": "hostinger_reach",
+      "status": ["DOCUMENTED", "VERIFIED_IN_PROJECT", "UNVERIFIED_ACCOUNT_ACCESS"],
+      "auth": ["Hostinger API token", "profile ID"],
+      "limits_or_costs": ["AI actions consume Hostinger Credits", "some automations/scheduling/editor features require paid plan"],
+      "verified_directly": true,
+      "verified_evidence": ["Inventory confirms Reach 1000 plan on wroughtiron.shop"],
+      "recommended_now": "contacts/segments/campaign design and readiness mapping"
+    },
+    {
+      "name": "heygen",
+      "status": ["DOCUMENTED", "UNVERIFIED_ACCOUNT_ACCESS"],
+      "auth": ["API key"],
+      "limits_or_costs": ["batch APIs up to 100 requests per call"],
+      "verified_directly": false,
+      "recommended_now": "avatar-video pipeline planning only"
+    },
+    {
+      "name": "elevenlabs_tts",
+      "status": ["DOCUMENTED", "UNVERIFIED_ACCOUNT_ACCESS"],
+      "auth": ["API"],
+      "limits_or_costs": ["paid plan required for commercial use", "model character limits vary: 5000/10000/40000/100000 depending on model"],
+      "verified_directly": false,
+      "recommended_now": "voiceover pipeline planning only"
+    },
+    {
+      "name": "kling_ai_api",
+      "status": ["DOCUMENTED", "UNVERIFIED_ACCOUNT_ACCESS"],
+      "auth": ["AccessKey", "SecretKey", "JWT bearer token"],
+      "limits_or_costs": ["4K mode charged at 3 units/second", "prompt/negative_prompt max 2500 chars", "outputs cleared after 30 days"],
+      "verified_directly": false,
+      "recommended_now": "render/effects planning only"
+    }
+  ],
+  "priority_after_biz01": [
+    "ga4 read-only reporting",
+    "wordpress/woocommerce contract-first design",
+    "hostinger mail/reach readiness",
+    "social/media remain design-only until approvals and credentials exist"
+  ],
+  "blockers": [
+    "No live account credentials verified in Hermes session for ads, analytics, wordpress, social, or media vendors",
+    "BIZ-01 remains NO_TASK_YET on main; this delivery is report/evidence only",
+    "Production writes and paid API calls are out of scope"
+  ],
+  "next_owner": "ChatGPT Điều phối",
+  "source_urls": [
+    "https://github.com/DuyKienTTD/Hosting/pull/6",
+    "https://developers.google.com/google-ads/api/docs/get-started/make-first-call",
+    "https://developers.google.com/google-ads/api/docs/api-policy/access-levels",
+    "https://developers.google.com/analytics/devguides/reporting/data/v1/basics",
+    "https://developers.google.com/analytics/devguides/reporting/data/v1/quotas",
+    "https://developer.wordpress.org/rest-api/using-the-rest-api/",
+    "https://developer.wordpress.org/rest-api/using-the-rest-api/authentication/",
+    "https://woocommerce.com/document/woocommerce-rest-api/",
+    "https://developers.google.com/youtube/data/guides/authentication",
+    "https://developers.google.com/youtube/data/reference/rest/v3/videos/insert",
+    "https://developers.google.com/youtube/v3/determine_quota_cost",
+    "https://developers.tiktok.com/doc/content-posting-api-get-started",
+    "https://developers.facebook.com/docs/graph-api/reference/page/feed/",
+    "https://docs.hostinger.com/emails/mail-api",
+    "https://www.hostinger.com/ca/mail-api",
+    "https://docs.hostinger.com/reach/overview",
+    "https://docs.hostinger.com/reach/integrations",
+    "https://developers.heygen.com/",
+    "https://elevenlabs.io/docs/overview/capabilities/text-to-speech",
+    "https://docs.qingque.cn/d/home/eZQDkhg4h2Qg8SEVSUTBdzYeY"
+  ]
+}
