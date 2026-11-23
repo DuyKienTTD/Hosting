@@ -13,6 +13,7 @@ RELS=['program/kng/validate.py','program/kng/test_validate.py','program/current.
       'program/README.md','program/KNOWLEDGE_OPTIMIZATION.md','program/OPERATING_PROTOCOL.md',
       'program/WORK_BREAKDOWN.md','program/roadmaps/a1.md',
       'program/PRODUCT_AND_UI.md','program/SKILL_REGISTRY.md','program/roadmaps/work.md',
+      'README.md','program/kng/derive.py','reports/evidence/2026-11-23-a1-kng01-d2-q0-metrics.json',
       'AGENTS.md','PROJECT.md','STATE.md','CATALOG.yaml',
       'rules/AGENT_WORKFLOW.md','rules/REPOSITORY_SECURITY.md']
 class Contract(unittest.TestCase):
@@ -99,21 +100,36 @@ class GitObjectEngine(unittest.TestCase):
             with self.assertRaises(LookupError):GitObjects(d).verify('0'*40,'source.txt',blob)
 
 class DerivedState(unittest.TestCase):
-    def test_generated_view_is_idempotent_and_requires_receipt(self):
-        from derive import materialize_state
+    def test_generated_view_is_idempotent_and_rejects_unverified_receipts(self):
+        from derive import materialize_state, materialize_catalog, D2_WORK_ID, WS02_TASK
         data=json.loads((BASE/'program/current.json').read_text())
         base='top\n<!-- KNG:BEGIN_GENERATED -->\nobsolete\n<!-- KNG:END_GENERATED -->\nfooter\n'
         one=materialize_state(base,data)
         self.assertEqual(one,materialize_state(one,data))
-        data.setdefault('current_handoffs',{})['WS-02']={'status':'ACKNOWLEDGED','ack_receipt':None}
+        data.setdefault('current_handoffs',{})['WS-02']={'source_task':WS02_TASK,'status':'ACKNOWLEDGED','ack_receipt':None}
         with self.assertRaisesRegex(ValueError,'ACK_RECEIPT_MISMATCH'):materialize_state(base,data)
-        data['current_handoffs']['WS-02']['ack_receipt']={'task_id':'WS-02','actor':'Work','immutable_evidence_url':'https://github.com/test/x'}
-        self.assertIn('ACKNOWLEDGED',materialize_state(base,data))
-        from derive import materialize_catalog
+        data['current_handoffs']['WS-02']['ack_receipt']={
+            'task_id':'WS-02','actor':'Work','event':'ACK','status':'ACKNOWLEDGED',
+            'authorized_task_id':D2_WORK_ID,
+            'immutable_evidence_url':'https://example.invalid/no-receipt',
+            'commit':'0'*40,'path':'reports/missing-receipt.json','git_blob':'0'*40
+        }
+        with self.assertRaisesRegex(ValueError,'ACK_RECEIPT_MISMATCH'):materialize_state(base,data)
+        data['current_handoffs']['WS-02']={'source_task':WS02_TASK,'status':'PREPARED_FOR_OWNER_FORWARD','ack_receipt':None}
         cat='documents:\n  # KNG:BEGIN_GENERATED_REPORTS\n  # KNG:END_GENERATED_REPORTS\n'
         self.assertEqual(cat,materialize_catalog(cat,data))
-        data.setdefault('acceptance_index',{})['WS-02']={'last_evidence':{'path':'reports/dummy.md','git_blob':'a'*40}}
-        self.assertIn('kng-derived-ws02-paper-report',materialize_catalog(cat,data))
+        data.setdefault('acceptance_index',{})['WS-02']={
+            'review_state':'UNKNOWN_NEW_REPORT',
+            'last_evidence':{'path':'reports/dummy.md','git_blob':'a'*40}
+        }
+        with self.assertRaisesRegex(ValueError,'ACCEPTANCE_PROVENANCE_INVALID'):materialize_catalog(cat,data)
+
+    def test_correct_task_binding(self):
+        from derive import materialize_state
+        data=json.loads((BASE/'program/current.json').read_text())
+        data['work_ack_task_id']='WORK-KNG01-TARGETED-D2-REQA'
+        with self.assertRaisesRegex(ValueError,'ACK_RECEIPT_MISMATCH'):
+            materialize_state('<!-- KNG:BEGIN_GENERATED -->\n<!-- KNG:END_GENERATED -->',data)
 
 if __name__ == "__main__":
     unittest.main()

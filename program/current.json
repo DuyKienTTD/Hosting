@@ -39,8 +39,8 @@
     "program/roadmaps/work.md"
   ],
   "coordinator_readback_required": true,
-  "status_note": "KNG D2 isolated candidate only; Work D1 completed with findings and D2 independent review not yet ACK. PR31 and PR39 unmerged.",
-  "work_ack_task_id": "WORK-KNG01-TARGETED-D2-REQA",
+  "status_note": "D3 targeted author fix on PR41. Work D2 independent review ACK and verdict are historical at comment 7099819982; Work D3 targeted re-QA has no session ACK. work_ack UNKNOWN refers to pending future D3 review; no live or merge rights.",
+  "work_ack_task_id": "WORK-KNG01-D2-TARGETED-INDEPENDENT-REQA",
   "work_ack_receipt": null,
   "last_work_qa_d1": {
     "status": "NEEDS_A1_FIX",
@@ -79,5 +79,13 @@
       "rules/AGENT_WORKFLOW.md"
     ],
     "pr31_head": "a770de80a2467ca1789c820b63416209cf53b7d1"
+  },
+  "last_work_qa_d2": {
+    "task_id": "WORK-KNG01-D2-TARGETED-INDEPENDENT-REQA",
+    "actor": "Work",
+    "verdict": "KNG01_D2_NEEDS_A1_FIX",
+    "receipt_url": "https://github.com/DuyKienTTD/Hosting/pull/41#issuecomment-7099819982",
+    "source_sha": "666a32f54bd55cebb88117725a5f8c7c6208ffd0",
+    "record_type": "HISTORICAL_REVIEW_NOT_NEW_D3_ACK"
   }
 }

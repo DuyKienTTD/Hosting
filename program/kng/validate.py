@@ -51,11 +51,15 @@ def validate(root, *, verify_objects=True):
     if state.get('source_authority') != 'main_effective_rules_until_approved_merge': reject('WRONG_AUTHORITY', 'candidate cannot supersede main')
     if set(state.get('must_read', [])) != REQUIRED_RULES: reject('MISSING_MANDATORY_RULE', state.get('must_read'))
     if state.get('production_authorized') is not False or state.get('merge_authorized') is not False or state.get('codex_authorized') is not False: reject('UNSAFE_PERMISSION', 'production, merge and codex must remain false')
+    # A real Work ACK must be bound to the exact dispatch, not a swapped task ID.
+    expected_work_task = 'WORK-KNG01-D2-TARGETED-INDEPENDENT-REQA'
+    if state.get('work_ack_task_id') != expected_work_task:
+        reject('ACK_RECEIPT_MISMATCH', 'Work task ID differs from authorized D2 dispatch')
     if state.get('work_ack') not in ('UNKNOWN','ACKNOWLEDGED'): reject('FALSE_ACK', state.get('work_ack'))
     if state.get('work_ack') == 'ACKNOWLEDGED':
         receipt = state.get('work_ack_receipt')
         expected = lock.get('work_ack_receipt')
-        if not isinstance(receipt, dict) or receipt != expected or not expected or state.get('agent_status',{}).get('Work') == 'KNG_INDEPENDENT_QA_PENDING_ACK':
+        if not isinstance(receipt, dict) or receipt != expected or not expected or 'PENDING_ACK' in state.get('agent_status',{}).get('Work',''):
             reject('ACK_RECEIPT_MISMATCH', 'Work ACK must match pinned task-specific immutable receipt and nonpending state')
     elif state.get('work_ack_receipt'):
         reject('ACK_RECEIPT_MISMATCH', 'receipt exists but work_ack is UNKNOWN')
