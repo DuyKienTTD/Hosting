@@ -48,10 +48,11 @@ Nếu HEAD, blob, owner hoặc mục đích thay đổi, khoanh scope bị lệc
 | Đổi HEAD hoặc một blob nguồn, kể cả nguồn bị mất | Báo drift hoặc source unavailable và dừng áp dụng mục tương ứng. |
 | Thêm link cho path mới chỉ có ở source PR, thiếu trên base đích | Từ chối lập mục hoặc giữ chờ. |
 | Dùng lại ID report #24 hoặc gỡ hold khi owner chưa xác nhận | Từ chối duplicate hoặc premature publish. |
+| Hai package có task ID khác nhau nhưng dùng chung report/front matter ID trên hai canonical path | Phát hiện va chạm xuyên package. Cùng path xuất hiện ở nhiều snapshot chỉ được tính một lần. Đây là regression bắt buộc của `GOV02-QA-01`. |
 | Giữ `NO_TASK_YET` khi đã có task, hoặc để hai lượt cùng ghi shared file | Báo stale/double writer dù diff văn bản có thể sạch. |
 | Đổi `DRAFT`, `INDEPENDENT_QA_PENDING`, `LINUX_NOT_RUN`, `A0_PENDING` hoặc `REAL_UNTESTED` thành approval/production-ready | Từ chối trạng thái nâng vượt bằng chứng; `SOURCE_ACCEPTED` không đóng các gate. |
 | Gán executor #29 cho Hostinger hoặc ghi một work order đã được cấp quyền | Từ chối provenance và approval sai; giữ Hermes tabletop và Hostinger owner gate. |
 
 Ca dương kiểm mỗi ID duy nhất, tất cả path đã có trên đúng base, đúng SHA và một writer mỗi file. Giai đoạn A chỉ chạy đối chiếu nguồn và các bất biến của kế hoạch. Các ca âm/dương trên patch còn chờ Giai đoạn B. Không chạy lại bộ test S1.
 
-**Bàn giao** ChatGPT Điều phối nhận kế hoạch trên draft PR. Giai đoạn B giữ `BLOCKED_PENDING_INDEPENDENT_QA_AND_COORDINATOR_APPROVAL` cho đến khi có Work PASS đúng HEAD PR #28 và chỉ thị phê duyệt riêng. [Chỉ thị QA độc lập](https://github.com/DuyKienTTD/Hosting/pull/28#issuecomment-7092001295)
+**Bàn giao** ChatGPT Điều phối nhận kế hoạch trên draft PR. Work trả `NEEDS_CODEX_DELTA` tại PR #28 HEAD `6dafae50bd17bc1a18080b13b86c5b8c35573580` vì validator bỏ sót ID front matter trùng giữa hai package. Đối chiếu bổ sung trên tập tài liệu đã ghim của kế hoạch chỉ thấy cặp OPS-01A/S2 đã được giữ chờ. Giai đoạn B vẫn `BLOCKED_PENDING_INDEPENDENT_QA_AND_COORDINATOR_APPROVAL`. Điều phối cần giao riêng việc sửa `GOV02-QA-01`, nhận Work PASS trên HEAD đã sửa được duyệt, rồi phê duyệt write set của Giai đoạn B. [Verdict QA độc lập](https://github.com/DuyKienTTD/Hosting/pull/28#issuecomment-7092060267)
