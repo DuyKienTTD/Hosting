@@ -1,0 +1,834 @@
+{
+  "id": "hermes-biz02-s1-priority-matrix-2026-11-23",
+  "task_id": "BIZ-02/S1",
+  "mode": "read-only-draft",
+  "base_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "refs": {
+    "PR6": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+    "BIZ01": "8c821bbf1842eccb8519127f54ba7673965276d5",
+    "GROW01": "3c8cb40357ee23d13a2c1aa7e07e6848ff5256dd",
+    "ENG_S1": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+    "ENG_S2": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+    "UX_S1": "9deab7391190bb9a159a924db320d08cb2a43b3f",
+    "UX_S2": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+    "ENG_S3": "c343f7dded47a67e385ab05b8bb46aed88444f15"
+  },
+  "source_urls": {
+    "project": "PROJECT.md@e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "roadmap": "GOALS_AND_ROADMAP.md@e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "BIZ01": "https://github.com/DuyKienTTD/Hosting/commit/8c821bbf1842eccb8519127f54ba7673965276d5",
+    "GROW01": "https://github.com/DuyKienTTD/Hosting/commit/3c8cb40357ee23d13a2c1aa7e07e6848ff5256dd",
+    "ENG_S1": "https://github.com/DuyKienTTD/Hosting/pull/10",
+    "ENG_S2": "https://github.com/DuyKienTTD/Hosting/pull/13",
+    "UX_S1": "https://github.com/DuyKienTTD/Hosting/pull/14",
+    "UX_S2": "https://github.com/DuyKienTTD/Hosting/pull/16",
+    "ENG_S3": "https://github.com/DuyKienTTD/Hosting/pull/19"
+  },
+  "weighting": {
+    "weights_percent": {
+      "impact": 30,
+      "confidence": 20,
+      "effort_ease": 20,
+      "safety_ease": 20,
+      "dependency_ease": 10
+    },
+    "grade_scale": "0=unfavorable/unknown, 4=favorable/easier; ordinal hypothetical, no measured ROI",
+    "formula": "sum(weight_percent * ordinal_grade)/100; 0..4, score cannot override hard approval/auth gates",
+    "tie_break": "stable UC ID",
+    "tier_gate": "MVP only synthetic no account IO; NEXT only after verified read auth; LATER any write, spend, publication or sensitive join"
+  },
+  "use_cases": [
+    {
+      "id": "UC06",
+      "title": "Approval queue and incident monitoring draft",
+      "business_outcome": "operator reliability",
+      "audience_segment": "internal operator and reviewer",
+      "actor": "operator",
+      "pain_point": "unknown outcomes and overdue approvals hide risk",
+      "workflow": {
+        "trigger": "mock queue delay or synthetic incident",
+        "input": "synthetic approval/job state",
+        "agent": "Hermes triage guidance",
+        "tool": "UX-01 S2 offline UI",
+        "output": "review queue with escalation and no automatic retry",
+        "approval": "operator reviews; production notification requires separate scope",
+        "audit": "job_id, state transition, decision reason"
+      },
+      "source_status": "PROJECT_DIRECTION_AND_PROVISIONAL_HYPOTHESIS",
+      "source_refs": [
+        "project",
+        "UX_S2",
+        "ENG_S1"
+      ],
+      "capability_status": [
+        "OFFLINE_MOCK_ONLY",
+        "BACKEND_UNIMPLEMENTED"
+      ],
+      "current_implementing_prs": [
+        "#16",
+        "#10"
+      ],
+      "leading_kpi": {
+        "name": "triage_coverage",
+        "numerator": "synthetic blocked/unknown items with owner",
+        "denominator": "synthetic blocked/unknown items created",
+        "unit": "ratio",
+        "window": "weekly",
+        "data_owner": "operator",
+        "attribution_and_dedup": "unique job_id+state transition; replay same ID not counted twice",
+        "consent_status": "NO_REAL_CUSTOMER_DATA",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "lagging_kpi": {
+        "name": "mean_synthetic_resolution_time",
+        "numerator": "sum of elapsed minutes for resolved synthetic incidents",
+        "denominator": "number of resolved synthetic incidents",
+        "unit": "minutes per resolved incident",
+        "window": "monthly",
+        "data_owner": "operator",
+        "attribution_and_dedup": "exclude open incidents; real incident stream unavailable",
+        "consent_status": "BASELINE_UNKNOWN",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "score_components": {
+        "impact": 3,
+        "confidence": 3,
+        "effort_ease": 4,
+        "safety_ease": 4,
+        "dependency_ease": 4
+      },
+      "tier": "MVP_OFFLINE_NOW",
+      "measurable_expected_value": "hypothesis to test after baseline; no numeric benefit promised",
+      "failure_recovery": "unknown outcome -> hold and escalate; no automatic retry",
+      "cost_boundary": "no paid or live alert action",
+      "privacy_security": "metadata only, no payload in shared logs",
+      "dependencies": [
+        "UX-01 S2",
+        "ENG-01A S1",
+        "Hostinger infra/security baseline"
+      ],
+      "baseline": "BASELINE_UNKNOWN",
+      "illustrative_score_0_to_4": 3.5,
+      "score_is_business_roi": false
+    },
+    {
+      "id": "UC01",
+      "title": "WP/Woo content and product inventory gap detection",
+      "business_outcome": "content readiness",
+      "audience_segment": "internal marketing/operator",
+      "actor": "editor",
+      "pain_point": "manual content audit and missing metadata",
+      "workflow": {
+        "trigger": "weekly draft audit",
+        "input": "synthetic posts/pages/products and approved taxonomy",
+        "agent": "Hermes analysis of gaps",
+        "tool": "ENG-01A S2 fake read adapter",
+        "output": "gap list with provenance and human review",
+        "approval": "human editor; real read requires site owner consent",
+        "audit": "report version + source watermark"
+      },
+      "source_status": "PROJECT_DIRECTION_AND_PROVISIONAL_HYPOTHESIS",
+      "source_refs": [
+        "project",
+        "BIZ01",
+        "ENG_S2"
+      ],
+      "capability_status": [
+        "DOCUMENTED",
+        "VERIFIED_IN_PROJECT_SITE",
+        "UNVERIFIED_ACCOUNT_ACCESS",
+        "OFFLINE_MOCK_ONLY"
+      ],
+      "current_implementing_prs": [
+        "#13"
+      ],
+      "leading_kpi": {
+        "name": "inventory_review_coverage",
+        "numerator": "fake records reviewed",
+        "denominator": "fake records in selected fixture",
+        "unit": "ratio",
+        "window": "weekly",
+        "data_owner": "content owner",
+        "attribution_and_dedup": "version/site+locale+record ID, dedup update watermark",
+        "consent_status": "NO_REAL_CUSTOMER_DATA",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "lagging_kpi": {
+        "name": "resolved_content_gap_rate",
+        "numerator": "gaps marked resolved after human check",
+        "denominator": "unique confirmed content gaps",
+        "unit": "ratio",
+        "window": "monthly",
+        "data_owner": "content owner",
+        "attribution_and_dedup": "one gap per record+field+version, no live site inference",
+        "consent_status": "REQUIRES_OWNER_REVIEW",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "score_components": {
+        "impact": 3,
+        "confidence": 3,
+        "effort_ease": 3,
+        "safety_ease": 4,
+        "dependency_ease": 4
+      },
+      "tier": "MVP_OFFLINE_NOW",
+      "measurable_expected_value": "hypothesis to test after baseline; no numeric benefit promised",
+      "failure_recovery": "403/429/timeout -> UNKNOWN; retain last verified snapshot, no write",
+      "cost_boundary": "zero paid calls; offline only",
+      "privacy_security": "only synthetic catalog content; avoid unpublished product facts",
+      "dependencies": [
+        "BIZ-01",
+        "#13",
+        "ENG-01A S3 for integration"
+      ],
+      "baseline": "BASELINE_UNKNOWN",
+      "illustrative_score_0_to_4": 3.3,
+      "score_is_business_roi": false
+    },
+    {
+      "id": "UC04",
+      "title": "Multilingual P1/P2/P3 draft and rights QA",
+      "business_outcome": "editorial throughput",
+      "audience_segment": "VI homeowner/installer and EN importer hypotheses",
+      "actor": "editor + product reviewer",
+      "pain_point": "content production slow and claims may lack rights or technical approval",
+      "workflow": {
+        "trigger": "approved draft request",
+        "input": "synthetic P1/P2/P3 briefs only",
+        "agent": "Hermes drafts and QA flags",
+        "tool": "GROW-01 runbook and fake gate",
+        "output": "draft package with blocked/needs-review states",
+        "approval": "business + rights + engineer + privacy; no real approval in S1",
+        "audit": "package version and reviewer decision references"
+      },
+      "source_status": "PROJECT_DIRECTION_AND_PROVISIONAL_HYPOTHESIS",
+      "source_refs": [
+        "project",
+        "GROW01",
+        "BIZ01"
+      ],
+      "capability_status": [
+        "OFFLINE_DRAFT_ONLY",
+        "UNVERIFIED_ACCOUNT_ACCESS"
+      ],
+      "current_implementing_prs": [
+        "#18"
+      ],
+      "leading_kpi": {
+        "name": "draft_review_completion",
+        "numerator": "synthetic drafts with all mandatory QA fields",
+        "denominator": "synthetic drafts submitted for review",
+        "unit": "ratio",
+        "window": "weekly",
+        "data_owner": "editorial owner",
+        "attribution_and_dedup": "stable package_id/version; not count of published content",
+        "consent_status": "NO_REAL_CUSTOMER_DATA",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "lagging_kpi": {
+        "name": "QA_rework_rate",
+        "numerator": "reviewed drafts returned for substantive correction",
+        "denominator": "reviewed drafts with recorded decision",
+        "unit": "ratio",
+        "window": "monthly",
+        "data_owner": "editorial owner",
+        "attribution_and_dedup": "one review decision per package version",
+        "consent_status": "REQUIRES_RIGHTS_REVIEW",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "score_components": {
+        "impact": 3,
+        "confidence": 3,
+        "effort_ease": 3,
+        "safety_ease": 4,
+        "dependency_ease": 4
+      },
+      "tier": "MVP_OFFLINE_NOW",
+      "measurable_expected_value": "hypothesis to test after baseline; no numeric benefit promised",
+      "failure_recovery": "unapproved spec/rights -> BLOCKED; preserve original draft",
+      "cost_boundary": "zero paid render and no publish",
+      "privacy_security": "placeholder assets only; consent/rights UNKNOWN",
+      "dependencies": [
+        "GROW-01",
+        "BIZ-02 KPI decision",
+        "product engineer for P2"
+      ],
+      "baseline": "BASELINE_UNKNOWN",
+      "illustrative_score_0_to_4": 3.3,
+      "score_is_business_roi": false
+    },
+    {
+      "id": "UC03",
+      "title": "UTM source and lead funnel reporting design",
+      "business_outcome": "measurement correctness",
+      "audience_segment": "marketing and sales operators",
+      "actor": "analyst",
+      "pain_point": "clicks, messages and qualified leads are conflated",
+      "workflow": {
+        "trigger": "new campaign brief or weekly mock review",
+        "input": "synthetic campaign/source and separate form/chat/CRM aggregates",
+        "agent": "Hermes designs reconciled definitions",
+        "tool": "offline event schema only",
+        "output": "illustrative funnel with missing join marked UNKNOWN",
+        "approval": "privacy owner must approve join and event policy separately",
+        "audit": "UTM taxonomy + separate aggregate source provenance"
+      },
+      "source_status": "PROJECT_DIRECTION_AND_PROVISIONAL_HYPOTHESIS",
+      "source_refs": [
+        "project",
+        "BIZ01",
+        "GROW01",
+        "ENG_S1"
+      ],
+      "capability_status": [
+        "DOCUMENTED",
+        "OFFLINE_DESIGN_ONLY",
+        "UNVERIFIED_ACCOUNT_ACCESS"
+      ],
+      "current_implementing_prs": [
+        "#10",
+        "#18"
+      ],
+      "leading_kpi": {
+        "name": "UTM_validity_rate",
+        "numerator": "synthetic campaign links with valid source+medium+campaign",
+        "denominator": "synthetic campaign links checked",
+        "unit": "ratio",
+        "window": "weekly",
+        "data_owner": "marketing owner",
+        "attribution_and_dedup": "dedup normalized URL; GROW-02A owns full dictionary",
+        "consent_status": "NO_PII",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "lagging_kpi": {
+        "name": "qualified_lead_rate",
+        "numerator": "CRM leads explicitly qualified by sales",
+        "denominator": "distinct consented CRM leads reviewed",
+        "unit": "ratio",
+        "window": "monthly",
+        "data_owner": "sales owner",
+        "attribution_and_dedup": "no person join to GA4/chat without key/consent; do not infer from clicks",
+        "consent_status": "UNKNOWN_REQUIRES_CONSENT",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "score_components": {
+        "impact": 3,
+        "confidence": 2,
+        "effort_ease": 3,
+        "safety_ease": 3,
+        "dependency_ease": 3
+      },
+      "tier": "MVP_OFFLINE_NOW",
+      "measurable_expected_value": "hypothesis to test after baseline; no numeric benefit promised",
+      "failure_recovery": "missing source key -> UNKNOWN, separate totals; no inferred attribution",
+      "cost_boundary": "no spend; design only",
+      "privacy_security": "do not join identity or export customer data",
+      "dependencies": [
+        "BIZ-01",
+        "GROW-01",
+        "GROW-02A future full dictionary",
+        "ENG-01A S3"
+      ],
+      "baseline": "BASELINE_UNKNOWN",
+      "illustrative_score_0_to_4": 2.8,
+      "score_is_business_roi": false
+    },
+    {
+      "id": "UC02",
+      "title": "GA4 read-only channel aggregate review",
+      "business_outcome": "channel visibility",
+      "audience_segment": "internal marketing/operator",
+      "actor": "analyst",
+      "pain_point": "no trusted source-level performance baseline",
+      "workflow": {
+        "trigger": "weekly reporting proposal",
+        "input": "synthetic aggregate rows by date/source/medium",
+        "agent": "Hermes comparison",
+        "tool": "ENG-01A S2 fake GA4 read adapter",
+        "output": "channel trends with provenance, never customer identity",
+        "approval": "GA4 property owner verifies read scope before real use",
+        "audit": "source/date window + freshness flag"
+      },
+      "source_status": "PROJECT_DIRECTION_AND_PROVISIONAL_HYPOTHESIS",
+      "source_refs": [
+        "project",
+        "BIZ01",
+        "ENG_S2"
+      ],
+      "capability_status": [
+        "DOCUMENTED",
+        "UNVERIFIED_ACCOUNT_ACCESS",
+        "OFFLINE_MOCK_ONLY"
+      ],
+      "current_implementing_prs": [
+        "#13"
+      ],
+      "leading_kpi": {
+        "name": "channel_attribution_coverage",
+        "numerator": "aggregate sessions with channel tag",
+        "denominator": "all aggregate sessions for same property/window",
+        "unit": "ratio",
+        "window": "weekly",
+        "data_owner": "analytics owner",
+        "attribution_and_dedup": "GA4 property/date/channel only; do not infer unique people",
+        "consent_status": "READ_AUTH_PENDING",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "lagging_kpi": {
+        "name": "engaged_session_rate",
+        "numerator": "GA4 engaged sessions",
+        "denominator": "GA4 sessions",
+        "unit": "ratio",
+        "window": "monthly",
+        "data_owner": "analytics owner",
+        "attribution_and_dedup": "GA4 definitions/property only; no form/lead joins",
+        "consent_status": "READ_AUTH_PENDING",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "score_components": {
+        "impact": 3,
+        "confidence": 2,
+        "effort_ease": 2,
+        "safety_ease": 3,
+        "dependency_ease": 2
+      },
+      "tier": "NEXT_AFTER_READ_AUTH",
+      "measurable_expected_value": "hypothesis to test after baseline; no numeric benefit promised",
+      "failure_recovery": "quota/403/timeout -> stale/unknown; no retry that implies complete data",
+      "cost_boundary": "read-only permission required; cost unknown until owner plan",
+      "privacy_security": "aggregate data only; no identity join",
+      "dependencies": [
+        "BIZ-01",
+        "#13",
+        "GA4 property owner read grant",
+        "ENG-01A S3"
+      ],
+      "baseline": "BASELINE_UNKNOWN",
+      "illustrative_score_0_to_4": 2.5,
+      "score_is_business_roi": false
+    },
+    {
+      "id": "UC05",
+      "title": "Manual approved publish handoff",
+      "business_outcome": "controlled distribution",
+      "audience_segment": "internal marketing/publisher",
+      "actor": "publisher",
+      "pain_point": "inconsistent signoffs and handoff receipts",
+      "workflow": {
+        "trigger": "real publication request AFTER separate authorization",
+        "input": "human-approved package and channel-owner permission",
+        "agent": "Hermes prepares export checklist only",
+        "tool": "no live connector in S1",
+        "output": "handoff receipt draft; actual publish outside S1",
+        "approval": "separate business, rights, account, spend and final publish approval",
+        "audit": "signed decision IDs and published URL only after actual action"
+      },
+      "source_status": "PROJECT_DIRECTION_AND_PROVISIONAL_HYPOTHESIS",
+      "source_refs": [
+        "GROW01",
+        "BIZ01",
+        "UX_S2"
+      ],
+      "capability_status": [
+        "DOCUMENTED",
+        "UNVERIFIED_ACCOUNT_ACCESS",
+        "FRONTEND_MOCK_ONLY"
+      ],
+      "current_implementing_prs": [
+        "#18",
+        "#16"
+      ],
+      "leading_kpi": {
+        "name": "handoff_gate_completeness",
+        "numerator": "packages with all separately verified approvals",
+        "denominator": "packages submitted for real handoff",
+        "unit": "ratio",
+        "window": "weekly",
+        "data_owner": "publisher",
+        "attribution_and_dedup": "package_id+version; synthetic signoffs excluded",
+        "consent_status": "REQUIRES_CONSENT",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "lagging_kpi": {
+        "name": "authorized_publish_success_rate",
+        "numerator": "real authorized posts confirmed by platform",
+        "denominator": "real attempted authorized posts",
+        "unit": "ratio",
+        "window": "monthly",
+        "data_owner": "account owner",
+        "attribution_and_dedup": "platform post ID; never count exported drafts as posts",
+        "consent_status": "REQUIRES_APPROVAL",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "score_components": {
+        "impact": 3,
+        "confidence": 2,
+        "effort_ease": 2,
+        "safety_ease": 1,
+        "dependency_ease": 2
+      },
+      "tier": "LATER_WITH_SEPARATE_WRITE_APPROVAL",
+      "measurable_expected_value": "hypothesis to test after baseline; no numeric benefit promised",
+      "failure_recovery": "missing rights/permission -> STOP, no export to platform",
+      "cost_boundary": "approval + channel owner; paid render prohibited",
+      "privacy_security": "no content/PII leakage; manual owner action only",
+      "dependencies": [
+        "GROW-01",
+        "SEC-01 rights",
+        "account owner write approval"
+      ],
+      "baseline": "BASELINE_UNKNOWN",
+      "illustrative_score_0_to_4": 2.1,
+      "score_is_business_roi": false
+    },
+    {
+      "id": "UC07",
+      "title": "Customer inquiry triage with human handoff",
+      "business_outcome": "response quality",
+      "audience_segment": "VI homeowner/installer and EN importer hypotheses",
+      "actor": "sales operator",
+      "pain_point": "unclassified requests may sit in inbox",
+      "workflow": {
+        "trigger": "future consented inbound inquiry",
+        "input": "synthetic message categories, no real text",
+        "agent": "Hermes classifies draft labels",
+        "tool": "offline-only schema; no connected mailbox",
+        "output": "human queue item, not automatic reply",
+        "approval": "consent + sales owner approval",
+        "audit": "synthetic case ID, category and reviewer"
+      },
+      "source_status": "PROJECT_DIRECTION_AND_PROVISIONAL_HYPOTHESIS",
+      "source_refs": [
+        "project",
+        "BIZ01",
+        "GROW01"
+      ],
+      "capability_status": [
+        "DOCUMENTED",
+        "UNVERIFIED_ACCOUNT_ACCESS",
+        "NO_LIVE_INBOX"
+      ],
+      "current_implementing_prs": [],
+      "leading_kpi": {
+        "name": "synthetic_triage_coverage",
+        "numerator": "synthetic inquiries assigned a category and reviewer",
+        "denominator": "synthetic inquiries provided",
+        "unit": "ratio",
+        "window": "weekly",
+        "data_owner": "sales owner",
+        "attribution_and_dedup": "one case ID per inquiry, not contact identity",
+        "consent_status": "NO_REAL_CUSTOMER_DATA",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "lagging_kpi": {
+        "name": "qualified_inquiry_handoff_rate",
+        "numerator": "consented inquiries sales explicitly accepts as qualified",
+        "denominator": "consented inquiries human-reviewed",
+        "unit": "ratio",
+        "window": "monthly",
+        "data_owner": "sales owner",
+        "attribution_and_dedup": "separate messages/inquiries from qualified leads; no merge with GA4",
+        "consent_status": "CONSENT_AND_READ_AUTH_PENDING",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "score_components": {
+        "impact": 2,
+        "confidence": 1,
+        "effort_ease": 2,
+        "safety_ease": 2,
+        "dependency_ease": 1
+      },
+      "tier": "NEXT_AFTER_READ_AUTH",
+      "measurable_expected_value": "hypothesis to test after baseline; no numeric benefit promised",
+      "failure_recovery": "ambiguity or consent unknown -> human queue, no send",
+      "cost_boundary": "no email send or provider spend",
+      "privacy_security": "customer text/PII not accessed in S1",
+      "dependencies": [
+        "BIZ-01",
+        "SEC-01 privacy",
+        "mailbox owner read approval",
+        "ENG-01A S3 if authorized"
+      ],
+      "baseline": "BASELINE_UNKNOWN",
+      "illustrative_score_0_to_4": 1.7,
+      "score_is_business_roi": false
+    },
+    {
+      "id": "UC08",
+      "title": "Paid Ads optimization proposal",
+      "business_outcome": "spend efficiency",
+      "audience_segment": "marketing account owner",
+      "actor": "campaign manager",
+      "pain_point": "optimization lacks trustworthy conversion evidence",
+      "workflow": {
+        "trigger": "future owner-approved campaign review",
+        "input": "consented performance aggregates and budget guard",
+        "agent": "Hermes proposes changes only",
+        "tool": "Ads docs; no live account",
+        "output": "recommendation draft, no mutation",
+        "approval": "A0 budget + account owner + separate write approval",
+        "audit": "change proposal ID, before/after only after real approval"
+      },
+      "source_status": "PROJECT_DIRECTION_AND_PROVISIONAL_HYPOTHESIS",
+      "source_refs": [
+        "project",
+        "BIZ01"
+      ],
+      "capability_status": [
+        "DOCUMENTED",
+        "UNVERIFIED_ACCOUNT_ACCESS",
+        "NOT_APPROVED_FOR_WRITE"
+      ],
+      "current_implementing_prs": [],
+      "leading_kpi": {
+        "name": "proposal_review_coverage",
+        "numerator": "Ads proposals reviewed by budget owner",
+        "denominator": "Ads proposals submitted",
+        "unit": "ratio",
+        "window": "monthly",
+        "data_owner": "ads owner",
+        "attribution_and_dedup": "campaign ID scope only, no customer identity",
+        "consent_status": "ACCOUNT_ACCESS_UNKNOWN",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "lagging_kpi": {
+        "name": "cost_per_qualified_lead",
+        "numerator": "approved campaign spend in currency",
+        "denominator": "distinct consented qualified leads attributed under reviewed policy",
+        "unit": "currency per qualified lead",
+        "window": "monthly",
+        "data_owner": "ads + sales owners",
+        "attribution_and_dedup": "attribution policy and dedup required; never equate clicks with leads",
+        "consent_status": "ATTRIBUTION_AND_CONSENT_UNKNOWN",
+        "baseline": "BASELINE_UNKNOWN"
+      },
+      "score_components": {
+        "impact": 4,
+        "confidence": 1,
+        "effort_ease": 1,
+        "safety_ease": 0,
+        "dependency_ease": 0
+      },
+      "tier": "LATER_WITH_SEPARATE_WRITE_APPROVAL",
+      "measurable_expected_value": "hypothesis to test after baseline; no numeric benefit promised",
+      "failure_recovery": "unknown billing/attribution -> no optimization action",
+      "cost_boundary": "explicit spend ceiling and rollback; none authorized here",
+      "privacy_security": "no Ads login or customer export",
+      "dependencies": [
+        "BIZ-01",
+        "GROW-02A policy",
+        "A0 budget approval",
+        "ENG-01B real connector approval"
+      ],
+      "baseline": "BASELINE_UNKNOWN",
+      "illustrative_score_0_to_4": 1.6,
+      "score_is_business_roi": false
+    }
+  ],
+  "personas": [
+    {
+      "id": "VI_HOME_INSTALL",
+      "kind": "end_customer_hypothesis",
+      "region": "Vietnam",
+      "need": "style/fit questions without engineering claims",
+      "status": "PROVISIONAL_FOR_A0",
+      "source": "PROJECT/GROW01 direction"
+    },
+    {
+      "id": "EN_IMPORTER",
+      "kind": "end_customer_hypothesis",
+      "region": "international English-speaking",
+      "need": "product fit and trade inquiry",
+      "status": "PROVISIONAL_FOR_A0",
+      "source": "GROW01 P2/P3 draft"
+    },
+    {
+      "id": "INTERNAL_MARKETING_SALES",
+      "kind": "Hosting_operator",
+      "region": "internal",
+      "need": "auditable draft/review, channel/KPI visibility",
+      "status": "PROJECT_DIRECTION_NO_DEMAND_BASELINE",
+      "source": "PROJECT/PR6"
+    },
+    {
+      "id": "PRODUCT_TECH_REVIEW",
+      "kind": "Hosting_operator",
+      "region": "internal",
+      "need": "safety/spec signoff before public claims",
+      "status": "GROW01_DRAFT_GATE",
+      "source": "GROW01"
+    }
+  ],
+  "kpi_tree": {
+    "principle": "traffic/click != message != form submission != consented CRM lead != qualified lead; no identity-level join approved",
+    "events_proposed_only": [
+      {
+        "name": "content_draft_submitted",
+        "scope": "synthetic editorial package submitted; not published"
+      },
+      {
+        "name": "content_review_decided",
+        "scope": "review status by package/version; reject synthetic approval as real"
+      },
+      {
+        "name": "catalog_gap_detected",
+        "scope": "mock WP/Woo record+field, no live site change"
+      },
+      {
+        "name": "campaign_link_checked",
+        "scope": "UTM syntax check, not visit or conversion"
+      },
+      {
+        "name": "lead_form_submitted",
+        "scope": "future consented form only; no events emitted here"
+      },
+      {
+        "name": "inquiry_qualified",
+        "scope": "future human CRM decision only; distinct from message/click"
+      }
+    ],
+    "naming_rule": "lower_snake_case, domain_action_past_tense, stable meaning, no PII in event names; full dictionary belongs to GROW-02A",
+    "join_policy": "no identity join; UTM and GA4 aggregate source are separate from form/CRM; joins require consent, keys, policy and A0 decision",
+    "baseline": "BASELINE_UNKNOWN"
+  },
+  "roi_formulas": {
+    "labor_saved_hours": "eligible_cases * (manual_minutes_per_case - assisted_minutes_per_case) / 60 - QA_minutes / 60; avoid double counting",
+    "labor_value": "labor_saved_hours * fully_loaded_hourly_cost; value unknown until A0 supplies data",
+    "cost_per_qualified_lead": "approved_campaign_spend / distinct_consent_based_qualified_leads; undefined when denominator=0 or attribution policy absent",
+    "campaign_efficiency": "qualified_leads_attributed / approved_campaign_spend; not computable absent policy/spend",
+    "content_throughput": "human_approved_packages / editorial_period; drafts != approved != published",
+    "qa_rework": "returned_package_versions / reviewed_package_versions",
+    "total_incremental_cost": "infra_delta + provider_inference + media_render + connector_subscription + review_labor + approved_campaign_spend",
+    "net_roi": "(attributable_incremental_margin + defensible_labor_value - total_incremental_cost) / total_incremental_cost; undefined for zero or unknown cost"
+  },
+  "data_request_register": [
+    {
+      "owner": "A0/business",
+      "exact_input": "target segment, qualification criteria, success KPI, RPO/retention and allowable spend",
+      "purpose": "decision",
+      "status": "NOT_COLLECTED"
+    },
+    {
+      "owner": "marketing/content owner",
+      "exact_input": "manual and assisted minutes by workflow, review time, package versions, approval timestamps",
+      "purpose": "labor/QA",
+      "status": "NOT_COLLECTED"
+    },
+    {
+      "owner": "site owner",
+      "exact_input": "read-only WP/Woo API scope, site/locale taxonomy and record counts",
+      "purpose": "catalog",
+      "status": "NOT_COLLECTED"
+    },
+    {
+      "owner": "GA4 property owner",
+      "exact_input": "aggregate sessions, engaged sessions, channel tags, attribution settings, read access",
+      "purpose": "analytics",
+      "status": "NOT_COLLECTED"
+    },
+    {
+      "owner": "form/CRM and privacy owner",
+      "exact_input": "consented form submissions, distinct lead IDs, qualification decisions, dedup and retention policy",
+      "purpose": "lead",
+      "status": "NOT_COLLECTED"
+    },
+    {
+      "owner": "Ads/budget owner",
+      "exact_input": "approved spend by currency/date/campaign, platform fees and budget cap",
+      "purpose": "cost",
+      "status": "NOT_COLLECTED"
+    },
+    {
+      "owner": "infra/provider owner",
+      "exact_input": "incremental hosting, model usage/rates, media render bills, connector subscriptions",
+      "purpose": "cost",
+      "status": "NOT_COLLECTED"
+    }
+  ],
+  "a0_decisions": [
+    {
+      "id": "A0-1",
+      "question": "Đối tượng đầu tiên?",
+      "options": [
+        "VI homeowner/installer",
+        "EN importer/distributor",
+        "internal operator only"
+      ],
+      "recommendation": "internal operator only for offline MVP; external segment choice remains A0",
+      "reason": "no customer demand evidence",
+      "status": "AWAITING_A0_DECISION"
+    },
+    {
+      "id": "A0-2",
+      "question": "KPI chính sau khi có dữ liệu?",
+      "options": [
+        "qualified consented leads",
+        "editorial QA throughput",
+        "channel aggregate visibility"
+      ],
+      "recommendation": "editorial QA throughput for offline MVP; qualified leads only after consented source",
+      "reason": "mock data cannot prove lead value",
+      "status": "AWAITING_A0_DECISION"
+    },
+    {
+      "id": "A0-3",
+      "question": "Nguồn dữ liệu mở đọc đầu tiên?",
+      "options": [
+        "WP/Woo inventory",
+        "GA4 aggregates",
+        "manual CRM export with consent"
+      ],
+      "recommendation": "WP/Woo read after owner confirms scope; mock first",
+      "reason": "site presence known; real API rights not verified",
+      "status": "AWAITING_A0_DECISION"
+    },
+    {
+      "id": "A0-4",
+      "question": "MVP slice?",
+      "options": [
+        "editorial+approval mock",
+        "catalog gap report mock",
+        "full cross-channel live dashboard"
+      ],
+      "recommendation": "editorial+approval mock, then catalog gap report mock",
+      "reason": "reuses GROW/UX/ENG offline; avoids live joins",
+      "status": "AWAITING_A0_DECISION"
+    },
+    {
+      "id": "A0-5",
+      "question": "Cadence and retention?",
+      "options": [
+        "weekly aggregate review + A0-defined retention",
+        "monthly aggregate review + A0-defined retention",
+        "defer until policy owner decides"
+      ],
+      "recommendation": "weekly synthetic review only; real retention deferred to A0/privacy owner",
+      "reason": "no approved data retention policy",
+      "status": "AWAITING_A0_DECISION"
+    }
+  ],
+  "tabletop": {
+    "id": "NEG-01",
+    "input": "synthetic proposal requests TikTok auto-publish and joins GA4 aggregate to identifiable CRM leads without approved consent, auth, budget or publisher",
+    "flags": {
+      "social_publish_requested": true,
+      "identity_join_requested": true,
+      "social_write_authorized": false,
+      "join_consent_authorized": false,
+      "budget_approved": false
+    },
+    "expected": "LATER_WITH_SEPARATE_WRITE_APPROVAL / BLOCKED",
+    "observed": "LATER_WITH_SEPARATE_WRITE_APPROVAL / BLOCKED",
+    "result": "PASS_OFFLINE_ONLY",
+    "test_method": "Python stdlib boolean gate over synthetic flags; no connector call"
+  },
+  "operational_actions": {
+    "production_writes": 0,
+    "paid_api_calls": 0,
+    "account_logins": 0,
+    "publishes": 0,
+    "real_customer_records": 0
+  },
+  "verdict": "BIZ02_S1_PRIORITIZATION_DRAFT_READY_FOR_REVIEW",
+  "next_owner": "chatgpt"
+}
