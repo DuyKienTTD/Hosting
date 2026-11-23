@@ -11,6 +11,14 @@ sensitivity: public-redacted
 
 Đây là điểm đọc nhanh. Chi tiết đầy đủ nằm trong `inventory/current-vps-state.md`.
 
+## Checkpoint danh mục — 2026-11-23 (không phải kiểm chứng VPS live)
+
+- [Báo cáo tiến độ và năng lực mục tiêu](reports/2026-11-23-hosting-progress-and-target-capabilities.md) đánh giá theo năm workstream: **~31% mức trưởng thành của danh mục** và **~5–10% khả năng sử dụng end-to-end**; đây là **ước tính điều phối với sai số**, không phải KPI hoặc chứng nhận production. PR #31 và các hạng mục mới còn draft/chưa merge; nhiều điều khoản ở phần cũ bên dưới là snapshot lịch sử ngày 21–22/11.
+- [ENG-01A/S4 Linux independent Work QA](https://github.com/DuyKienTTD/Hosting/pull/21#issuecomment-7094836398): official S4 7/7 + S3 12/12 PASS offline; không chứng minh connector thật. A1 PR #37 receipt preflight còn thiếu ingress của **riêng phiên A1**, nhưng không còn là blocker của gate Linux ở **cấp dự án**.
+- [OPS-01A/S2-D3](https://github.com/DuyKienTTD/Hosting/pull/36#issuecomment-7094319094): Hermes độc lập 17/17 PASS_WITH_LIMITS offline; registry 256 và snapshot chưa xác thực không production-ready. S3-P0 design QA PASS_WITH_LIMITS, S3-P1 chỉ đạt bản nháp read-only, chưa có 24 test runnable hoặc DB tests.
+- [GOV-01 PR31 D7 QA](https://github.com/DuyKienTTD/Hosting/pull/31#issuecomment-7094625768) PASS_WITH_LIMITS, PR31 vẫn draft; [cost-first A0](https://github.com/DuyKienTTD/Hosting/pull/31#issuecomment-7095081485): ChatGPT Standard mặc định tự làm, Hermes `HOLD_NO_NEW_TASKS`; Hostinger `PAUSED`, Codex `NOT_AUTHORIZED`.
+- **Bất biến:** không có phê duyệt merge, live connectors, VPS changes, auto-publish hay API trả phí mới; GATE B `BLOCKED_PREFLIGHT`. Trước thao tác production phải đọc bằng chứng live mới thay cho checkpoint này.
+
 ## VPS
 
 - Hostinger KVM 2, Ubuntu 24.04.4 LTS, 2 vCPU, 8 GB RAM, 100 GB đĩa.
