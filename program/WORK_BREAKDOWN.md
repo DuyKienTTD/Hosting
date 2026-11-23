@@ -71,7 +71,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Product Charter with O1–O5, personas, authorization matrix, M0–M5 and KPI measurement contracts; author-complete.
 - **REQUIRED_SKILL_IDS:** K-DOC,K-DATA,K-UX
 - **MINIMUM_TOOL_CAPABILITY:** GitHub source read/branch/diff/readback; Markdown/spec review; no business connector required for design.
-- **PRIMARY_OWNER_CANDIDATE:** A2; Coordinator integrates
+- **PRIMARY_OWNER_CANDIDATE:** A2
 - **AGENT_CANDIDATES:** A2
 - **CONTRIBUTORS:** Coordinator (integration owner)
 - **PREDECESSORS:** Existing PROJECT/ROADMAP; DGN-1.
@@ -93,7 +93,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** 12-screen specification, navigation, data/action/state contracts, five journeys and responsive/error/UNKNOWN/offline states.
 - **REQUIRED_SKILL_IDS:** K-UX,K-DOC,K-SEC,K-DATA
 - **MINIMUM_TOOL_CAPABILITY:** GitHub docs and source traceability; future browser/DOM harness not required for design.
-- **PRIMARY_OWNER_CANDIDATE:** A2 sole product/UI writer; Work read-only consultant
+- **PRIMARY_OWNER_CANDIDATE:** A2
 - **AGENT_CANDIDATES:** A2
 - **CONTRIBUTORS:** Work (feasibility consultant)
 - **PREDECESSORS:** G0-01; Work DGN-FEASIBILITY.
@@ -137,7 +137,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Source-path inventory, authority map and duplicate/conflict analysis completed in KNG-01; preserve evidence.
 - **REQUIRED_SKILL_IDS:** K-GIT,K-PY,K-DOC,K-DATA
 - **MINIMUM_TOOL_CAPABILITY:** GitHub source/blobs; local Git/Python only for concrete delta.
-- **PRIMARY_OWNER_CANDIDATE:** A1 historical owner
+- **PRIMARY_OWNER_CANDIDATE:** A1 (historical)
 - **AGENT_CANDIDATES:** A1 (historical)
 - **CONTRIBUTORS:** None; historical
 - **PREDECESSORS:** PR31/KNG baseline.
@@ -159,7 +159,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Compact task entry/context pack and provenance migration completed in KNG-01; preserve historical source/evidence.
 - **REQUIRED_SKILL_IDS:** K-GIT,K-SCHEMA,K-DOC
 - **MINIMUM_TOOL_CAPABILITY:** GitHub source and offline schema validation only on change trigger.
-- **PRIMARY_OWNER_CANDIDATE:** A1 historical owner
+- **PRIMARY_OWNER_CANDIDATE:** A1 (historical)
 - **AGENT_CANDIDATES:** A1 (historical)
 - **CONTRIBUTORS:** None; historical
 - **PREDECESSORS:** G1-01.
@@ -181,7 +181,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Offline validator and positive/negative fixtures from KNG-01; preserve test evidence.
 - **REQUIRED_SKILL_IDS:** K-PY,K-SCHEMA,K-TEST,K-SEC,K-GIT
 - **MINIMUM_TOOL_CAPABILITY:** Python/Git objects/offline fixtures; no external service.
-- **PRIMARY_OWNER_CANDIDATE:** A1 historical author; Work historical QA
+- **PRIMARY_OWNER_CANDIDATE:** A1 (historical)
 - **AGENT_CANDIDATES:** A1 (historical)
 - **CONTRIBUTORS:** Work (historical independent reviewer)
 - **PREDECESSORS:** G1-02.
@@ -203,7 +203,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Independent evaluation of context pack and validator; retain historical verdict and measurements.
 - **REQUIRED_SKILL_IDS:** K-QA,K-TEST,K-DATA,K-GIT
 - **MINIMUM_TOOL_CAPABILITY:** Independent Work session and source-pinned offline harness.
-- **PRIMARY_OWNER_CANDIDATE:** Work historical reviewer; Coordinator records lineage
+- **PRIMARY_OWNER_CANDIDATE:** Work (historical)
 - **AGENT_CANDIDATES:** Work (historical)
 - **CONTRIBUTORS:** Coordinator (lineage only)
 - **PREDECESSORS:** G1-02,G1-03.
@@ -247,7 +247,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Specify append-only event schema, receipts, idempotency/deduplication, status projection, source freshness and reconciliation; build is separate gated phase.
 - **REQUIRED_SKILL_IDS:** K-PY,K-SCHEMA,K-GIT,K-API,K-TEST,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Design: docs/schema. Future build: isolated backend, DB, migration/test runner and authenticated Git/session adapter.
-- **PRIMARY_OWNER_CANDIDATE:** A1 schema/technical candidate; Coordinator owns operating contract
+- **PRIMARY_OWNER_CANDIDATE:** A1
 - **AGENT_CANDIDATES:** A1
 - **CONTRIBUTORS:** Coordinator (operating contract); Work (integration consultant)
 - **PREDECESSORS:** G2-01,G1-03; Work feasibility; G2-03.
@@ -291,7 +291,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Eight Agent directory, 20 canonical K IDs, 19 S surfaces, nine installable candidates and capability/authorization distinction.
 - **REQUIRED_SKILL_IDS:** K-DOC,K-GIT,K-DATA,K-SCHEMA,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** GitHub branch/diff/readback; each Agent must self-survey for fresh capability claims.
-- **PRIMARY_OWNER_CANDIDATE:** A1 DGN-2 owner; A2 consult
+- **PRIMARY_OWNER_CANDIDATE:** A1
 - **AGENT_CANDIDATES:** A1
 - **CONTRIBUTORS:** A2 (product requirements); Work (review only if separately assigned)
 - **PREDECESSORS:** G0-01; DGN-1; agent profiles; Work report.
@@ -335,7 +335,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Create actionable roadmaps from WBS/assignment; each recipient edits only its roadmap after actual task ACK.
 - **REQUIRED_SKILL_IDS:** K-GIT,K-SCHEMA,K-DOC,K-SEC,K-AUTO
 - **MINIMUM_TOOL_CAPABILITY:** GitHub branch/PR/readback; owner-forward is manual; no cross-session dispatcher verified.
-- **PRIMARY_OWNER_CANDIDATE:** Coordinator issues; each Agent sole-writes its roadmap
+- **PRIMARY_OWNER_CANDIDATE:** Coordinator
 - **AGENT_CANDIDATES:** Coordinator
 - **CONTRIBUTORS:** Each recipient Agent, sole-writer of own roadmap after ACK
 - **PREDECESSORS:** G2-01,G2-02,G3-02.
@@ -357,7 +357,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Fresh scoped inventory of hosting services, resource health, network, DNS/TLS and WordPress baseline.
 - **REQUIRED_SKILL_IDS:** K-VPS,K-SEC,K-OBS,K-WP
 - **MINIMUM_TOOL_CAPABILITY:** Hostinger hPanel/authorized SSH or read-only telemetry; verify identity/version.
-- **PRIMARY_OWNER_CANDIDATE:** Hostinger Agent proposed specialist
+- **PRIMARY_OWNER_CANDIDATE:** Hostinger Agent (PAUSED; not dispatchable)
 - **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
 - **CONTRIBUTORS:** None; A1 may provide static notes only if separately assigned
 - **PREDECESSORS:** Existing inventory; separate A0 resume + Hostinger ACK.
@@ -379,7 +379,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Prove backup integrity and restore into isolated safe environment; document RPO/RTO evidence and rollback.
 - **REQUIRED_SKILL_IDS:** K-VPS,K-BACKUP,K-TEST,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Authorized backup inventory, isolated restore target and integrity tools.
-- **PRIMARY_OWNER_CANDIDATE:** Hostinger Agent proposed; A1 runbook design fallback
+- **PRIMARY_OWNER_CANDIDATE:** Hostinger Agent (PAUSED; not dispatchable)
 - **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
 - **CONTRIBUTORS:** A1 (runbook design only; not restore execution)
 - **PREDECESSORS:** INF-01.
@@ -423,7 +423,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Demonstrate minimal safe workflow, durable state, retry/recovery and observability in isolated environment; n8n is runtime, not Agent.
 - **REQUIRED_SKILL_IDS:** K-VPS,K-N8N,K-API,K-TEST,K-SEC,K-OBS
 - **MINIMUM_TOOL_CAPABILITY:** n8n sandbox, database, workflow export/import, signed webhook, synthetic trigger and logs.
-- **PRIMARY_OWNER_CANDIDATE:** Hostinger proposed infra owner (paused); A1 schema support
+- **PRIMARY_OWNER_CANDIDATE:** Hostinger Agent (PAUSED; not dispatchable)
 - **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
 - **CONTRIBUTORS:** A1 (schema consultant only)
 - **PREDECESSORS:** INF-02,INF-03,G2-02.
@@ -444,8 +444,8 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **PRIORITY:** P1
 - **DELIVERABLE:** Build interactive sandbox prototype from A2 spec with source-linked tasks, roadmaps, skills, approvals, evidence and mobile layouts.
 - **REQUIRED_SKILL_IDS:** K-UX,K-BROW,K-PY,K-TEST,K-SEC
-- **MINIMUM_TOOL_CAPABILITY:** Work Linux/browser or approved local UI runtime; synthetic fixtures; future Playwright/axe only if installed/approved.
-- **PRIMARY_OWNER_CANDIDATE:** Work proposed builder; A2 product input; A1 independent code QA
+- **MINIMUM_TOOL_CAPABILITY:** Work Linux environment with Python and Node Playwright modules observed available on 2026-11-23 18:07 UTC; axe-core is UNKNOWN_NOT_VERIFIED; no browser or screen-reader test was run. Existing Playwright only in separately authorized sandbox; do not install axe-core without approved gap/cost/rollback.
+- **PRIMARY_OWNER_CANDIDATE:** Work (proposed; product build HOLD)
 - **AGENT_CANDIDATES:** Work
 - **CONTRIBUTORS:** A2 (product input); A1 (technical consultant/reviewer)
 - **PREDECESSORS:** G0-02,G2-02,G2-03.
@@ -467,7 +467,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Connect approved UI to durable task/evidence state, server RBAC/ABAC, approval ledger, freshness and scoped integrations.
 - **REQUIRED_SKILL_IDS:** K-UX,K-API,K-TEST,K-SEC,K-SCHEMA,K-GIT
 - **MINIMUM_TOOL_CAPABILITY:** Authenticated backend/API, database, test identity provider, migrations, audit and negative auth tests.
-- **PRIMARY_OWNER_CANDIDATE:** Work proposed integrator; A1 schema support; Coordinator policy
+- **PRIMARY_OWNER_CANDIDATE:** Work (proposed; product build HOLD)
 - **AGENT_CANDIDATES:** Work
 - **CONTRIBUTORS:** A1 (schema consultant); Coordinator (policy input)
 - **PREDECESSORS:** UI-01,G2-02,G2-03,INF-03.
@@ -489,7 +489,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** After a supported channel is verified, prove two consenting test sessions receive unique synthetic work, issue real ACK and return exact-attempt receipts.
 - **REQUIRED_SKILL_IDS:** K-BROW,K-AUTO,K-TEST,K-SEC,K-API
 - **MINIMUM_TOOL_CAPABILITY:** Verified destination and authorized browser/API adapter, isolated state store, two synthetic sessions, kill switch.
-- **PRIMARY_OWNER_CANDIDATE:** Work research/test owner; Coordinator owns handoff semantics
+- **PRIMARY_OWNER_CANDIDATE:** Work (proposed; channel UNKNOWN)
 - **AGENT_CANDIDATES:** Work
 - **CONTRIBUTORS:** Coordinator (handoff semantics only)
 - **PREDECESSORS:** G2-01,G2-02,G3-03; separate A0 test authorization.
@@ -511,7 +511,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Audit authorized WP product/page/post content, metadata, internal links and errors; output source-linked findings and UNKNOWN/errors.
 - **REQUIRED_SKILL_IDS:** K-WP,K-SEO,K-DATA,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Verified WordPress connector/API read-only scope or sanitized export; source snapshot.
-- **PRIMARY_OWNER_CANDIDATE:** A2 business owner candidate; Work QA
+- **PRIMARY_OWNER_CANDIDATE:** A2 (proposed; read-only source access UNKNOWN)
 - **AGENT_CANDIDATES:** A2
 - **CONTRIBUTORS:** Work (independent reviewer)
 - **PREDECESSORS:** G0-01; separate read-only account authorization.
@@ -533,7 +533,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Transform UC01-01 findings into reproducible report/evidence consumed by Console with bounded failures and provenance.
 - **REQUIRED_SKILL_IDS:** K-WP,K-PY,K-API,K-TEST,K-UX,K-DATA
 - **MINIMUM_TOOL_CAPABILITY:** Synthetic fixture first; future worker/API with versioned schema and trace.
-- **PRIMARY_OWNER_CANDIDATE:** Work pipeline candidate; A2 defines finding acceptance; A1 schema support
+- **PRIMARY_OWNER_CANDIDATE:** Work (proposed; build HOLD)
 - **AGENT_CANDIDATES:** Work
 - **CONTRIBUTORS:** A2 (acceptance definition); A1 (schema consultant)
 - **PREDECESSORS:** UC01-01,UI-01,G2-02.
@@ -555,7 +555,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Establish sourced lead/conversion/spend baseline and attribution limitations; distinguish form, message and qualified lead events.
 - **REQUIRED_SKILL_IDS:** K-ADS,K-DATA,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Google Ads/GA4 read-only connector/API, consent and metric dictionary, bounded date range.
-- **PRIMARY_OWNER_CANDIDATE:** A2 business analytics owner candidate; Work data QA
+- **PRIMARY_OWNER_CANDIDATE:** A2 (proposed; Ads/GA4 access UNKNOWN)
 - **AGENT_CANDIDATES:** A2
 - **CONTRIBUTORS:** Work (data QA only)
 - **PREDECESSORS:** G0-01; consent and read-only access.
@@ -577,7 +577,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Design and later validate draft→review→approval→publish with rights, asset provenance, consent and human approval.
 - **REQUIRED_SKILL_IDS:** K-MEDIA,K-DOC,K-UX,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Asset library/source links, licensed/consented assets, draft sandbox.
-- **PRIMARY_OWNER_CANDIDATE:** A2 content workflow owner candidate; Work UX review
+- **PRIMARY_OWNER_CANDIDATE:** A2 (proposed; media execution HOLD)
 - **AGENT_CANDIDATES:** A2
 - **CONTRIBUTORS:** Work (UX review only)
 - **PREDECESSORS:** G0-01,G2-03.
@@ -599,7 +599,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Aggregate validated business/operational metrics with provenance, freshness, currency, cost state and UNKNOWN semantics.
 - **REQUIRED_SKILL_IDS:** K-DATA,K-ADS,K-API,K-UX,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Read-only connectors/versioned imports, data dictionary, time-zone alignment, freshness monitor and fixtures.
-- **PRIMARY_OWNER_CANDIDATE:** Work integration candidate; A2 owns KPI definitions; Coordinator policy
+- **PRIMARY_OWNER_CANDIDATE:** Work (proposed; live data UNKNOWN)
 - **AGENT_CANDIDATES:** Work
 - **CONTRIBUTORS:** A2 (KPI definitions); Coordinator (policy)
 - **PREDECESSORS:** GROW-01,UI-02,G2-02.
@@ -621,7 +621,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Collect complete Agent roadmap handoffs, verify consistency/evidence/HOLD boundaries and prepare one integrated verdict.
 - **REQUIRED_SKILL_IDS:** K-QA,K-SEC,K-GIT,K-DATA,K-SCHEMA
 - **MINIMUM_TOOL_CAPABILITY:** GitHub source SHA/diff/readback; reviewer not author; package matrix; no deployment.
-- **PRIMARY_OWNER_CANDIDATE:** Coordinator integration owner; A0 Assistant independent reviewer (self-session capability confirmation required)
+- **PRIMARY_OWNER_CANDIDATE:** Coordinator
 - **AGENT_CANDIDATES:** Coordinator
 - **CONTRIBUTORS:** A0 Assistant (independent reviewer, not execution owner)
 - **PREDECESSORS:** DGN-1,DGN-2,DGN-3,DGN-4; roadmap-level handoffs or justified partial blockers.
@@ -643,7 +643,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** A0 reviews integrated package and decides PASS/PASS_WITH_CONDITIONS/FAIL; separately decides if/when build or operations are authorized.
 - **REQUIRED_SKILL_IDS:** K-DOC,K-SEC (decision authority, not technical execution)
 - **MINIMUM_TOOL_CAPABILITY:** Authenticated A0 decision tied to exact candidate/tree SHA, scope, conditions and expiry.
-- **PRIMARY_OWNER_CANDIDATE:** A0 sole decision owner
+- **PRIMARY_OWNER_CANDIDATE:** A0 (reserved decision owner; not an Agent executor)
 - **AGENT_CANDIDATES:** None (A0 is decision authority, not Agent)
 - **CONTRIBUTORS:** None
 - **PREDECESSORS:** REL-01.
@@ -687,7 +687,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Sample A2 read-only WP findings for false positives, unsupported inference and reproducibility.
 - **REQUIRED_SKILL_IDS:** K-QA,K-SEO,K-DATA,K-WP
 - **MINIMUM_TOOL_CAPABILITY:** Sanitized source snapshot or authorized read-only WP access; sampling protocol.
-- **PRIMARY_OWNER_CANDIDATE:** A1 QA candidate; Work alternative if independent of author
+- **PRIMARY_OWNER_CANDIDATE:** A1 (proposed; only after UC01-01)
 - **AGENT_CANDIDATES:** A1
 - **CONTRIBUTORS:** Work (independent reviewer only if separately scoped)
 - **PREDECESSORS:** UC01-01.
@@ -709,7 +709,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Preserve already-assigned PR31 Work QA history; no recreation/re-run absent explicit change trigger.
 - **REQUIRED_SKILL_IDS:** K-QA,K-GIT,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Pinned PR31 diff/comments and exact historical QA artifact.
-- **PRIMARY_OWNER_CANDIDATE:** Work historical owner; Coordinator records lineage
+- **PRIMARY_OWNER_CANDIDATE:** Work (historical)
 - **AGENT_CANDIDATES:** Work (historical)
 - **CONTRIBUTORS:** Coordinator (lineage only)
 - **PREDECESSORS:** PR31 pinned assignment.
@@ -731,7 +731,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Prepare risk-gated hardening plan for SSH exposure, ports, firewall, backup and recovery; no live mutation during design.
 - **REQUIRED_SKILL_IDS:** K-SEC,K-VPS,K-BACKUP,K-OBS
 - **MINIMUM_TOOL_CAPABILITY:** Provider/hPanel/VPS read-only topology; official docs; isolated validation later.
-- **PRIMARY_OWNER_CANDIDATE:** Hostinger proposed specialist (paused); A1 static runbook fallback
+- **PRIMARY_OWNER_CANDIDATE:** Hostinger Agent (PAUSED; not dispatchable)
 - **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
 - **CONTRIBUTORS:** A1 (static runbook consultant only)
 - **PREDECESSORS:** INF-01.
@@ -753,7 +753,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Diagnose reproducible WP HTTP500 using logs/health/bounded request evidence; do not alter site/plugin state.
 - **REQUIRED_SKILL_IDS:** K-VPS,K-WP,K-OBS,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Read-only hPanel/web logs or sanitized trace; staging reproduction if available.
-- **PRIMARY_OWNER_CANDIDATE:** Hostinger proposed specialist (paused); Coordinator/A1 static review only
+- **PRIMARY_OWNER_CANDIDATE:** Hostinger Agent (PAUSED; not dispatchable)
 - **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
 - **CONTRIBUTORS:** A1 (static evidence consultant only)
 - **PREDECESSORS:** INF-01; existing incident evidence; UC01-01 is not a live-access grant.
