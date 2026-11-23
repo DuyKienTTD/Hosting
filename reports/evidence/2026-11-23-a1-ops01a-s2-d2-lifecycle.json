@@ -1,0 +1,220 @@
+{
+  "task_id": "A1-OPS01A-S2-D2",
+  "agent": "A1",
+  "ack": "ACKNOWLEDGED",
+  "mode": "SAFE_OFFLINE_IMPLEMENTATION",
+  "date": "2026-11-23",
+  "source_provenance": {
+    "main_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "pr24_base_sha": "e9c2d8f759850ea9c654de7e103549e041f66679",
+    "pr24_original_blobs": {
+      "lifecycle.py": "c5f5db8cfff48563e9f8d2640d0a910c4d56af25",
+      "policy.json": "8d7e9981691f03eb537bbf5fb4d153831591d0cc",
+      "README.md": "26acedbdd6b805d12ca3db57791d29fc5cee6595",
+      "test_lifecycle.py": "ac912069d1a31698fcea7fb8b6a23c178d7010ef"
+    },
+    "work_qa_comment_id": 7092910873,
+    "owner_reassignment_comment_id": 7093346631,
+    "hostinger_pause_comment_id": 7093337445,
+    "workflow_main_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+    "workflow_pr31_unmerged_blob": "21b8e76321f5f32fb865ce597b953ab1e3d43a57"
+  },
+  "runtime": {
+    "python": "3.13.5",
+    "git": "2.47.3",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "network_clone": "BLOCKED_DNS",
+    "origin_integrity": "All 4 original files Git hash-object matched exact GitHub source blobs prior to editing"
+  },
+  "tests": {
+    "command": "python3 -m unittest discover -s sandbox/ops-monitoring-lifecycle/tests -p test_lifecycle.py -v",
+    "executed": 31,
+    "d1_existing_related_methods": 10,
+    "d2_new_methods": 21,
+    "passed": 31,
+    "failed": 0,
+    "errors": 0,
+    "exit_code": 0,
+    "python_compile": "PASS",
+    "policy_json_parse": "PASS",
+    "d1_method_names": [
+      "test_identity_before_mutation_then_corrected_sample",
+      "test_bad_rule_timestamp_stale_and_blocked_are_no_control_mutation",
+      "test_replay_is_distinguished_and_no_control_mutation",
+      "test_same_timestamp_ids_do_not_form_streak",
+      "test_open_899_900_901_are_notification_only",
+      "test_recovered_boundaries_start_new_incident",
+      "test_wrong_source_future_does_not_poison_corrected_timestamp",
+      "test_pinned_s1_composition_fixture",
+      "test_snapshot_replay_no_duplicate_incident",
+      "test_clock_reversal_rejected_without_advancing_trusted_time"
+    ],
+    "d2_method_names": [
+      "test_f1_unknown_interrupts_good_streak",
+      "test_f1_stale_interrupts_good_streak",
+      "test_f1_blocked_interrupts_good_streak",
+      "test_f1_requires_three_NEW_goods_after_break",
+      "test_f1_interruption_breaks_BAD_streak_in_normal",
+      "test_f1_interruption_breaks_BAD_streak_in_recovered",
+      "test_f1_foreign_identity_does_NOT_interrupt_streak",
+      "test_f1_trusted_interrupt_snapshot_restore",
+      "test_f2_invalid_sample_ids_list_dict_float_none_empty_oversize",
+      "test_f2_invalid_non_dict_payloads",
+      "test_f2_non_json_object_and_extra_field",
+      "test_f2_nan_infinity_cyclic_payloads",
+      "test_f2_unserializable_allowed_field",
+      "test_f2_corrected_same_id_after_invalid",
+      "test_f3_wrong_explicit_rule_rejected_no_mutation",
+      "test_f3_correct_explicit_rule_accepted",
+      "test_f3_missing_rule_backward_compatible",
+      "test_f3_bad_rule_type_rejected",
+      "test_d1_replay_precedes_time_and_snapshot",
+      "test_d1_equal_time_and_wrong_source_corrected",
+      "test_d2_policy_order_matches_code"
+    ],
+    "full_pr22_historical_suite": "NOT_RERUN",
+    "work_independent_18_cases": "NOT_RERUN",
+    "independent_work_qa": "PENDING"
+  },
+  "expected_observed": [
+    {
+      "finding": "F1",
+      "case_name": "UNKNOWN after good x2 (OPEN)",
+      "expected": "reset good streak; no recovery from next one good",
+      "observed": "TRUSTED_INTERRUPTION, 0 good streak; OPEN retained; fresh good x3 RECOVERED",
+      "verdict": "PASS_OFFLINE_AUTHOR_TEST"
+    },
+    {
+      "finding": "F1",
+      "case_name": "stale after good x2 (OPEN)",
+      "expected": "same interruption",
+      "observed": "PASS: no premature RECOVERED",
+      "verdict": "PASS_OFFLINE_AUTHOR_TEST"
+    },
+    {
+      "finding": "F1",
+      "case_name": "blocked after good x2 (OPEN)",
+      "expected": "same interruption",
+      "observed": "PASS: no premature RECOVERED",
+      "verdict": "PASS_OFFLINE_AUTHOR_TEST"
+    },
+    {
+      "finding": "F1",
+      "case_name": "bad x2 then UNKNOWN, NORMAL and RECOVERED",
+      "expected": "require three new bad samples",
+      "observed": "PASS: new OPEN only at third fresh bad; incident seq correct",
+      "verdict": "PASS_OFFLINE_AUTHOR_TEST"
+    },
+    {
+      "finding": "F1",
+      "case_name": "foreign resource,source,rule_version,rule mismatches",
+      "expected": "audit-only, no streak or clock mutation",
+      "observed": "PASS: byte-identical control_snapshot after each",
+      "verdict": "PASS_OFFLINE_AUTHOR_TEST"
+    },
+    {
+      "finding": "F1",
+      "case_name": "synthetic snapshot/restore after interruption",
+      "expected": "retain interrupted streak",
+      "observed": "PASS: restore good streak=0, next good alone does not recover",
+      "verdict": "PASS_OFFLINE_AUTHOR_TEST"
+    },
+    {
+      "finding": "F2",
+      "case_name": "sample_id list/dict/float/null/empty/oversize/bytes/spaces/nonascii",
+      "expected": "INVALID_SAMPLE_ID, null sanitized audit, no mutation",
+      "observed": "PASS: no TypeError; corrected same-ID accepted",
+      "verdict": "PASS_OFFLINE_AUTHOR_TEST"
+    },
+    {
+      "finding": "F2",
+      "case_name": "non-dict/extra fields/non-JSON object/NaN/Infinity/cycle",
+      "expected": "INVALID_PAYLOAD no exception or full payload in audit",
+      "observed": "PASS: control snapshot unchanged, audit sanitized",
+      "verdict": "PASS_OFFLINE_AUTHOR_TEST"
+    },
+    {
+      "finding": "F3",
+      "case_name": "supplied wrong rule",
+      "expected": "RULE_MISMATCH before control mutation",
+      "observed": "PASS: explicit WRONG rejected; future matching data may still OPEN",
+      "verdict": "PASS_OFFLINE_AUTHOR_TEST"
+    },
+    {
+      "finding": "F3",
+      "case_name": "supplied matching rule",
+      "expected": "accept qualifying synthetic v1",
+      "observed": "PASS: matching bad x3 OPEN",
+      "verdict": "PASS_OFFLINE_AUTHOR_TEST"
+    },
+    {
+      "finding": "F3",
+      "case_name": "absent rule on legacy synthetic v1",
+      "expected": "allow backcompat only in fake single-rule envelope",
+      "observed": "PASS: qualifying bad x3 OPEN",
+      "verdict": "PASS_OFFLINE_AUTHOR_TEST"
+    },
+    {
+      "finding": "P",
+      "case_name": "policy validation order",
+      "expected": "replay before strict time, rule before replay",
+      "observed": "PASS: policy and source match",
+      "verdict": "PASS_OFFLINE_AUTHOR_TEST"
+    },
+    {
+      "finding": "D1",
+      "case_name": "OPEN and RECOVERED +899/+900/+901, UTC, replay after restore",
+      "expected": "all historical D1 invariants unchanged",
+      "observed": "PASS: 10 existing related D1 + 2 D2 focused regression tests",
+      "verdict": "PASS_OFFLINE_AUTHOR_TEST"
+    }
+  ],
+  "policy_decision": {
+    "absent_rule": "ALLOW_IN_SYNTHETIC_SINGLE_RULE_V1_ONLY",
+    "provided_rule": "REJECT_IF_MISMATCHED",
+    "trusted_interruption": "reset bad_streak and good_streak ONLY; no watermark, seen, incident, notification, state mutation",
+    "invalid_payload": "full control snapshot unchanged; sanitized audit only",
+    "sample_id": "ASCII 1..128, alphanumeric plus _.:-"
+  },
+  "new_source_blobs": {
+    "sandbox/ops-monitoring-lifecycle/lifecycle.py": "6d138ab6e044fc85067b9bbf7f6ae0db8a50af78",
+    "sandbox/ops-monitoring-lifecycle/policy.json": "16d7e724aa3ae9073794f7c009450813b93c9288",
+    "sandbox/ops-monitoring-lifecycle/README.md": "a091a20feefcc715da50db248a12335382273206",
+    "sandbox/ops-monitoring-lifecycle/tests/test_lifecycle.py": "11fdbb06410936fba75a65713d1961ea59fe3038"
+  },
+  "write_set": [
+    "sandbox/ops-monitoring-lifecycle/lifecycle.py",
+    "sandbox/ops-monitoring-lifecycle/policy.json",
+    "sandbox/ops-monitoring-lifecycle/README.md",
+    "sandbox/ops-monitoring-lifecycle/tests/test_lifecycle.py",
+    "tasks/2026-11-23-a1-ops01a-s2-d2-lifecycle.md",
+    "reports/2026-11-23-a1-ops01a-s2-d2-lifecycle.md",
+    "reports/evidence/2026-11-23-a1-ops01a-s2-d2-lifecycle.json"
+  ],
+  "do_not_touch": [
+    "Hostinger PR24 branch",
+    "main",
+    "STATE.md",
+    "CATALOG.yaml",
+    "CHANGELOG.md",
+    "PR22",
+    "PR26",
+    "VPS",
+    "KVM2",
+    "production",
+    "paid APIs",
+    "Codex",
+    "GitHub merge/rebase/force push"
+  ],
+  "side_effects": {
+    "external_notifications": 0,
+    "production_actions": 0,
+    "vps_access": 0,
+    "paid_calls": 0,
+    "codex_calls": 0,
+    "hostinger_branch_modifications": 0,
+    "merges": 0
+  },
+  "verdict": "A1_OPS01A_S2_D2_AUTHOR_TESTS_PASS_OFFLINE_PENDING_WORK_QA",
+  "next_owner": "ChatGPT Điều phối → Work independent QA"
+}
