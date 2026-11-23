@@ -269,7 +269,7 @@ Every row defines exactly 18 fields: `WBS_ID | PRODUCT_OUTCOME | FEATURE/UI | WO
 - **DELIVERABLE:** Define approval scope/version/expiry/cost cap/revocation, author-reviewer separation, rollback and release gates.
 - **REQUIRED_SKILL_IDS:** K-SEC,K-QA,K-DOC,K-SCHEMA
 - **MINIMUM_TOOL_CAPABILITY:** GitHub PR review, versioned docs, negative policy fixtures; no main rule mutation.
-- **PRIMARY_OWNER_CANDIDATE:** Coordinator; A0 approval authority
+- **PRIMARY_OWNER_CANDIDATE:** Coordinator
 - **AGENT_CANDIDATES:** Coordinator
 - **CONTRIBUTORS:** A1 (schema consultant); A0 (reserved approver, not contributor)
 - **PREDECESSORS:** G2-01,G0-03.
@@ -366,7 +366,7 @@ Every row defines exactly 18 fields: `WBS_ID | PRODUCT_OUTCOME | FEATURE/UI | WO
 - **ACCEPTANCE:** Timestamped live observations, service/version/resource/network evidence, redacted logs and UNKNOWN where inaccessible.
 - **EVIDENCE_PROVENANCE:** Main AGENT_WORKFLOW §11.1a/§12.4; historical Hostinger inventory.
 - **STATUS:** HOLD_PAUSED_HOSTINGER; not dispatched.
-- **TARGET_ROADMAP:** No active roadmap until resume and ACK
+- **TARGET_ROADMAP:** No active roadmap until A0 resume and Hostinger ACK
 
 
 ### INF-02 — Prove backup integrity and restore into isolated safe environment; document RPO/RTO evidence and rollback.
@@ -641,7 +641,7 @@ Every row defines exactly 18 fields: `WBS_ID | PRODUCT_OUTCOME | FEATURE/UI | WO
 - **WORK_TYPE:** OWNER DECISION/APPROVAL
 - **PRIORITY:** P0
 - **DELIVERABLE:** A0 reviews integrated package and decides PASS/PASS_WITH_CONDITIONS/FAIL; separately decides if/when build or operations are authorized.
-- **REQUIRED_SKILL_IDS:** K-DOC,K-SEC (decision authority, not technical execution)
+- **REQUIRED_SKILL_IDS:** K-DOC,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Authenticated A0 decision tied to exact candidate/tree SHA, scope, conditions and expiry.
 - **PRIMARY_OWNER_CANDIDATE:** A0 (reserved decision owner; not an Agent executor)
 - **AGENT_CANDIDATES:** None (A0 is decision authority, not Agent)
