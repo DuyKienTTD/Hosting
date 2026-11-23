@@ -1,0 +1,716 @@
+{
+  "task": "QA-A1-OPS01A-S2-D2-HERMES",
+  "pr36_head": "6838ca7d5e69b43f5272e5fe7f03ba5fff1d7222",
+  "pr24_base": "e9c2d8f759850ea9c654de7e103549e041f66679",
+  "python": "3.14.10",
+  "cases": [
+    {
+      "case": "F1_open_good2_unknown_good3",
+      "expected": [
+        [
+          "TRUSTED_INTERRUPTION",
+          "OPEN",
+          0,
+          true,
+          true,
+          true,
+          true
+        ],
+        "OPEN",
+        [
+          "RECOVERED"
+        ]
+      ],
+      "observed": [
+        [
+          "TRUSTED_INTERRUPTION",
+          "OPEN",
+          0,
+          true,
+          true,
+          true,
+          true
+        ],
+        "OPEN",
+        [
+          "RECOVERED"
+        ]
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "F1_normal_bad2_blocked_bad3",
+      "expected": [
+        [
+          0,
+          true,
+          true,
+          true
+        ],
+        [
+          null,
+          null,
+          "OPEN"
+        ],
+        1
+      ],
+      "observed": [
+        [
+          0,
+          true,
+          true,
+          true
+        ],
+        [
+          null,
+          null,
+          "OPEN"
+        ],
+        1
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "F1_recovered_bad2_blocked_bad3",
+      "expected": [
+        [
+          0,
+          true,
+          true,
+          true
+        ],
+        [
+          null,
+          null,
+          "OPEN"
+        ],
+        2
+      ],
+      "observed": [
+        [
+          0,
+          true,
+          true,
+          true
+        ],
+        [
+          null,
+          null,
+          "OPEN"
+        ],
+        2
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "F1_seen_id_interruption_ignored_then_valid",
+      "expected": [
+        "CONFLICTING_REPLAY",
+        true,
+        [
+          "RECOVERED"
+        ]
+      ],
+      "observed": [
+        "CONFLICTING_REPLAY",
+        true,
+        [
+          "RECOVERED"
+        ]
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "F1_stale_utc_interruption_ignored",
+      "expected": [
+        "NON_ADVANCING_TIMESTAMP",
+        true,
+        [
+          "RECOVERED"
+        ]
+      ],
+      "observed": [
+        "NON_ADVANCING_TIMESTAMP",
+        true,
+        [
+          "RECOVERED"
+        ]
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "F1_foreign_identity_no_reset",
+      "expected": [
+        [
+          [
+            "SOURCE_MISMATCH",
+            true
+          ],
+          [
+            "IDENTITY_MISMATCH",
+            true
+          ],
+          [
+            "RULE_VERSION_MISMATCH",
+            true
+          ],
+          [
+            "RULE_MISMATCH",
+            true
+          ]
+        ],
+        [
+          "RECOVERED"
+        ]
+      ],
+      "observed": [
+        [
+          [
+            "SOURCE_MISMATCH",
+            true
+          ],
+          [
+            "IDENTITY_MISMATCH",
+            true
+          ],
+          [
+            "RULE_VERSION_MISMATCH",
+            true
+          ],
+          [
+            "RULE_MISMATCH",
+            true
+          ]
+        ],
+        [
+          "RECOVERED"
+        ]
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "NOVEL_interruption_replayed_after_watermark_advanced",
+      "expected": [
+        [
+          2,
+          "2026-01-01T00:00:14+00:00",
+          7
+        ],
+        [
+          2,
+          "2026-01-01T00:00:14+00:00",
+          7,
+          "NON_ADVANCING_TIMESTAMP"
+        ],
+        [
+          "RECOVERED"
+        ]
+      ],
+      "observed": [
+        [
+          2,
+          "2026-01-01T00:00:14+00:00",
+          7
+        ],
+        [
+          2,
+          "2026-01-01T00:00:14+00:00",
+          7,
+          "NON_ADVANCING_TIMESTAMP"
+        ],
+        [
+          "RECOVERED"
+        ]
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "NOVEL_unrecorded_interruption_replay_before_clock_catches_up",
+      "expected": [
+        [
+          2,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7
+        ],
+        [
+          2,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7,
+          "EXACT_REPLAY"
+        ],
+        [
+          "RECOVERED"
+        ]
+      ],
+      "observed": [
+        [
+          2,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7
+        ],
+        [
+          0,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7,
+          "TRUSTED_INTERRUPTION"
+        ],
+        []
+      ],
+      "status": "FAIL"
+    },
+    {
+      "case": "NOVEL_conflicting_interruption_replay_after_restore",
+      "expected": [
+        [
+          2,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7
+        ],
+        [
+          2,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7,
+          "CONFLICTING_REPLAY"
+        ],
+        [
+          "RECOVERED"
+        ]
+      ],
+      "observed": [
+        [
+          2,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7
+        ],
+        [
+          0,
+          "OPEN",
+          "2026-01-01T00:00:11.200000+00:00",
+          7,
+          "TRUSTED_INTERRUPTION"
+        ],
+        []
+      ],
+      "status": "FAIL"
+    },
+    {
+      "case": "F2_ids_list_dict_bytes_empty_long_unicode",
+      "expected": [
+        [
+          {
+            "type": "INVALID_SAMPLE_ID",
+            "sample_id": null
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_SAMPLE_ID",
+            "sample_id": null
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_SAMPLE_ID",
+            "sample_id": null
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_SAMPLE_ID",
+            "sample_id": null
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_SAMPLE_ID",
+            "sample_id": null
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_SAMPLE_ID",
+            "sample_id": null
+          },
+          true
+        ]
+      ],
+      "observed": [
+        [
+          {
+            "type": "INVALID_SAMPLE_ID",
+            "sample_id": null
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_SAMPLE_ID",
+            "sample_id": null
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_SAMPLE_ID",
+            "sample_id": null
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_SAMPLE_ID",
+            "sample_id": null
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_SAMPLE_ID",
+            "sample_id": null
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_SAMPLE_ID",
+            "sample_id": null
+          },
+          true
+        ]
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "F2_non_dict_nan_inf_object_cycle_extra_sanitized",
+      "expected": [
+        [
+          {
+            "type": "INVALID_PAYLOAD",
+            "sample_id": null
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_PAYLOAD",
+            "sample_id": null
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_PAYLOAD",
+            "sample_id": "nan"
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_PAYLOAD",
+            "sample_id": "inf"
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_PAYLOAD",
+            "sample_id": "obj"
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_PAYLOAD",
+            "sample_id": "cycle"
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_PAYLOAD",
+            "sample_id": "extra"
+          },
+          true
+        ]
+      ],
+      "observed": [
+        [
+          {
+            "type": "INVALID_PAYLOAD",
+            "sample_id": null
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_PAYLOAD",
+            "sample_id": null
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_PAYLOAD",
+            "sample_id": "nan"
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_PAYLOAD",
+            "sample_id": "inf"
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_PAYLOAD",
+            "sample_id": "obj"
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_PAYLOAD",
+            "sample_id": "cycle"
+          },
+          true
+        ],
+        [
+          {
+            "type": "INVALID_PAYLOAD",
+            "sample_id": "extra"
+          },
+          true
+        ]
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "F2_corrected_id_conflict_and_snapshot_restore",
+      "expected": [
+        "INVALID_PAYLOAD",
+        1,
+        [
+          "CONFLICTING_REPLAY",
+          "CONFLICTING_REPLAY"
+        ],
+        "EXACT_REPLAY",
+        1
+      ],
+      "observed": [
+        "INVALID_PAYLOAD",
+        1,
+        [
+          "CONFLICTING_REPLAY",
+          "CONFLICTING_REPLAY"
+        ],
+        "EXACT_REPLAY",
+        1
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "F3_wrong_rule_future_same_id_corrected",
+      "expected": [
+        [
+          "RULE_MISMATCH",
+          true
+        ],
+        [],
+        [
+          "OPEN"
+        ]
+      ],
+      "observed": [
+        [
+          "RULE_MISMATCH",
+          true
+        ],
+        [],
+        [
+          "OPEN"
+        ]
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "F3_absent_rule_synthetic_only",
+      "expected": [
+        [
+          "OPEN"
+        ],
+        "N8N_READINESS",
+        "synthetic"
+      ],
+      "observed": [
+        [
+          "OPEN"
+        ],
+        "N8N_READINESS",
+        "synthetic"
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "D1_OPEN_cooldown_899",
+      "expected": [
+        "SUPPRESSED_COOLDOWN",
+        false,
+        1,
+        "kvm2:N8N_READINESS:ops-01a-s2-v1:1",
+        1,
+        "OPEN"
+      ],
+      "observed": [
+        "SUPPRESSED_COOLDOWN",
+        false,
+        1,
+        "kvm2:N8N_READINESS:ops-01a-s2-v1:1",
+        1,
+        "OPEN"
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "D1_OPEN_cooldown_900",
+      "expected": [
+        "NOTIFICATION",
+        true,
+        1,
+        "kvm2:N8N_READINESS:ops-01a-s2-v1:1",
+        1,
+        "OPEN"
+      ],
+      "observed": [
+        "NOTIFICATION",
+        true,
+        1,
+        "kvm2:N8N_READINESS:ops-01a-s2-v1:1",
+        1,
+        "OPEN"
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "D1_OPEN_cooldown_901",
+      "expected": [
+        "NOTIFICATION",
+        true,
+        1,
+        "kvm2:N8N_READINESS:ops-01a-s2-v1:1",
+        1,
+        "OPEN"
+      ],
+      "observed": [
+        "NOTIFICATION",
+        true,
+        1,
+        "kvm2:N8N_READINESS:ops-01a-s2-v1:1",
+        1,
+        "OPEN"
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "D1_RECOVERED_new_incident_899",
+      "expected": [
+        "OPEN",
+        false,
+        2,
+        "kvm2:N8N_READINESS:ops-01a-s2-v1:2",
+        1,
+        "OPEN"
+      ],
+      "observed": [
+        "OPEN",
+        false,
+        2,
+        "kvm2:N8N_READINESS:ops-01a-s2-v1:2",
+        1,
+        "OPEN"
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "D1_RECOVERED_new_incident_900",
+      "expected": [
+        "OPEN",
+        true,
+        2,
+        "kvm2:N8N_READINESS:ops-01a-s2-v1:2",
+        1,
+        "OPEN"
+      ],
+      "observed": [
+        "OPEN",
+        true,
+        2,
+        "kvm2:N8N_READINESS:ops-01a-s2-v1:2",
+        1,
+        "OPEN"
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "D1_RECOVERED_new_incident_901",
+      "expected": [
+        "OPEN",
+        true,
+        2,
+        "kvm2:N8N_READINESS:ops-01a-s2-v1:2",
+        1,
+        "OPEN"
+      ],
+      "observed": [
+        "OPEN",
+        true,
+        2,
+        "kvm2:N8N_READINESS:ops-01a-s2-v1:2",
+        1,
+        "OPEN"
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "P_policy_order_and_S1_boundary",
+      "expected": [
+        true,
+        true,
+        [
+          "state",
+          "last_ts",
+          "last_alert_ts",
+          "incident_seq",
+          "seen"
+        ]
+      ],
+      "observed": [
+        true,
+        true,
+        [
+          "state",
+          "last_ts",
+          "last_alert_ts",
+          "incident_seq",
+          "seen"
+        ]
+      ],
+      "status": "PASS"
+    }
+  ],
+  "passed": 19,
+  "failed": 2
+}
