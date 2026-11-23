@@ -1,0 +1,99 @@
+{
+  "task": "ttd-multi-agent-master-allocation-2026-11-23",
+  "agent": "hermes-agent-webui",
+  "checked_at": "2026-11-23T01:43:25Z",
+  "reviewed": {
+    "main": "a22516aa9e5940baccc37ab2edf9eeed2ccc3d93",
+    "pr6": "e5f702e96e04e229f853fe336d0e627713fcf350",
+    "rules": "origin/main@a22516aa9e5940baccc37ab2edf9eeed2ccc3d93",
+    "read_status": "FULL_READ"
+  },
+  "ack_state": "ACKNOWLEDGED",
+  "capability": {
+    "verified": [
+      "repo and PR read-only review via git/web/file tools",
+      "GitHub read/write history via git+SSH in prior Hermes sessions",
+      "file/terminal/web/browser tool surface",
+      "55 installed skills visible in session",
+      "memory and session_search available",
+      "cronjob_manage available with 0 active jobs"
+    ],
+    "untested": [
+      "background 24/7 execution",
+      "external connector accounts",
+      "direct PR comment/review posting from this session",
+      "long-lived delegated orchestration"
+    ],
+    "blocked": [
+      "live Hermes inference API on VPS production runtime",
+      "n8n production MCP",
+      "production mutations",
+      "paid/provider calls",
+      "hPanel or Hostinger control directly from this Hermes session"
+    ]
+  },
+  "ownership": {
+    "accept": ["BIZ-01", "GROW-01"],
+    "change": [
+      "GOV-02 -> codex primary + chatgpt governance review",
+      "AI-01 -> chatgpt-work primary only after capability ACK, otherwise chatgpt fallback",
+      "INF-02 -> chatgpt-work provisional only after capability ACK, otherwise chatgpt fallback",
+      "UX-01 -> chatgpt provisional owner until Work confirms capacity",
+      "GROW-02 -> chatgpt primary + hermes support"
+    ],
+    "decline": ["AI-04", "INF-01", "SEC-02", "ENG-01", "OPS-01"]
+  },
+  "dependencies": {
+    "accept": [
+      "GOV-01->GOV-02",
+      "INF-01->SEC-02",
+      "AI-01+AI-02+INF-01->AI-03",
+      "BIZ-01->BIZ-02",
+      "BIZ-02->UX-01",
+      "BIZ-02->ENG-01",
+      "BIZ-02->GROW-01",
+      "ENG-01->OPS-01",
+      "ENG-01->GROW-02"
+    ],
+    "remove_or_add": [
+      "remove blanket AI-04->ENG-01 edge",
+      "add ChatGPT Work capability ACK gate for GOV-02/AI-01/INF-02/UX-01/QA-01 ownership",
+      "add SEC-01->GROW-01",
+      "add BIZ-01 feasibility findings -> GROW-02"
+    ],
+    "parallelize": [
+      "GOV-01 || AI-01 || AI-02 || INF-01 || INF-02 || BIZ-01",
+      "GOV-02 || SEC-01 || BIZ-02 || GROW-01 after owner ACKs exist"
+    ]
+  },
+  "capacity": {
+    "max_concurrent": "1 primary ownership package or 1 primary + 1 light read-only consult",
+    "active_existing_work": ["PR6 review only"],
+    "workload_risks": [
+      "ChatGPT Work overloaded before independent capability ACK",
+      "Codex overloaded if Gate B execution, ENG-01, OPS-01 and GOV-02 are all assigned together",
+      "Hermes assigned to work that assumes live connectors or VPS mutation capability"
+    ]
+  },
+  "missing_or_duplicate": {
+    "missing_in_catalog": [
+      "tasks/2026-11-21-repository-operating-plan.md",
+      "tasks/2026-11-21-hermes-gate-b-guard-transaction-hardening.md"
+    ],
+    "capability_gap": "no independent capability survey/ACK artifact for ChatGPT Work in current base snapshot",
+    "planning_placeholders": ["BIZ-01", "BIZ-02", "GROW-01", "GROW-02", "SEC-01", "SEC-02", "UX-01"],
+    "overlap_risks": [
+      "AI-04 vs existing Gate B/H6 chain if not explicitly mapped to the existing task",
+      "GOV-02 vs repository operating plan if scope is not narrowed to validator/CI delta"
+    ]
+  },
+  "acceptance_or_safety_gaps": [
+    "add existing_task_path or NO_TASK_YET marker for each backlog line",
+    "add explicit Work capability ACK gate",
+    "state that Hermes accepts BIZ-01/GROW-01 only for discovery/draft evidence, not live connector execution",
+    "relax blanket AI-04 blocker on ENG-01",
+    "make Codex load risk explicit in the plan"
+  ],
+  "verdict": "ACCEPT_WITH_CHANGES",
+  "next_owner": "chatgpt"
+}

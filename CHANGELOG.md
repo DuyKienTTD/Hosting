@@ -3,6 +3,8 @@
 ## 2026-11-23
 
 - Nghiệm thu B2-O fake local tại `d95f161` và chuẩn bị B2-P preflight chỉ đọc.
+- Thêm `reports/2026-11-23-hermes-pr6-master-allocation-review.md` và `reports/evidence/2026-11-23-hermes-pr6-master-allocation-review.json` như ACK/đánh giá của Hermes cho PR #6 về phân bổ multi-agent.
+- Hermes chấp nhận hướng kế hoạch nhưng yêu cầu chỉnh owner provisional của ChatGPT Work, nới dependency blanket `AI-04 -> ENG-01`, gắn `existing_task_path|NO_TASK_YET` cho các dòng backlog, và ghi rõ giới hạn discovery-only cho BIZ-01/GROW-01.
 
 ## 2026-11-22
 

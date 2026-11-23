@@ -1104,6 +1104,24 @@ documents:
     updated_at: 2026-11-22
     sensitivity: public-redacted
 
+  - id: hermes-pr6-master-allocation-review-2026-11-23
+    path: reports/2026-11-23-hermes-pr6-master-allocation-review.md
+    type: report
+    status: current
+    authoritative_for: Hermes-review-of-PR6-multi-agent-master-allocation-plan
+    updated_at: 2026-11-23
+    verified_at: 2026-11-23
+    sensitivity: public-redacted
+
+  - id: hermes-pr6-master-allocation-review-evidence-2026-11-23
+    path: reports/evidence/2026-11-23-hermes-pr6-master-allocation-review.json
+    type: evidence
+    status: current
+    authoritative_for: structured-Hermes-ACK-and-capacity-findings-for-PR6
+    updated_at: 2026-11-23
+    verified_at: 2026-11-23
+    sensitivity: public-redacted
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria
