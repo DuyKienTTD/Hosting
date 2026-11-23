@@ -1,7 +1,7 @@
 ---
 id: ttd-a1-cost-first-master-allocation-2026-11-23
 type: task
-status: proposed_reallocation_pending_agent_ack
+status: proposed_governance_with_agent_evidence
 updated_at: 2026-11-23
 owner: chatgpt
 sensitivity: public
@@ -21,18 +21,24 @@ approval_scope: governance_and_safe_offline_only
 | **A1** | **ChatGPT Thông thường, phiên riêng** | công việc tài liệu/JSON/code nhỏ, metadata, QA nguồn, kế hoạch | A1 tự báo cáo GitHub/Workspace/Ads/WordPress/media đã kết nối; từng task kiểm quyền thật, không tự chạy nền |
 | Work | ChatGPT Work | đa bước, browser/UI, source QA độc lập, kiểm thử offline | Theo quyền và công suất phiên; không QA code của mình |
 | Hermes | Hermes WebUI | code/validator offline phù hợp, media/content/business, schema và mock | Đúng profile/credential; không live/publish mặc định |
-| Hostinger | Hostinger Agent | VPS/hPanel/hosting, OPS, SEC, rollback/feasibility; offline tests nếu có sandbox | Không suy diễn quyền live |
+| Hostinger | Hostinger Agent | VPS/hPanel/hosting, OPS, SEC theo capability lịch sử | **PAUSED A0 2026-11-23**, chưa có ACK pause trong phiên; không giao mới/tiếp tục |
 | **Codex — ngoại lệ** | Codex | case không thể làm bằng 4 lựa chọn trên (ví dụ race/fault phức tạp, low-level runtime) | **CODEX_NOT_AUTHORIZED** mặc định, cần chứng minh và A0 duyệt từng việc |
 
 **n8n là workflow engine, không tính là AI Agent.** A1 bổ sung chứ không đổi tên ChatGPT Điều phối hoặc Work.
 
 ## A1 capability update (self-reported 2026-11-23)
 
-A1 **đã xác nhận nhận vai trò** và bàn giao capability survey cho Điều phối. GitHub (branch/commit/PR), Drive, Gmail, Calendar, WordPress staging/production, Google Ads read-only, Canva/HeyGen, vidIQ/YouTube và QA tooling được A1 **tự báo cáo đã kiểm tra**. Xem [hồ sơ A1](../agents/a1.md) để phân biệt từng scope `SELF_REPORTED_VERIFIED_BY_A1` với quyền ghi/chi phí `NOT_TESTED`; chưa có bằng chứng thực hiện task GOV02-QA01.
+A1 **đã xác nhận nhận vai trò** và bàn giao capability survey cho Điều phối. GitHub (branch/commit/PR), Drive, Gmail, Calendar, WordPress staging/production, Google Ads read-only, Canva/HeyGen, vidIQ/YouTube và QA tooling được A1 **tự báo cáo đã kiểm tra**. Xem [hồ sơ A1](../agents/a1.md) để phân biệt từng scope `SELF_REPORTED_VERIFIED_BY_A1` với quyền ghi/chi phí `NOT_TESTED`; đã có [PR #32](https://github.com/DuyKienTTD/Hosting/pull/32) và Work QA offline PASS_WITH_LIMITS; quyền và test của tác vụ khác vẫn phải xác minh.
 
 **Routing mở rộng:** ưu tiên A1 cho Google Workspace, read-only Ads analysis, WordPress staging/SEO QA, GitHub technical QA và content analytics theo đúng task approval. Các thay đổi Ads, publish YouTube, production WP, AI media trả phí, email gửi ra ngoài vẫn có gate theo công việc; không gán cho A1 quyền production hoặc ngân sách tự động.
 
-**Handoff status:** `A1_ROLE_ACCEPTED_CAPABILITY_REPORTED` nhưng `A1-GOV02-QA01 = PREPARED_FOR_OWNER_FORWARD` cho tới task-specific ACK và PR/evidence. Không coi hồ sơ năng lực là code đã sửa.
+**Handoff status hiện hành:** A1 `ROLE_ACTIVE`; `A1-GOV02-QA01=AUTHOR_DONE + WORK_QA_PASS_WITH_LIMITS` trên PR #32 (chưa merge); `A1-GOV02-S2-A=PROPOSAL_DONE + HERMES_QA_PASS_WITH_LIMITS` tại PR #33 (không có Phase B). `A1-OPS01A-S2-D2=PREPARED_FOR_OWNER_FORWARD` tới khi có task-specific ACK. GitHub comment không tự giao việc.
+
+## A0 override — Hostinger PAUSED / ownership (2026-11-23)
+
+[OPS pause](https://github.com/DuyKienTTD/Hosting/pull/24#issuecomment-7093337445) và [SEC pause](https://github.com/DuyKienTTD/Hosting/pull/29#issuecomment-7093338761) thu hồi các lệnh Hostinger chưa hoàn tất. **Không suy ra phiên Hostinger đã ACK dừng.** Năng lực, code, QA và feasibility lịch sử được giữ nguyên.
+
+[A1 được giao OPS-01A/S2-D2](https://github.com/DuyKienTTD/Hosting/pull/24#issuecomment-7093346631) trên **branch A1 riêng stacked PR24** tại HEAD `e9c2d8f759850ea9c654de7e103549e041f66679`. Work đã QA D1 bằng 18 nhóm synthetic và báo `NEEDS_HOSTINGER_DELTA`; A1 sửa F1–F3 trên branch riêng, **không sửa branch Hostinger**; Work re-QA sau handoff. P0-R1 và năm SEC work orders giữ `NOT_AUTHORIZED`/PAUSED. Chỉ A0 mới có thể cho Hostinger resume, cần ACK rồi mới giao việc.
 
 ## Thu hồi và chuyển việc Codex tại checkpoint
 
@@ -47,7 +53,7 @@ A1 **đã xác nhận nhận vai trò** và bàn giao capability survey cho Đi�
 
 **Không xóa PR, commit, report, QA, branch.** `CANCEL_CODEX_*` chỉ là **thu hồi/không phát hành lệnh điều phối**, không chứng minh Codex đã nhận được thông báo dừng; mọi task active ở phiên khác cần người sở hữu chuyển chỉ thị dừng và nhận ACK. Không dùng một comment để ghi đè owner/status của task đã thực hiện bởi agent khác.
 
-## Gói công việc cho A1 (đã đặc tả, chưa gửi/ACK)
+## Gói công việc cho A1 (lịch sử đã thực hiện; không giao lại)
 
 **Task:** `A1-GOV02-QA01` — sửa validator lỗi ID trùng giữa các package tại PR #28 theo Work [finding](https://github.com/DuyKienTTD/Hosting/pull/28#issuecomment-7092060267). **Owner A1 provisional**, fallback Hermes nếu A1 thiếu local Git/Python và GitHub write. **FIRST_ACTION:** đọc rules/main/PR #28 SHA `6dafae50bd17bc1a18080b13b86c5b8c35573580`, nguồn `sandbox/repo-metadata-validator/validate.py` và fixtures, check quyền trong phiên. Đọc `AGENTS.md`, `rules/AGENT_WORKFLOW.md`, `rules/REPOSITORY_SECURITY.md`, `STATE.md`, `CATALOG.yaml`, `agents/a1.md`, báo cáo Work và Codex; ghi rule/base SHA. **WRITE_SET:** nhánh riêng với source validator + đúng fixture affected, báo cáo delta riêng; không sửa trực tiếp PR #28 nếu không được điều phối phê duyệt; không sửa main/index. **TEST_DELTA:** hai package khác path cùng report ID phải báo `DUPLICATE_DOCUMENT_ID`; cùng path thấy qua hai snapshot không được báo false duplicate; lỗi sha/source vẫn chặn, ID task riêng không bị lẫn ID report; chạy targeted positive+negative offline. **PASS:** source SHA và test thực chạy + GitHub readback; Work QA độc lập (nếu Work đã đọc finding thì được QA code của A1, không QA code tự viết). **STOP:** thiếu tool/owner branch/conflict -> `BLOCKED_CAPABILITY` và chuyển Hermes. **NEXT_OWNER:** ChatGPT Điều phối.
 
@@ -58,10 +64,10 @@ A1 **đã xác nhận nhận vai trò** và bàn giao capability survey cho Đi�
 | CATALOG/STATE/CHANGELOG đối chiếu, 5 dòng `NO_TASK_YET`, metadata PR #10/#13 | A1 và ChatGPT Điều phối (mỗi file đúng một writer) | Work review; **chưa merge hoặc sửa shared index khi có conflict** |
 | BIZ-02, GOV-01/A0 choices, GROW-01/S2 | Hermes, A1 hỗ trợ tài liệu | A0 duyệt lựa chọn; Work reviewer theo slot |
 | UX Operator Console, browser QA, integration demo | Work | A1/Hermes review độc lập, không giả định browser PASS |
-| OPS-01A/S2-D1 và SEC-02/S2 feasibility | Hostinger | Work QA; Hermes-authored SEC PR #29 cần owner review |
+| OPS-01A/S2-D1 và SEC-02/S2 feasibility | **Historical Hostinger DONE_WITH_LIMITS; Agent PAUSED** | Work 18-case D1 QA còn 3 finding; A1 D2 sole writer; Hostinger feasibility PR29 source review đã hoàn tất |
 | GROW-02A event dictionary/UTM | Hermes đã làm; Work QA đã PASS offline | Không triển khai tracking live |
-| ENG-01A offline release/Linux test | Work/Hostinger/A1 nếu verified toolchain Linux/Git | Chỉ khi không agent nào làm được mới đề xuất Codex với bằng chứng |
-| AI-03, paid Gate B | ChatGPT gate; Hostinger và Work input | `NO_GO_CURRENT_PREFLIGHT`/`BLOCKED_PREFLIGHT`; Codex không được tự kích hoạt |
+| ENG-01A offline release/Linux test | Work/A1 nếu verified toolchain Linux/Git (Hostinger PAUSED) | Chỉ khi không agent nào làm được mới đề xuất Codex với bằng chứng |
+| AI-03, paid Gate B | ChatGPT gate; Work input (Hostinger PAUSED) | `NO_GO_CURRENT_PREFLIGHT`/`BLOCKED_PREFLIGHT`; Codex không được tự kích hoạt |
 
 ## Bắt buộc trước mỗi đề xuất Codex
 
