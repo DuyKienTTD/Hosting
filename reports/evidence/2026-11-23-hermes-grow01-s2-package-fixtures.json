@@ -1,0 +1,303 @@
+{
+  "contract_version": "v0-proposal",
+  "task": "GROW-01/S2",
+  "base_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "source_shas": {
+    "GROW01_S1_PR18": "3c8cb40357ee23d13a2c1aa7e07e6848ff5256dd",
+    "BIZ02_S2_PR25": "6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd",
+    "GOV01_S2_PR27": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+    "UX01_S2_PR16": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+    "GROW02A_PR23": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61"
+  },
+  "source_blob_sha": "68941462d7cade8f1ff3168b8033817da6a1ce4d",
+  "packages": [
+    {
+      "package_id": "P1-short-vi-craftsmanship",
+      "source_ref": "reports/evidence/2026-11-23-hermes-grow-01-s1-content-packages.json#P1-short-vi-craftsmanship",
+      "source_sha": "3c8cb40357ee23d13a2c1aa7e07e6848ff5256dd",
+      "revision": 1,
+      "language": "vi",
+      "target_channel": "youtube_shorts",
+      "asset_refs": [
+        {
+          "asset_ref": "placeholder-P1-short-vi-craftsmanship",
+          "kind": "synthetic_placeholder",
+          "rights": "UNVERIFIED"
+        }
+      ],
+      "asset_rights_status": "UNVERIFIED",
+      "technical_review_status": "UNVERIFIED",
+      "marketing_review_status": "UNVERIFIED",
+      "owner_approval_status": "UNVERIFIED",
+      "consent_status": "UNVERIFIED",
+      "channel_status": "UNVERIFIED",
+      "proposed_cost": null,
+      "state": "DRAFT",
+      "decision_log": [],
+      "idempotency_key": null,
+      "content_note": "v0.1-draft|Synthetic draft from repo-known business context only; no approved brand copy reused.",
+      "created_at_utc": "2026-11-23T00:00:00Z",
+      "updated_at_utc": "2026-11-23T00:00:00Z",
+      "content_digest": "81a8a846ae16f14f7a564e97a3685f7f4bced668b9e2cd9b451325795da6af17"
+    },
+    {
+      "package_id": "P2-install-howto-en",
+      "source_ref": "reports/evidence/2026-11-23-hermes-grow-01-s1-content-packages.json#P2-install-howto-en",
+      "source_sha": "3c8cb40357ee23d13a2c1aa7e07e6848ff5256dd",
+      "revision": 1,
+      "language": "en",
+      "target_channel": "youtube_video",
+      "asset_refs": [
+        {
+          "asset_ref": "placeholder-P2-install-howto-en",
+          "kind": "synthetic_placeholder",
+          "rights": "UNVERIFIED"
+        }
+      ],
+      "asset_rights_status": "UNVERIFIED",
+      "technical_review_status": "UNVERIFIED",
+      "marketing_review_status": "UNVERIFIED",
+      "owner_approval_status": "UNVERIFIED",
+      "consent_status": "UNVERIFIED",
+      "channel_status": "UNVERIFIED",
+      "proposed_cost": null,
+      "state": "DRAFT",
+      "decision_log": [],
+      "idempotency_key": null,
+      "content_note": "v0.1-draft|English draft guidance only; exact technical details intentionally withheld pending engineer approval.",
+      "created_at_utc": "2026-11-23T00:00:00Z",
+      "updated_at_utc": "2026-11-23T00:00:00Z",
+      "content_digest": "486974b5d27ca584d910a524e4f72df9a29f770b509351ed7e8e9acf9d29b358"
+    },
+    {
+      "package_id": "P3-landing-brief-envi",
+      "source_ref": "reports/evidence/2026-11-23-hermes-grow-01-s1-content-packages.json#P3-landing-brief-envi",
+      "source_sha": "3c8cb40357ee23d13a2c1aa7e07e6848ff5256dd",
+      "revision": 1,
+      "language": "en-vi",
+      "target_channel": "wordpress_page",
+      "asset_refs": [
+        {
+          "asset_ref": "placeholder-P3-landing-brief-envi",
+          "kind": "synthetic_placeholder",
+          "rights": "UNVERIFIED"
+        }
+      ],
+      "asset_rights_status": "UNVERIFIED",
+      "technical_review_status": "UNVERIFIED",
+      "marketing_review_status": "UNVERIFIED",
+      "owner_approval_status": "UNVERIFIED",
+      "consent_status": "UNVERIFIED",
+      "channel_status": "UNVERIFIED",
+      "proposed_cost": null,
+      "state": "DRAFT",
+      "decision_log": [],
+      "idempotency_key": null,
+      "content_note": "v0.1-draft|Bilingual content brief only; prices, stock, certification, and final SEO targets remain unknown.",
+      "created_at_utc": "2026-11-23T00:00:00Z",
+      "updated_at_utc": "2026-11-23T00:00:00Z",
+      "content_digest": "ce5b595936b8310144d52c8550b19464c934696ae579ff058784a1ed846192b3"
+    }
+  ],
+  "traceability": [
+    {
+      "package_id": "P1-short-vi-craftsmanship",
+      "biz02_story": "J4",
+      "adjacent_review_queue": "J1 (design only, not integrated)",
+      "ux_controls": [
+        "C16",
+        "C17",
+        "C18",
+        "C08"
+      ],
+      "proposed_event_names": [
+        "content_draft_submitted",
+        "content_review_decided",
+        "publish_handoff_requested"
+      ],
+      "a0_ids": [
+        "A0-1",
+        "A0-4",
+        "A0-5"
+      ],
+      "status": [
+        "CONTRACT_READY_FOR_REVIEW",
+        "UI_INTEGRATION_NOT_RUN",
+        "SERVER_AUTH_UNIMPLEMENTED",
+        "REAL_PUBLISH_BLOCKED"
+      ]
+    },
+    {
+      "package_id": "P2-install-howto-en",
+      "biz02_story": "J4",
+      "adjacent_review_queue": "J1 (design only, not integrated)",
+      "ux_controls": [
+        "C16",
+        "C17",
+        "C18",
+        "C08"
+      ],
+      "proposed_event_names": [
+        "content_draft_submitted",
+        "content_review_decided",
+        "publish_handoff_requested"
+      ],
+      "a0_ids": [
+        "A0-1",
+        "A0-4",
+        "A0-5"
+      ],
+      "status": [
+        "CONTRACT_READY_FOR_REVIEW",
+        "UI_INTEGRATION_NOT_RUN",
+        "SERVER_AUTH_UNIMPLEMENTED",
+        "REAL_PUBLISH_BLOCKED"
+      ]
+    },
+    {
+      "package_id": "P3-landing-brief-envi",
+      "biz02_story": "J4",
+      "adjacent_review_queue": "J1 (design only, not integrated)",
+      "ux_controls": [
+        "C16",
+        "C17",
+        "C18",
+        "C08"
+      ],
+      "proposed_event_names": [
+        "content_draft_submitted",
+        "content_review_decided",
+        "publish_handoff_requested"
+      ],
+      "a0_ids": [
+        "A0-1",
+        "A0-4",
+        "A0-5"
+      ],
+      "status": [
+        "CONTRACT_READY_FOR_REVIEW",
+        "UI_INTEGRATION_NOT_RUN",
+        "SERVER_AUTH_UNIMPLEMENTED",
+        "REAL_PUBLISH_BLOCKED"
+      ]
+    }
+  ],
+  "a0_pending": [
+    {
+      "id": "A0-1",
+      "status": "AWAITING_A0_DECISION"
+    },
+    {
+      "id": "A0-2",
+      "status": "AWAITING_A0_DECISION"
+    },
+    {
+      "id": "A0-3",
+      "status": "AWAITING_A0_DECISION"
+    },
+    {
+      "id": "A0-4",
+      "status": "AWAITING_A0_DECISION"
+    },
+    {
+      "id": "A0-5",
+      "status": "AWAITING_A0_DECISION"
+    }
+  ],
+  "test_execution": {
+    "command": "python3 -B -m unittest discover -s sandbox/grow01-package-contract -p test_contract.py -v",
+    "python": "3.14.10",
+    "platform": "Linux-6.12.116+deb13-amd64-x86_64-with-glibc2.41",
+    "executed_count": 15,
+    "passed": 15,
+    "failed": 0,
+    "scope": "LOCAL_STDLIB_OFFLINE_ONLY; UI/browser/IAM/production NOT_TESTED",
+    "tested_code_blob": "e65b74cd7443b657825f60f9f1ce07a3b9595827"
+  },
+  "test_results": [
+    {
+      "case_id": "test_01_three_inherited_drafts",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_02_draft_to_review",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_03_missing_rights_blocks_approval",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_04_p2_requires_technical_review",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_05_unverified_channel_blocks_release",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_06_self_approval_blocked",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_07_stale_revision_and_digest_rejected",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_08_replay_stable",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_09_key_collision_rejected",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_10_fork_invalidates_review",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_11_publish_and_paid_render_blocked",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_12_missing_callback_and_out_of_order",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_13_unauthorized_role_and_client_switch",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_14_synthetic_owner_sequence",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_15_digest_canonical_and_audit",
+      "expected": "PASS_OFFLINE",
+      "observed": "PASS_OFFLINE"
+    }
+  ],
+  "side_effects": {
+    "paid_calls": 0,
+    "uploads": 0,
+    "publishes": 0,
+    "production_writes": 0,
+    "account_logins": 0
+  },
+  "verdict": "GROW01_S2_OFFLINE_PACKAGE_CONTRACT_PASS_READY_FOR_REVIEW",
+  "next_owner": "ChatGPT Điều phối"
+}
