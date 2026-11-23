@@ -1,0 +1,124 @@
+{
+  "task_id": "B2-P-D1",
+  "agent": "codex",
+  "observed_date_ict": "2026-11-23",
+  "recorded_utc": "2026-11-23T03:41:52.865737+00:00",
+  "base_pr7_head": "54b4e1853861b4170cd3dd38c52a223726589ce3",
+  "stack_base_pr5": "d95f1619d3e82d9bfe38ea583d50b1f5b1a5a810",
+  "rules_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "workflow_rule_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "assignment": "https://github.com/DuyKienTTD/Hosting/pull/7#issuecomment-7090919796",
+  "work_qa": "https://github.com/DuyKienTTD/Hosting/pull/7#issuecomment-7090722358",
+  "execute_ack": "EXECUTE_RECEIVED_AND_ACKNOWLEDGED_2026_11_23",
+  "source": {
+    "sandbox/p0-hermes-gate-a/h6_b2p_preflight.py": {
+      "git_blob": "90f7ec6518e78010457164df5e25b8e757452672",
+      "checked_out_sha256": "ae1abb97a74cbffc4023cc81ec31f0f7c6705cd34283a185ef25a3882716ad25"
+    },
+    "sandbox/p0-hermes-gate-a/h6_b2p_preflight_test.py": {
+      "git_blob": "2226258c3233cc630aac38bec4e197fee7666f19",
+      "checked_out_sha256": "fd1707393bf6454f6a5dfb75906c89fdf6880db621e8cc8d76352cc29f2f2c31"
+    }
+  },
+  "source_manifest_sha256": "de15ed270f75d0dc4932e963eb05611c3528f1236cb13cd862e78a77993109fc",
+  "environment": {
+    "python": "3.12.3",
+    "python_implementation": "CPython",
+    "os": "Windows",
+    "os_release": "11",
+    "machine": "AMD64",
+    "utf8_mode": true,
+    "compose": "v5.1.4",
+    "compose_context": "desktop-linux",
+    "compose_actions": [
+      "config"
+    ],
+    "kvm2_runtime": "NOT_MEASURED"
+  },
+  "environment_sha256": "a02e460da543285f6b32f600fe0d0c7f3ddb08ab32a171b19d14566d2ba07050",
+  "test_results": {
+    "methods_passed": 5,
+    "historical_suites_rerun": false,
+    "q2_timer": {
+      "expected": "exactly one timer total in b2o-46 with Guard role, integer timestamp and causal bounds",
+      "observed": {
+        "historical_mixed_role_accepted": true,
+        "changed_mixed_role_rejected": true,
+        "original_trace": {
+          "connected_to_timer_s": 45.000576181,
+          "timer_to_read_end_s": 0.000427156
+        },
+        "rejected_mutations": [
+          "missing",
+          "duplicate",
+          "wrong_role",
+          "mixed_role",
+          "non_integer_timestamp",
+          "after_read_end"
+        ],
+        "other_task_timer_did_not_change_result": true
+      }
+    },
+    "q1_workflow": {
+      "expected": "pinned baseline and distinct full candidate projection plus exact bytes on local stage",
+      "observed": {
+        "published_baseline_drift_rejected": true,
+        "staged_candidate_route_drift_rejected": true,
+        "valid_byte_copy_accepted": true,
+        "format_only_copy_drift_rejected": true,
+        "missing_byte_pin_rejected": true,
+        "fresh_stage_normalized_digest_equal": true,
+        "fresh_stage_raw_digest_differs": true
+      }
+    }
+  },
+  "workflow_provenance": {
+    "historical_b2o_base_projection_sha256": "08aa63bcfaf27f9ced2a5374ce67f4683877f615ed00dafea086f608321dde0d",
+    "source_base_projection_sha256": "08aa63bcfaf27f9ced2a5374ce67f4683877f615ed00dafea086f608321dde0d",
+    "stage": "LOCAL_TEMPORARY_STAGED_VERIFIED",
+    "file": "workflows.json",
+    "candidate_normalized_projection_sha256": "439624f3e3dede91f75ad6f12df4fbd9d3104fab1f9bc41e227846acef0cde3a",
+    "approved_candidate_projection_sha256": "439624f3e3dede91f75ad6f12df4fbd9d3104fab1f9bc41e227846acef0cde3a",
+    "candidate_staged_file_sha256": "5abe355fa61f86a249476bd8e284b9557b1f46360086698e418fb8592f2b2ea3",
+    "kvm2_staging": "NOT_PERFORMED",
+    "n8n_import": "NOT_RUN"
+  },
+  "second_local_workflow_provenance": {
+    "historical_b2o_base_projection_sha256": "08aa63bcfaf27f9ced2a5374ce67f4683877f615ed00dafea086f608321dde0d",
+    "source_base_projection_sha256": "08aa63bcfaf27f9ced2a5374ce67f4683877f615ed00dafea086f608321dde0d",
+    "stage": "LOCAL_TEMPORARY_STAGED_VERIFIED",
+    "file": "workflows.json",
+    "candidate_normalized_projection_sha256": "439624f3e3dede91f75ad6f12df4fbd9d3104fab1f9bc41e227846acef0cde3a",
+    "approved_candidate_projection_sha256": "439624f3e3dede91f75ad6f12df4fbd9d3104fab1f9bc41e227846acef0cde3a",
+    "candidate_staged_file_sha256": "e7ef455962e5efe6bffa90d0634ae296b72cdf705d0f0e816b2a32d542185ef3",
+    "kvm2_staging": "NOT_PERFORMED",
+    "n8n_import": "NOT_RUN"
+  },
+  "render": {
+    "all_profiles": true,
+    "repeat_equal": true,
+    "redacted_sha256": "fa1661930b548f628d84e044f9a8f4695aef3b7821de414e7066062f1c5eb1b0",
+    "unchanged_vs_pr7_base": true
+  },
+  "immutable_inputs": {
+    "b2o_trace_git_blob": "af92029898fe68d178cfdadd1fa5f7a91f2f2066",
+    "pr5_or_b2o_evidence_changed": false,
+    "original_b2p_report_evidence_changed": false
+  },
+  "scope_counters": {
+    "kvm2_accesses": 0,
+    "production_accesses": 0,
+    "provider_calls": 0,
+    "paid": 0,
+    "usd": 0
+  },
+  "verdict": "B2P_D1_SOURCE_DELTA_PASS",
+  "limits": {
+    "kvm2": "BLOCKED_PREFLIGHT_INPUT / NOT_MEASURED",
+    "independent_qa": "PENDING_WORK_DELTA_REVIEW",
+    "real_connector": "REAL_CONNECTOR_UNTESTED",
+    "paid_gate_b": "BLOCKED_PREFLIGHT"
+  },
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}

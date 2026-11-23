@@ -1,0 +1,765 @@
+{
+  "task_id": "ttd-hermes-gate-b-001",
+  "stage": "H6_B2_P",
+  "portfolio_id": "AI-02",
+  "agent": "codex",
+  "observed_date_ict": "2026-11-23",
+  "recorded_utc": "2026-11-23T03:16:07.350873+00:00",
+  "assignment_sha": "cdf0aed51965465601320fd57623a84065ad9c5b",
+  "rules_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "workflow_rules_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "handoff_ack": "ACKNOWLEDGED_BY_CODEX_IN_EXECUTION_TURN_2026_11_23",
+  "verdict": "BLOCKED_PREFLIGHT_INPUT",
+  "source_blobs": {
+    "sandbox/p0-hermes-gate-a/h6_b2p_preflight.py": "b0b92d2ab1e1171592a8c23fa8603feb805fa8bc",
+    "sandbox/p0-hermes-gate-a/h6_b2p_preflight_test.py": "9d4b88e24340913f1f273da914530c7da40dcd46"
+  },
+  "b2o_findings": {
+    "ack_provenance": {
+      "review_id": 4655099761,
+      "resolution": "Separate actual B2-P ACK from assignment/rules SHA; historical B2-O report preserved"
+    },
+    "projection": {
+      "review_id": 4655099766,
+      "resolution": "Recompute and require matching base workflow projection before render"
+    },
+    "timer": {
+      "review_id": 4655099772,
+      "resolution": "Require exactly one Guard timer before the Guard read ended and before delayed response"
+    }
+  },
+  "test_results": {
+    "local_changed_code_tests_passed": 4,
+    "negative_assertions": {
+      "workflow_drift": 1,
+      "timer_missing_duplicate_wrong_role_or_order": 4,
+      "host_port_docker_socket_external_network_unowned_volume_mem_cap": 5
+    },
+    "b2o_preserved_trace_verified_without_rerun": true,
+    "fresh_sanitized_render_runs_equal": true,
+    "compose_version": "v5.1.4",
+    "local_docker_daemon": "UNAVAILABLE_NPIPE",
+    "kvm2_runtime_test": "NOT_RUN"
+  },
+  "b2o_candidate_delta": {
+    "retained": [
+      "8 roles",
+      "7 internal network memberships",
+      "6 named state volume roles",
+      "image pins",
+      "Hermes fixture config hash",
+      "async adapter/guard/fake writer/recorder/receipt path"
+    ],
+    "changed": [
+      "dedicated project namespace and owner label",
+      "single fake profile",
+      "Linux nonce-only source staging bind with create_host_path=false and rprivate",
+      "internal IPv4 bridge gateway isolation",
+      "linux/amd64 platform and per-service CPU/RAM ceilings"
+    ],
+    "historical_b2o_report_or_source_modified": false
+  },
+  "kvm2_preflight": {
+    "permission": "NOT_VERIFIED",
+    "access_attempt_evidence": {
+      "browser_inventory": "No existing hPanel/Web Terminal exposed in connected Chrome profile",
+      "computer_use": "Stopped before reading a page because current browser URL could not be verified",
+      "ssh": "No SSH config; local ssh-agent unavailable (ssh-add -l exit 2); no approved target/login verified; no SSH connection attempted",
+      "hostinger": "Read existing capacity ACK on main; no INF-01 evidence PR or matching ws02 branch visible during readback"
+    },
+    "collision_live": "NOT_MEASURED",
+    "platform_pinned_images_live": "NOT_MEASURED",
+    "headroom_live": "NOT_MEASURED",
+    "health_restart_live": "NOT_MEASURED",
+    "historical_only": [
+      "B2-G fake CONNECT/TLS and Docker Engine/Compose",
+      "B2-H metadata baseline",
+      "B2-M 9 containers/11 networks/11 volumes plus rollback ownership"
+    ],
+    "last_probe_ict_date": "2026-11-23"
+  },
+  "scope_counters": {
+    "kvm2_runtime_accesses": 0,
+    "kvm2_mutations": 0,
+    "production_mutations": 0,
+    "real_ledger_permit_key_accesses": 0,
+    "provider_calls": 0,
+    "paid_attempts": 0,
+    "usd": 0
+  },
+  "live_integration": "NO_GO",
+  "live_mount": "BLOCKED_UID_OR_MOUNT",
+  "paid_gate_b": "BLOCKED_PREFLIGHT",
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD",
+  "fixture_base_commit": "d95f1619d3e82d9bfe38ea583d50b1f5b1a5a810",
+  "live_enabled": false,
+  "b2o_recorded_trace_timer_check": {
+    "connected_to_timer_s": 45.000576181,
+    "timer_to_read_end_s": 0.000427156
+  },
+  "workflow_base_projection_verified_sha256": "08aa63bcfaf27f9ced2a5374ce67f4683877f615ed00dafea086f608321dde0d",
+  "hermes_fixture_config_sha256": "5b7b9eaa0443881a642bceaa381a25c350b151fbe6659bd012e8420c480a3e3f",
+  "staged_source_file_sha256": {
+    "bridge.py": "acef33a87e227a8170ec61174e5dc70fb12e6fc385c52f852995bef7296d522a",
+    "config.yaml": "9a119d9ff9be13098802b9ab47cb62e752a83b30bb3c8182806f96c4cbd07a03",
+    "guard.py": "ea379b8d6eccb67cdbc07d1c9be2cd1d5287de3648b63f6682086a820e6c1f3b",
+    "h6_b2i_async_mock.py": "bdb5bcf15d83b0bb37bf0ac9a53e1cf44b608de888e3219db894b9435b2b9de3",
+    "h6_b2k_services.py": "0e1eb83edfc0384ee2de4160258bbea11f790cc84ef0d5fc86d145ae055e3b13",
+    "h6_b2n_runtime_fixture.py": "9ce7c7266d96509927bbf9b8b8cc997e0ccec75a8f6cd613ebe43d741993af74",
+    "h6_b2o_services.py": "257ed61736248f5cc2c3dd8b50b242d832ffa9006d31b0b4fb8e03300b329864",
+    "h6_ipc_auth.py": "e5aaacada628c66757c49fd9f25b34c28c6f1da083bf43971e6ee14a5bf9242e",
+    "h6_p0.py": "6862d58298b83eddbae0091fd990f9be9de0efc82b9f7eb6b9d0d05d7329ea73",
+    "h6_provider.py": "fffcb7401944b5a6daf7d33bf4b05adb3825355712ab824a027d4c4d94c407e9",
+    "h6_writer.py": "03941e90dbbcb0c4255a459081b02ac566db7c8e8bd27626928919d5dc130d9b",
+    "mock_contract.py": "df7abfba03d2bfcb9ef9202f3cd07a8471c4d7b6babf0a8b37b4c309f3310fe2",
+    "one_shot.py": "969f98674465e6af4f0a70fe07be5509c9ead9f9ef5ff4548a5200df185a2e21",
+    "provider_mock.py": "1e56e83ec9963a41e05a6ac849df2ab0371daab4aaa438e11fd01daf57d2f5d7"
+  },
+  "redacted_render_sha256": "fa1661930b548f628d84e044f9a8f4695aef3b7821de414e7066062f1c5eb1b0",
+  "render_repeat_equal": true,
+  "compose_all_profiles": true,
+  "redacted_render": {
+    "name": "h6-b2-p-fake-candidate",
+    "networks": {
+      "accounting": {
+        "name": "h6-b2-p-fake-candidate_accounting",
+        "driver": "bridge",
+        "driver_opts": {
+          "com.docker.network.bridge.gateway_mode_ipv4": "isolated"
+        },
+        "ipam": {},
+        "internal": true,
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        }
+      },
+      "binding": {
+        "name": "h6-b2-p-fake-candidate_binding",
+        "driver": "bridge",
+        "driver_opts": {
+          "com.docker.network.bridge.gateway_mode_ipv4": "isolated"
+        },
+        "ipam": {},
+        "internal": true,
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        }
+      },
+      "callback": {
+        "name": "h6-b2-p-fake-candidate_callback",
+        "driver": "bridge",
+        "driver_opts": {
+          "com.docker.network.bridge.gateway_mode_ipv4": "isolated"
+        },
+        "ipam": {},
+        "internal": true,
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        }
+      },
+      "front": {
+        "name": "h6-b2-p-fake-candidate_front",
+        "driver": "bridge",
+        "driver_opts": {
+          "com.docker.network.bridge.gateway_mode_ipv4": "isolated"
+        },
+        "ipam": {},
+        "internal": true,
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        }
+      },
+      "inference": {
+        "name": "h6-b2-p-fake-candidate_inference",
+        "driver": "bridge",
+        "driver_opts": {
+          "com.docker.network.bridge.gateway_mode_ipv4": "isolated"
+        },
+        "ipam": {},
+        "internal": true,
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        }
+      },
+      "runs": {
+        "name": "h6-b2-p-fake-candidate_runs",
+        "driver": "bridge",
+        "driver_opts": {
+          "com.docker.network.bridge.gateway_mode_ipv4": "isolated"
+        },
+        "ipam": {},
+        "internal": true,
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        }
+      },
+      "upstream": {
+        "name": "h6-b2-p-fake-candidate_upstream",
+        "driver": "bridge",
+        "driver_opts": {
+          "com.docker.network.bridge.gateway_mode_ipv4": "isolated"
+        },
+        "ipam": {},
+        "internal": true,
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        }
+      }
+    },
+    "services": {
+      "bridge": {
+        "profiles": [
+          "fake"
+        ],
+        "cap_drop": [
+          "ALL"
+        ],
+        "cpus": 0.1,
+        "command": [],
+        "entrypoint": [
+          "python",
+          "-B",
+          "/b2n-src/h6_b2o_services.py",
+          "bridge"
+        ],
+        "environment": {
+          "B2O_ADMIT": "<redacted-synthetic-config>",
+          "B2O_BIND": "<redacted-synthetic-config>",
+          "B2O_ENGINE": "<redacted-synthetic-config>",
+          "B2O_EVENT_KEY": "<redacted-synthetic-config>",
+          "B2O_RECEIPT_KEY": "<redacted-synthetic-config>",
+          "B2O_WEBHOOK": "<redacted-synthetic-config>"
+        },
+        "image": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        },
+        "mem_limit": "134217728",
+        "networks": {
+          "binding": null,
+          "front": null,
+          "runs": null
+        },
+        "pids_limit": 180,
+        "platform": "linux/amd64",
+        "pull_policy": "never",
+        "read_only": true,
+        "restart": "no",
+        "security_opt": [
+          "no-new-privileges:true"
+        ],
+        "tmpfs": [
+          "/tmp:rw,nosuid,nodev,size=64m"
+        ],
+        "volumes": [
+          {
+            "type": "bind",
+            "source": "/tmp/h6-b2p-src-<owner-nonce>",
+            "target": "/b2n-src",
+            "read_only": true,
+            "bind": {
+              "propagation": "rprivate",
+              "create_host_path": false
+            }
+          },
+          {
+            "type": "volume",
+            "source": "bridge",
+            "target": "/fixture-data"
+          }
+        ]
+      },
+      "driver": {
+        "profiles": [
+          "fake"
+        ],
+        "cap_drop": [
+          "ALL"
+        ],
+        "cpus": 0.1,
+        "command": [],
+        "entrypoint": [
+          "sleep",
+          "infinity"
+        ],
+        "environment": {
+          "B2N_ENGINE_BEARER": "<redacted-synthetic-config>",
+          "B2N_HTTP_BEARER": "<redacted-synthetic-config>",
+          "B2N_PROVIDER_BEARER": "<redacted-synthetic-config>",
+          "B2N_RECEIPT_BEARER": "<redacted-synthetic-config>",
+          "B2O_ADMIT": "<redacted-synthetic-config>",
+          "B2O_WEBHOOK": "<redacted-synthetic-config>"
+        },
+        "image": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        },
+        "mem_limit": "100663296",
+        "networks": {
+          "front": null
+        },
+        "pids_limit": 180,
+        "platform": "linux/amd64",
+        "pull_policy": "never",
+        "read_only": true,
+        "restart": "no",
+        "security_opt": [
+          "no-new-privileges:true"
+        ],
+        "tmpfs": [
+          "/tmp:rw,nosuid,nodev,size=64m"
+        ],
+        "volumes": [
+          {
+            "type": "bind",
+            "source": "/tmp/h6-b2p-src-<owner-nonce>",
+            "target": "/b2n-src",
+            "read_only": true,
+            "bind": {
+              "propagation": "rprivate",
+              "create_host_path": false
+            }
+          }
+        ]
+      },
+      "guard": {
+        "profiles": [
+          "fake"
+        ],
+        "cap_drop": [
+          "ALL"
+        ],
+        "cpus": 0.1,
+        "command": [],
+        "entrypoint": [
+          "python",
+          "-B",
+          "/b2n-src/h6_b2o_services.py",
+          "guard"
+        ],
+        "environment": {
+          "B2O_GUARD": "<redacted-synthetic-config>",
+          "B2O_UPSTREAM": "<redacted-synthetic-config>",
+          "B2O_WRITER": "<redacted-synthetic-config>"
+        },
+        "image": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        },
+        "mem_limit": "134217728",
+        "networks": {
+          "accounting": null,
+          "inference": null,
+          "upstream": null
+        },
+        "pids_limit": 180,
+        "platform": "linux/amd64",
+        "pull_policy": "never",
+        "read_only": true,
+        "restart": "no",
+        "security_opt": [
+          "no-new-privileges:true"
+        ],
+        "tmpfs": [
+          "/tmp:rw,nosuid,nodev,size=64m"
+        ],
+        "volumes": [
+          {
+            "type": "bind",
+            "source": "/tmp/h6-b2p-src-<owner-nonce>",
+            "target": "/b2n-src",
+            "read_only": true,
+            "bind": {
+              "propagation": "rprivate",
+              "create_host_path": false
+            }
+          }
+        ]
+      },
+      "hermes": {
+        "profiles": [
+          "fake"
+        ],
+        "cap_add": [
+          "CHOWN",
+          "SETUID",
+          "SETGID"
+        ],
+        "cap_drop": [
+          "ALL"
+        ],
+        "cpus": 0.45,
+        "command": [],
+        "entrypoint": [
+          "/bin/sh",
+          "-ec",
+          "if [ ! -f /b2n-state/.b2n-initialized ]; then mkdir -p /b2n-state/.hermes; cp /b2n-src/hermes.yaml /b2n-state/.hermes/config.yaml; chown -R hermes:hermes /b2n-state/.hermes; touch /b2n-state/.b2n-initialized; fi; exec /command/s6-setuidgid hermes /opt/hermes/.venv/bin/hermes gateway run --no-supervise --force"
+        ],
+        "environment": {
+          "ALL_PROXY": "<redacted-synthetic-config>",
+          "API_SERVER_KEY": "<redacted-synthetic-config>",
+          "HERMES_HOME": "<redacted-synthetic-config>",
+          "HERMES_IGNORE_RULES": "<redacted-synthetic-config>",
+          "HOME": "<redacted-synthetic-config>",
+          "HTTPS_PROXY": "<redacted-synthetic-config>",
+          "HTTP_PROXY": "<redacted-synthetic-config>",
+          "NO_PROXY": "<redacted-synthetic-config>",
+          "OPENAI_API_KEY": "<redacted-synthetic-config>",
+          "OPENAI_BASE_URL": "<redacted-synthetic-config>",
+          "PYTHONDONTWRITEBYTECODE": "<redacted-synthetic-config>"
+        },
+        "image": "ghcr.io/hostinger/hvps-hermes-agent@sha256:0ea63377bd672cb76de6a8510aaaef619fe2a045558b771656c072ef527c344f",
+        "init": true,
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        },
+        "mem_limit": "1073741824",
+        "networks": {
+          "inference": null,
+          "runs": null
+        },
+        "pids_limit": 180,
+        "platform": "linux/amd64",
+        "pull_policy": "never",
+        "read_only": true,
+        "restart": "no",
+        "security_opt": [
+          "no-new-privileges:true"
+        ],
+        "tmpfs": [
+          "/tmp:rw,nosuid,nodev,size=64m",
+          "/opt/data:rw,nosuid,nodev,noexec,size=8m"
+        ],
+        "user": "0:0",
+        "volumes": [
+          {
+            "type": "bind",
+            "source": "/tmp/h6-b2p-src-<owner-nonce>",
+            "target": "/b2n-src",
+            "read_only": true,
+            "bind": {
+              "propagation": "rprivate",
+              "create_host_path": false
+            }
+          },
+          {
+            "type": "volume",
+            "source": "hermes",
+            "target": "/b2n-state"
+          }
+        ]
+      },
+      "n8n": {
+        "profiles": [
+          "fake"
+        ],
+        "cap_drop": [
+          "ALL"
+        ],
+        "cpus": 0.45,
+        "command": [],
+        "entrypoint": [
+          "/bin/sh",
+          "-ec",
+          "if [ ! -f /home/node/.n8n/.b2o-seeded ]; then n8n import:workflow --input=/b2n-src/workflows.json; n8n publish:workflow --id=b2oLocalFixture01; touch /home/node/.n8n/.b2o-seeded; fi; exec n8n start"
+        ],
+        "environment": {
+          "N8N_DIAGNOSTICS_ENABLED": "<redacted-synthetic-config>",
+          "N8N_ENCRYPTION_KEY": "<redacted-synthetic-config>",
+          "N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS": "<redacted-synthetic-config>",
+          "N8N_HIRING_BANNER_ENABLED": "<redacted-synthetic-config>",
+          "N8N_HOST": "<redacted-synthetic-config>",
+          "N8N_RUNNERS_ENABLED": "<redacted-synthetic-config>",
+          "N8N_SECURE_COOKIE": "<redacted-synthetic-config>",
+          "N8N_TEMPLATES_ENABLED": "<redacted-synthetic-config>",
+          "N8N_VERSION_NOTIFICATIONS_ENABLED": "<redacted-synthetic-config>"
+        },
+        "image": "docker.n8n.io/n8nio/n8n@sha256:9a8d8dcea75667496695d7810d7e1fe018a65efb36cc499d347f3931b3957b5d",
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        },
+        "mem_limit": "671088640",
+        "networks": {
+          "callback": null,
+          "front": null
+        },
+        "pids_limit": 180,
+        "platform": "linux/amd64",
+        "pull_policy": "never",
+        "read_only": true,
+        "restart": "no",
+        "security_opt": [
+          "no-new-privileges:true"
+        ],
+        "tmpfs": [
+          "/tmp:rw,nosuid,nodev,size=64m",
+          "/home/node/.cache:rw,nosuid,nodev,size=64m,mode=1777"
+        ],
+        "volumes": [
+          {
+            "type": "bind",
+            "source": "/tmp/h6-b2p-src-<owner-nonce>",
+            "target": "/b2n-src",
+            "read_only": true,
+            "bind": {
+              "propagation": "rprivate",
+              "create_host_path": false
+            }
+          },
+          {
+            "type": "volume",
+            "source": "n8n",
+            "target": "/home/node/.n8n"
+          }
+        ]
+      },
+      "provider": {
+        "profiles": [
+          "fake"
+        ],
+        "cap_drop": [
+          "ALL"
+        ],
+        "cpus": 0.1,
+        "command": [],
+        "entrypoint": [
+          "python",
+          "-B",
+          "/b2n-src/h6_b2o_services.py",
+          "provider"
+        ],
+        "environment": {
+          "B2O_UPSTREAM": "<redacted-synthetic-config>"
+        },
+        "image": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        },
+        "mem_limit": "100663296",
+        "networks": {
+          "upstream": null
+        },
+        "pids_limit": 180,
+        "platform": "linux/amd64",
+        "pull_policy": "never",
+        "read_only": true,
+        "restart": "no",
+        "security_opt": [
+          "no-new-privileges:true"
+        ],
+        "tmpfs": [
+          "/tmp:rw,nosuid,nodev,size=64m"
+        ],
+        "volumes": [
+          {
+            "type": "bind",
+            "source": "/tmp/h6-b2p-src-<owner-nonce>",
+            "target": "/b2n-src",
+            "read_only": true,
+            "bind": {
+              "propagation": "rprivate",
+              "create_host_path": false
+            }
+          },
+          {
+            "type": "volume",
+            "source": "provider",
+            "target": "/fixture-data"
+          }
+        ]
+      },
+      "receipt": {
+        "profiles": [
+          "fake"
+        ],
+        "cap_drop": [
+          "ALL"
+        ],
+        "cpus": 0.1,
+        "command": [],
+        "entrypoint": [
+          "python",
+          "-B",
+          "/b2n-src/h6_b2o_services.py",
+          "receipt"
+        ],
+        "environment": {
+          "B2O_BIND": "<redacted-synthetic-config>",
+          "B2O_EVENT_KEY": "<redacted-synthetic-config>",
+          "B2O_RECEIPT_KEY": "<redacted-synthetic-config>",
+          "B2O_RECEIVE": "<redacted-synthetic-config>"
+        },
+        "image": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        },
+        "mem_limit": "100663296",
+        "networks": {
+          "binding": null,
+          "callback": null
+        },
+        "pids_limit": 180,
+        "platform": "linux/amd64",
+        "pull_policy": "never",
+        "read_only": true,
+        "restart": "no",
+        "security_opt": [
+          "no-new-privileges:true"
+        ],
+        "tmpfs": [
+          "/tmp:rw,nosuid,nodev,size=64m"
+        ],
+        "volumes": [
+          {
+            "type": "bind",
+            "source": "/tmp/h6-b2p-src-<owner-nonce>",
+            "target": "/b2n-src",
+            "read_only": true,
+            "bind": {
+              "propagation": "rprivate",
+              "create_host_path": false
+            }
+          },
+          {
+            "type": "volume",
+            "source": "receipt",
+            "target": "/fixture-data"
+          }
+        ]
+      },
+      "writer": {
+        "profiles": [
+          "fake"
+        ],
+        "cap_drop": [
+          "ALL"
+        ],
+        "cpus": 0.1,
+        "command": [],
+        "entrypoint": [
+          "python",
+          "-B",
+          "/b2n-src/h6_b2o_services.py",
+          "writer"
+        ],
+        "environment": {
+          "B2O_WRITER": "<redacted-synthetic-config>"
+        },
+        "image": "python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89",
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        },
+        "mem_limit": "100663296",
+        "networks": {
+          "accounting": null
+        },
+        "pids_limit": 180,
+        "platform": "linux/amd64",
+        "pull_policy": "never",
+        "read_only": true,
+        "restart": "no",
+        "security_opt": [
+          "no-new-privileges:true"
+        ],
+        "tmpfs": [
+          "/tmp:rw,nosuid,nodev,size=64m"
+        ],
+        "volumes": [
+          {
+            "type": "bind",
+            "source": "/tmp/h6-b2p-src-<owner-nonce>",
+            "target": "/b2n-src",
+            "read_only": true,
+            "bind": {
+              "propagation": "rprivate",
+              "create_host_path": false
+            }
+          },
+          {
+            "type": "volume",
+            "source": "writer",
+            "target": "/fixture-data"
+          }
+        ]
+      }
+    },
+    "volumes": {
+      "bridge": {
+        "name": "h6-b2-p-fake-candidate_bridge",
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        }
+      },
+      "hermes": {
+        "name": "h6-b2-p-fake-candidate_hermes",
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        }
+      },
+      "n8n": {
+        "name": "h6-b2-p-fake-candidate_n8n",
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        }
+      },
+      "provider": {
+        "name": "h6-b2-p-fake-candidate_provider",
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        }
+      },
+      "receipt": {
+        "name": "h6-b2-p-fake-candidate_receipt",
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        }
+      },
+      "writer": {
+        "name": "h6-b2-p-fake-candidate_writer",
+        "labels": {
+          "ttd.b2p.owner": "<owner-nonce>"
+        }
+      }
+    }
+  },
+  "resource_caps": {
+    "total_vcpu": 1.5,
+    "total_memory_mib": 2304
+  },
+  "planned_owned_resources": {
+    "project": "h6-b2-p-fake-candidate",
+    "owner_label": "ttd.b2p.owner",
+    "owner_match_required_before_cleanup": true,
+    "container_names": [
+      "h6-b2-p-fake-candidate-bridge-1",
+      "h6-b2-p-fake-candidate-driver-1",
+      "h6-b2-p-fake-candidate-guard-1",
+      "h6-b2-p-fake-candidate-hermes-1",
+      "h6-b2-p-fake-candidate-n8n-1",
+      "h6-b2-p-fake-candidate-provider-1",
+      "h6-b2-p-fake-candidate-receipt-1",
+      "h6-b2-p-fake-candidate-writer-1"
+    ],
+    "network_names": [
+      "h6-b2-p-fake-candidate_accounting",
+      "h6-b2-p-fake-candidate_binding",
+      "h6-b2-p-fake-candidate_callback",
+      "h6-b2-p-fake-candidate_front",
+      "h6-b2-p-fake-candidate_inference",
+      "h6-b2-p-fake-candidate_runs",
+      "h6-b2-p-fake-candidate_upstream"
+    ],
+    "volume_names": [
+      "h6-b2-p-fake-candidate_bridge",
+      "h6-b2-p-fake-candidate_hermes",
+      "h6-b2-p-fake-candidate_n8n",
+      "h6-b2-p-fake-candidate_provider",
+      "h6-b2-p-fake-candidate_receipt",
+      "h6-b2-p-fake-candidate_writer"
+    ],
+    "bind_root": "/tmp/h6-b2p-src-<owner-nonce>"
+  },
+  "proxy_tls_and_idle": "NOT_MEASURED",
+  "render_verdict": "B2P_LOCAL_RENDER_PASS"
+}
