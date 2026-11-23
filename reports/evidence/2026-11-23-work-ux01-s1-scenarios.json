@@ -1,0 +1,152 @@
+{
+  "task": "UX-01/S1",
+  "mode": "synthetic_design_tabletop",
+  "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "scenarios": [
+    {
+      "id": "J1",
+      "actor": "operator-fixture",
+      "input": {
+        "environment": "sandbox",
+        "order_id": "mock-order-1",
+        "graph": [
+          "trigger",
+          "agent",
+          "connector",
+          "receipt"
+        ],
+        "version": "mock-v1",
+        "cost": 0
+      },
+      "expected": {
+        "validate": "pass",
+        "simulate": "mock_receipt",
+        "activate": "blocked"
+      },
+      "observed": "tabletop_pass"
+    },
+    {
+      "id": "J2",
+      "actor": "operator-fixture",
+      "input": {
+        "job_id": "mock-job-2",
+        "task_id": "mock-task-2",
+        "run_id": "mock-run-2",
+        "correlation_id": "mock-corr-2",
+        "digest": "mock-digest-2",
+        "outcome": "outcome_unknown",
+        "late_result": "success",
+        "receipt_id": "mock-receipt-2",
+        "dispatch_count": 1
+      },
+      "expected": {
+        "state": "outcome_unknown",
+        "late": "disputed",
+        "retry": "blocked",
+        "dispatch_count": 1
+      },
+      "observed": "tabletop_pass"
+    },
+    {
+      "id": "J3",
+      "actor": "reviewer-fixture",
+      "input": {
+        "requester": "operator-fixture",
+        "action": "content.review",
+        "version": "mock-media-v3",
+        "cost": 0,
+        "approval_valid": true
+      },
+      "expected": {
+        "decision": "draft_approved",
+        "publish": "blocked"
+      },
+      "observed": "tabletop_pass"
+    },
+    {
+      "id": "J4",
+      "actor": "admin-fixture",
+      "input": {
+        "source": "GA4",
+        "account_alias": "mock-property",
+        "scope": "read",
+        "access": "UNVERIFIED_ACCOUNT_ACCESS"
+      },
+      "expected": {
+        "proposal": "saved_mock",
+        "oauth": "disabled"
+      },
+      "observed": "tabletop_pass"
+    },
+    {
+      "id": "J5",
+      "actor": "operator-fixture",
+      "input": {
+        "health": [
+          200,
+          200,
+          200
+        ],
+        "readiness": [
+          503,
+          503,
+          503
+        ],
+        "recovery_readiness": [
+          200,
+          200,
+          200
+        ],
+        "hermes_dashboard": 200,
+        "new_restart_or_oom": false,
+        "backup_age_h": 216,
+        "backup_threshold_h": 192
+      },
+      "expected": {
+        "readiness_owner": "Codex",
+        "backup_owner": "Hostinger Agent + ChatGPT",
+        "restore": "UNKNOWN"
+      },
+      "observed": "tabletop_pass"
+    }
+  ],
+  "negative_gates": [
+    {
+      "id": "N1",
+      "journey": "J1",
+      "input": "missing simulate scope",
+      "expected": "403 and no run",
+      "observed": "tabletop_pass"
+    },
+    {
+      "id": "N2",
+      "journey": "J3",
+      "input": "expired approval or requested cost above approved cap",
+      "expected": "blocked and no side effect",
+      "observed": "tabletop_pass"
+    },
+    {
+      "id": "N3",
+      "journey": "J2",
+      "input": "callback digest differs from binding",
+      "expected": "409 and existing receipt unchanged",
+      "observed": "tabletop_pass"
+    },
+    {
+      "id": "N4",
+      "journey": "J2",
+      "input": "retry dispatch for outcome_unknown",
+      "expected": "409 and dispatch count remains 1",
+      "observed": "tabletop_pass"
+    },
+    {
+      "id": "N5",
+      "journey": "J4",
+      "input": "account access unverified",
+      "expected": "live controls disabled, no OAuth request",
+      "observed": "tabletop_pass"
+    }
+  ],
+  "runtime_tested": false,
+  "paid_calls": 0
+}
