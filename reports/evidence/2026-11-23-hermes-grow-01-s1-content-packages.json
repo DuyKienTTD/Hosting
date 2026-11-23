@@ -1,0 +1,408 @@
+{
+  "id": "hermes-grow-01-s1-content-packages-evidence-2026-11-23",
+  "task_id": "GROW-01/S1",
+  "assignment_source": "https://github.com/DuyKienTTD/Hosting/pull/12#issuecomment-7090773585",
+  "assignment_source_type": "pull_request_comment",
+  "ack_execute": "EXECUTE GROW-01/S1",
+  "main_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "biz01_source_commit": "8c821bbf1842eccb8519127f54ba7673965276d5",
+  "reviewed_paths": [
+    "AGENTS.md",
+    "PROJECT.md",
+    "GOALS_AND_ROADMAP.md",
+    "rules/AGENT_WORKFLOW.md",
+    "rules/REPOSITORY_SECURITY.md",
+    "STATE.md",
+    "CATALOG.yaml",
+    "agents/README.md",
+    "agents/hermes.md",
+    "reports/2026-11-21-hostinger-account-capability-inventory.md",
+    "reports/2026-11-23-hermes-biz-01-channel-capability-matrix.md",
+    "reports/evidence/2026-11-23-hermes-biz-01-channel-capability-matrix.json"
+  ],
+  "session_capabilities": {
+    "git_push_repo": "VERIFIED_IN_SESSION",
+    "web_search_extract": "VERIFIED_IN_SESSION",
+    "browser_automation": "VERIFIED_IN_SESSION",
+    "live_growth_connectors": "UNVERIFIED_ACCOUNT_ACCESS",
+    "paid_api_calls": "NOT_USED",
+    "production_mutation": "NOT_USED"
+  },
+  "observed_repo_context": {
+    "known_sites": ["wroughtiron.shop", "staging.wroughtiron.shop", "qtcty.com", "thuanthanhdat.com", "nepdong.com"],
+    "known_reach_plan": "Reach 1000 on wroughtiron.shop",
+    "known_email_services": ["nepdong.com", "nepdong.top", "qtcty.com", "thuanthanhdat.com"],
+    "approved_product_specs_present": false,
+    "approved_price_book_present": false,
+    "approved_channel_credentials_present": false,
+    "notes": [
+      "Website/WordPress presence is VERIFIED_IN_PROJECT, but API/account access remains UNVERIFIED_ACCOUNT_ACCESS.",
+      "Product, pricing, engineering and safety claims remain owner approval boundaries."
+    ]
+  },
+  "status_model": ["DRAFT", "NEEDS_REVIEW", "APPROVED", "BLOCKED", "PUBLISHED"],
+  "lifecycle": [
+    {
+      "stage": "idea",
+      "owner": "Hermes draft operator or coordinator",
+      "trigger": "new growth hypothesis or campaign request",
+      "required_inputs": ["objective", "audience", "region", "funnel_stage", "channel_guess", "source_status"],
+      "validation": ["no customer data", "no paid/live side effects", "unknowns marked explicitly"],
+      "transition_criteria": "brief scaffold complete",
+      "approval_gate": "business scope check",
+      "audit_evidence": ["idea_id", "source_status", "created_at"],
+      "stop_or_rollback": "block if source or rights intent is unclear",
+      "tool_unavailable_handling": "manual brief entry allowed"
+    },
+    {
+      "stage": "approved_brief",
+      "owner": "business owner or coordinator",
+      "trigger": "idea ready for review",
+      "required_inputs": ["message angle", "KPI hypothesis", "claim boundaries", "CTA boundary"],
+      "validation": ["no invented pricing", "no ranking guarantee", "no unsupported customer promise"],
+      "transition_criteria": "brief marked APPROVED or NEEDS_REVIEW",
+      "approval_gate": "business claim signoff",
+      "audit_evidence": ["reviewer", "decision", "revision_notes"],
+      "stop_or_rollback": "revert to DRAFT on missing business approval",
+      "tool_unavailable_handling": "markdown review thread"
+    },
+    {
+      "stage": "approved_assets",
+      "owner": "asset-rights reviewer",
+      "trigger": "brief approved",
+      "required_inputs": ["asset_list", "provenance", "rights_status", "consent_status"],
+      "validation": ["rights traceable", "consent known", "placeholder flagged as synthetic"],
+      "transition_criteria": "all required assets have rights decision",
+      "approval_gate": "IP/music/consent gate",
+      "audit_evidence": ["asset_id", "rights_status", "usage_limit"],
+      "stop_or_rollback": "BLOCKED on missing rights",
+      "tool_unavailable_handling": "placeholder-only draft package"
+    },
+    {
+      "stage": "draft_script_storyboard",
+      "owner": "Hermes or content drafter",
+      "trigger": "brief and asset plan ready",
+      "required_inputs": ["brief", "asset plan", "channel format", "language"],
+      "validation": ["physically plausible actions", "technical unknowns flagged", "script separate from approved brand copy"],
+      "transition_criteria": "script + shot list complete",
+      "approval_gate": "technical/safety sensitivity check",
+      "audit_evidence": ["version", "language", "placeholder markers"],
+      "stop_or_rollback": "return to DRAFT when a forbidden claim appears",
+      "tool_unavailable_handling": "text-only storyboard allowed"
+    },
+    {
+      "stage": "human_QA",
+      "owner": "business + technical + rights reviewers",
+      "trigger": "draft ready",
+      "required_inputs": ["script", "shot_list", "claim_map", "rights_map", "tracking_names"],
+      "validation": ["claim review", "rights review", "CTA review", "tracking completeness"],
+      "transition_criteria": "all reviewers pass",
+      "approval_gate": "multi-role QA signoff",
+      "audit_evidence": ["qa_result", "reviewer_names_or_roles", "issues"],
+      "stop_or_rollback": "BLOCKED on failed rights or technical claim review",
+      "tool_unavailable_handling": "manual review checklist"
+    },
+    {
+      "stage": "approved_publish_package",
+      "owner": "coordinator",
+      "trigger": "QA passed",
+      "required_inputs": ["approved brief", "approved asset list", "approved script", "channel mapping", "UTM/event names"],
+      "validation": ["login owner identified", "publish path known", "no unapproved claims remain"],
+      "transition_criteria": "package complete",
+      "approval_gate": "publish readiness check",
+      "audit_evidence": ["package_id", "package_status", "approval_summary"],
+      "stop_or_rollback": "NEEDS_REVIEW if any field missing",
+      "tool_unavailable_handling": "manual export only"
+    },
+    {
+      "stage": "scheduled_or_published_by_separately_authorized_connector",
+      "owner": "future authorized connector or manual publisher",
+      "trigger": "explicit publish approval",
+      "required_inputs": ["account credentials", "approved package", "channel permission"],
+      "validation": ["connector verified", "publish approval present", "logging enabled"],
+      "transition_criteria": "content actually scheduled or published",
+      "approval_gate": "external side-effect authorization",
+      "audit_evidence": ["publish_id", "scheduled_at", "channel_event"],
+      "stop_or_rollback": "not allowed in GROW-01/S1",
+      "tool_unavailable_handling": "manual export package only"
+    },
+    {
+      "stage": "performance_feedback",
+      "owner": "analytics/reporting owner",
+      "trigger": "content live and measurable",
+      "required_inputs": ["channel metrics", "landing metrics", "event counts"],
+      "validation": ["source/medium integrity", "account access verified"],
+      "transition_criteria": "feedback loop documented",
+      "approval_gate": "read-only data sufficiency",
+      "audit_evidence": ["views", "clicks", "leads", "notes"],
+      "stop_or_rollback": "record UNKNOWN if analytics access absent",
+      "tool_unavailable_handling": "manual metric import later"
+    }
+  ],
+  "approval_matrix": {
+    "business_claims": "business owner",
+    "technical_safety_claims": "product engineer",
+    "ip_music_media_rights": "asset-rights reviewer",
+    "consent_and_retention": "privacy/compliance reviewer or owner delegate",
+    "channel_login_permissions": "account owner",
+    "cost_or_render_execution": "budget owner",
+    "final_publication": "separately authorized publisher",
+    "default_rule": "If access, rights, cost or claim approval is unknown, package cannot move beyond NEEDS_REVIEW or BLOCKED."
+  },
+  "packages": [
+    {
+      "package_id": "P1-short-vi-craftsmanship",
+      "title": "Vietnamese vertical short about railing craftsmanship",
+      "audience_region": "Vietnam / homeowners, architects, fabricators browsing short-form video",
+      "objective_kpi": "PROVISIONAL_FOR_BIZ02: earn short-form engagement and qualified curiosity about craftsmanship workflow",
+      "funnel_stage": "top-mid funnel",
+      "format": "9:16 vertical, 15-30 seconds",
+      "hook": "Từ thép thô đến chi tiết hoàn thiện: 20 giây nhìn vào nhịp làm việc của xưởng.",
+      "script_or_outline": [
+        "0-3s: Cận cảnh thước đo, phấn dấu, vật liệu thép được đặt lên bàn gia công. On-screen text: 'Một chi tiết đẹp bắt đầu từ bước đo chuẩn'.",
+        "3-8s: Cảnh cắt, mài mép, thử ráp khô các đoạn module trang trí. Voice/text: 'Đo, cắt, thử ráp trước khi hoàn thiện bề mặt'.",
+        "8-14s: Cảnh thợ kiểm tra đường nét và bề mặt. Voice/text: 'Tập trung vào độ đều, độ sạch và tính đồng bộ của từng chi tiết'.",
+        "14-20s: Góc quay chi tiết hoa văn/lan can hoàn thiện ở mức draft concept. Voice/text: 'Bản nháp nội dung này chỉ mô tả quy trình thủ công, không phải cam kết kỹ thuật'.",
+        "20-25s: CTA mềm: 'Muốn xem thêm ý tưởng ứng dụng cho không gian của bạn? Theo dõi để xem bản demo tiếp theo.'"
+      ],
+      "visual_shot_list": [
+        "macro measuring tape and chalk mark",
+        "cutting wheel or saw prep without unsafe dramatization",
+        "dry-fit of decorative module",
+        "surface prep / sanding / inspection",
+        "finished detail close-up on neutral background"
+      ],
+      "required_assets_permissions": [
+        "internal workshop footage or synthetic placeholder clips",
+        "music rights cleared or no-music version",
+        "worker consent if faces are visible"
+      ],
+      "forbidden_claims": [
+        "guaranteed durability or safety certification",
+        "customer promise without source",
+        "price, lead time or installation guarantee",
+        "claim that all footage is from production if using placeholders"
+      ],
+      "qa_rubric": [
+        "manufacturing actions remain physically plausible",
+        "no safety promise",
+        "placeholder/source status visible",
+        "CTA is non-deceptive"
+      ],
+      "publish_gate": "Needs business claim review, asset-rights review and channel permission owner before any export beyond draft.",
+      "utm_event_naming_proposal": {
+        "utm_source": ["youtube_shorts", "tiktok", "facebook_reels"],
+        "utm_medium": "organic_short_video",
+        "utm_campaign": "prov_biz02_craftsmanship_series",
+        "event_name": "short_craftsmanship_hook_click"
+      },
+      "channel_adaptations": {
+        "youtube_shorts": "keep text overlays concise, add EN subtitles optionally",
+        "tiktok": "faster opening cut, stronger first-frame visual",
+        "facebook_reels": "caption can include inquiry CTA instead of follow-only CTA"
+      },
+      "version": "v0.1-draft",
+      "source_status": "Synthetic draft from repo-known business context only; no approved brand copy reused."
+    },
+    {
+      "package_id": "P2-install-howto-en",
+      "title": "English decorative baluster/module installation how-to draft",
+      "audience_region": "English-speaking homeowners, installers, resellers",
+      "objective_kpi": "PROVISIONAL_FOR_BIZ02: communicate installation planning workflow without making engineering promises",
+      "funnel_stage": "mid funnel",
+      "format": "9:16 or 16:9 video, about 30 seconds",
+      "hook": "Planning a decorative railing module install? Start with fit, layout, and review — not assumptions.",
+      "script_or_outline": [
+        "0-5s: 'Before any fasteners go in, confirm your opening, layout, and approved module dimensions.'",
+        "5-10s: 'Dry-fit the decorative section and check spacing, orientation, and visual alignment.'",
+        "10-16s: 'Mark anchor points only after the product engineer or approved drawing confirms the mounting approach.'",
+        "16-22s: 'Fastener type, spacing, torque, substrate suitability, and load requirements: REQUIRES_PRODUCT_ENGINEER_APPROVAL.'",
+        "22-27s: 'Do not treat this draft as a structural instruction or universal-fit guarantee.'",
+        "27-30s: 'Use the approved site-specific drawing and hardware checklist before installation.'"
+      ],
+      "visual_shot_list": [
+        "opening measurement",
+        "module dry-fit on workbench or opening",
+        "alignment check with level or straightedge",
+        "close-up on marked note: REQUIRES_PRODUCT_ENGINEER_APPROVAL",
+        "end frame with drawing/checklist placeholder"
+      ],
+      "required_assets_permissions": [
+        "approved product drawing or synthetic placeholder drawing",
+        "installer consent if identifiable",
+        "rights-cleared music or silent instructional cut"
+      ],
+      "forbidden_claims": [
+        "torque values",
+        "structural certification",
+        "universal fit",
+        "warranty statement without approved source",
+        "code-compliance claim without jurisdiction review"
+      ],
+      "qa_rubric": [
+        "every exact spec remains approval-gated",
+        "script reads as planning guidance, not certified install instruction",
+        "no universal fit or safety claim"
+      ],
+      "publish_gate": "Cannot reach APPROVED unless product engineer approves all technical instructions and the business owner approves public framing.",
+      "utm_event_naming_proposal": {
+        "utm_source": ["youtube", "meta_video"],
+        "utm_medium": "organic_howto_video",
+        "utm_campaign": "prov_biz02_install_planning_en",
+        "event_name": "install_guide_cta_click"
+      },
+      "channel_adaptations": {
+        "youtube": "can include chapter markers in description once approved",
+        "facebook_video": "keep on-screen disclaimer visible longer",
+        "website_embed": "pair with approved FAQ and drawing request CTA"
+      },
+      "version": "v0.1-draft",
+      "source_status": "English draft guidance only; exact technical details intentionally withheld pending engineer approval."
+    },
+    {
+      "package_id": "P3-landing-brief-envi",
+      "title": "Bilingual landing-page / SEO brief for modular decorative railing lead capture",
+      "audience_region": "Vietnam + export/international inquiry visitors",
+      "objective_kpi": "PROVISIONAL_FOR_BIZ02: improve inquiry readiness and content structure for modular decorative railing pages",
+      "funnel_stage": "mid-bottom funnel",
+      "format": "EN/VI website article or landing-page brief",
+      "hook": "A modular decorative railing page should answer fit, style, process, and inquiry questions without inventing price or certification claims.",
+      "script_or_outline": [
+        "Hero: EN 'Decorative railing modules for custom projects' / VI 'Giải pháp module lan can trang trí cho công trình theo yêu cầu'",
+        "Section 1: Use-case overview and style direction",
+        "Section 2: Modular design logic and customization questions",
+        "Section 3: Surface finish / detail / workflow explanation without technical guarantee",
+        "Section 4: Project inquiry form and drawing/photo request CTA",
+        "Section 5: FAQ: fit, style, lead time discussion boundary, maintenance questions, what requires engineer review",
+        "Section 6: Proof placeholders only: gallery, draft process notes, contact route"
+      ],
+      "visual_shot_list": [
+        "hero image placeholder of decorative railing module",
+        "detail close-up placeholder",
+        "before/after space mockup placeholder",
+        "simple process icons",
+        "lead form section placeholder"
+      ],
+      "required_assets_permissions": [
+        "rights-cleared gallery images or placeholders",
+        "approved bilingual copy review",
+        "form/privacy text reviewed"
+      ],
+      "forbidden_claims": [
+        "fixed pricing",
+        "stock availability",
+        "delivery guarantee",
+        "SEO ranking promise",
+        "certification or universal compliance claim"
+      ],
+      "qa_rubric": [
+        "all bilingual copy preserves same claim boundaries",
+        "CTA does not imply instant quote unless owner approves",
+        "keyword ideas remain hypotheses, not promises"
+      ],
+      "publish_gate": "Business owner must approve page claims, legal/privacy text, and lead-capture handling before APPROVED.",
+      "utm_event_naming_proposal": {
+        "utm_source": ["organic_search", "shorts_referral", "email_reach"],
+        "utm_medium": "landing_page",
+        "utm_campaign": "prov_biz02_modular_railing_landing",
+        "event_name": "lead_form_start_modular_railing"
+      },
+      "channel_adaptations": {
+        "wordpress_page": "primary target once content/claim approvals exist",
+        "seo_article": "expand FAQ and process explanation into article variant",
+        "email_reach": "teaser summary can route to page once approved"
+      },
+      "keyword_intent_hypotheses": {
+        "en": ["decorative railing modules", "modular wrought iron railing", "custom baluster panel", "decorative railing for stairs"],
+        "vi": ["module lan can trang trí", "lan can sắt mỹ thuật lắp ghép", "con tiện sắt trang trí", "lan can cầu thang sắt nghệ thuật"]
+      },
+      "customer_questions": [
+        "Can the style be adapted to my space?",
+        "What information do I need to request a quote or drawing review?",
+        "Which details require engineering confirmation before installation?",
+        "How should I prepare reference images or dimensions?"
+      ],
+      "version": "v0.1-draft",
+      "source_status": "Bilingual content brief only; prices, stock, certification, and final SEO targets remain unknown."
+    }
+  ],
+  "channel_feasibility_mapping": {
+    "P1-short-vi-craftsmanship": {
+      "youtube_shorts": "DOCUMENTED + UNVERIFIED_ACCOUNT_ACCESS",
+      "tiktok": "DOCUMENTED + UNVERIFIED_ACCOUNT_ACCESS",
+      "meta_reels": "DOCUMENTED + UNVERIFIED_ACCOUNT_ACCESS",
+      "heygen": "DOCUMENTED + UNVERIFIED_ACCOUNT_ACCESS",
+      "elevenlabs_tts": "DOCUMENTED + UNVERIFIED_ACCOUNT_ACCESS",
+      "kling_ai": "DOCUMENTED + UNVERIFIED_ACCOUNT_ACCESS",
+      "future_steps": ["owner account OAuth or login permission", "rights-cleared assets", "manual export or later real connector"]
+    },
+    "P2-install-howto-en": {
+      "youtube_video": "DOCUMENTED + UNVERIFIED_ACCOUNT_ACCESS",
+      "meta_video": "DOCUMENTED + UNVERIFIED_ACCOUNT_ACCESS",
+      "wordpress_embed": "DOCUMENTED + VERIFIED_IN_PROJECT + UNVERIFIED_ACCOUNT_ACCESS",
+      "future_steps": ["product engineer signoff", "owner channel approval", "later Codex mock schema for package handoff"]
+    },
+    "P3-landing-brief-envi": {
+      "wordpress_page": "DOCUMENTED + VERIFIED_IN_PROJECT + UNVERIFIED_ACCOUNT_ACCESS",
+      "woocommerce_context": "DOCUMENTED + UNVERIFIED_ACCOUNT_ACCESS",
+      "ga4_measurement": "DOCUMENTED + UNVERIFIED_ACCOUNT_ACCESS",
+      "hostinger_reach": "DOCUMENTED + VERIFIED_IN_PROJECT + UNVERIFIED_ACCOUNT_ACCESS",
+      "future_steps": ["account credential verification", "draft contract implementation by Codex if approved", "manual content entry or later connector"]
+    }
+  },
+  "draft_contract_proposals": {
+    "content_asset": {
+      "asset_id": "asset-placeholder-001",
+      "asset_type": "video_clip|image|music|voiceover|page_copy",
+      "source_status": "synthetic_placeholder|internal_unapproved|approved_internal|licensed_external",
+      "rights_status": "unknown|needs_review|approved|blocked",
+      "consent_status": "not_applicable|unknown|approved|blocked",
+      "approved_for_channels": ["youtube_shorts"],
+      "notes": "draft contract proposal only"
+    },
+    "channel_event": {
+      "event_id": "evt-placeholder-001",
+      "channel": "youtube|tiktok|meta|wordpress|email",
+      "event_name": "lead_form_start_modular_railing",
+      "status": "draft|queued|published|blocked",
+      "requires_access": true,
+      "notes": "draft contract proposal only"
+    },
+    "campaign": {
+      "campaign_id": "camp-prov-biz02-modular-railing",
+      "objective": "lead_capture|engagement|education",
+      "source_status": "provisional_for_biz02",
+      "owner": "chatgpt_or_business_owner",
+      "notes": "draft contract proposal only"
+    },
+    "lead": {
+      "lead_id": "lead-synthetic-001",
+      "capture_source": "landing_page|email|social_referral",
+      "contact_status": "synthetic_only",
+      "privacy_review": "required before real use",
+      "notes": "draft contract proposal only; no real lead data in GROW-01/S1"
+    }
+  },
+  "acceptance_checklist": [
+    "Exactly 3 packages present",
+    "Each package includes audience, objective, funnel stage, format, hook, script/outline, visual/shot list, required assets/permissions, forbidden claims, QA rubric, publish gate, UTM/event naming, channel adaptations, version and source status",
+    "No package invents pricing, discounts, stock, structural certification, universal fit, or ranking promise",
+    "BIZ-01 capability classes reused instead of resurveying vendors",
+    "At least one negative tabletop blocker example recorded",
+    "Evidence shows 0 publish, 0 paid render, 0 account mutation"
+  ],
+  "negative_tabletop_test": {
+    "scenario": "P2 draft receives a request to add exact anchor spacing and claim universal fit, while no engineer approval or approved hardware spec exists.",
+    "expected": "Package status must become BLOCKED and cannot transition to APPROVED or PUBLISHED.",
+    "observed": "Blocked path defined in report/runbook and technical fields remain REQUIRES_PRODUCT_ENGINEER_APPROVAL.",
+    "result": "PASS"
+  },
+  "no_side_effects_evidence": {
+    "publish_count": 0,
+    "paid_render_count": 0,
+    "account_mutation_count": 0,
+    "production_write_count": 0
+  },
+  "verdict": "GROW01_S1_DRAFT_WORKFLOW_READY_FOR_REVIEW",
+  "next_owner": "chatgpt"
+}
