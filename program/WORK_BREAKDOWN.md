@@ -357,7 +357,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Fresh scoped inventory of hosting services, resource health, network, DNS/TLS and WordPress baseline.
 - **REQUIRED_SKILL_IDS:** K-VPS,K-SEC,K-OBS,K-WP
 - **MINIMUM_TOOL_CAPABILITY:** Hostinger hPanel/authorized SSH or read-only telemetry; verify identity/version.
-- **PRIMARY_OWNER_CANDIDATE:** Hostinger Agent (PAUSED; not dispatchable)
+- **PRIMARY_OWNER_CANDIDATE:** NO_VERIFIED_EXECUTION_OWNER (Hostinger is paused; historical capability only)
 - **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
 - **CONTRIBUTORS:** None; A1 may provide static notes only if separately assigned
 - **PREDECESSORS:** Existing inventory; separate A0 resume + Hostinger ACK.
@@ -379,7 +379,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Prove backup integrity and restore into isolated safe environment; document RPO/RTO evidence and rollback.
 - **REQUIRED_SKILL_IDS:** K-VPS,K-BACKUP,K-TEST,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Authorized backup inventory, isolated restore target and integrity tools.
-- **PRIMARY_OWNER_CANDIDATE:** Hostinger Agent (PAUSED; not dispatchable)
+- **PRIMARY_OWNER_CANDIDATE:** NO_VERIFIED_EXECUTION_OWNER (Hostinger is paused; historical capability only)
 - **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
 - **CONTRIBUTORS:** A1 (runbook design only; not restore execution)
 - **PREDECESSORS:** INF-01.
@@ -423,7 +423,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Demonstrate minimal safe workflow, durable state, retry/recovery and observability in isolated environment; n8n is runtime, not Agent.
 - **REQUIRED_SKILL_IDS:** K-VPS,K-N8N,K-API,K-TEST,K-SEC,K-OBS
 - **MINIMUM_TOOL_CAPABILITY:** n8n sandbox, database, workflow export/import, signed webhook, synthetic trigger and logs.
-- **PRIMARY_OWNER_CANDIDATE:** Hostinger Agent (PAUSED; not dispatchable)
+- **PRIMARY_OWNER_CANDIDATE:** NO_VERIFIED_EXECUTION_OWNER (Hostinger is paused; historical capability only)
 - **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
 - **CONTRIBUTORS:** A1 (schema consultant only)
 - **PREDECESSORS:** INF-02,INF-03,G2-02.
@@ -731,7 +731,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Prepare risk-gated hardening plan for SSH exposure, ports, firewall, backup and recovery; no live mutation during design.
 - **REQUIRED_SKILL_IDS:** K-SEC,K-VPS,K-BACKUP,K-OBS
 - **MINIMUM_TOOL_CAPABILITY:** Provider/hPanel/VPS read-only topology; official docs; isolated validation later.
-- **PRIMARY_OWNER_CANDIDATE:** Hostinger Agent (PAUSED; not dispatchable)
+- **PRIMARY_OWNER_CANDIDATE:** NO_VERIFIED_EXECUTION_OWNER (Hostinger is paused; historical capability only)
 - **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
 - **CONTRIBUTORS:** A1 (static runbook consultant only)
 - **PREDECESSORS:** INF-01.
@@ -753,7 +753,7 @@ Every row defines: WBS_ID, PRODUCT_OUTCOME, FEATURE/UI, WORK_TYPE, PRIORITY, DEL
 - **DELIVERABLE:** Diagnose reproducible WP HTTP500 using logs/health/bounded request evidence; do not alter site/plugin state.
 - **REQUIRED_SKILL_IDS:** K-VPS,K-WP,K-OBS,K-SEC
 - **MINIMUM_TOOL_CAPABILITY:** Read-only hPanel/web logs or sanitized trace; staging reproduction if available.
-- **PRIMARY_OWNER_CANDIDATE:** Hostinger Agent (PAUSED; not dispatchable)
+- **PRIMARY_OWNER_CANDIDATE:** NO_VERIFIED_EXECUTION_OWNER (Hostinger is paused; historical capability only)
 - **AGENT_CANDIDATES:** Hostinger Agent (PAUSED)
 - **CONTRIBUTORS:** A1 (static evidence consultant only)
 - **PREDECESSORS:** INF-01; existing incident evidence; UC01-01 is not a live-access grant.
