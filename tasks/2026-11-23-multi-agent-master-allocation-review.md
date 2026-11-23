@@ -95,32 +95,80 @@ flowchart LR
 
 Mỗi review capacity ghi: `max_concurrent`, `session_access`, `skills_verified_with_evidence`, `willing_to_own`, `cannot_own`, `dependencies`, `alternative_owner`. Nếu Agent không có session được khởi tạo, trạng thái `PREPARED_FOR_OWNER_FORWARD`, không tự nói agent đang rảnh/đang làm.
 
-## 7. Quy trình tất cả Agent thẩm định và ký xác nhận
+## 7. ĐẶC TẢ CHUNG DUY NHẤT — gửi nguyên văn cùng một URL cho mọi Agent
 
-1. **ChatGPT phát hành DRAFT PR**; không merge hoặc đổi quyền triển khai. Mỗi Agent nhận URL GitHub đúng kênh; nhận được mới đánh `SENT`, có ACK đủ SHA mới đánh `ACKNOWLEDGED`.
-2. **Codex review:** kiểm tính khả thi kỹ thuật, dependency/critical path, workload, write-set, nhánh Gate B; nêu năng lực đã verified vs unavailable và sửa đề xuất owner nếu cần. **Không chạy KVM2 từ việc review này.**
-3. **Hermes Agent WebUI review:** tự đối chiếu tools/skills và GitHub khả dụng theo phiên; chấp nhận/đề xuất sửa BIZ-01, GROW-01 và phần semantic. Không tự nhận Hermes auxiliary inference đã production-ready.
-4. **Hostinger Agent review:** tự kiểm capability hPanel/WordPress/VPS và nhịp capacity; xác minh phù hợp INF-01, SEC-01/02; không thao tác thay đổi hạ tầng.
-5. **ChatGPT Work review:** trước hết tự ghi capability survey session (GitHub read/write, browsing/review, UI documentation, permission, giới hạn); rồi đánh giá công suất và xung đột AI-01/INF-02/GOV-02/UX-01/QA-01. Nếu không có môi trường Work riêng để ACK, đánh `PENDING`.
-6. **ChatGPT đối chiếu phản biện:** tổng hợp ý kiến có bằng chứng và cập nhật tối thiểu kế hoạch trên branch, ghi change log/review table; chủ dự án quyết định nếu có xung đột phạm vi kinh doanh/approval. Chỉ **APPROVED_ALLOCATION** khi mọi Agent tham gia nhận owner đã ACK, conflict giải quyết, dependency graph không vòng, không vượt capacity, mọi item có first action/acceptance và review readback hoàn tất. Nếu một Agent không thể ACK, đánh `PARTIALLY_VALIDATED` và không gán task mới cho Agent đó như đã nhận.
-7. **Sau consensus:** mới đưa kế hoạch vào index `CATALOG.yaml`/`STATE.md`, cập nhật rule chung trong `rules/AGENT_WORKFLOW.md` và entrypoints, changelog, review diff đầy đủ rồi merge theo chính sách repo. Việc mở task kỹ thuật tiếp theo vẫn cần gate riêng.
+**Dành đồng thời cho:** Codex, Hermes Agent WebUI, Hostinger Agent và ChatGPT Work. **Không có thứ tự Codex trước rồi Agent khác sau.** Mọi Agent nhận **cùng một nhiệm vụ review, cùng một PR #6, cùng một biểu mẫu trả lời** và làm song song, không đợi kết quả nhau. ChatGPT Điều phối là người tổng hợp duy nhất, không tự ký ACK thay bất kỳ Agent nào. n8n là thành phần phần mềm, không cần giả vờ ký xác nhận như AI Agent.
 
-**Mẫu verdict một Agent** (report trên branch/PR riêng hoặc comment có URL và SHA, redacted): `agent; reviewed_plan_sha; rules_sha; actual_session_tools; skill_evidence_urls; rows_accepted; rows_rejected_or_modified; concurrency_limit; dependency_changes; security_scope; verdict=ACCEPT_WITH_EVIDENCE|ACCEPT_WITH_CHANGES|REJECT_WITH_REASONS|BLOCKED_ACCESS; next_owner`. Không tự viết hộ chữ ký/ACK của Agent khác.
+**LINK DUY NHẤT:** https://github.com/DuyKienTTD/Hosting/pull/6
 
-### Ma trận chữ ký — CHƯA ĐƯỢC XÁC NHẬN
+**TASK ID chung:** `ttd-multi-agent-master-allocation-2026-11-23`
+**Mục tiêu chung:** phản biện và hoàn thiện toàn bộ danh mục công việc, phân bổ đúng Agent theo năng lực thật, đủ việc độc lập để triển khai đồng thời, tránh dồn Codex và tránh Agent bị nhàn rỗi do phụ thuộc giả.
+**Trạng thái:** `PREPARED_FOR_OWNER_FORWARD`; một owner duy nhất cho **mỗi lượt review** là chính Agent nhận URL này; ChatGPT owner hợp nhất cuối. Tệp kế hoạch vẫn DRAFT cho tới khi đủ các ACK.
 
-| Agent | Verdict | Evidence/PR |
+### A. FIRST ACTION — mọi Agent áp dụng giống nhau
+
+1. Fetch `main` và head của PR #6, ghi SHA thực đọc; đọc **đủ** `AGENTS.md`, `PROJECT.md`, `GOALS_AND_ROADMAP.md`, `rules/AGENT_WORKFLOW.md` §§7–10, `rules/REPOSITORY_SECURITY.md`, `STATE.md`, `CATALOG.yaml`, `agents/README.md`, **hồ sơ chính Agent**, tài liệu này và task/evidence liên quan đến các dòng đang kiểm. Nếu kết quả bị cắt, đọc phần còn thiếu; nếu không thể đọc đủ thì báo `PARTIAL_READ`, không xác nhận vô điều kiện.
+2. Tự nhận diện đúng môi trường: Codex kỹ thuật, Hermes WebUI, Hostinger Agent hPanel, hay ChatGPT Work. Kiểm chứng công cụ và quyền thực tế **trong phiên hiện tại**, phân biệt `VERIFIED`, `REPORTED`, `AVAILABLE_UNTESTED`, `UNKNOWN/BLOCKED`. Không nhầm backend/runtime production với WebUI/session.
+3. Đọc **toàn bộ bảng backlog, sơ đồ dependency, waves và capacity**, không chỉ dòng gắn tên mình. Đối chiếu với danh mục task đang mở và mốc PASS đã có để tìm thiếu/trùng, các nhiệm vụ có thể tách song song, dependency giả và điểm nghẽn.
+4. Tự xác nhận hoặc đề xuất sửa **các dòng mình làm owner, các dòng mình hỗ trợ, và các dòng cần agent khác làm tốt hơn**. Nêu năng lực/chứng cứ cụ thể; phân loại công việc nào có thể bắt đầu ngay ở chế độ read-only/draft, việc nào cần quyền/gate, việc nào không khả thi trong phiên.
+5. Ghi khả năng tải công việc có căn cứ: giới hạn đồng thời hợp lý, loại công việc chính/phụ, những tác vụ có thể triển khai song song, reviewer thay thế, và kiến nghị chuyển owner để tối ưu critical path. Không tối ưu theo số task bằng nhau; tối ưu thời gian hoàn thành tổng thể và quality gates.
+6. Phản biện tiêu chí nghiệm thu, first action, READ_SET/WRITE_SET, STOP, dữ liệu và quyền; đánh dấu rõ mỗi claim chưa đủ evidence. **Không chạy chính các task đang được đánh giá trong lượt review kế hoạch này.**
+7. Trả về **một ACK + một verdict thống nhất** theo mẫu dưới, trên comment/review PR #6 hoặc report đã khử nhạy cảm dẫn URL và SHA, không cần lập task/PR mới chỉ để ký xác nhận. Nếu không có quyền ghi GitHub, trả nội dung ACK trong phiên hiện tại để chủ dự án chuyển tiếp và ghi `NOT_PUSHED`.
+
+### B. Mẫu trả lời chung — các Agent điền một lần
+
+```text
+TASK: ttd-multi-agent-master-allocation-2026-11-23
+AGENT / SESSION: <agent, environment, checked_at>
+REVIEWED: main=<SHA>; PR6=<SHA>; rules=<SHA or ref>; read_status=FULL_READ|PARTIAL_READ
+ACK_STATE: ACKNOWLEDGED | BLOCKED_ACCESS  (chỉ khi thực sự nhận được URL)
+CAPABILITY: VERIFIED=<skills/tools + evidence>; UNTESTED=<...>; BLOCKED=<...>
+OWNERSHIP: ACCEPT=<task IDs>; CHANGE=<task IDs -> proposed owner + reason>; DECLINE=<task IDs + evidence>
+DEPENDENCIES: ACCEPT=<IDs>; REMOVE/ADD=<edges + reason>; PARALLELIZE=<IDs>
+CAPACITY: max_concurrent=<reasoned range>; active_existing_work=<IDs>; workload_risks=<...>
+MISSING_TASKS_OR_DUPLICATES: <IDs, links, concrete correction or NONE_FOUND_WITH_SCOPE>
+ACCEPTANCE_OR_SAFETY_GAPS: <specific issues + minimal fix>
+VERDICT: ACCEPT_WITH_EVIDENCE | ACCEPT_WITH_CHANGES | REJECT_WITH_REASONS | BLOCKED_ACCESS
+EVIDENCE: <GitHub comment URL, report URL/commit or NOT_PUSHED>
+NEXT_OWNER: chatgpt
+```
+
+**Điều kiện ACCEPT:** không chỉ nói “đồng ý”. Phải có kết luận thực chất về skills/quyền, owner/dependency/tải, và mức độ hoàn chỉnh. Đề xuất chỉnh sửa ghi **hàng/edge cụ thể**, có lý do và owner phù hợp; không sửa trực tiếp tài liệu trung tâm từ các phiên Agent song song để tránh lost updates.
+
+### C. Phân biệt trọng tâm thẩm định, KHÔNG phải bốn lệnh giao riêng
+
+- **Codex:** kiến trúc, code/infra, kiểm thử, critical path, tính khả thi AI-02/ENG-01/OPS-01, hạn mức thay đổi KVM2.
+- **Hermes WebUI:** số tools/skills đã xác minh, reasoning, nghiên cứu kết nối, BIZ-01/GROW-01, kỹ năng thực sự dùng được, không tự nhận connector production.
+- **Hostinger Agent:** bằng chứng hPanel/VPS/Cloud Hosting/WordPress/backup, INF-01/SEC-01/02, mức truy cập và phân định với Codex.
+- **ChatGPT Work:** tự capability survey trong phiên, QA độc lập, monitoring runbook, UX, báo cáo, AI-01/INF-02 và giới hạn công suất trước khi nhận thêm GOV-02/UX-01.
+- **ChatGPT Điều phối:** đối chiếu toàn bộ ACK, giải quyết chồng chéo/thiếu việc và cân tải, xác nhận dependency graph không vòng, xác định first safe action từng wave; chỉ sửa kế hoạch sau review.
+
+### D. READ/WRITE/STOP/ACCEPTANCE chung
+
+**READ_SET:** nguồn trong §1, hồ sơ Agent, mọi task/evidence đang review, PR #4/#5 đối với Gate B, PR #6 hiện hành. **WRITE_SET của Agent review:** đúng **một comment/review PR #6** hoặc báo cáo riêng đã khử nhạy cảm nếu comment không khả dụng. **WRITE_SET của ChatGPT:** chỉnh duy nhất kế hoạch PR #6 sau tổng hợp phản hồi; mọi thay đổi rule/index/state là bước riêng sau đồng thuận, không gộp ngầm vào review.
+
+**DO_NOT_TOUCH:** production, KVM2 runtime, Docker, provider/cost, Ads/website/publish, credential, ledger/permit/kill switch, những task Gate B/WS-02 đang chạy, evidence PASS cũ. Review này không cấp thêm quyền hay đổi owner của các task hiện có.
+
+**ACCEPTANCE:** mỗi Agent đã thực sự ACK qua kênh truy xuất được và có verdict cụ thể; ChatGPT tổng hợp discrepancy, cập nhật PR, soát drift/đường găng/xung đột write-set, thu nhận xác nhận lại chỉ với các thay đổi ảnh hưởng trực tiếp, không bắt mọi Agent đọc lại mọi thứ từ đầu. Nếu Agent chưa thể nhận, đánh `PENDING/BLOCKED_ACCESS`, không tự ghi hoàn tất hay coi im lặng là chấp thuận.
+
+**STOP:** thiếu chứng cứ quyền/skill, tài liệu không đọc đủ, nhiệm vụ cần side effect, thông tin nhạy cảm hoặc đề xuất vượt giới hạn ngân sách → dừng đúng phần đó, vẫn hoàn thành nhận xét độc lập khác. Review chỉ đọc, zero USD.
+
+### E. Handoff và phê duyệt hợp nhất
+
+`from_agent=chatgpt; to_agent=Codex|Hermes WebUI|Hostinger Agent|ChatGPT Work (mỗi Agent nhận chung URL, đồng thời); why=independent capability and allocation verification; first_action=§7A; inputs=PR6 + §1; limits=§7D; acceptance=§7B/D; artifact=PR6 comment/review; next_owner=chatgpt; handoff_state=PREPARED_FOR_OWNER_FORWARD`.
+
+Chỉ khi cả bốn Agent trả verdict hoặc blocker cụ thể, ChatGPT mới hợp nhất các đề xuất, tạo bản phân công `APPROVED_ALLOCATION` khi các owner liên quan chấp nhận nhiệm vụ và mọi conflict đã giải quyết. Nếu chưa đủ thì `PARTIALLY_VALIDATED`. Không yêu cầu lượt “Codex review trước” hay bốn prompt riêng; chủ dự án chỉ cần **chuyển cùng URL PR #6 và chỉ dẫn “Thực hiện §7”** tới các phiên Agent có thể sử dụng.
+
+### Ma trận xác nhận — chưa giả định đã giao
+
+| Agent | Trạng thái | Nơi trả kết quả |
 |---|---|---|
-| ChatGPT Điều phối | AUTHOR_DRAFT; chưa final nghiệm thu | PR kế hoạch này |
-| Codex | PENDING | Chưa nhận |
-| Hermes WebUI | PENDING | Chưa nhận |
-| Hostinger Agent | PENDING | Chưa nhận |
-| ChatGPT Work | PENDING_CAPABILITY_SURVEY | Chưa nhận |
-| n8n | NOT_APPLICABLE_NOT_AGENT | Do owner kỹ thuật kiểm runtime |
-
-## 8. Handoff đặc tả review (chưa SENT)
-
-`task_id=ttd-multi-agent-master-allocation-2026-11-23`; `from_agent=chatgpt`; `to_agent=<one agent above>`; `why=confirm actual strengths, workload/dependency and feasible ownership`; `first_action=fetch latest main + this PR, read AGENTS/Workflow §§7–10/Security/STATE/CATALOG and your profile, ACK refs`; `inputs=this PR, roadmap, agent directory, task links`; `limits=read-only planning review; no provider/paid, no production, no account writes, no secrets`; `acceptance=verdict with verified tool evidence + rows owned + concurrency + reassignment suggestions`; `artifact=comment/review or redacted report in own PR`; `next_owner=chatgpt`; `handoff_state=PREPARED_FOR_OWNER_FORWARD`.
+| Codex | PENDING_NOT_SENT | Comment/review PR #6 |
+| Hermes WebUI | PENDING_NOT_SENT | Comment/review PR #6 |
+| Hostinger Agent | PENDING_NOT_SENT | Comment/review PR #6 |
+| ChatGPT Work | PENDING_NOT_SENT | Comment/review PR #6 |
+| ChatGPT Điều phối | AUTHOR / AWAITING_REVIEWS | Tích hợp sau khi nhận |
+| n8n | NOT_AN_AGENT | Kiểm thử bởi owner kỹ thuật tương lai |
 
 ## 9. Không thay đổi các bất biến hiện có
 
