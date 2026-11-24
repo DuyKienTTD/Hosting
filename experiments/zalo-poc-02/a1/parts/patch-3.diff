@@ -2,8 +2,12 @@ diff --git a/src/agent/tools/send-dispatch-guard.ts b/src/agent/tools/send-dispa
 new file mode 100644
 --- /dev/null
 +++ b/src/agent/tools/send-dispatch-guard.ts
-@@ -0,0 +1,45 @@
-+/** Offline candidate only. Not yet wired into application send paths. */
+@@ -0,0 +1,25 @@
++/** Legacy read-then-send contract is permanently fail-closed.
++ * STOP race was reproduced by independent Work: an asynchronous read cannot
++ * serialize policy revocation with transport start.
++ * Production candidate sends use atomic-send-admission.ts instead.
++ */
 +export type Destination = Readonly<{ accountId: string; threadId: string; recipientId: string; threadType: 'dm' | 'group' }>;
 +export type Authorization = Readonly<{ destination: Destination; consent: 'opt_in' | 'opt_out' | 'unknown'; humanTakeover: boolean | null; threadStop: boolean | null; globalStop: boolean | null; accountRunning: boolean | null; version: string }>;
 +export type PolicyReader = (destination: Destination) => Promise<Authorization | null>;
@@ -11,42 +15,18 @@ new file mode 100644
 +export type DispatchIntent = Readonly<{ destination: Destination; idempotencyKey: string; expected: Destination }>;
 +export type DispatchResult = { status: 'sent' } | { status: 'blocked'; reason: string } | { status: 'unknown'; reason: string };
 +const saneId = (v: string): boolean => typeof v === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9_:@.\-]{0,127}$/.test(v);
-+const same = (a: Destination, b: Destination): boolean => a.accountId === b.accountId && a.threadId === b.threadId && a.recipientId === b.recipientId && a.threadType === b.threadType;
-+function allowed(intent: DispatchIntent, current: Authorization | null): string | null {
-+  const d = intent.destination;
-+  if (![d.accountId, d.threadId, d.recipientId, intent.idempotencyKey].every(saneId)) return 'invalid_identity';
-+  if (d.threadType !== 'dm' && d.threadType !== 'group') return 'invalid_thread_type';
-+  if (!same(d, intent.expected)) return 'wrong_recipient_or_type';
-+  if (d.threadType === 'dm' && d.recipientId !== d.threadId) return 'dm_target_mismatch';
-+  if (!current || !same(current.destination, d) || !saneId(current.version)) return 'unknown_policy_or_binding';
-+  if (current.consent !== 'opt_in') return 'opt_out_or_unknown_consent';
-+  if (current.humanTakeover !== false) return 'human_takeover_or_unknown';
-+  if (current.globalStop !== false || current.threadStop !== false) return 'stopped_or_unknown';
-+  if (current.accountRunning !== true) return 'not_running_or_unknown';
-+  return null;
-+}
-+/** Requires atomic durable AttemptStore and an already audited transport closure.
-+ * An ambiguous send permanently retains its reserved idempotency key.
++/** Deprecated: no reader or in-memory attempt store can authorize transport.
++ * All invocations are blocked, including otherwise valid opt-in.
 + */
-+export async function dispatchWithLateGuard(intent: DispatchIntent, readPolicy: PolicyReader, store: AttemptStore, send: () => Promise<unknown>, beforeFinalCheck?: () => Promise<void>): Promise<DispatchResult> {
-+  if (!saneId(intent.idempotencyKey)) return { status: 'blocked', reason: 'invalid_idempotency_key' };
-+  let first: Authorization | null;
-+  try { first = await readPolicy(intent.destination); } catch { return { status: 'blocked', reason: 'policy_read_failed' }; }
-+  const initial = allowed(intent, first);
-+  if (initial) return { status: 'blocked', reason: initial };
-+  try {
-+    if (!(await store.reserveOnce(intent.idempotencyKey))) return { status: 'blocked', reason: 'duplicate_or_uncertain_attempt' };
-+  } catch { return { status: 'blocked', reason: 'idempotency_unavailable' }; }
-+  try {
-+    if (beforeFinalCheck) await beforeFinalCheck();
-+    const fresh = await readPolicy(intent.destination);
-+    const reason = allowed(intent, fresh);
-+    if (reason) return { status: 'blocked', reason };
-+    if (fresh!.version !== first!.version) return { status: 'blocked', reason: 'policy_changed_since_enqueue' };
-+  } catch { return { status: 'blocked', reason: 'policy_recheck_failed' }; }
-+  try { await send(); } catch { return { status: 'unknown', reason: 'delivery_outcome_uncertain_no_retry' }; }
-+  try { await store.markSent(intent.idempotencyKey); } catch { return { status: 'unknown', reason: 'delivered_but_receipt_failed_no_retry' }; }
-+  return { status: 'sent' };
++export async function dispatchWithLateGuard(
++  intent: DispatchIntent,
++  _readPolicy: PolicyReader,
++  _store: AttemptStore,
++  _send: () => Promise<unknown>,
++  _beforeFinalCheck?: () => Promise<void>,
++): Promise<DispatchResult> {
++  if (!saneId(intent.idempotencyKey)) return {status:'blocked',reason:'invalid_idempotency_key'};
++  return {status:'blocked',reason:'unsafe_legacy_non_atomic_dispatch_disabled'};
 +}
 diff --git a/src/agent/tools/send-dispatch-guard.test.ts b/src/agent/tools/send-dispatch-guard.test.ts
 new file mode 100644
@@ -68,10 +48,10 @@ new file mode 100644
 +  };
 +  return { adapter, seen, sent };
 +};
-+test('one synthetic account: opt-in sends once', async () => {
++test('legacy send path is disabled even for synthetic opt-in', async () => {
 +  let sends = 0; const s = store();
 +  const r = await dispatchWithLateGuard(intent('msg_1'), async () => ok(), s.adapter, async () => { sends++; });
-+  assert.equal(r.status, 'sent'); assert.equal(sends, 1); assert.equal(s.sent.size, 1);
++  assert.equal(r.status, 'blocked'); assert.equal(sends, 0); assert.equal(s.sent.size, 0);
 +});
 +test('unknown, opt-out, takeover, STOP and paused account fail closed', async () => {
 +  const scenarios: Array<Authorization | null> = [null, { ...ok(), consent: 'unknown' }, { ...ok(), consent: 'opt_out' }, { ...ok(), humanTakeover: true }, { ...ok(), humanTakeover: null }, { ...ok(), globalStop: true }, { ...ok(), threadStop: true }, { ...ok(), accountRunning: false }];
@@ -98,11 +78,11 @@ new file mode 100644
 +  assert.equal((await dispatchWithLateGuard(intent('part_1'), async () => p, s.adapter, async () => { sends++; p = { ...p, threadStop: true, version: 'v2' }; })).status, 'sent');
 +  assert.equal((await dispatchWithLateGuard(intent('part_2'), async () => p, s.adapter, async () => { sends++; })).status, 'blocked'); assert.equal(sends, 1);
 +});
-+test('ambiguous send and restart with shared reservation never retry', async () => {
++test('legacy ambiguous send never attempts transport', async () => {
 +  const s = store(); let sends = 0;
 +  const run = () => dispatchWithLateGuard(intent('retry_1'), async () => ok(), s.adapter, async () => { sends++; throw Error('ambiguous'); });
-+  assert.equal((await run()).status, 'unknown'); assert.equal((await run()).status, 'blocked');
-+  assert.equal((await dispatchWithLateGuard(intent('retry_1'), async () => ok(), s.adapter, async () => { sends++; })).status, 'blocked'); assert.equal(sends, 1);
++  assert.equal((await run()).status, 'blocked'); assert.equal((await run()).status, 'blocked');
++  assert.equal((await dispatchWithLateGuard(intent('retry_1'), async () => ok(), s.adapter, async () => { sends++; })).status, 'blocked'); assert.equal(sends, 0);
 +});
 +test('policy epoch change while queued blocks', async () => {
 +  let p = ok(); let sends = 0;
@@ -159,98 +139,183 @@ diff --git a/src/agent/tools/outbound-guard-runtime.ts b/src/agent/tools/outboun
 new file mode 100644
 --- /dev/null
 +++ b/src/agent/tools/outbound-guard-runtime.ts
-@@ -0,0 +1,38 @@
-+import { dispatchWithLateGuard, type PolicyReader, type AttemptStore, type Destination } from './send-dispatch-guard.js';
-+
-+/** OFFLINE POC: nothing registers this in production; missing binding denies every send.
-+ * Integration owner must replace this per-process adapter with A2-approved durable
-+ * policy/consent snapshots, including a shared STOP fence.
-+ */
-+let runtime: { readPolicy: PolicyReader; attempts: AttemptStore } | null = null;
-+export function setOfflineOutboundGuardRuntime(value: { readPolicy: PolicyReader; attempts: AttemptStore } | null): void {
-+  runtime = value;
+@@ -0,0 +1,31 @@
++import { type SendBinding, type AdmissionOutcome } from './atomic-send-admission.js';
++/** Offline injected authority only. Never constructs consent from botEnabled. */
++export interface AtomicAdmissionPort {
++  dispatch<T>(binding: SendBinding, transport: () => Promise<T>, nowMs: number): Promise<AdmissionOutcome<T>>;
 +}
++let authority: AtomicAdmissionPort | null = null;
++export function setSyntheticAtomicOutboundRuntime(value: AtomicAdmissionPort | null): void { authority=value; }
 +export class OutboundGuardDenied extends Error {
-+  readonly reason: string;
-+  constructor(reason: string) { super('outbound_guard_' + reason); this.reason = reason; }
++  readonly reason:string;
++  constructor(reason:string){ super('outbound_guard_'+reason);this.reason=reason; }
 +}
 +export async function sendWithOutboundGuard(input: {
-+  threadKey: string;
-+  threadId: string;
-+  threadType: number;
-+  stableKey: string | undefined;
-+  send: () => Promise<unknown>;
-+}): Promise<unknown> {
-+  if (!runtime) throw new OutboundGuardDenied('missing_authoritative_policy');
-+  const pos = input.threadKey.indexOf(':');
-+  const accountId = pos > 0 ? input.threadKey.slice(0,pos) : '';
-+  const binding = pos > 0 ? input.threadKey.slice(pos+1) : '';
-+  if (!accountId || binding !== input.threadId || !input.stableKey) throw new OutboundGuardDenied('missing_or_mismatched_binding');
-+  const kind = input.threadType === 0 ? 'dm' : input.threadType === 1 ? 'group' : null;
-+  if (!kind) throw new OutboundGuardDenied('unknown_thread_type');
-+  const destination: Destination = { accountId, threadId: input.threadId, recipientId: input.threadId, threadType: kind };
-+  let value: unknown;
-+  const result = await dispatchWithLateGuard({
-+    destination,
-+    expected: destination,
-+    idempotencyKey: input.stableKey,
-+  }, runtime.readPolicy, runtime.attempts, async () => { value = await input.send(); });
-+  if (result.status !== 'sent') throw new OutboundGuardDenied(result.reason);
-+  return value;
++  threadKey:string;threadId:string;threadType:number;senderId?:string;
++  stableKey:string|undefined;send:()=>Promise<unknown>;
++}):Promise<unknown>{
++  if (!authority) throw new OutboundGuardDenied('missing_atomic_authority');
++  const pos=input.threadKey.indexOf(':');
++  const accountId=pos>0?input.threadKey.slice(0,pos):'';
++  const boundThread=pos>0?input.threadKey.slice(pos+1):'';
++  if (!accountId||boundThread!==input.threadId||!input.stableKey) throw new OutboundGuardDenied('invalid_binding');
++  const type=input.threadType===0?'dm':input.threadType===1?'group':null;
++  if(!type) throw new OutboundGuardDenied('unknown_thread_type');
++  // Group sender must be supplied by validated inbound context, never guessed from thread ID.
++  const senderId=type==='dm'?input.threadId:input.senderId;
++  if(!senderId) throw new OutboundGuardDenied('missing_group_sender_id');
++  const binding:SendBinding={accountId,threadId:input.threadId,senderId,
++    recipientId:input.threadId,threadType:type,attemptKey:input.stableKey};
++  const result=await authority.dispatch(binding,input.send,Date.now());
++  if(result.status!=='sent')throw new OutboundGuardDenied(result.reason);
++  return result.value;
 +}
 diff --git a/src/agent/tools/outbound-guard-runtime.test.ts b/src/agent/tools/outbound-guard-runtime.test.ts
 new file mode 100644
 --- /dev/null
 +++ b/src/agent/tools/outbound-guard-runtime.test.ts
-@@ -0,0 +1,51 @@
+@@ -0,0 +1,11 @@
 +import test from 'node:test';
 +import assert from 'node:assert/strict';
-+import fs from 'node:fs';
-+import os from 'node:os';
-+import path from 'node:path';
-+import { openDurableAttemptStore } from './durable-attempt-store.js';
-+import { sendWithOutboundGuard, setOfflineOutboundGuardRuntime, OutboundGuardDenied } from './outbound-guard-runtime.js';
-+import type { Authorization, Destination } from './send-dispatch-guard.js';
++import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
++import {openSyntheticAtomicAdmission} from './atomic-send-admission.js';
++import {setSyntheticAtomicOutboundRuntime,sendWithOutboundGuard,OutboundGuardDenied} from './outbound-guard-runtime.js';
++const p=()=>({accountId:'synthetic_1',threadId:'user_1',senderId:'user_1',threadType:'dm' as const,
++verified:true,respond:true,retain:true,outbound:true,optedOut:false,takeover:false,stopped:false,running:true,revision:1,expiresAtMs:1890000000000});
++const input=(key:string)=>({threadKey:'synthetic_1:user_1',threadId:'user_1',threadType:0,stableKey:key,send:async()=>({fake:true})});
++test('real wrapper invokes atomic admission and refuses duplicate',async()=>{const d=fs.mkdtempSync(path.join(os.tmpdir(),'atomic-adapter-'));const s=openSyntheticAtomicAdmission(path.join(d,'test.db'));try{s.mutatePolicy(p());setSyntheticAtomicOutboundRuntime(s);assert.deepEqual(await sendWithOutboundGuard(input('k1')),{fake:true});await assert.rejects(sendWithOutboundGuard(input('k1')),OutboundGuardDenied);}finally{setSyntheticAtomicOutboundRuntime(null);s.close();fs.rmSync(d,{recursive:true,force:true});}});
++test('STOP microtask race blocks wrapper transport',async()=>{const d=fs.mkdtempSync(path.join(os.tmpdir(),'atomic-adapter-'));const s=openSyntheticAtomicAdmission(path.join(d,'test.db'));let calls=0;try{s.mutatePolicy(p());setSyntheticAtomicOutboundRuntime(s);await Promise.resolve().then(()=>s.mutatePolicy({...p(),revision:2,stopped:true}));await assert.rejects(sendWithOutboundGuard({...input('k2'),send:async()=>{calls++;}}),OutboundGuardDenied);assert.equal(calls,0);}finally{setSyntheticAtomicOutboundRuntime(null);s.close();fs.rmSync(d,{recursive:true,force:true});}});
++test('group sender missing denies, mismatched binding denies',async()=>{const d=fs.mkdtempSync(path.join(os.tmpdir(),'atomic-adapter-'));const s=openSyntheticAtomicAdmission(path.join(d,'test.db'));let calls=0;try{setSyntheticAtomicOutboundRuntime(s);await assert.rejects(sendWithOutboundGuard({...input('g'),threadKey:'synthetic_1:group_1',threadId:'group_1',threadType:1,send:async()=>{calls++;}}),OutboundGuardDenied);await assert.rejects(sendWithOutboundGuard({...input('m'),threadId:'another',send:async()=>{calls++;}}),OutboundGuardDenied);assert.equal(calls,0);}finally{setSyntheticAtomicOutboundRuntime(null);s.close();fs.rmSync(d,{recursive:true,force:true});}});
+diff --git a/src/agent/tools/atomic-send-admission.ts b/src/agent/tools/atomic-send-admission.ts
+new file mode 100644
+--- /dev/null
++++ b/src/agent/tools/atomic-send-admission.ts
+@@ -0,0 +1,108 @@
++import { DatabaseSync } from 'node:sqlite';
 +
-+const destination: Destination = { accountId: 'synthetic_1', threadId: 'user_1', recipientId: 'user_1', threadType: 'dm' };
-+const policy = (): Authorization => ({ destination, consent: 'opt_in', humanTakeover: false, globalStop: false, threadStop: false, accountRunning: true, version: 'epoch_1' });
-+function sandbox() { const dir=fs.mkdtempSync(path.join(os.tmpdir(),'send-guard-runtime-')); return { dir, db: path.join(dir,'attempts.db') }; }
-+test('late guard sends only once with durable SQLite key', async () => {
-+  const f=sandbox(), store=openDurableAttemptStore(f.db); let sends=0;
-+  try {
-+    setOfflineOutboundGuardRuntime({ readPolicy: async()=>policy(), attempts:store });
-+    const args={ threadKey:'synthetic_1:user_1', threadId:'user_1', threadType:0, stableKey:'chat_synthetic_1_user_1_msg1:segment_1', send:async()=>{sends++;return {fake:true};} };
-+    assert.deepEqual(await sendWithOutboundGuard(args),{fake:true});
-+    await assert.rejects(sendWithOutboundGuard(args), OutboundGuardDenied);
-+    assert.equal(sends,1);
-+  } finally {setOfflineOutboundGuardRuntime(null);store.close();fs.rmSync(f.dir,{recursive:true,force:true});}
-+});
-+test('STOP arriving after enqueue but before final send denies',async()=>{
-+  const f=sandbox(),store=openDurableAttemptStore(f.db);let reads=0,sends=0;
-+  try{
-+    setOfflineOutboundGuardRuntime({ readPolicy:async()=>{ reads++;return reads>=2?{...policy(),threadStop:true,version:'epoch_2'}:policy(); },attempts:store });
-+    await assert.rejects(sendWithOutboundGuard({ threadKey:'synthetic_1:user_1',threadId:'user_1',threadType:0,stableKey:'stop_1',send:async()=>{sends++;} }), OutboundGuardDenied);
-+    assert.equal(sends,0);
-+  }finally{setOfflineOutboundGuardRuntime(null);store.close();fs.rmSync(f.dir,{recursive:true,force:true});}
-+});
-+test('revoke opt-in and human takeover each deny final fake send',async()=>{
-+  for(const change of [{consent:'opt_out',version:'epoch_2'} as const,{humanTakeover:true,version:'epoch_2'} as const]){
-+    const f=sandbox(),store=openDurableAttemptStore(f.db);let reads=0,sends=0;
-+    try{
-+      setOfflineOutboundGuardRuntime({readPolicy:async()=>++reads===1?policy():{...policy(),...change},attempts:store});
-+      await assert.rejects(sendWithOutboundGuard({threadKey:'synthetic_1:user_1',threadId:'user_1',threadType:0,stableKey:'takeover_1',send:async()=>{sends++;}}),OutboundGuardDenied);
-+      assert.equal(sends,0);
-+    }finally{setOfflineOutboundGuardRuntime(null);store.close();fs.rmSync(f.dir,{recursive:true,force:true});}
++/** Offline synthetic policy authority, not connected to Zalo or real consent. */
++export type SendBinding = Readonly<{
++  accountId: string; threadId: string; senderId: string; recipientId: string;
++  threadType: 'dm' | 'group'; attemptKey: string;
++}>;
++export type PolicyMutation = Readonly<{
++  accountId: string; threadId: string; senderId: string; threadType: 'dm' | 'group';
++  verified: boolean; respond: boolean; retain: boolean; outbound: boolean;
++  optedOut: boolean; takeover: boolean; stopped: boolean; running: boolean;
++  revision: number; expiresAtMs: number;
++}>;
++export type AdmissionOutcome<T> =
++  | { status: 'blocked'; reason: string }
++  | { status: 'unknown'; reason: string }
++  | { status: 'sent'; value: T };
++const id = (s: string) => typeof s === 'string' && /^[a-zA-Z0-9][\w:@.\-]{0,127}$/.test(s);
++const valid = (p: PolicyMutation) => p &&
++  [p.accountId,p.threadId,p.senderId].every(id) &&
++  (p.threadType === 'dm' || p.threadType === 'group') &&
++  Number.isSafeInteger(p.revision) && p.revision >= 1 && Number.isSafeInteger(p.expiresAtMs);
++
++/** All real policy writers must use the same transactional admission boundary.
++ * Do not treat this synthetic table as evidence of real customer consent.
++ */
++export function openSyntheticAtomicAdmission(file: string) {
++  if (!file || file === ':memory:') throw Error('durable_file_required');
++  const db = new DatabaseSync(file);
++  db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL;
++CREATE TABLE IF NOT EXISTS synthetic_outbound_policy (
++ account_id TEXT NOT NULL, thread_id TEXT NOT NULL, sender_id TEXT NOT NULL,
++ thread_type TEXT NOT NULL CHECK(thread_type IN ('dm','group')),
++ verified INTEGER NOT NULL, can_respond INTEGER NOT NULL, can_retain INTEGER NOT NULL,
++ can_outbound INTEGER NOT NULL, opted_out INTEGER NOT NULL, takeover INTEGER NOT NULL,
++ stopped INTEGER NOT NULL, running INTEGER NOT NULL, revision INTEGER NOT NULL,
++ expires_at_ms INTEGER NOT NULL,
++ PRIMARY KEY(account_id,thread_id,sender_id,thread_type));
++CREATE TABLE IF NOT EXISTS synthetic_outbound_attempts (
++ key TEXT PRIMARY KEY, state TEXT NOT NULL CHECK(state IN ('admitted','sent','unknown')),
++ account_id TEXT NOT NULL, thread_id TEXT NOT NULL, revision INTEGER NOT NULL);
++`);
++  const getPolicy = db.prepare(`SELECT * FROM synthetic_outbound_policy
++    WHERE account_id=? AND thread_id=? AND sender_id=? AND thread_type=?`);
++  const current = db.prepare(`SELECT revision FROM synthetic_outbound_policy
++    WHERE account_id=? AND thread_id=? AND sender_id=? AND thread_type=?`);
++  const upsert = db.prepare(`INSERT INTO synthetic_outbound_policy VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
++    ON CONFLICT(account_id,thread_id,sender_id,thread_type) DO UPDATE SET
++    verified=excluded.verified, can_respond=excluded.can_respond,
++    can_retain=excluded.can_retain, can_outbound=excluded.can_outbound,
++    opted_out=excluded.opted_out, takeover=excluded.takeover, stopped=excluded.stopped,
++    running=excluded.running, revision=excluded.revision, expires_at_ms=excluded.expires_at_ms`);
++  const reserve = db.prepare(`INSERT OR IGNORE INTO synthetic_outbound_attempts
++    (key,state,account_id,thread_id,revision) VALUES(?,'admitted',?,?,?)`);
++  const sent = db.prepare(`UPDATE synthetic_outbound_attempts SET state='sent' WHERE key=? AND state='admitted'`);
++  const unknown = db.prepare(`UPDATE synthetic_outbound_attempts SET state='unknown' WHERE key=? AND state='admitted'`);
++  const state = db.prepare(`SELECT state FROM synthetic_outbound_attempts WHERE key=?`);
++
++  /** STOP/opt-out/takeover writer is serialized against dispatch admission. */
++  function mutatePolicy(p: PolicyMutation): boolean {
++    if (!valid(p)) throw Error('invalid_policy_mutation');
++    db.exec('BEGIN IMMEDIATE');
++    try {
++      const row = current.get(p.accountId,p.threadId,p.senderId,p.threadType) as {revision:number}|undefined;
++      if (row && p.revision <= row.revision) { db.exec('ROLLBACK'); return false; }
++      upsert.run(p.accountId,p.threadId,p.senderId,p.threadType,
++        Number(p.verified),Number(p.respond),Number(p.retain),Number(p.outbound),
++        Number(p.optedOut),Number(p.takeover),Number(p.stopped),Number(p.running),
++        p.revision,p.expiresAtMs);
++      db.exec('COMMIT'); return true;
++    } catch(e) {db.exec('ROLLBACK');throw e;}
 +  }
-+});
-+test('unknown policy, malformed identity and unset policy block without transport',async()=>{
-+  let sends=0;
-+  await assert.rejects(sendWithOutboundGuard({threadKey:'synthetic_1:user_1',threadId:'user_1',threadType:0,stableKey:'none_1',send:async()=>{sends++;}}),OutboundGuardDenied);
-+  const f=sandbox(),store=openDurableAttemptStore(f.db);
-+  try{
-+    setOfflineOutboundGuardRuntime({readPolicy:async()=>policy(),attempts:store});
-+    await assert.rejects(sendWithOutboundGuard({threadKey:'synthetic_1:user_1',threadId:'other_1',threadType:0,stableKey:'wrong_1',send:async()=>{sends++;}}),OutboundGuardDenied);
-+    await assert.rejects(sendWithOutboundGuard({threadKey:'synthetic_1:user_1',threadId:'user_1',threadType:99,stableKey:'bad_1',send:async()=>{sends++;}}),OutboundGuardDenied);
-+    assert.equal(sends,0);
-+  }finally{setOfflineOutboundGuardRuntime(null);store.close();fs.rmSync(f.dir,{recursive:true,force:true});}
-+});
++  /** Linearizes admission, not remote completion. No await while holding lock.
++   * Transport MUST begin its side effect synchronously on invocation; async
++   * deferred transport needs its own admission boundary at actual dispatch.
++   */
++  async function dispatch<T>(b: SendBinding, transport: () => Promise<T>, nowMs: number): Promise<AdmissionOutcome<T>> {
++    if (![b.accountId,b.threadId,b.senderId,b.recipientId,b.attemptKey].every(id) ||
++      (b.threadType !== 'dm' && b.threadType !== 'group') ||
++      (b.threadType === 'dm' && (b.recipientId !== b.threadId || b.senderId !== b.threadId)) ||
++      b.recipientId !== b.threadId || !Number.isSafeInteger(nowMs)) {
++      return { status: 'blocked', reason: 'invalid_destination_or_attempt' };
++    }
++    let call: Promise<T>;
++    db.exec('BEGIN IMMEDIATE');
++    try {
++      const p = getPolicy.get(b.accountId,b.threadId,b.senderId,b.threadType) as Record<string,number>|undefined;
++      const reason = !p ? 'unknown_policy' : !p.verified ? 'unverified_policy'
++        : !p.can_outbound ? 'no_outbound_consent' : p.opted_out ? 'opt_out'
++        : p.takeover ? 'human_takeover' : p.stopped ? 'stop' : !p.running ? 'account_stopped'
++        : p.expires_at_ms <= nowMs ? 'expired_policy' : null;
++      if (reason) { db.exec('ROLLBACK'); return {status:'blocked',reason}; }
++      if (reserve.run(b.attemptKey,b.accountId,b.threadId,p!.revision).changes !== 1) {
++        db.exec('ROLLBACK');return {status:'blocked',reason:'duplicate_or_uncertain_attempt'};
++      }
++      // Start transport BEFORE releasing the policy writer's SQLite lock.
++      try { call = Promise.resolve(transport()); }
++      catch { unknown.run(b.attemptKey);db.exec('COMMIT');return {status:'unknown',reason:'transport_sync_throw'}; }
++      db.exec('COMMIT');
++    } catch { try {db.exec('ROLLBACK');} catch{}; return {status:'blocked',reason:'atomic_admission_unavailable'}; }
++    try {
++      const value = await call!;
++      try {sent.run(b.attemptKey);} catch {return {status:'unknown',reason:'receipt_failure_no_retry'};}
++      return {status:'sent',value};
++    } catch {try {unknown.run(b.attemptKey);} catch{};return {status:'unknown',reason:'ambiguous_transport_no_retry'};}
++  }
++  return {mutatePolicy,dispatch,status:(key:string)=>(state.get(key) as {state:string}|undefined)?.state,close:()=>db.close()};
++}
+diff --git a/src/agent/tools/atomic-send-admission.test.ts b/src/agent/tools/atomic-send-admission.test.ts
+new file mode 100644
+--- /dev/null
++++ b/src/agent/tools/atomic-send-admission.test.ts
+@@ -0,0 +1,14 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
++import {spawnSync} from 'node:child_process';
++import {openSyntheticAtomicAdmission} from './atomic-send-admission.js';
++const base={accountId:'synthetic_1',threadId:'user_1',senderId:'user_1',recipientId:'user_1',threadType:'dm' as const,attemptKey:'msg_1:part_1'};
++const p=(revision=1)=>({accountId:base.accountId,threadId:base.threadId,senderId:base.senderId,threadType:base.threadType,verified:true,respond:true,retain:false,outbound:true,optedOut:false,takeover:false,stopped:false,running:true,revision,expiresAtMs:1890000000000});
++function fixture(){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'poc02atomic-'));return {dir,file:path.join(dir,'guard.db')}}
++test('atomic STOP before admission prevents send after microtask',async()=>{const f=fixture();const s=openSyntheticAtomicAdmission(f.file);try{assert.equal(s.mutatePolicy(p()),true);let fake=0;let stopped=false;await Promise.resolve().then(()=>{s.mutatePolicy({...p(2),stopped:true});stopped=true});const r=await s.dispatch(base,async()=>{if(stopped)fake++;return 'ok'},Date.now());assert.equal(r.status,'blocked');assert.equal(fake,0);}finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true})}});
++test('already admitted send is in-flight when STOP linearizes later',async()=>{const f=fixture();const s=openSyntheticAtomicAdmission(f.file);try{s.mutatePolicy(p());let started=0;let done:(x:string)=>void=()=>{};const waiting=new Promise<string>(resolve=>{done=resolve});const operation=s.dispatch(base,()=>{started++;return waiting},Date.now());s.mutatePolicy({...p(2),stopped:true});done('ok');const r=await operation;assert.equal(started,1);assert.equal(r.status,'sent');const blocked=await s.dispatch({...base,attemptKey:'msg_1:part_2'},async()=>{started++;return 'bad'},Date.now());assert.equal(blocked.status,'blocked');assert.equal(started,1);}finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true})}});
++test('STOP, opt-out, takeover, expiry and unknown deny',async()=>{for(const changes of [{stopped:true},{optedOut:true},{takeover:true},{outbound:false},{verified:false},{expiresAtMs:1}]){const f=fixture();const s=openSyntheticAtomicAdmission(f.file);try{s.mutatePolicy({...p(),...changes});let sends=0;assert.equal((await s.dispatch(base,async()=>{sends++;return 1},Date.now())).status,'blocked');assert.equal(sends,0)}finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true})}}});
++test('actual process restart durable idempotency and no retry after unknown',async()=>{const f=fixture();const s=openSyntheticAtomicAdmission(f.file);try{s.mutatePolicy(p());assert.equal((await s.dispatch(base,async()=>{throw Error('ambiguous')},Date.now())).status,'unknown');s.close();const source=new URL('./atomic-send-admission.js',import.meta.url).href;const js='import {openSyntheticAtomicAdmission} from '+JSON.stringify(source)+';const s=openSyntheticAtomicAdmission(process.argv[1]);const result=await s.dispatch('+JSON.stringify(base)+',async()=>{throw Error("duplicate transport invoked")},Date.now());process.stdout.write(result.status+":"+result.reason);s.close()';const child=spawnSync(process.execPath,['--input-type=module','-e',js,f.file],{encoding:'utf8',env:{PATH:process.env.PATH}});assert.equal(child.status,0,child.stderr);assert.equal(child.stdout,'blocked:duplicate_or_uncertain_attempt')}finally{fs.rmSync(f.dir,{recursive:true,force:true})}});
++test('policy revision monotonic and group/type binding',async()=>{const f=fixture();const s=openSyntheticAtomicAdmission(f.file);try{s.mutatePolicy(p());assert.equal(s.mutatePolicy(p()),false);assert.throws(()=>s.mutatePolicy({...p(0),stopped:true}),/invalid_policy_mutation/);let sends=0;const bad=await s.dispatch({...base,threadType:'group' as const,recipientId:'group_1'},async()=>{sends++;return 'x'},Date.now());assert.equal(bad.status,'blocked');assert.equal(sends,0);}finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true})}});
++test('concurrent updates and sends linearize by transaction in one process',async()=>{const f=fixture();const s=openSyntheticAtomicAdmission(f.file);try{s.mutatePolicy(p());const events:string[]=[];let calls=0;const send=s.dispatch(base,async()=>{events.push('admitted');calls++;return 'ok'},Date.now());const stop=Promise.resolve().then(()=>{s.mutatePolicy({...p(2),stopped:true});events.push('stopped')});await Promise.all([send,stop]);assert.deepEqual(events,['admitted','stopped']);assert.equal(calls,1);assert.equal((await s.dispatch({...base,attemptKey:'next'},async()=>{calls++;return 'wrong'},Date.now())).status,'blocked');assert.equal(calls,1);}finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true})}});
