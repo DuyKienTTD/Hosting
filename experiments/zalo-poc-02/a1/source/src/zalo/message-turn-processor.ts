@@ -1,4 +1,5 @@
 import { runAgentTurn, type AgentTurnParams } from "../agent/agent-loop.js";
+import { readCurrentSyntheticPolicy } from "../agent/tools/outbound-guard-runtime.js";
 import type { KenhLuot } from "./kenh-luot.js";
 import { phanLoaiLoiProvider } from "../agent/provider-error-classifier.js";
 import type { StepTrace } from "../agent/agent-step-trace.js";
@@ -59,6 +60,9 @@ export async function processBatch(
   options: XuLyLuotOptions = {},
 ): Promise<void> {
   const latest = batch[batch.length - 1]!;
+  // A1 ephemeral path: no trace, usage, history, media or LLM when policy absent.
+  const policy = readCurrentSyntheticPolicy(config.id, latest.threadId, latest.senderId, latest.isGroup);
+  if (!policy?.respond || !policy.retain) return; // respond-only awaits audited non-persistent pipeline
   const turnId = openAgentTurn(config.id, latest.threadId);
   return runInTurnLogContext({ accountId: config.id, threadId: latest.threadId, turnId }, () =>
     xuLyLuot(config, kenh, batch, turnId, options),
