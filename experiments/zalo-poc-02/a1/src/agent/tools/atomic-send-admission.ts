@@ -20,6 +20,7 @@ const id = (s: string) => typeof s === 'string' && /^[a-zA-Z0-9][\w:@.\-]{0,127}
 const valid = (p: PolicyMutation) => p &&
   [p.accountId,p.threadId,p.senderId].every(id) &&
   (p.threadType === 'dm' || p.threadType === 'group') &&
+  (p.threadType !== 'dm' || p.senderId === p.threadId) &&
   Number.isSafeInteger(p.revision) && p.revision >= 1 && Number.isSafeInteger(p.expiresAtMs);
 
 /** All real policy writers must use the same transactional admission boundary.
@@ -28,7 +29,7 @@ const valid = (p: PolicyMutation) => p &&
 export function openSyntheticAtomicAdmission(file: string) {
   if (!file || file === ':memory:') throw Error('durable_file_required');
   const db = new DatabaseSync(file);
-  db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL;
+  db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=2500;
 CREATE TABLE IF NOT EXISTS synthetic_outbound_policy (
  account_id TEXT NOT NULL, thread_id TEXT NOT NULL, sender_id TEXT NOT NULL,
  thread_type TEXT NOT NULL CHECK(thread_type IN ('dm','group')),
@@ -77,7 +78,9 @@ CREATE TABLE IF NOT EXISTS synthetic_outbound_attempts (
     } catch(e) {db.exec('ROLLBACK');throw e;}
   }
   function readSnapshot(identity:Pick<SendBinding,'accountId'|'threadId'|'senderId'|'threadType'>,nowMs=Date.now()):PolicySnapshot|null{
-    if (![identity.accountId,identity.threadId,identity.senderId].every(id)) return null;
+    if (![identity.accountId,identity.threadId,identity.senderId].every(id) ||
+        (identity.threadType!=='dm'&&identity.threadType!=='group') ||
+        (identity.threadType==='dm'&&identity.senderId!==identity.threadId)) return null;
     const q=getPolicy.get(identity.accountId,identity.threadId,identity.senderId,identity.threadType) as Record<string,number>|undefined;
     if(!q||!Number.isSafeInteger(nowMs))return null;
     return Object.freeze({...identity,verified:Boolean(q.verified),respond:Boolean(q.can_respond),retain:Boolean(q.can_retain),
@@ -124,7 +127,7 @@ CREATE TABLE IF NOT EXISTS synthetic_outbound_attempts (
         else {try{began=true;call=Promise.resolve(transport())}catch{reason='transport_sync_throw'}}
       }
       db.exec('COMMIT');
-    }catch{try{db.exec('ROLLBACK')}catch{};return {status:'unknown',reason:'admission_commit_uncertain_no_retry'}}
+    }catch{try{db.exec('ROLLBACK')}catch{}; if(call)void call.catch(()=>{});return {status:'unknown',reason:'admission_commit_uncertain_no_retry'}}
     if(reason)return began?{status:'unknown',reason}:{status:'blocked',reason};
     if(!call)return {status:'unknown',reason:'not_started'};
     try {const value=await call;try{if(sent.run(b.attemptKey).changes!==1)return {status:'unknown',reason:'receipt_missing'}}catch{return {status:'unknown',reason:'receipt_failed'}}return {status:'sent',value}}
