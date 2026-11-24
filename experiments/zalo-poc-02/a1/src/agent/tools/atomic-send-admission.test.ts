@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
-import {spawnSync} from 'node:child_process';
+import {spawnSync, spawn} from 'node:child_process';
+import {DatabaseSync} from 'node:sqlite';
 import {openSyntheticAtomicAdmission} from './atomic-send-admission.js';
 const base={accountId:'synthetic_1',threadId:'user_1',senderId:'user_1',recipientId:'user_1',threadType:'dm' as const,attemptKey:'msg_1:part_1'};
 const p=(revision=1)=>({accountId:base.accountId,threadId:base.threadId,senderId:base.senderId,threadType:base.threadType,verified:true,respond:true,retain:false,passiveGroup:false,outbound:true,optedOut:false,takeover:false,stopped:false,running:true,revision,expiresAtMs:1890000000000});
@@ -60,4 +61,38 @@ test('mutation rejects non-boolean consent scopes instead of fabricating opt-in'
     assert.throws(()=>s.mutatePolicy({...p(),passiveGroup:undefined as unknown as boolean}),/invalid_policy_mutation/);
     assert.equal(s.readOnly.readSnapshot(base),null);
   }finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true});}
+});
+
+test('cross-process STOP writer waits for SQLite lock and blocks later admission',async()=>{
+  const f=fixture(),s=openSyntheticAtomicAdmission(f.file);
+  let child:ReturnType<typeof spawn>|undefined;
+  try {
+    s.mutatePolicy(p());
+    const source=new URL('./atomic-send-admission.js',import.meta.url).href;
+    const script='import {openSyntheticAtomicAdmission} from '+JSON.stringify(source)+
+      ';const s=openSyntheticAtomicAdmission(process.argv[1]);process.stdout.write("READY\\n");'+
+      'process.stdin.once("data",()=>{s.mutateStop("global","synthetic_1",true,1);process.stdout.write("DONE\\n");s.close()})';
+    child=spawn(process.execPath,['--import','tsx','--input-type=module','-e',script,f.file],{
+      stdio:['pipe','pipe','pipe'],env:{PATH:process.env.PATH}
+    });
+    const ready=await new Promise<string>((resolve,reject)=>{
+      child!.stdout!.once('data',v=>resolve(String(v)));
+      child!.once('error',reject);
+    });
+    assert.match(ready,/READY/);
+    const other=new DatabaseSync(f.file);
+    try {
+      other.exec('BEGIN IMMEDIATE');
+      child.stdin!.write('GO\n');
+      await new Promise(resolve=>setTimeout(resolve,80));
+      other.exec('COMMIT');
+    }finally{other.close();}
+    const exit=await new Promise<number|null>(resolve=>child!.once('exit',resolve));
+    assert.equal(exit,0);
+    let sendCount=0;
+    const denied=await s.dispatch({...base,attemptKey:'after_cross_process_stop'},async()=>{
+      sendCount++;return 'bad';
+    },Date.now());
+    assert.equal(denied.status,'blocked');assert.equal(sendCount,0);
+  }finally{if(child?.exitCode===null)child.kill();s.close();fs.rmSync(f.dir,{recursive:true,force:true});}
 });
