@@ -1,0 +1,199 @@
+diff --git a/src/agent/tools/send-dispatch-guard.ts b/src/agent/tools/send-dispatch-guard.ts
+new file mode 100644
+--- /dev/null
++++ b/src/agent/tools/send-dispatch-guard.ts
+@@ -0,0 +1,45 @@
++/** Offline candidate only. Not yet wired into application send paths. */
++export type Destination = Readonly<{ accountId: string; threadId: string; recipientId: string; threadType: 'dm' | 'group' }>;
++export type Authorization = Readonly<{ destination: Destination; consent: 'opt_in' | 'opt_out' | 'unknown'; humanTakeover: boolean | null; threadStop: boolean | null; globalStop: boolean | null; accountRunning: boolean | null; version: string }>;
++export type PolicyReader = (destination: Destination) => Promise<Authorization | null>;
++export type AttemptStore = { reserveOnce(key: string): Promise<boolean>; markSent(key: string): Promise<void> };
++export type DispatchIntent = Readonly<{ destination: Destination; idempotencyKey: string; expected: Destination }>;
++export type DispatchResult = { status: 'sent' } | { status: 'blocked'; reason: string } | { status: 'unknown'; reason: string };
++const saneId = (v: string): boolean => typeof v === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9_:@.\-]{0,127}$/.test(v);
++const same = (a: Destination, b: Destination): boolean => a.accountId === b.accountId && a.threadId === b.threadId && a.recipientId === b.recipientId && a.threadType === b.threadType;
++function allowed(intent: DispatchIntent, current: Authorization | null): string | null {
++  const d = intent.destination;
++  if (![d.accountId, d.threadId, d.recipientId, intent.idempotencyKey].every(saneId)) return 'invalid_identity';
++  if (d.threadType !== 'dm' && d.threadType !== 'group') return 'invalid_thread_type';
++  if (!same(d, intent.expected)) return 'wrong_recipient_or_type';
++  if (d.threadType === 'dm' && d.recipientId !== d.threadId) return 'dm_target_mismatch';
++  if (!current || !same(current.destination, d) || !saneId(current.version)) return 'unknown_policy_or_binding';
++  if (current.consent !== 'opt_in') return 'opt_out_or_unknown_consent';
++  if (current.humanTakeover !== false) return 'human_takeover_or_unknown';
++  if (current.globalStop !== false || current.threadStop !== false) return 'stopped_or_unknown';
++  if (current.accountRunning !== true) return 'not_running_or_unknown';
++  return null;
++}
++/** Requires atomic durable AttemptStore and an already audited transport closure.
++ * An ambiguous send permanently retains its reserved idempotency key.
++ */
++export async function dispatchWithLateGuard(intent: DispatchIntent, readPolicy: PolicyReader, store: AttemptStore, send: () => Promise<unknown>, beforeFinalCheck?: () => Promise<void>): Promise<DispatchResult> {
++  if (!saneId(intent.idempotencyKey)) return { status: 'blocked', reason: 'invalid_idempotency_key' };
++  let first: Authorization | null;
++  try { first = await readPolicy(intent.destination); } catch { return { status: 'blocked', reason: 'policy_read_failed' }; }
++  const initial = allowed(intent, first);
++  if (initial) return { status: 'blocked', reason: initial };
++  try {
++    if (!(await store.reserveOnce(intent.idempotencyKey))) return { status: 'blocked', reason: 'duplicate_or_uncertain_attempt' };
++  } catch { return { status: 'blocked', reason: 'idempotency_unavailable' }; }
++  try {
++    if (beforeFinalCheck) await beforeFinalCheck();
++    const fresh = await readPolicy(intent.destination);
++    const reason = allowed(intent, fresh);
++    if (reason) return { status: 'blocked', reason };
++    if (fresh!.version !== first!.version) return { status: 'blocked', reason: 'policy_changed_since_enqueue' };
++  } catch { return { status: 'blocked', reason: 'policy_recheck_failed' }; }
++  try { await send(); } catch { return { status: 'unknown', reason: 'delivery_outcome_uncertain_no_retry' }; }
++  try { await store.markSent(intent.idempotencyKey); } catch { return { status: 'unknown', reason: 'delivered_but_receipt_failed_no_retry' }; }
++  return { status: 'sent' };
++}
+diff --git a/src/agent/tools/send-dispatch-guard.test.ts b/src/agent/tools/send-dispatch-guard.test.ts
+new file mode 100644
+--- /dev/null
++++ b/src/agent/tools/send-dispatch-guard.test.ts
+@@ -0,0 +1,64 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { dispatchWithLateGuard } from './send-dispatch-guard.ts';
++import type { Authorization, Destination, DispatchIntent, AttemptStore } from './send-dispatch-guard.ts';
++const destination: Destination = { accountId: 'synthetic_1', threadId: 'user_1', recipientId: 'user_1', threadType: 'dm' };
++const intent = (key: string, d: Destination = destination): DispatchIntent => ({ idempotencyKey: key, expected: destination, destination: d });
++const ok = (): Authorization => ({ destination, consent: 'opt_in', humanTakeover: false, threadStop: false, globalStop: false, accountRunning: true, version: 'v1' });
++const store = () => {
++  const seen = new Set<string>(); const sent = new Set<string>();
++  const adapter: AttemptStore = {
++    reserveOnce: async key => { if (seen.has(key)) return false; seen.add(key); return true; },
++    markSent: async key => { sent.add(key); },
++  };
++  return { adapter, seen, sent };
++};
++test('one synthetic account: opt-in sends once', async () => {
++  let sends = 0; const s = store();
++  const r = await dispatchWithLateGuard(intent('msg_1'), async () => ok(), s.adapter, async () => { sends++; });
++  assert.equal(r.status, 'sent'); assert.equal(sends, 1); assert.equal(s.sent.size, 1);
++});
++test('unknown, opt-out, takeover, STOP and paused account fail closed', async () => {
++  const scenarios: Array<Authorization | null> = [null, { ...ok(), consent: 'unknown' }, { ...ok(), consent: 'opt_out' }, { ...ok(), humanTakeover: true }, { ...ok(), humanTakeover: null }, { ...ok(), globalStop: true }, { ...ok(), threadStop: true }, { ...ok(), accountRunning: false }];
++  for (const [i, policy] of scenarios.entries()) {
++    let sends = 0;
++    const r = await dispatchWithLateGuard(intent('blocked_'+i), async () => policy, store().adapter, async () => { sends++; });
++    assert.equal(r.status, 'blocked'); assert.equal(sends, 0);
++  }
++});
++test('wrong recipient, cross-thread group, malformed recipient and thread type', async () => {
++  const cases: Destination[] = [{ ...destination, recipientId: 'user_2' }, { ...destination, threadId: 'group_2', recipientId: 'group_2', threadType: 'group' }, { ...destination, threadId: '../bad' }, { ...destination, threadType: 'evil' as Destination['threadType'] }];
++  for (const [i, d] of cases.entries()) {
++    let sends = 0; const r = await dispatchWithLateGuard(intent('bad_'+i, d), async () => ok(), store().adapter, async () => { sends++; });
++    assert.equal(r.status, 'blocked'); assert.equal(sends, 0);
++  }
++});
++test('queued before opt-out blocks after revocation', async () => {
++  let p = ok(); let sends = 0;
++  const r = await dispatchWithLateGuard(intent('queue_1'), async () => p, store().adapter, async () => { sends++; }, async () => { p = { ...p, consent: 'opt_out', version: 'v2' }; });
++  assert.equal(r.status, 'blocked'); assert.equal(sends, 0);
++});
++test('mid-multipart STOP blocks second part', async () => {
++  let p = ok(); let sends = 0; const s = store();
++  assert.equal((await dispatchWithLateGuard(intent('part_1'), async () => p, s.adapter, async () => { sends++; p = { ...p, threadStop: true, version: 'v2' }; })).status, 'sent');
++  assert.equal((await dispatchWithLateGuard(intent('part_2'), async () => p, s.adapter, async () => { sends++; })).status, 'blocked'); assert.equal(sends, 1);
++});
++test('ambiguous send and restart with shared reservation never retry', async () => {
++  const s = store(); let sends = 0;
++  const run = () => dispatchWithLateGuard(intent('retry_1'), async () => ok(), s.adapter, async () => { sends++; throw Error('ambiguous'); });
++  assert.equal((await run()).status, 'unknown'); assert.equal((await run()).status, 'blocked');
++  assert.equal((await dispatchWithLateGuard(intent('retry_1'), async () => ok(), s.adapter, async () => { sends++; })).status, 'blocked'); assert.equal(sends, 1);
++});
++test('policy epoch change while queued blocks', async () => {
++  let p = ok(); let sends = 0;
++  const r = await dispatchWithLateGuard(intent('epoch_1'), async () => p, store().adapter, async () => { sends++; }, async () => { p = { ...p, version: 'v2' }; });
++  assert.equal(r.status, 'blocked'); assert.equal(sends, 0);
++});
++test('failed initial/final policy read and unavailable idempotency fail closed', async () => {
++  let sends = 0; const fail = async (): Promise<Authorization> => { throw Error('offline'); };
++  assert.equal((await dispatchWithLateGuard(intent('read_1'), fail, store().adapter, async () => { sends++; })).status, 'blocked');
++  let reads = 0;
++  assert.equal((await dispatchWithLateGuard(intent('read_2'), async () => { if (++reads > 1) throw Error('offline'); return ok(); }, store().adapter, async () => { sends++; })).status, 'blocked');
++  const broken: AttemptStore = { reserveOnce: async () => { throw Error('db'); }, markSent: async () => {} };
++  assert.equal((await dispatchWithLateGuard(intent('db_1'), async () => ok(), broken, async () => { sends++; })).status, 'blocked'); assert.equal(sends, 0);
++});
+diff --git a/src/agent/tools/durable-attempt-store.ts b/src/agent/tools/durable-attempt-store.ts
+new file mode 100644
+--- /dev/null
++++ b/src/agent/tools/durable-attempt-store.ts
+@@ -0,0 +1,17 @@
++import { DatabaseSync } from 'node:sqlite';
++import type { AttemptStore } from './send-dispatch-guard.js';
++/** One SQLite file per isolated sandbox. Reserve is a transactional UNIQUE insert. */
++export function openDurableAttemptStore(filename: string): AttemptStore & { close(): void; status(key: string): string | undefined } {
++  if (!filename || filename === ':memory:') throw Error('durable_file_required');
++  const db = new DatabaseSync(filename);
++  db.exec("PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS outbound_attempts (attempt_key TEXT PRIMARY KEY, state TEXT NOT NULL CHECK(state IN ('reserved','sent')), created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)");
++  const reserve = db.prepare("INSERT OR IGNORE INTO outbound_attempts(attempt_key,state) VALUES(?, 'reserved')");
++  const mark = db.prepare("UPDATE outbound_attempts SET state='sent' WHERE attempt_key=? AND state='reserved'");
++  const read = db.prepare('SELECT state FROM outbound_attempts WHERE attempt_key=?');
++  return {
++    reserveOnce: async (key: string) => { if (!key) throw Error('invalid_key'); return reserve.run(key).changes === 1; },
++    markSent: async (key: string) => { if (mark.run(key).changes !== 1) throw Error('missing_or_duplicate_attempt'); },
++    status: (key: string) => (read.get(key) as {state:string}|undefined)?.state,
++    close: () => db.close(),
++  };
++}
+diff --git a/src/agent/tools/durable-attempt-store.test.ts b/src/agent/tools/durable-attempt-store.test.ts
+new file mode 100644
+--- /dev/null
++++ b/src/agent/tools/durable-attempt-store.test.ts
+@@ -0,0 +1,11 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import fs from 'node:fs';
++import os from 'node:os';
++import path from 'node:path';
++import { spawnSync } from 'node:child_process';
++import { openDurableAttemptStore } from './durable-attempt-store.js';
++function fixture() { const dir=fs.mkdtempSync(path.join(os.tmpdir(),'poc02-')); return {dir,db:path.join(dir,'attempts.db')}; }
++test('transactional same key reserve only once',async()=>{const f=fixture();try{const s=openDurableAttemptStore(f.db);assert.equal(await s.reserveOnce('a1:dm:u1:part1'),true);assert.equal(await s.reserveOnce('a1:dm:u1:part1'),false);await s.markSent('a1:dm:u1:part1');assert.equal(s.status('a1:dm:u1:part1'),'sent');s.close();}finally{fs.rmSync(f.dir,{recursive:true,force:true})}});
++test('actual Node process restart keeps uncertain reservation',async()=>{const f=fixture();try{const s=openDurableAttemptStore(f.db);assert.equal(await s.reserveOnce('a1:dm:u1:file1'),true);s.close();const child=spawnSync(process.execPath,['--experimental-strip-types','--input-type=module','-e',"import {openDurableAttemptStore} from "+JSON.stringify(new URL('./durable-attempt-store.ts',import.meta.url).href)+"; const s=openDurableAttemptStore(process.argv[1]);const result=await s.reserveOnce('a1:dm:u1:file1');s.close();process.stdout.write(String(result));",f.db],{encoding:'utf8',env:{PATH:process.env.PATH}});assert.equal(child.status,0,child.stderr);assert.equal(child.stdout,'false');}finally{fs.rmSync(f.dir,{recursive:true,force:true})}});
++test('different segment key distinct, missing receipt rejected',async()=>{const f=fixture();try{const s=openDurableAttemptStore(f.db);assert.equal(await s.reserveOnce('a1:dm:u1:p1'),true);assert.equal(await s.reserveOnce('a1:dm:u1:p2'),true);assert.equal(s.status('a1:dm:u1:p2'),'reserved');await assert.rejects(s.markSent('a1:dm:u1:never'));s.close();}finally{fs.rmSync(f.dir,{recursive:true,force:true})}});
+diff --git a/src/agent/tools/outbound-guard-runtime.ts b/src/agent/tools/outbound-guard-runtime.ts
+new file mode 100644
+--- /dev/null
++++ b/src/agent/tools/outbound-guard-runtime.ts
+@@ -0,0 +1,37 @@
++import { dispatchWithLateGuard, type PolicyReader, type AttemptStore, type Destination } from './send-dispatch-guard.js';
++
++/** OFFLINE POC: nothing registers this in production; missing binding denies every send.
++ * Integration owner must replace this per-process adapter with A2-approved durable
++ * policy/consent snapshots, including a shared STOP fence.
++ */
++let runtime: { readPolicy: PolicyReader; attempts: AttemptStore } | null = null;
++export function setOfflineOutboundGuardRuntime(value: { readPolicy: PolicyReader; attempts: AttemptStore } | null): void {
++  runtime = value;
++}
++export class OutboundGuardDenied extends Error {
++  constructor(readonly reason: string) { super('outbound_guard_' + reason); }
++}
++export async function sendWithOutboundGuard(input: {
++  threadKey: string;
++  threadId: string;
++  threadType: number;
++  stableKey: string | undefined;
++  send: () => Promise<unknown>;
++}): Promise<unknown> {
++  if (!runtime) throw new OutboundGuardDenied('missing_authoritative_policy');
++  const pos = input.threadKey.indexOf(':');
++  const accountId = pos > 0 ? input.threadKey.slice(0,pos) : '';
++  const binding = pos > 0 ? input.threadKey.slice(pos+1) : '';
++  if (!accountId || binding !== input.threadId || !input.stableKey) throw new OutboundGuardDenied('missing_or_mismatched_binding');
++  const kind = input.threadType === 0 ? 'dm' : input.threadType === 1 ? 'group' : null;
++  if (!kind) throw new OutboundGuardDenied('unknown_thread_type');
++  const destination: Destination = { accountId, threadId: input.threadId, recipientId: input.threadId, threadType: kind };
++  let value: unknown;
++  const result = await dispatchWithLateGuard({
++    destination,
++    expected: destination,
++    idempotencyKey: input.stableKey,
++  }, runtime.readPolicy, runtime.attempts, async () => { value = await input.send(); });
++  if (result.status !== 'sent') throw new OutboundGuardDenied(result.reason);
++  return value;
++}
