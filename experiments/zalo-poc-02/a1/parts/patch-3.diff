@@ -75,8 +75,8 @@ new file mode 100644
 +});
 +test('mid-multipart STOP blocks second part', async () => {
 +  let p = ok(); let sends = 0; const s = store();
-+  assert.equal((await dispatchWithLateGuard(intent('part_1'), async () => p, s.adapter, async () => { sends++; p = { ...p, threadStop: true, version: 'v2' }; })).status, 'sent');
-+  assert.equal((await dispatchWithLateGuard(intent('part_2'), async () => p, s.adapter, async () => { sends++; })).status, 'blocked'); assert.equal(sends, 1);
++  assert.equal((await dispatchWithLateGuard(intent('part_1'), async () => p, s.adapter, async () => { sends++; p = { ...p, threadStop: true, version: 'v2' }; })).status, 'blocked');
++  assert.equal((await dispatchWithLateGuard(intent('part_2'), async () => p, s.adapter, async () => { sends++; })).status, 'blocked'); assert.equal(sends, 0);
 +});
 +test('legacy ambiguous send never attempts transport', async () => {
 +  const s = store(); let sends = 0;
@@ -182,7 +182,7 @@ new file mode 100644
 +import {openSyntheticAtomicAdmission} from './atomic-send-admission.js';
 +import {setSyntheticAtomicOutboundRuntime,sendWithOutboundGuard,OutboundGuardDenied} from './outbound-guard-runtime.js';
 +const p=()=>({accountId:'synthetic_1',threadId:'user_1',senderId:'user_1',threadType:'dm' as const,
-+verified:true,respond:true,retain:true,outbound:true,optedOut:false,takeover:false,stopped:false,running:true,revision:1,expiresAtMs:1890000000000});
++verified:true,respond:true,retain:true,passiveGroup:false,outbound:true,optedOut:false,takeover:false,stopped:false,running:true,revision:1,expiresAtMs:1890000000000});
 +const input=(key:string)=>({threadKey:'synthetic_1:user_1',threadId:'user_1',threadType:0,stableKey:key,send:async()=>({fake:true})});
 +test('real wrapper invokes atomic admission and refuses duplicate',async()=>{const d=fs.mkdtempSync(path.join(os.tmpdir(),'atomic-adapter-'));const s=openSyntheticAtomicAdmission(path.join(d,'test.db'));try{s.mutatePolicy(p());setSyntheticAtomicOutboundRuntime(s);assert.deepEqual(await sendWithOutboundGuard(input('k1')),{fake:true});await assert.rejects(sendWithOutboundGuard(input('k1')),OutboundGuardDenied);}finally{setSyntheticAtomicOutboundRuntime(null);s.close();fs.rmSync(d,{recursive:true,force:true});}});
 +test('STOP microtask race blocks wrapper transport',async()=>{const d=fs.mkdtempSync(path.join(os.tmpdir(),'atomic-adapter-'));const s=openSyntheticAtomicAdmission(path.join(d,'test.db'));let calls=0;try{s.mutatePolicy(p());setSyntheticAtomicOutboundRuntime(s);await Promise.resolve().then(()=>s.mutatePolicy({...p(),revision:2,stopped:true}));await assert.rejects(sendWithOutboundGuard({...input('k2'),send:async()=>{calls++;}}),OutboundGuardDenied);assert.equal(calls,0);}finally{setSyntheticAtomicOutboundRuntime(null);s.close();fs.rmSync(d,{recursive:true,force:true});}});
@@ -191,7 +191,7 @@ diff --git a/src/agent/tools/atomic-send-admission.ts b/src/agent/tools/atomic-s
 new file mode 100644
 --- /dev/null
 +++ b/src/agent/tools/atomic-send-admission.ts
-@@ -0,0 +1,108 @@
+@@ -0,0 +1,135 @@
 +import { DatabaseSync } from 'node:sqlite';
 +
 +/** Offline synthetic policy authority, not connected to Zalo or real consent. */
@@ -201,10 +201,11 @@ new file mode 100644
 +}>;
 +export type PolicyMutation = Readonly<{
 +  accountId: string; threadId: string; senderId: string; threadType: 'dm' | 'group';
-+  verified: boolean; respond: boolean; retain: boolean; outbound: boolean;
++  verified: boolean; respond: boolean; retain: boolean; passiveGroup: boolean; outbound: boolean;
 +  optedOut: boolean; takeover: boolean; stopped: boolean; running: boolean;
 +  revision: number; expiresAtMs: number;
 +}>;
++export type PolicySnapshot = Readonly<PolicyMutation & {globalStopped:boolean;accountStopped:boolean;observedAtMs:number}>;
 +export type AdmissionOutcome<T> =
 +  | { status: 'blocked'; reason: string }
 +  | { status: 'unknown'; reason: string }
@@ -225,93 +226,119 @@ new file mode 100644
 +CREATE TABLE IF NOT EXISTS synthetic_outbound_policy (
 + account_id TEXT NOT NULL, thread_id TEXT NOT NULL, sender_id TEXT NOT NULL,
 + thread_type TEXT NOT NULL CHECK(thread_type IN ('dm','group')),
-+ verified INTEGER NOT NULL, can_respond INTEGER NOT NULL, can_retain INTEGER NOT NULL,
++ verified INTEGER NOT NULL, can_respond INTEGER NOT NULL, can_retain INTEGER NOT NULL, passive_group INTEGER NOT NULL,
 + can_outbound INTEGER NOT NULL, opted_out INTEGER NOT NULL, takeover INTEGER NOT NULL,
 + stopped INTEGER NOT NULL, running INTEGER NOT NULL, revision INTEGER NOT NULL,
 + expires_at_ms INTEGER NOT NULL,
 + PRIMARY KEY(account_id,thread_id,sender_id,thread_type));
++CREATE TABLE IF NOT EXISTS synthetic_outbound_stops (scope TEXT NOT NULL,scope_id TEXT NOT NULL,stopped INTEGER NOT NULL,revision INTEGER NOT NULL,PRIMARY KEY(scope,scope_id));
 +CREATE TABLE IF NOT EXISTS synthetic_outbound_attempts (
-+ key TEXT PRIMARY KEY, state TEXT NOT NULL CHECK(state IN ('admitted','sent','unknown')),
++ key TEXT PRIMARY KEY, state TEXT NOT NULL CHECK(state IN ('reserved','admitted','sent','unknown')),
 + account_id TEXT NOT NULL, thread_id TEXT NOT NULL, revision INTEGER NOT NULL);
 +`);
++  const getStop = db.prepare("SELECT stopped FROM synthetic_outbound_stops WHERE scope=? AND scope_id=?");
++  const stopRev=db.prepare("SELECT revision FROM synthetic_outbound_stops WHERE scope=? AND scope_id=?");
++  const putStop=db.prepare("INSERT INTO synthetic_outbound_stops VALUES(?,?,?,?) ON CONFLICT(scope,scope_id) DO UPDATE SET stopped=excluded.stopped,revision=excluded.revision");
 +  const getPolicy = db.prepare(`SELECT * FROM synthetic_outbound_policy
 +    WHERE account_id=? AND thread_id=? AND sender_id=? AND thread_type=?`);
 +  const current = db.prepare(`SELECT revision FROM synthetic_outbound_policy
 +    WHERE account_id=? AND thread_id=? AND sender_id=? AND thread_type=?`);
-+  const upsert = db.prepare(`INSERT INTO synthetic_outbound_policy VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
++  const upsert = db.prepare(`INSERT INTO synthetic_outbound_policy VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 +    ON CONFLICT(account_id,thread_id,sender_id,thread_type) DO UPDATE SET
 +    verified=excluded.verified, can_respond=excluded.can_respond,
-+    can_retain=excluded.can_retain, can_outbound=excluded.can_outbound,
++    can_retain=excluded.can_retain, passive_group=excluded.passive_group, can_outbound=excluded.can_outbound,
 +    opted_out=excluded.opted_out, takeover=excluded.takeover, stopped=excluded.stopped,
 +    running=excluded.running, revision=excluded.revision, expires_at_ms=excluded.expires_at_ms`);
 +  const reserve = db.prepare(`INSERT OR IGNORE INTO synthetic_outbound_attempts
-+    (key,state,account_id,thread_id,revision) VALUES(?,'admitted',?,?,?)`);
++    (key,state,account_id,thread_id,revision) VALUES(?,'reserved',?,?,0)`);
++  const admit=db.prepare("UPDATE synthetic_outbound_attempts SET state='admitted',revision=? WHERE key=? AND state='reserved'");
 +  const sent = db.prepare(`UPDATE synthetic_outbound_attempts SET state='sent' WHERE key=? AND state='admitted'`);
 +  const unknown = db.prepare(`UPDATE synthetic_outbound_attempts SET state='unknown' WHERE key=? AND state='admitted'`);
 +  const state = db.prepare(`SELECT state FROM synthetic_outbound_attempts WHERE key=?`);
 +
 +  /** STOP/opt-out/takeover writer is serialized against dispatch admission. */
 +  function mutatePolicy(p: PolicyMutation): boolean {
-+    if (!valid(p)) throw Error('invalid_policy_mutation');
++    if (!valid(p) || ['verified','respond','retain','passiveGroup','outbound','optedOut','takeover','stopped','running'].some(k=>typeof (p as unknown as Record<string,unknown>)[k]!=='boolean')) throw Error('invalid_policy_mutation');
 +    db.exec('BEGIN IMMEDIATE');
 +    try {
 +      const row = current.get(p.accountId,p.threadId,p.senderId,p.threadType) as {revision:number}|undefined;
 +      if (row && p.revision <= row.revision) { db.exec('ROLLBACK'); return false; }
 +      upsert.run(p.accountId,p.threadId,p.senderId,p.threadType,
-+        Number(p.verified),Number(p.respond),Number(p.retain),Number(p.outbound),
++        Number(p.verified),Number(p.respond),Number(p.retain),Number(p.passiveGroup),Number(p.outbound),
 +        Number(p.optedOut),Number(p.takeover),Number(p.stopped),Number(p.running),
 +        p.revision,p.expiresAtMs);
 +      db.exec('COMMIT'); return true;
 +    } catch(e) {db.exec('ROLLBACK');throw e;}
 +  }
-+  /** Linearizes admission, not remote completion. No await while holding lock.
-+   * Transport MUST begin its side effect synchronously on invocation; async
-+   * deferred transport needs its own admission boundary at actual dispatch.
-+   */
-+  async function dispatch<T>(b: SendBinding, transport: () => Promise<T>, nowMs: number): Promise<AdmissionOutcome<T>> {
-+    if (![b.accountId,b.threadId,b.senderId,b.recipientId,b.attemptKey].every(id) ||
-+      (b.threadType !== 'dm' && b.threadType !== 'group') ||
-+      (b.threadType === 'dm' && (b.recipientId !== b.threadId || b.senderId !== b.threadId)) ||
-+      b.recipientId !== b.threadId || !Number.isSafeInteger(nowMs)) {
-+      return { status: 'blocked', reason: 'invalid_destination_or_attempt' };
-+    }
-+    let call: Promise<T>;
-+    db.exec('BEGIN IMMEDIATE');
-+    try {
-+      const p = getPolicy.get(b.accountId,b.threadId,b.senderId,b.threadType) as Record<string,number>|undefined;
-+      const reason = !p ? 'unknown_policy' : !p.verified ? 'unverified_policy'
-+        : !p.can_outbound ? 'no_outbound_consent' : p.opted_out ? 'opt_out'
-+        : p.takeover ? 'human_takeover' : p.stopped ? 'stop' : !p.running ? 'account_stopped'
-+        : p.expires_at_ms <= nowMs ? 'expired_policy' : null;
-+      if (reason) { db.exec('ROLLBACK'); return {status:'blocked',reason}; }
-+      if (reserve.run(b.attemptKey,b.accountId,b.threadId,p!.revision).changes !== 1) {
-+        db.exec('ROLLBACK');return {status:'blocked',reason:'duplicate_or_uncertain_attempt'};
-+      }
-+      // Start transport BEFORE releasing the policy writer's SQLite lock.
-+      try { call = Promise.resolve(transport()); }
-+      catch { unknown.run(b.attemptKey);db.exec('COMMIT');return {status:'unknown',reason:'transport_sync_throw'}; }
-+      db.exec('COMMIT');
-+    } catch { try {db.exec('ROLLBACK');} catch{}; return {status:'blocked',reason:'atomic_admission_unavailable'}; }
-+    try {
-+      const value = await call!;
-+      try {sent.run(b.attemptKey);} catch {return {status:'unknown',reason:'receipt_failure_no_retry'};}
-+      return {status:'sent',value};
-+    } catch {try {unknown.run(b.attemptKey);} catch{};return {status:'unknown',reason:'ambiguous_transport_no_retry'};}
++  function readSnapshot(identity:Pick<SendBinding,'accountId'|'threadId'|'senderId'|'threadType'>,nowMs=Date.now()):PolicySnapshot|null{
++    if (![identity.accountId,identity.threadId,identity.senderId].every(id)) return null;
++    const q=getPolicy.get(identity.accountId,identity.threadId,identity.senderId,identity.threadType) as Record<string,number>|undefined;
++    if(!q||!Number.isSafeInteger(nowMs))return null;
++    return Object.freeze({...identity,verified:Boolean(q.verified),respond:Boolean(q.can_respond),retain:Boolean(q.can_retain),
++      passiveGroup:Boolean(q.passive_group),outbound:Boolean(q.can_outbound),optedOut:Boolean(q.opted_out),
++      takeover:Boolean(q.takeover),stopped:Boolean(q.stopped),running:Boolean(q.running),
++      revision:q.revision,expiresAtMs:q.expires_at_ms,observedAtMs:nowMs,
++      globalStopped:Boolean((getStop.get('global','*') as {stopped:number}|undefined)?.stopped),
++      accountStopped:Boolean((getStop.get('account',identity.accountId) as {stopped:number}|undefined)?.stopped)});
 +  }
-+  return {mutatePolicy,dispatch,status:(key:string)=>(state.get(key) as {state:string}|undefined)?.state,close:()=>db.close()};
++  function mutateStop(scope:'global'|'account',accountId:string,stopped:boolean,revision:number):boolean{
++    const scopeId=scope==='global'?'*':accountId;
++    if(!['global','account'].includes(scope)||(scope==='account'&&!id(accountId))||typeof stopped!=='boolean'||!Number.isSafeInteger(revision)||revision<1)throw Error('invalid_stop');
++    db.exec('BEGIN IMMEDIATE');
++    try{const old=stopRev.get(scope,scopeId) as {revision:number}|undefined;
++      if(old&&revision<=old.revision){db.exec('ROLLBACK');return false}
++      putStop.run(scope,scopeId,Number(stopped),revision);db.exec('COMMIT');return true;
++    }catch(e){try{db.exec('ROLLBACK')}catch{};throw e}
++  }
++  /** Reservation is committed BEFORE transport can begin, surviving crash/commit failure.
++   * Same SQLite writer lock fences STOP mutation and synchronous transport initiation.
++   * Already admitted in-flight delivery cannot be retracted; deferred network adapters must
++   * perform actual initiation within this fence, not from a later microtask.
++   */
++  async function dispatch<T>(b:SendBinding,transport:()=>Promise<T>,nowMs:number):Promise<AdmissionOutcome<T>>{
++    if(![b.accountId,b.threadId,b.senderId,b.recipientId,b.attemptKey].every(id)||
++      (b.threadType!=='dm'&&b.threadType!=='group')||
++      (b.threadType==='dm'&&b.senderId!==b.threadId)||b.recipientId!==b.threadId||
++      !Number.isSafeInteger(nowMs))return {status:'blocked',reason:'invalid_binding'};
++    try {
++      db.exec('BEGIN IMMEDIATE');
++      const reserved=reserve.run(b.attemptKey,b.accountId,b.threadId).changes===1;
++      db.exec('COMMIT');
++      if(!reserved)return {status:'blocked',reason:'duplicate_or_uncertain_attempt'};
++    }catch {try{db.exec('ROLLBACK')}catch{};return {status:'blocked',reason:'reservation_not_durable'}}
++    let call:Promise<T>|undefined,reason:string|undefined,began=false;
++    try {
++      db.exec('BEGIN IMMEDIATE');
++      const q=readSnapshot(b,nowMs);
++      reason=!q?'unknown_policy':!q.verified?'unverified_policy':!q.outbound?'no_outbound':
++        q.optedOut?'opted_out':q.takeover?'takeover':q.stopped||q.globalStopped||q.accountStopped?'stop':
++        !q.running?'not_running':q.expiresAtMs<=nowMs?'expired':undefined;
++      if(!reason){
++        if(admit.run(q!.revision,b.attemptKey).changes!==1)reason='not_reserved';
++        else {try{began=true;call=Promise.resolve(transport())}catch{reason='transport_sync_throw'}}
++      }
++      db.exec('COMMIT');
++    }catch{try{db.exec('ROLLBACK')}catch{};return {status:'unknown',reason:'admission_commit_uncertain_no_retry'}}
++    if(reason)return began?{status:'unknown',reason}:{status:'blocked',reason};
++    if(!call)return {status:'unknown',reason:'not_started'};
++    try {const value=await call;try{if(sent.run(b.attemptKey).changes!==1)return {status:'unknown',reason:'receipt_missing'}}catch{return {status:'unknown',reason:'receipt_failed'}}return {status:'sent',value}}
++    catch{try{unknown.run(b.attemptKey)}catch{};return {status:'unknown',reason:'ambiguous_delivery_no_retry'}}
++  }
++  return {mutatePolicy,mutateStop,readSnapshot,readOnly:Object.freeze({readSnapshot}),dispatch,
++    status:(k:string)=>(state.get(k) as {state:string}|undefined)?.state,close:()=>db.close()};
 +}
 diff --git a/src/agent/tools/atomic-send-admission.test.ts b/src/agent/tools/atomic-send-admission.test.ts
 new file mode 100644
 --- /dev/null
 +++ b/src/agent/tools/atomic-send-admission.test.ts
-@@ -0,0 +1,14 @@
+@@ -0,0 +1,63 @@
 +import test from 'node:test';
 +import assert from 'node:assert/strict';
 +import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
 +import {spawnSync} from 'node:child_process';
 +import {openSyntheticAtomicAdmission} from './atomic-send-admission.js';
 +const base={accountId:'synthetic_1',threadId:'user_1',senderId:'user_1',recipientId:'user_1',threadType:'dm' as const,attemptKey:'msg_1:part_1'};
-+const p=(revision=1)=>({accountId:base.accountId,threadId:base.threadId,senderId:base.senderId,threadType:base.threadType,verified:true,respond:true,retain:false,outbound:true,optedOut:false,takeover:false,stopped:false,running:true,revision,expiresAtMs:1890000000000});
++const p=(revision=1)=>({accountId:base.accountId,threadId:base.threadId,senderId:base.senderId,threadType:base.threadType,verified:true,respond:true,retain:false,passiveGroup:false,outbound:true,optedOut:false,takeover:false,stopped:false,running:true,revision,expiresAtMs:1890000000000});
 +function fixture(){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'poc02atomic-'));return {dir,file:path.join(dir,'guard.db')}}
 +test('atomic STOP before admission prevents send after microtask',async()=>{const f=fixture();const s=openSyntheticAtomicAdmission(f.file);try{assert.equal(s.mutatePolicy(p()),true);let fake=0;let stopped=false;await Promise.resolve().then(()=>{s.mutatePolicy({...p(2),stopped:true});stopped=true});const r=await s.dispatch(base,async()=>{if(stopped)fake++;return 'ok'},Date.now());assert.equal(r.status,'blocked');assert.equal(fake,0);}finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true})}});
 +test('already admitted send is in-flight when STOP linearizes later',async()=>{const f=fixture();const s=openSyntheticAtomicAdmission(f.file);try{s.mutatePolicy(p());let started=0;let done:(x:string)=>void=()=>{};const waiting=new Promise<string>(resolve=>{done=resolve});const operation=s.dispatch(base,()=>{started++;return waiting},Date.now());s.mutatePolicy({...p(2),stopped:true});done('ok');const r=await operation;assert.equal(started,1);assert.equal(r.status,'sent');const blocked=await s.dispatch({...base,attemptKey:'msg_1:part_2'},async()=>{started++;return 'bad'},Date.now());assert.equal(blocked.status,'blocked');assert.equal(started,1);}finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true})}});
@@ -319,3 +346,52 @@ new file mode 100644
 +test('actual process restart durable idempotency and no retry after unknown',async()=>{const f=fixture();const s=openSyntheticAtomicAdmission(f.file);try{s.mutatePolicy(p());assert.equal((await s.dispatch(base,async()=>{throw Error('ambiguous')},Date.now())).status,'unknown');s.close();const source=new URL('./atomic-send-admission.js',import.meta.url).href;const js='import {openSyntheticAtomicAdmission} from '+JSON.stringify(source)+';const s=openSyntheticAtomicAdmission(process.argv[1]);const result=await s.dispatch('+JSON.stringify(base)+',async()=>{throw Error("duplicate transport invoked")},Date.now());process.stdout.write(result.status+":"+result.reason);s.close()';const child=spawnSync(process.execPath,['--input-type=module','-e',js,f.file],{encoding:'utf8',env:{PATH:process.env.PATH}});assert.equal(child.status,0,child.stderr);assert.equal(child.stdout,'blocked:duplicate_or_uncertain_attempt')}finally{fs.rmSync(f.dir,{recursive:true,force:true})}});
 +test('policy revision monotonic and group/type binding',async()=>{const f=fixture();const s=openSyntheticAtomicAdmission(f.file);try{s.mutatePolicy(p());assert.equal(s.mutatePolicy(p()),false);assert.throws(()=>s.mutatePolicy({...p(0),stopped:true}),/invalid_policy_mutation/);let sends=0;const bad=await s.dispatch({...base,threadType:'group' as const,recipientId:'group_1'},async()=>{sends++;return 'x'},Date.now());assert.equal(bad.status,'blocked');assert.equal(sends,0);}finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true})}});
 +test('concurrent updates and sends linearize by transaction in one process',async()=>{const f=fixture();const s=openSyntheticAtomicAdmission(f.file);try{s.mutatePolicy(p());const events:string[]=[];let calls=0;const send=s.dispatch(base,async()=>{events.push('admitted');calls++;return 'ok'},Date.now());const stop=Promise.resolve().then(()=>{s.mutatePolicy({...p(2),stopped:true});events.push('stopped')});await Promise.all([send,stop]);assert.deepEqual(events,['admitted','stopped']);assert.equal(calls,1);assert.equal((await s.dispatch({...base,attemptKey:'next'},async()=>{calls++;return 'wrong'},Date.now())).status,'blocked');assert.equal(calls,1);}finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true})}});
++
++test('scoped read-only snapshot exposes independent passive/retain/outbound and STOP',async()=>{
++  const f=fixture(),s=openSyntheticAtomicAdmission(f.file);
++  try {
++    s.mutatePolicy({...p(),respond:false,retain:true,passiveGroup:true,outbound:false});
++    const read=s.readOnly.readSnapshot({accountId:base.accountId,threadId:base.threadId,senderId:base.senderId,threadType:'dm'},Date.now());
++    assert.ok(read);assert.equal(read!.respond,false);assert.equal(read!.retain,true);
++    assert.equal(read!.passiveGroup,true);assert.equal(read!.outbound,false);assert.equal(Object.isFrozen(read),true);
++    assert.equal(s.readOnly.readSnapshot({accountId:base.accountId,threadId:'other',senderId:base.senderId,threadType:'group'}),null);
++  } finally {s.close();fs.rmSync(f.dir,{recursive:true,force:true});}
++});
++test('global STOP and account STOP share policy admission fence',async()=>{
++  for(const scope of ['global','account'] as const){
++    const f=fixture(),s=openSyntheticAtomicAdmission(f.file);let called=0;
++    try {
++      s.mutatePolicy(p());
++      assert.equal(s.mutateStop(scope,'synthetic_1',true,1),true);
++      assert.equal(s.mutateStop(scope,'synthetic_1',false,1),false);
++      const snap=s.readOnly.readSnapshot(base)!;
++      assert.equal(scope==='global'?snap.globalStopped:snap.accountStopped,true);
++      const r=await s.dispatch({...base,attemptKey:'stop_'+scope},async()=>{called++;return 'bad'},Date.now());
++      assert.equal(r.status,'blocked');assert.equal(called,0);
++      assert.equal(s.mutateStop(scope,'synthetic_1',false,2),true);
++      assert.equal((await s.dispatch({...base,attemptKey:'resume_'+scope},async()=>{called++;return 'ok'},Date.now())).status,'sent');
++      assert.equal(called,1);
++    }finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true});}
++  }
++});
++test('reservation remains durable if transport throws synchronously, no resend after reopen',async()=>{
++  const f=fixture(),s=openSyntheticAtomicAdmission(f.file);let calls=0;
++  try {
++    s.mutatePolicy(p());
++    const r=await s.dispatch({...base,attemptKey:'crash_key'},()=>{calls++;throw Error('synchronous start failed')},Date.now());
++    assert.equal(r.status,'unknown');assert.equal(calls,1);
++    s.close();
++    const reopened=openSyntheticAtomicAdmission(f.file);
++    try {
++      const retry=await reopened.dispatch({...base,attemptKey:'crash_key'},async()=>{calls++;return 'unsafe'},Date.now());
++      assert.equal(retry.status,'blocked');assert.equal(calls,1);
++    }finally{reopened.close();}
++  }finally{fs.rmSync(f.dir,{recursive:true,force:true});}
++});
++test('mutation rejects non-boolean consent scopes instead of fabricating opt-in',async()=>{
++  const f=fixture(),s=openSyntheticAtomicAdmission(f.file);
++  try {
++    assert.throws(()=>s.mutatePolicy({...p(),passiveGroup:undefined as unknown as boolean}),/invalid_policy_mutation/);
++    assert.equal(s.readOnly.readSnapshot(base),null);
++  }finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true});}
++});
