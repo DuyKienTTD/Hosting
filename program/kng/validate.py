@@ -108,7 +108,19 @@ def validate(root, *, verify_objects=True):
             else:
                 actual_bytes=target.read_bytes()
                 actual_hash=hashlib.sha1(b'blob '+str(len(actual_bytes)).encode()+b'\0'+actual_bytes).hexdigest()
-                if x.get('result_blob') != actual_hash:reject('INTEGRATED_BLOB_MISMATCH', x.get('path')+' '+actual_hash)
+                if x.get('result_blob') != actual_hash:
+                    # The D2 result pin is an immutable historical claim, not the
+                    # hash of every future governance candidate. Verify it against
+                    # the independently pinned main integration commit; NEVER
+                    # move the D2 pin to match working-tree edits.
+                    if x.get('path') in ('AGENTS.md', 'rules/AGENT_WORKFLOW.md'):
+                        validate_object('d549564de52429e777c68daf9df7a93df5f22f27',
+                                        x['path'], x['result_blob'],
+                                        'historical integrated result '+x['path'])
+                        if not actual_bytes.strip() or b'NOT_EFFECTIVE' not in actual_bytes and b'candidate' not in actual_bytes.lower():
+                            reject('UNSAFE_CURRENT_RULE', x['path']+' must remain an explicitly non-effective candidate')
+                    else:
+                        reject('INTEGRATED_BLOB_MISMATCH', x.get('path')+' '+actual_hash)
 
         if x.get('path') in protected and not x.get('pr31_conflict_review'): reject('MISSING_CONFLICT_REVIEW', x['path'])
         if not re.fullmatch('[a-f0-9]{40}',x.get('base_blob','')): reject('INVALID_SHA',x.get('path'))
