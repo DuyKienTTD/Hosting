@@ -1,5 +1,5 @@
 schema_version: 1
-updated_at: 2026-11-23
+updated_at: 2026-11-24
 repository_visibility: public
 default_language: vi
 
@@ -16,6 +16,41 @@ entrypoints:
   change_history: CHANGELOG.md
 
 documents:
+  - id: zalo-poc-02-s0-readiness-2026-11-24
+    path: reports/2026-11-24-zalo-poc-02-s0-readiness.md
+    type: report
+    status: approved-gated-s0-prepared
+    authoritative_for: zalo-poc02-approval-evidence-and-s0-readiness
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: zalo-poc-02-a1-send-guard-2026-11-24
+    path: tasks/2026-11-24-zalo-poc-02-a1-send-guard.md
+    type: task
+    status: prepared-owner-forward
+    authoritative_for: zalo-poc02-a1-synthetic-send-guard-workorder
+    updated_at: 2026-11-24
+    dispatch_eligible: false
+    sensitivity: public
+
+  - id: zalo-poc-02-a2-data-privacy-2026-11-24
+    path: tasks/2026-11-24-zalo-poc-02-a2-data-privacy.md
+    type: task
+    status: prepared-owner-forward
+    authoritative_for: zalo-poc02-a2-group-memory-and-retention-workorder
+    updated_at: 2026-11-24
+    dispatch_eligible: false
+    sensitivity: public
+
+  - id: zalo-poc-02-work-sandbox-qa-2026-11-24
+    path: tasks/2026-11-24-zalo-poc-02-work-sandbox-qa.md
+    type: task
+    status: prepared-owner-forward
+    authoritative_for: zalo-poc02-work-runnable-sandbox-and-independent-qa-workorder
+    updated_at: 2026-11-24
+    dispatch_eligible: false
+    sensitivity: public
+
   # KNG:BEGIN_GENERATED_REPORTS
   # KNG:END_GENERATED_REPORTS
   - id: kng01-current-routing-candidate
