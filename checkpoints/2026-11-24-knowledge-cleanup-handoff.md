@@ -56,4 +56,6 @@ Line numbers là kết quả phiên trước, cần xác minh tại SHA thực. 
 
 - Cả 5 ứng viên còn tham chiếu đều tồn tại trong candidate tree, CATALOG chưa được phép đổi; không xóa. Ba báo cáo đã xóa trong commit `ae9dd293` được checkpoint trước xác nhận absent, chưa có tái kiểm full-tree một lượt độc lập.
 - Validator đã được sửa theo phạm vi hẹp, nhưng historical commit/tree/blob verification và candidate full test cần kiểm chứng thêm; không thay đổi pin hoặc vô hiệu kiểm tra.
+
+- **Independent-source remote tree check (GitHub API, không phải local Git):** đã fetch 4 immutable trees `e385c1be` (236 blobs), PR31 `a770de80` (240), PR39 `22d741e3` (247), integrated main `d549564d` (275); GitHub trả `truncated=false` cả 4. Đối chiếu `provenance-lock.json` 12 source pins + 6 migration-base pins + 6 historical result blobs: **24/24 SHA/path/blob matches**, 0 mismatch. Đây là remote tree verification read-only, không thay thế executable local Git graph gate hiện hành (vẫn `PROVENANCE_UNVERIFIED` khi chạy ZIP-only validator). Không tự sửa lock/migration để tạo PASS.
 - **Status:** `PARTIAL · CLEANUP_NOT_ACCEPTED · PR59_DRAFT_UNMERGED`. **Next owner:** A0 Assistant tiếp tục scoped QA/code khi có khả năng thực thi kiểm chứng; Điều phối điều phối independent QA sau candidate. Quyền merge vẫn thuộc A0. Chưa chuyển sang TTD Zalo MVP khi cleanup chưa đạt gate.
