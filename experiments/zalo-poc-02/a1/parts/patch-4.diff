@@ -1,0 +1,21 @@
+diff --git a/src/agent/tools/save-memory-tool.ts b/src/agent/tools/save-memory-tool.ts
+--- a/src/agent/tools/save-memory-tool.ts
++++ b/src/agent/tools/save-memory-tool.ts
+@@ -99,6 +99,9 @@
+     }),
+     execute: async ({ action, content, doan_chu, about }) => {
+       const subjectId = about === "sender" ? message.senderId : message.threadId;
++      if (message.isGroup && (!message.threadId?.trim() || !message.senderId?.trim())) {
++        return ketQuaLoi("Thiếu định danh group hoặc người gửi đã xác minh");
++      }
+       if (!subjectId) return ketQuaLoi("Không xác định được đối tượng để lưu");
+ 
+       // `?? "them"` chứ không dựa vào `.default()` của Zod: default chỉ chạy khi
+@@ -133,6 +136,7 @@
+         accountId: account.id,
+         subjectId,
+         chiFactHocTrongNhom: message.isGroup && about === "sender",
++        threadId: message.isGroup ? message.threadId : undefined,
+       };
+ 
+       if (hanhDong === "xoa") {
