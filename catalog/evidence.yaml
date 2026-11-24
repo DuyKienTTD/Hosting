@@ -1,0 +1,297 @@
+documents:
+  - id: ttd-ai-p0-integration-001-evidence
+    path: reports/evidence/2026-11-21-ttd-ai-p0-integration-001.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-machine-readable-evidence-for-ttd-ai-p0-integration-001
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-ai-platform-audit-001-evidence
+    path: reports/evidence/2026-11-21-ttd-ai-platform-audit-001.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-machine-readable-evidence-for-ttd-ai-platform-audit-001
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-ai-p0-level2-001-evidence
+    path: reports/evidence/2026-11-21-ttd-ai-p0-level2-001.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-machine-readable-evidence-for-ttd-ai-p0-level2-001
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-e2e-hard-cap-001-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-e2e-hard-cap-001.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-machine-readable-evidence-for-ttd-hermes-e2e-hard-cap-001
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-a-001-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-a-001.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-machine-readable-evidence-for-ttd-hermes-gate-a-001
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-001-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-001.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-Gate-B-preflight-evidence
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-guard-remediation-001-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-guard-remediation-001.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-Gate-B-remediation-blocker-evidence
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-linux-check-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-linux-check.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-KVM2-Linux-remediation-test-evidence
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-guard-remediation-results-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-guard-remediation.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-Gate-B-guard-mock-acceptance-evidence
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-preflight-recheck-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-preflight-recheck.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-Gate-B-live-preflight-and-mock-evidence
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-egress-isolation-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-egress-isolation.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-Gate-B-egress-isolation-and-preflight-evidence
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: gate-b-hermes-consult-evidence-2026-11-21
+    path: reports/evidence/2026-11-21-gate-b-hermes-consult.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-mock-and-code-level-evidence-for-Hermes-Gate-B-H2-consult
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h3-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-h3.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-H3-combined-mock-and-live-checks
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h4-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-h4.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-Gate-B-H4-key-input-and-live-boundary-evidence
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h4-owner-key-live-check-evidence
+    path: reports/evidence/2026-11-21-ttd-hermes-gate-b-h4-owner-key-live-check.json
+    type: evidence
+    status: current
+    authoritative_for: sanitized-Gate-B-H4-owner-key-live-metadata-evidence
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-guard-mount-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-guard-mount.json
+    type: evidence
+    status: current
+    authoritative_for: guard-only-mount-acceptance-measurements
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h5-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h5.json
+    type: evidence
+    status: current
+    authoritative_for: h5-provider-preflight-measurements
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h5-followup-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h5-followup.json
+    type: evidence
+    status: current
+    authoritative_for: h5-project-final-candidate-count-and-one-shot-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-preparation-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-preparation.json
+    type: evidence
+    status: current
+    authoritative_for: h6-read-only-runtime-and-candidate-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-stage-a-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-stage-a.json
+    type: evidence
+    status: current
+    authoritative_for: H6-Stage-A-source-hashes-and-isolated-mock-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-stage-b1-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-stage-b1.json
+    type: evidence
+    status: current
+    authoritative_for: H6-Stage-B1-render-runtime-mock-and-postflight-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-a-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-a.json
+    type: evidence
+    status: current
+    authoritative_for: H6-Stage-B2-A-schema-lock-crash-and-render-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-b-preflight-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-b-preflight.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-B-metadata-DAC-and-Compose-preview-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-c-uid-model-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-c-uid-model.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-C-offline-DAC-IPC-and-transaction-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-d-ipc-integration-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-d-ipc-integration.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-D-source-blobs-IPC-auth-scope-and-fault-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-e-kvm2-mock-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-e-kvm2-mock.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-E-KVM2-render-runtime-ext4-callback-and-invariants
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-f-source-mock-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-f-source-mock.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-F-source-blobs-offline-faults-and-scope-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-g-kvm2-fake-tls-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-g-kvm2-fake-tls.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-G-render-source-digest-TLS-matrix-and-invariants
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-h-read-only-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-h-read-only.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-H-verified-metadata-render-diff-and-blockers
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-i-async-contract-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-i-async-contract.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-I-async-deadline-and-callback-test-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-k-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-k-cross-service.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-K-separate-processes-and-stores-test-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-l-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-l-idle-writer.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-L-immutable-health-and-crash-test-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hermes-gate-b-h6-b2-m-evidence-2026-11-22
+    path: reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-m-kvm2-idle-canary.json
+    type: evidence
+    status: current
+    authoritative_for: H6-B2-M-redacted-render-immutable-health-and-inventory-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted

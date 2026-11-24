@@ -1,0 +1,133 @@
+documents:
+  - id: ttd-a1-cost-first-master-allocation-2026-11-23
+    path: tasks/2026-11-23-a1-cost-first-master-allocation.md
+    type: task
+    status: archived-inactive-not-dispatchable
+    authoritative_for: historical-pr31-allocation-archive-not-operational-task-authority
+    # Original task frontmatter remains byte-exact PR31 evidence; catalog excludes it from dispatch.
+    updated_at: 2026-11-23
+    dispatch_eligible: false
+    sensitivity: public
+
+  - id: ttd-ai-platform-audit-001
+    path: tasks/2026-11-21-n8n-hermes-integration-audit.md
+    type: task
+    status: complete
+    authoritative_for: codex-n8n-hermes-integration-audit-scope
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: agent-capability-survey-001
+    path: tasks/2026-11-21-agent-capability-survey.md
+    type: task
+    status: complete
+    authoritative_for: capability-validation-questions-to-codex-hermes-hostinger-agent
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: ttd-resource-identity-001
+    path: tasks/2026-11-21-ttdnew-resource-identity-verification.md
+    type: task
+    status: complete
+    authoritative_for: ttdnew-docker-hosting-resource-identification
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: ttd-ai-p0-integration-001
+    path: tasks/2026-11-21-n8n-hermes-p0-sandbox-integration.md
+    type: task
+    status: in_progress
+    authoritative_for: gated-n8n-hermes-p0-sandbox-implementation
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: ttd-ai-p0-level2-001
+    path: tasks/2026-11-21-n8n-hermes-p0-level2-real-inference.md
+    type: task
+    status: blocked
+    authoritative_for: codex-gpt6-luna-level2-pilot-and-dual-e2e-acceptance
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: ttd-hermes-e2e-hard-cap-001
+    path: tasks/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md
+    type: task
+    status: complete
+    authoritative_for: Hermes-agent-hard-output-token-cap-and-shared-cost-gate-feasibility
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: ttd-hermes-gate-a-001
+    path: tasks/2026-11-21-hermes-auxiliary-guard-bridge-gate-a.md
+    type: task
+    status: complete
+    authoritative_for: Codex-sandbox-Hermes-guard-bridge-mock-only-implementation
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: ttd-hermes-gate-b-001
+    path: tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md
+    type: task
+    status: blocked
+    authoritative_for: codex-one-shot-approved-paid-hermes-e2e-with-cost-control
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: ttd-hermes-gate-b-guard-remediation-001
+    path: tasks/2026-11-21-hermes-gate-b-permit-ledger-remediation.md
+    type: task
+    status: complete
+    authoritative_for: Codex-Hermes-Gate-B-one-shot-permit-and-shared-ledger-guard-remediation
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: ttd-work-b2-h-assurance-001
+    path: tasks/2026-11-22-work-independent-b2-h-assurance.md
+    type: task
+    status: done
+    authoritative_for: independent-chatgpt-work-B2-H-read-only-security-audit
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-work-b2-j-idle-startup-001
+    path: tasks/2026-11-22-work-b2-j-idle-startup-audit.md
+    type: task
+    status: done
+    authoritative_for: independent-Work-B2-J-permitless-startup-and-recovery-audit
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-work-b2-m-independent-qa-001
+    path: tasks/2026-11-22-work-b2-m-independent-canary-qa.md
+    type: task
+    status: prepared
+    authoritative_for: independent-Work-B2-M-KVM2-fake-canary-source-and-rollback-assurance
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-work-b2-n-independent-contract-qa-001
+    path: tasks/2026-11-22-work-b2-n-independent-contract-qa.md
+    type: task
+    status: prepared
+    authoritative_for: independent-Work-B2-N-Hermes-n8n-offline-contract-evidence-review
+    updated_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-work-ws02-monitoring-triage-001
+    path: tasks/2026-11-22-work-ws02-monitoring-and-triage.md
+    type: task
+    status: prepared
+    authoritative_for: independent-Work-WS02-monitoring-and-triage-runbook-scope
+    updated_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-hostinger-ws02-infrastructure-baseline-001
+    path: tasks/2026-11-22-hostinger-ws02-infrastructure-baseline.md
+    type: task
+    status: prepared
+    authoritative_for: hostinger-ws02-read-only-infrastructure-baseline-scope
+    updated_at: 2026-11-22
+    sensitivity: public-redacted

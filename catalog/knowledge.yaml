@@ -1,0 +1,57 @@
+documents:
+  - id: kng01-current-routing-candidate
+    path: program/current.json
+    type: knowledge
+    status: release-source-snapshot-external-activation-required
+    authoritative_for: kng01-routing-source-after-independent-a0-and-main-readback
+    updated_at: 2026-11-23
+    sensitivity: public-redacted
+
+  - id: agent-a1-chatgpt-standard
+    path: agents/a1.md
+    type: knowledge
+    status: historical-capability-profile-non-routing
+    authoritative_for: historical-a1-capability-evidence-not-current-task-or-priority
+    updated_at: 2026-11-23
+    sensitivity: public
+
+  - id: agent-chatgpt
+    path: agents/chatgpt.md
+    type: knowledge
+    status: current
+    authoritative_for: chatgpt-role-capabilities
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: agent-codex
+    path: agents/codex.md
+    type: knowledge
+    status: historical-capability-profile-non-routing
+    authoritative_for: codex-capability-evidence-not-current-work-dispatch
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: agent-hermes
+    path: agents/hermes.md
+    type: knowledge
+    status: current
+    authoritative_for: hermes-role-capabilities
+    updated_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: component-hostinger
+    path: agents/hostinger.md
+    type: knowledge
+    status: current
+    authoritative_for: hostinger-and-hostinger-agent-capabilities
+    updated_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: component-n8n
+    path: agents/n8n.md
+    type: knowledge
+    status: current
+    authoritative_for: n8n-workflow-engine-capabilities
+    updated_at: 2026-11-21
+    sensitivity: public-redacted

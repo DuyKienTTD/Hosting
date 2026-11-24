@@ -1,0 +1,579 @@
+documents:
+  - id: hosting-progress-and-target-capabilities-2026-11-23
+    path: reports/2026-11-23-hosting-progress-and-target-capabilities.md
+    type: report
+    status: historical-estimate-not-live-readiness
+    authoritative_for: dated-estimate-only-not-verified-live-project-readiness
+    updated_at: 2026-11-23
+    sensitivity: public-redacted
+
+  - id: report-2026-11-23-a1-codex-cost-reallocation
+    path: reports/2026-11-23-a1-codex-cost-reallocation.md
+    type: report
+    status: historical-proposal-not-current-authority
+    authoritative_for: historical-pr31-cost-first-proposal-not-current-dispatch
+    updated_at: 2026-11-23
+    sensitivity: public
+
+  - id: vps-security-review-2026-11-21
+    path: reports/2026-11-21-vps-security-review.md
+    type: report
+    status: current
+    authoritative_for: security-findings-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-self-assessment-2026-11-21
+    path: reports/2026-11-21-hermes-self-assessment.md
+    type: report
+    status: current
+    authoritative_for: hermes-agent-capability-assessment-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: n8n-hermes-integration-audit-2026-11-21
+    path: reports/2026-11-21-n8n-hermes-integration-audit.md
+    type: report
+    status: current
+    authoritative_for: n8n-hermes-live-integration-status-and-ai-automation-architecture-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: n8n-hermes-p0-sandbox-integration-2026-11-21
+    path: reports/2026-11-21-n8n-hermes-p0-sandbox-integration.md
+    type: report
+    status: current
+    authoritative_for: n8n-hermes-p0-level1-deployment-tests-and-level2-blocker-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: codex-capability-survey-2026-11-21
+    path: reports/2026-11-21-codex-capability-survey.md
+    type: report
+    status: complete
+    authoritative_for: codex-session-capabilities-and-limits-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: codex-repository-readiness-ack-2026-11-21
+    path: reports/2026-11-21-codex-repository-readiness-ack.md
+    type: report
+    status: complete
+    authoritative_for: codex-repository-documentation-readiness-ack-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hostinger-agent-capability-survey-2026-11-21
+    path: reports/2026-11-21-hostinger-agent-capability-survey.md
+    type: report
+    status: complete
+    authoritative_for: hostinger-agent-capabilities-and-limits-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-capability-survey-2026-11-21
+    path: reports/2026-11-21-hermes-capability-survey.md
+    type: report
+    status: current
+    authoritative_for: hermes-webui-runtime-capabilities-and-limits-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hostinger-account-capability-inventory-2026-11-21
+    path: reports/2026-11-21-hostinger-account-capability-inventory.md
+    type: report
+    status: current
+    authoritative_for: hostinger-account-resources-and-supported-operations-as-of-2026-11-21
+    updated_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: ttdnew-resource-identity-verification-2026-11-21
+    path: reports/2026-11-21-ttdnew-resource-identity-verification.md
+    type: report
+    status: complete
+    authoritative_for: ttdnew-u4s-and-kvm2-resource-identity-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: p0-level1-review-and-level2-criteria-2026-11-21
+    path: reports/2026-11-21-p0-level1-review-and-level2-criteria.md
+    type: report
+    status: current
+    authoritative_for: chatgpt-review-of-level1-and-differentiated-level2-e2e-acceptance
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: n8n-hermes-p0-level2-results-2026-11-21
+    path: reports/2026-11-21-n8n-hermes-p0-level2-results.md
+    type: report
+    status: current
+    authoritative_for: level2-provider-e2e-pass-and-hermes-cost-control-blocker-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-agent-e2e-hard-cap-feasibility-2026-11-21
+    path: reports/2026-11-21-hermes-agent-e2e-hard-cap-feasibility.md
+    type: report
+    status: complete
+    authoritative_for: Hermes-agent-hard-cap-feasibility-and-separate-implementation-approval-plan-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-gate-a-mock-results-2026-11-21
+    path: reports/2026-11-21-hermes-gate-a-mock-results.md
+    type: report
+    status: complete
+    authoritative_for: Hermes-auxiliary-guard-bridge-Gate-A-mock-acceptance-as-of-2026-11-21
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-paid-results-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-paid-results.md
+    type: report
+    status: blocked
+    authoritative_for: Gate-B-preflight-blocked-before-paid-dispatch
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-permit-ledger-remediation-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-permit-ledger-remediation.md
+    type: report
+    status: blocked
+    authoritative_for: Gate-B-permit-ledger-code-draft-and-unverified-mock-status
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-remediation-linux-check-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-remediation-linux-check.md
+    type: report
+    status: partial
+    authoritative_for: KVM2-Linux-transaction-unit-and-live-read-only-check
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-guard-remediation-results-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-guard-remediation-results.md
+    type: report
+    status: complete
+    authoritative_for: Gate-B-guard-mock-integration-acceptance
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-preflight-recheck-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-preflight-recheck.md
+    type: report
+    status: blocked
+    authoritative_for: Gate-B-current-paid-preflight-and-wire-contract-mock
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-egress-isolation-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-egress-isolation.md
+    type: report
+    status: blocked
+    authoritative_for: Gate-B-current-egress-isolation-and-paid-preflight
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: gate-b-hermes-consult-2026-11-21
+    path: reports/2026-11-21-gate-b-hermes-consult.md
+    type: report
+    status: current
+    authoritative_for: Hermes-specialist-analysis-of-runtime-mismatch-canonical-request-and-token-counting-for-Gate-B
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h3-preflight-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-h3-preflight.md
+    type: report
+    status: blocked
+    authoritative_for: Gate-B-H3-combined-mock-and-paid-preflight
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: gate-b-h3-checkpoint-2026-11-21
+    path: reports/2026-11-21-gate-b-h3-checkpoint.md
+    type: report
+    status: current
+    authoritative_for: Gate-B-H3-resume-point-and-handoff
+    updated_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h4-key-input-preparation-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-h4-key-input-preparation.md
+    type: report
+    status: current
+    authoritative_for: Gate-B-H4-secure-owner-key-input-preparation-and-sandbox-test
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h4-owner-key-live-check-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-h4-owner-key-live-check.md
+    type: report
+    status: current
+    authoritative_for: Gate-B-H4-owner-key-live-metadata-check-and-next-approval
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-guard-mount-paused-checkpoint-2026-11-21
+    path: reports/2026-11-21-hermes-gate-b-guard-mount-paused-checkpoint.md
+    type: report
+    status: current
+    authoritative_for: gate-b-guard-only-mount-paused-before-vps-live-preflight
+    updated_at: 2026-11-21
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-guard-mount-access-result-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-guard-mount-access-result.md
+    type: report
+    status: blocked
+    authoritative_for: guard-mount-execution-access-checks-2026-11-22
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-guard-mount-results-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-guard-mount-results.md
+    type: report
+    status: complete
+    authoritative_for: live-guard-only-mount-acceptance
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h5-provider-preflight-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h5-provider-preflight.md
+    type: report
+    status: blocked
+    authoritative_for: h5-model-access-and-provider-preflight-blockers
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h5-preflight-followup-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h5-preflight-followup.md
+    type: report
+    status: current
+    authoritative_for: h5-provider-preflight-result-and-h6-handoff
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: gate-b-chatgpt-provider-and-scope-review-2026-11-22
+    path: reports/2026-11-22-gate-b-chatgpt-provider-and-scope-review.md
+    type: report
+    status: current
+    authoritative_for: chatgpt-h5-followup-review-and-no-go-paid-scope-decision
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-preparation-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-preparation.md
+    type: report
+    status: current
+    authoritative_for: h6-read-only-preparation-and-sandbox-change-proposal
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-chatgpt-design-review-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-chatgpt-design-review.md
+    type: report
+    status: current
+    authoritative_for: H6-design-review-and-sandbox-approval-boundary
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-stage-a-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-stage-a.md
+    type: report
+    status: current
+    authoritative_for: H6-Stage-A-implementation-mock-results-and-Stage-B-proposal
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-stage-a-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-stage-a-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: H6-Stage-A-source-and-offline-mock-acceptance
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-stage-b1-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-stage-b1.md
+    type: report
+    status: current
+    authoritative_for: H6-Stage-B1-KVM2-mock-and-rollback-result
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-stage-b1-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-stage-b1-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: H6-Stage-B1-mock-acceptance-and-B2-scope-boundary
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-a-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-a.md
+    type: report
+    status: current
+    authoritative_for: H6-Stage-B2-A-offline-Level-2-compatibility-and-B2-B-gates
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-a-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-a-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-A-offline-acceptance-and-B2-B-read-only-scope
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-b-preflight-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-b-preflight.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-B-KVM2-read-only-UID-mount-and-rollback-preflight
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-b-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-b-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-B-acceptance-UID-blocker-and-B2-C-offline-direction
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-c-uid-model-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-c-uid-model.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-C-offline-UID-ACL-and-IPC-decision
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-c-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-c-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-C-offline-acceptance-and-B2-D-IPC-source-scope
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-d-ipc-integration-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-d-ipc-integration.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-D-source-IPC-integration-and-offline-mock-test
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-d-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-d-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-D-source-IPC-acceptance-and-B2-E-KVM2-isolated-mock-scope
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-e-kvm2-mock-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-e-kvm2-mock.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-E-isolated-KVM2-authenticated-IPC-and-rollback
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-e-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-e-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-E-KVM2-mock-acceptance-and-B2-F-source-scope
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-f-source-mock-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-f-source-mock.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-F-disabled-provider-source-and-P0-v1-mock-tests
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-f-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-f-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-F-source-acceptance-and-B2-G-KVM2-fake-TLS-scope
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-g-kvm2-fake-tls-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-g-kvm2-fake-tls.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-G-isolated-KVM2-TLS-CONNECT-and-rollback
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-g-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-g-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-G-acceptance-and-B2-H-read-only-integration-readiness
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-h-read-only-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-h-read-only.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-H-KVM2-read-only-readiness-and-Compose-proposal
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-h-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-h-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-H-live-NO-GO-acceptance-and-B2-I-deadline-callback-mock-scope
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-work-b2-h-assurance-report-2026-11-22
+    path: reports/2026-11-22-work-b2-h-assurance.md
+    type: report
+    status: current
+    authoritative_for: independent-Work-B2-H-assurance-ChatGPT-accepted
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-i-async-contract-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-i-async-contract.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-I-offline-async-job-contract-and-live-gaps
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-i-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-i-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-I-offline-async-acceptance-and-B2-K-cross-service-mock-scope
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: work-b2-j-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-work-b2-j-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: Work-B2-J-design-acceptance-and-B2-L-source-mock-scope
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: work-b2-j-audit-report-2026-11-22
+    path: reports/2026-11-22-work-b2-j-idle-startup-audit.md
+    type: report
+    status: current
+    authoritative_for: independent-Work-B2-J-idle-startup-and-crash-audit
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-k-cross-service-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-k-cross-service.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-K-cross-service-mock-and-recovery
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-l-idle-writer-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-l-idle-writer.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-L-fixture-writer-idle-startup-and-crash-recovery
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-k-l-chatgpt-review-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-k-l-chatgpt-review.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-K-and-B2-L-mock-acceptance-and-B2-M-isolated-KVM2-scope
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: hermes-gate-b-h6-b2-m-kvm2-idle-canary-2026-11-22
+    path: reports/2026-11-22-hermes-gate-b-h6-b2-m-kvm2-idle-canary.md
+    type: report
+    status: current
+    authoritative_for: H6-B2-M-KVM2-startup-only-mock-and-rollback
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted
+
+  - id: ttd-work-b2-m-independent-canary-qa-report-2026-11-22
+    path: reports/2026-11-22-work-b2-m-independent-canary-qa.md
+    type: report
+    status: current
+    authoritative_for: independent-Work-B2-M-review-of-canary-security-and-rollback-evidence
+    updated_at: 2026-11-22
+    verified_at: 2026-11-22
+    sensitivity: public-redacted

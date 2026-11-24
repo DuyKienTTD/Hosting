@@ -1,0 +1,9 @@
+documents:
+  - id: current-vps-inventory
+    path: inventory/current-vps-state.md
+    type: inventory
+    status: current
+    authoritative_for: current-vps-configuration
+    updated_at: 2026-11-21
+    verified_at: 2026-11-21
+    sensitivity: public-redacted

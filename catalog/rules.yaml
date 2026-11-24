@@ -1,0 +1,16 @@
+documents:
+  - id: repository-security-rules
+    path: rules/REPOSITORY_SECURITY.md
+    type: rule
+    status: current
+    authoritative_for: public-repository-safety
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: shared-agent-workflow
+    path: rules/AGENT_WORKFLOW.md
+    type: rule
+    status: current
+    authoritative_for: task-handoff-multi-agent-collaboration-mandatory-research-specialist-routing-and-acknowledged-handoffs-mandatory-complete-reading-evidence-reuse-scoped-writes-integrity-checks-continuous-outcome-owned-execution-event-based-handoff
+    updated_at: 2026-11-21
+    sensitivity: public
