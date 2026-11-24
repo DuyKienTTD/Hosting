@@ -1,9 +1,18 @@
 diff --git a/src/agent/tools/save-memory-tool.ts b/src/agent/tools/save-memory-tool.ts
 --- a/src/agent/tools/save-memory-tool.ts
 +++ b/src/agent/tools/save-memory-tool.ts
-@@ -99,6 +99,9 @@
+@@ -1,4 +1,5 @@
+ import { tool } from "ai";
++import { readCurrentSyntheticPolicy } from "./outbound-guard-runtime.js";
+ import { z } from "zod";
+ import {
+   suaFactTheoDoanChu,
+@@ -98,7 +99,12 @@
+         .describe("'sender' = về người vừa nhắn; 'thread' = về nhóm/cuộc trò chuyện này"),
      }),
      execute: async ({ action, content, doan_chu, about }) => {
++      const policy = readCurrentSyntheticPolicy(account.id, message.threadId, message.senderId, message.isGroup);
++      if (!policy?.retain) return ketQuaLoi("Thiếu retention consent hiện hành đã xác minh");
        const subjectId = about === "sender" ? message.senderId : message.threadId;
 +      if (message.isGroup && (!message.threadId?.trim() || !message.senderId?.trim())) {
 +        return ketQuaLoi("Thiếu định danh group hoặc người gửi đã xác minh");
@@ -11,7 +20,7 @@ diff --git a/src/agent/tools/save-memory-tool.ts b/src/agent/tools/save-memory-t
        if (!subjectId) return ketQuaLoi("Không xác định được đối tượng để lưu");
  
        // `?? "them"` chứ không dựa vào `.default()` của Zod: default chỉ chạy khi
-@@ -133,6 +136,7 @@
+@@ -133,6 +139,7 @@
          accountId: account.id,
          subjectId,
          chiFactHocTrongNhom: message.isGroup && about === "sender",
