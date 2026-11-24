@@ -16,6 +16,14 @@ entrypoints:
   change_history: CHANGELOG.md
 
 documents:
+  - id: zalo-poc-01-s3-final-2026-11-24
+    path: reports/2026-11-24-zalo-poc-01-s3-final.md
+    type: report
+    status: completed-no-go-for-platform-selection
+    authoritative_for: zalo-poc-01-s2-s3-integrated-offline-feasibility-evidence-and-coordinator-recommendation
+    updated_at: 2026-11-24
+    sensitivity: public-redacted
+
   - id: zalo-poc-01-s0-readiness-2026-11-24
     path: reports/2026-11-24-zalo-poc-01-s0-readiness.md
     type: report
