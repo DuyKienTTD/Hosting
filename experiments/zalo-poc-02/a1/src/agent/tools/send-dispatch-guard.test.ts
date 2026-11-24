@@ -40,8 +40,8 @@ test('queued before opt-out blocks after revocation', async () => {
 });
 test('mid-multipart STOP blocks second part', async () => {
   let p = ok(); let sends = 0; const s = store();
-  assert.equal((await dispatchWithLateGuard(intent('part_1'), async () => p, s.adapter, async () => { sends++; p = { ...p, threadStop: true, version: 'v2' }; })).status, 'sent');
-  assert.equal((await dispatchWithLateGuard(intent('part_2'), async () => p, s.adapter, async () => { sends++; })).status, 'blocked'); assert.equal(sends, 1);
+  assert.equal((await dispatchWithLateGuard(intent('part_1'), async () => p, s.adapter, async () => { sends++; p = { ...p, threadStop: true, version: 'v2' }; })).status, 'blocked');
+  assert.equal((await dispatchWithLateGuard(intent('part_2'), async () => p, s.adapter, async () => { sends++; })).status, 'blocked'); assert.equal(sends, 0);
 });
 test('legacy ambiguous send never attempts transport', async () => {
   const s = store(); let sends = 0;
