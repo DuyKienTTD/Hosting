@@ -141,7 +141,7 @@ diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filte
      }
    }
  
-@@ -54,9 +59,15 @@
+@@ -54,8 +59,14 @@
    // Check kill switch SAU allowlist: người ngoài allowlist không được ghi history
    // dù thread tắt bot
    if (!botEnabledForThread) {
@@ -158,7 +158,6 @@ diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filte
 +    reason: consent.respond || consent.retain ? "consent_scoped" : "opt_out",
 +  };
  }
- 
 diff --git a/src/zalo/incoming-message-router.ts b/src/zalo/incoming-message-router.ts
 --- a/src/zalo/incoming-message-router.ts
 +++ b/src/zalo/incoming-message-router.ts
