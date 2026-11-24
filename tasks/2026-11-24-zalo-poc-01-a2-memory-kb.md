@@ -1,3 +1,15 @@
+---
+id: zalo-poc-01-a2-memory
+type: task
+status: prepared-owner-forward
+dispatch_eligible: false
+owner: A2
+updated_at: 2026-11-24
+sensitivity: public
+---
+
+**HANDOFF_STATE:** `PREPARED_FOR_OWNER_FORWARD` — original task committed but no verified session delivery or ACK. Do not infer `SENT` from the GitHub PR.
+
 # ZALO-POC-01 — A2 Memory & Knowledge Test
 
 **TASK_ID:** `ZALO-POC-01-A2-MEMORY`  
