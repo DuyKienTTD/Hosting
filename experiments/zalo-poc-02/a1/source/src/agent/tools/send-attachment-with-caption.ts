@@ -27,12 +27,13 @@ export async function guiFileKemCaption(
   filePath: string,
   caption: string | undefined,
   requestId?: string,
+  senderId?: string,
 ): Promise<void> {
   const tin = tinKemFile(caption);
 
   await enqueueSend(threadKey, async () => {
     try {
-      return await sendWithOutboundGuard({ threadKey, threadId, threadType: Number(threadType), stableKey: requestId ? `${requestId}:attachment` : undefined, send: () => api.sendMessage({ ...tin, attachments: [filePath] }, threadId, threadType) });
+      return await sendWithOutboundGuard({ threadKey, threadId, threadType: Number(threadType), senderId, stableKey: requestId ? `${requestId}:attachment` : undefined, send: () => api.sendMessage({ ...tin, attachments: [filePath] }, threadId, threadType) });
     } catch (err) {
       // Không có style để bỏ, hoặc lỗi đường truyền (tin có thể đã tới) thì
       // KHÔNG gửi lại - gửi lại lúc đó là nhân đôi file trước mặt người dùng.
@@ -42,7 +43,7 @@ export async function guiFileKemCaption(
         { threadId, soStyle: tin.styles.length, err },
         "Zalo từ chối caption có định dạng - gửi lại dạng chữ trơn",
       );
-      return await sendWithOutboundGuard({ threadKey, threadId, threadType: Number(threadType), stableKey: requestId ? `${requestId}:attachment_fallback` : undefined, send: () => api.sendMessage({ msg: tin.msg, attachments: [filePath] }, threadId, threadType) });
+      return await sendWithOutboundGuard({ threadKey, threadId, threadType: Number(threadType), senderId, stableKey: requestId ? `${requestId}:attachment_fallback` : undefined, send: () => api.sendMessage({ msg: tin.msg, attachments: [filePath] }, threadId, threadType) });
     }
   });
 }
