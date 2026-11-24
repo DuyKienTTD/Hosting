@@ -4,6 +4,10 @@ type: report
 status: current
 updated_at: 2026-11-24
 sensitivity: public-redacted
+lifecycle: TEMPORARY
+owner: A0 Assistant
+task_id: HOSTING-KNG-READ-SCOPE-2026-11-24
+retention_trigger: handoff accepted and reference check complete
 ---
 
 # Checkpoint — hoàn tất tối ưu tri thức, tiếp tục TTD Zalo Assistant

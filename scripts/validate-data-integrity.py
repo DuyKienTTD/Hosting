@@ -3,6 +3,7 @@
 import argparse
 import datetime as dt
 import json
+import hashlib
 from pathlib import Path, PurePosixPath
 import re
 import runpy
@@ -34,7 +35,70 @@ def safe_path(root, name):
         raise ValueError("path escapes root")
     return dest
 
-def inspect(root, changed, new, removed, today=None):
+
+# Scan governance documents without loading their bodies into an agent context.
+DOC_DIRS = ("rules", "agents", "program", "knowledge", "decisions", "tasks", "reports", "checkpoints", "inventory", "runbooks", "references")
+AUTHORITY = {"policy": "rules/", "role": "agents/", "roadmap": "program/", "task": "tasks/", "result": "reports/", "decision": "decisions/", "knowledge": "knowledge/", "inventory": "inventory/"}
+
+def governance_scan(root, changed, removed, add):
+    docs, ids, fingerprints, claims, edges = {}, {}, {}, {}, {}
+    for folder in DOC_DIRS:
+        for file in sorted((root / folder).rglob("*.md")):
+            rel = file.relative_to(root).as_posix()
+            if file.is_symlink() or not file.resolve().is_relative_to(root):
+                add("ERROR", "UNSAFE_DOCUMENT_PATH", rel)
+                continue
+            if file.stat().st_size > 2_000_000:
+                add("WARN", "GOVERNANCE_DOCUMENT_NOT_SCANNED", rel)
+                continue
+            try:
+                text = file.read_text(encoding="utf-8")
+            except UnicodeError:
+                add("ERROR", "INVALID_TEXT_ENCODING", rel)
+                continue
+            m = metadata(text)
+            docs[rel] = (text, m)
+            if m.get("id"):
+                ids.setdefault(m["id"], []).append(rel)
+            if folder in ("rules", "knowledge", "agents", "runbooks"):
+                body = re.sub(r"\s+", " ", re.sub(r"(?s)^---\n.*?\n---\n", "", text)).strip().casefold()
+                if len(body) >= 100:
+                    fingerprints.setdefault(hashlib.sha256(body.encode()).hexdigest(), []).append(rel)
+            key = m.get("authority_key")
+            if key and m.get("status") not in {"archived", "superseded", "draft", "candidate"}:
+                claims.setdefault(key, []).append(rel)
+                category = key.split(":", 1)[0]
+                if category not in AUTHORITY or not rel.startswith(AUTHORITY[category]):
+                    add("ERROR", "AUTHORITY_WRONG_SOURCE", rel)
+            prose = re.sub(r"(?ms)^\s*```.*?^\s*```[^\n]*", "", text)
+            for match in LINK.finditer(prose):
+                dest = match.group(1).split("#", 1)[0].split("?", 1)[0].strip()
+                if not dest or re.match(r"^(https?://|mailto:|tel:)", dest):
+                    continue
+                target = (file.parent / dest).resolve()
+                if target.is_relative_to(root):
+                    edges.setdefault(target.relative_to(root).as_posix(), set()).add(rel)
+    for group in ids.values():
+        if len(group) > 1:
+            for rel in group:
+                add("ERROR" if rel in changed else "WARN", "DUPLICATE_DOCUMENT_ID", rel)
+    for group in fingerprints.values():
+        if len(group) > 1:
+            for rel in group:
+                add("WARN", "EXACT_NORMALIZED_KNOWLEDGE_DUPLICATE", rel)
+    for group in claims.values():
+        if len(group) > 1:
+            for rel in group:
+                add("ERROR", "MULTIPLE_ACTIVE_AUTHORITY_CLAIMS", rel)
+    impacts = []
+    for target in sorted(set(changed) | set(removed)):
+        for source in sorted(edges.get(target, ())):
+            impacts.append({"source": source, "target": target})
+            if target in removed:
+                add("ERROR", "DELETED_REFERENCED_DOCUMENT", source)
+    return {"documents_scanned": len(docs), "duplicate_id_groups": sum(len(g)>1 for g in ids.values()), "duplicate_knowledge_groups": sum(len(g)>1 for g in fingerprints.values()), "authority_conflict_groups": sum(len(g)>1 for g in claims.values()), "direct_impacts": impacts}
+
+def inspect(root, changed, new, removed, today=None, metrics=None):
     root = Path(root).resolve()
     today = today or dt.date.today()
     findings = []
@@ -98,6 +162,9 @@ def inspect(root, changed, new, removed, today=None):
                     add("WARN", "REVIEW_OVERDUE", rel)
             except ValueError:
                 add("ERROR", "INVALID_REVIEW_DATE", rel)
+    summary = governance_scan(root, set(changed), set(removed), add)
+    if metrics is not None:
+        metrics.update(summary)
     return findings
 
 def main():
@@ -117,8 +184,9 @@ def main():
         untracked = git(root, "ls-files", "--others", "--exclude-standard").splitlines()
         changed += untracked
         new += untracked
-        findings = inspect(root, changed, set(new), removed)
-        result = {"scope": "working_tree_delta_and_full_catalog", "base": a.base, "changed": len(set(changed)), "findings": findings}
+        metrics = {}
+        findings = inspect(root, changed, set(new), removed, metrics=metrics)
+        result = {"scope": "working_tree_delta_and_full_catalog", "base": a.base, "changed": len(set(changed)), "findings": findings, "governance": metrics}
         code = int(any(x["level"] == "ERROR" for x in findings))
         result["status"] = "FAIL" if code else "PASS_WITH_WARNINGS" if findings else "PASS"
     except (OSError, subprocess.CalledProcessError, ValueError):

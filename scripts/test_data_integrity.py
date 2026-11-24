@@ -45,5 +45,33 @@ class IntegrityTests(unittest.TestCase):
         self.put("scripts/validate-catalog-partitions.py", "def validate(root): raise ValueError('bad')\n")
         self.assertIn("CATALOG_INVALID", self.codes([]))
 
+    def test_duplicate_knowledge(self):
+        body = "Reusable verified knowledge. " * 8
+        self.put("knowledge/a.md", body)
+        self.put("knowledge/b.md", body)
+        self.assertIn("EXACT_NORMALIZED_KNOWLEDGE_DUPLICATE", self.codes(["knowledge/b.md"]))
+    def test_duplicate_id(self):
+        body = "---\nid: same\n---\n"
+        self.put("knowledge/a.md", body)
+        self.put("knowledge/b.md", body)
+        self.assertIn("DUPLICATE_DOCUMENT_ID", self.codes(["knowledge/b.md"]))
+    def test_authority_collision(self):
+        body = "---\nauthority_key: policy:retention\nstatus: current\n---\n"
+        self.put("rules/a.md", body)
+        self.put("rules/b.md", body)
+        self.assertIn("MULTIPLE_ACTIVE_AUTHORITY_CLAIMS", self.codes(["rules/b.md"]))
+    def test_wrong_authority_source(self):
+        self.put("knowledge/a.md", "---\nauthority_key: policy:retention\nstatus: current\n---\n")
+        self.assertIn("AUTHORITY_WRONG_SOURCE", self.codes(["knowledge/a.md"]))
+    def test_reverse_dependency(self):
+        self.put("knowledge/a.md", "[source](b.md)")
+        self.assertIn("DELETED_REFERENCED_DOCUMENT", self.codes([], removed=["knowledge/b.md"]))
+    def test_change_impact(self):
+        self.put("knowledge/a.md", "[source](b.md)")
+        self.put("knowledge/b.md", "Source")
+        metrics = {}
+        mod.inspect(self.root, ["knowledge/b.md"], set(), [], metrics=metrics)
+        self.assertIn({"source": "knowledge/a.md", "target": "knowledge/b.md"}, metrics["direct_impacts"])
+
 if __name__ == "__main__":
     unittest.main()
