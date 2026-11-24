@@ -305,3 +305,5 @@ Nguồn gốc PR31 tại [commit bất biến](https://github.com/DuyKienTTD/Hos
 - A0 chỉ thị tinh gọn trên nhánh riêng; rút gọn AGENTS và workflow, đưa tham khảo lịch sử về references/history/README.md (Git pin nguyên bản).
 - CATALOG 130 ID/path, security, STATE, source/receipt/pins và báo cáo gốc giữ nguyên. Không merge, không mở quyền mới.
 - Kiểm thử đọc range: workflow 3/3, CATALOG 12/12 khớp SHA/nội dung. KNG historical result_blob validator dự kiến không khớp hai file mới; runtime QA chưa chạy, phải giải quyết trước tích hợp.
+
+- A0 bổ sung chính sách chống phình tri thức: DURABLE/ACTIVE/TEMPORARY; một báo cáo kết thúc ngắn cho thử nghiệm thất bại đã đóng; xóa báo cáo trung gian hết vòng đời sau reference/retention checks, giữ bằng chứng thiết yếu và Git provenance. Chưa áp dụng xóa backlog; CATALOG giữ nguyên.

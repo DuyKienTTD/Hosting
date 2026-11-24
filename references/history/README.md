@@ -1,6 +1,6 @@
 # Kho tham khảo lịch sử HOSTING
 
-Không phải nguồn cấp quyền hay danh sách công việc đang chạy. Bảo toàn nguyên bản trên Git, không di chuyển hoặc xóa báo cáo/evidence/ID. Các liên kết dưới đây cố định commit.
+Không phải nguồn cấp quyền hay danh sách công việc đang chạy. Bảo toàn nguồn gốc trên Git; không xóa bằng chứng bắt buộc hay tái sử dụng ID. Báo cáo tạm hết vòng đời được loại khỏi cây hiện hành theo mục 8 của quy tắc vận hành. Các liên kết dưới đây cố định commit.
 
 | Nội dung | Nguồn nguyên bản |
 |---|---|
@@ -15,6 +15,8 @@ Báo cáo và bằng chứng gốc vẫn tra cứu bằng CATALOG. Trạng thái
 
 ## Giới hạn candidate 24/11/2026
 
-A0 yêu cầu tinh gọn trên nhánh riêng, giữ CATALOG nguyên bản. Chỉ sửa AGENTS và workflow; thêm chỉ mục này và changelog. STATE, security, CATALOG, current.json, migration, provenance và code giữ nguyên. Workflow giữ các ranh giới của §7–13, tách ví dụ, diễn giải lịch sử và routing cũ vào nguồn Git cố định. Chưa merge; không cấp quyền mới.
+A0 yêu cầu tinh gọn trên nhánh riêng, giữ CATALOG nguyên bản. Chỉ sửa AGENTS và workflow (bao gồm chính sách vòng đời); thêm chỉ mục này và changelog. STATE, security, CATALOG, current.json, migration, provenance và code giữ nguyên. Workflow giữ các ranh giới của §7–13, tách ví dụ, diễn giải lịch sử và routing cũ vào nguồn Git cố định. Chưa merge; không cấp quyền mới.
 
 KNG validator hiện kiểm result_blob lịch sử với working tree; thay đổi hai file sẽ gây INTEGRATED_BLOB_MISMATCH. Không sửa pin hoặc bỏ kiểm tra để báo PASS. Trước tích hợp cần coordinator/reviewer xác minh lịch sử tại commit gốc và thiết kế validator phiên bản hiện hành, đồng bộ must_read trong typed source và hồ sơ Agent liên quan. Không tự nghiệm thu. Runtime tests NOT_RUN.
+
+A0 bổ sung yêu cầu chống phình tri thức: xem [vòng đời tài liệu và đóng thử nghiệm](../../rules/AGENT_WORKFLOW.md#8-vòng-đời-tri-thức--chống-phình-kho-chỉ-thị-a0-24112026). Đây là chính sách candidate; chưa dọn backlog hay xóa báo cáo trong PR này.
