@@ -1,4 +1,5 @@
 import { tool } from "ai";
+import { readCurrentSyntheticPolicy } from "./outbound-guard-runtime.js";
 import { z } from "zod";
 import {
   suaFactTheoDoanChu,
@@ -98,6 +99,8 @@ export function createSaveMemoryTool({ account, message }: ToolContext) {
         .describe("'sender' = về người vừa nhắn; 'thread' = về nhóm/cuộc trò chuyện này"),
     }),
     execute: async ({ action, content, doan_chu, about }) => {
+      const policy = readCurrentSyntheticPolicy(account.id, message.threadId, message.senderId, message.isGroup);
+      if (!policy?.retain) return ketQuaLoi("Thiếu retention consent hiện hành đã xác minh");
       const subjectId = about === "sender" ? message.senderId : message.threadId;
       if (message.isGroup && (!message.threadId?.trim() || !message.senderId?.trim())) {
         return ketQuaLoi("Thiếu định danh group hoặc người gửi đã xác minh");
