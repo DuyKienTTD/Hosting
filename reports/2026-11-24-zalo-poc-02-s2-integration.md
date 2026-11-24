@@ -121,3 +121,45 @@ PRODUCT_EXECUTION: HOLD
 MAIN_MERGE: HOLD
 NEXT_OWNER: WORK_AFTER_ACTUAL_FOLLOWUP_ACK
 ```
+
+
+## 7. Work Q0 rerun — exact revised patches and two precise author fixes
+
+**Source:** Work actual-session continuation receipt `TASK_ACKNOWLEDGED CONTINUATION — ZALO-POC-02-WORK-SANDBOX-QA`; report at commit `0343abd5ce36c5f4c83f8545691ee917961eafdf`, blob `9ba621c60f5332033d5f85d01e5a300dc88ae9ff`; executable log `experiments/zalo-poc-02/work/q0-revision.log`, blob `4b74250f23bea28a162461d7ed43d49b81e1d4d9`. All Work tests ran with the same baseline `vuhai2002/zalo-agent@2dc09de31cd99306bc1ab18e57aa0aa872618561` and `ENETUNREACH` egress protection.
+
+**Q0-R1 A2 patch** `0a78460efa7110526a70983a6b47c2929ca8a3c0`: `git apply --check` failed for A2-only and combined tree at `src/middleware/allowlist-filter.ts:54`. The hunk `@@ -54,9 +59,15 @@` expects a trailing blank context line following closing `}`, absent in pinned baseline. This remains a **verified patch-apply failure**, not a privacy runtime verdict.
+
+**Q0-R2 A1 patch** `1fa7e1ef70630c29685e70f923bac42590d463fb`: standalone patch `git apply` PASS and native build PASS. `pnpm typecheck` FAILS `TS5097` at `src/agent/tools/send-dispatch-guard.test.ts:3:39`, from a `.ts` import specifier inconsistent with existing compiler settings. This is a precise build-validation blocker; it is not a reason to weaken global tsconfig.
+
+**Q0-R3 A1 guarded-unit tests:** 15/15 native targeted tests PASS against the exact pinned A1 patch in Work's offline environment, including SQLite reservation across actual child-process restart, synthetic STOP, opt-out, human takeover, wrong recipient and multipart cases. Preserve this strong **limited** evidence. Still no proof of atomic fencing of a STOP occurring after the final consent read or no bypass through all original send paths.
+
+**Q0-R4 combined tree:** **NOT_ESTABLISHED**; A2 patch does not apply. Combined build/typecheck, group X/Y SQLite privacy, consent/retention, cross-path outgoing and racing STOP tests remain NOT_RUN. The earlier 73/73 native baseline selected tests PASS are retained; no formal full regression rerun is needed solely to repeat old evidence.
+
+**Corrective routing within original tasks and exclusive WRITE_SETs:**
+- A2's own [PR #56 comment #7124888550](https://github.com/DuyKienTTD/Hosting/pull/56#issuecomment-7124888550): correct only the EOF blank-line mismatch, regenerate exact-source unified patch, preserve all D1/D2 logic. Return updated patch blob/head, no invented apply PASS.
+- A1's own [PR #55 comment #7124889257](https://github.com/DuyKienTTD/Hosting/pull/55#issuecomment-7124889257): fix `.ts` import in test using local ESM `.js` convention, no tsconfig change, return updated exact patch and SHA.
+- Both comments are `PREPARED_FOR_OWNER_FORWARD`, not recipient ACK. Authorized sender forwards into existing A1/A2 sessions and obtains new continuation receipts. Work remains independent and may re-enter combined-tree Q0 only once exact author patch SHAs are returned. Work must never silently patch author files.
+
+**Unresolved architecture gates stay visible:** verified consent store/resolver and its epoch, group edit caller threadId, live intake retention after restart, all-send transport guard coverage and atomic STOP fencing. Clearing the two syntactic defects merely enables tests; it is NOT functional/product PASS.
+
+```yaml
+ZALO_POC_02: S2_PARTIAL_BLOCKED
+WORK_Q0_CONTINUATION: ACKNOWLEDGED_COMPLETED_WITH_BLOCKERS
+WORK_E0_BASELINE: PASS_73_OF_73_SELECTED
+WORK_A1_NEW_PATCH_APPLY: PASS
+WORK_A1_NEW_PATCH_BUILD: PASS
+WORK_A1_NEW_PATCH_TYPECHECK: FAIL_TS5097
+WORK_A1_NEW_PATCH_TESTS: PASS_15_OF_15_TARGETED
+WORK_A2_NEW_PATCH_APPLY: FAIL_ALLOWLIST_EOF_HUNK
+COMBINED_TREE: NOT_ESTABLISHED
+INTEGRATED_PRIVACY_AND_SEND_SAFETY: NOT_VERIFIED
+CORRECTIVE_A1: PREPARED_FOR_OWNER_FORWARD
+CORRECTIVE_A2: PREPARED_FOR_OWNER_FORWARD
+NEXT_OWNER: A1_AND_A2_ON_EXISTING_PRS
+NEXT_QA_OWNER: WORK_AFTER_REVISED_AUTHOR_BLOBS
+S3: NOT_READY
+PRODUCT_EXECUTION: HOLD
+REAL_ZALO: PROHIBITED
+PAID_API_USD: 0
+MAIN_MERGE: HOLD
+```
