@@ -26,7 +26,7 @@ documents:
   - id: automated-integrity-data-validator
     path: scripts/validate-data-integrity.py
     type: script
-    status: candidate-test-only
+    status: authorized-pending-verified-main-ci
     authoritative_for: read-only-repository-delta-integrity-checks
     updated_at: 2026-11-24
     sensitivity: public

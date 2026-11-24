@@ -58,7 +58,7 @@ Nội dung lịch sử được truy xuất khi cần bằng chứng qua [chỉ 
 
 ## 8. Vòng đời tri thức — chống phình kho (chỉ thị A0 24/11/2026)
 
-Chi tiết triển khai và validator: [Data Lifecycle & Context Management Protocol](DATA_LIFECYCLE_CONTEXT.md) (candidate).
+Chi tiết triển khai và validator: [Data Lifecycle & Context Management Protocol](DATA_LIFECYCLE_CONTEXT.md) (đã được A0 duyệt áp dụng về tổ chức).
 
 Phân loại ngay khi tạo tài liệu: **DURABLE** (giữ lâu dài: quy tắc có hiệu lực, kiến trúc/ADR, đặc tả sản phẩm, hướng dẫn vận hành đã xác minh, mã/test hữu ích, nghiệm thu cuối và bằng chứng bắt buộc); **ACTIVE** (giữ đến khi đóng: task, roadmap, blocker, checkpoint và trạng thái đang dùng); **TEMPORARY** (dọn khi đóng: bản nháp, log thử, báo cáo tiến độ trung gian, phương án bị loại, các bản cập nhật cùng một thử nghiệm). Không biến tài liệu tạm thành tri thức lâu dài theo mặc định. Owner, task ID, loại lưu trữ và điều kiện hết hạn ghi trong metadata hoặc hồ sơ task hiện có; không tạo biểu mẫu riêng chỉ để phân loại.
 

@@ -2,7 +2,9 @@
 """KNG negatives run with only stdlib."""
 import copy
 import json
+import re
 import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -19,7 +21,11 @@ RELS=['program/kng/validate.py','program/kng/test_validate.py','program/current.
 class Contract(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name)
-        for rel in RELS:
+        catalog_paths = re.findall(
+            r"^    path: (.+)$", (BASE / "CATALOG.yaml").read_text(encoding="utf-8"), re.M
+        )
+        partitions = [path.relative_to(BASE) for path in (BASE / "catalog").glob("*.yaml")]
+        for rel in {*RELS, *catalog_paths, *partitions, "scripts/validate-catalog-partitions.py"}:
             d=self.root/rel;d.parent.mkdir(parents=True,exist_ok=True)
             shutil.copyfile(BASE/rel,d)
     def tearDown(self):self.temp.cleanup()
@@ -46,7 +52,19 @@ class Contract(unittest.TestCase):
                 x['result_blob']='bf24d5726c8518617f02777aec6d271723946358'
                 break
         self.put(p,j)
-        self.err('INTEGRATED_BLOB_MISMATCH')
+        object_dir = subprocess.check_output(
+            ["git", "-C", str(BASE), "rev-parse", "--path-format=absolute", "--git-path", "objects"],
+            text=True,
+        ).strip()
+        subprocess.run(["git", "init", "-q", str(self.root)], check=True)
+        (self.root / ".git/objects/info/alternates").write_text(object_dir + "\n")
+        errors = validate(self.root)
+        self.assertEqual(["SOURCE_BLOB_MISMATCH"], [error["code"] for error in errors])
+        self.assertIn("historical integrated result CATALOG", errors[0]["detail"])
+
+    def test_missing_partition_fails_closed(self):
+        (self.root / "catalog/rules.yaml").unlink()
+        self.err("CATALOG_PARTITION_INVALID")
 
     def test_migration_base_valid_but_wrong(self):
         p='program/kng/migration.json';j=self.obj(p);j['proposed_updates'][0]['base_blob']='0'*40;self.put(p,j);self.err('MIGRATION_BLOB_MISMATCH')

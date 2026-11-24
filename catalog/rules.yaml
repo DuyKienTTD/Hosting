@@ -18,7 +18,7 @@ documents:
   - id: data-lifecycle-context-management
     path: rules/DATA_LIFECYCLE_CONTEXT.md
     type: rule
-    status: candidate
+    status: approved-organizational
     authoritative_for: data-lifecycle-context-and-task-linked-retrieval
     updated_at: 2026-11-24
     sensitivity: public

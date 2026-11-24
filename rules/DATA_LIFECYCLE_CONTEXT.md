@@ -1,13 +1,13 @@
 ---
 id: data-lifecycle-context-management
 type: rule
-status: candidate
+status: approved-organizational
 updated_at: 2026-11-24
 sensitivity: public
 ---
 # Data Lifecycle & Context Management Protocol
 
-Phạm vi: dữ liệu quản trị HOSTING trên GitHub, không phải chính sách lưu dữ liệu khách hàng hoặc quyền thao tác production. Kế thừa [quyết định A0](https://github.com/DuyKienTTD/Hosting/pull/59#issuecomment-7136686998). Protocol này là candidate; không cấp thêm quyền. [Workflow](AGENT_WORKFLOW.md) và [Security](REPOSITORY_SECURITY.md) giữ nguyên các gate.
+Phạm vi: dữ liệu quản trị HOSTING trên GitHub, không phải chính sách lưu dữ liệu khách hàng hoặc quyền thao tác production. Kế thừa [quyết định A0](https://github.com/DuyKienTTD/Hosting/pull/59#issuecomment-7136686998). A0 đã [phê duyệt áp dụng quy trình tổ chức](https://github.com/DuyKienTTD/Hosting/pull/59#issuecomment-7137006723). Kích hoạt kỹ thuật cần merge hợp lệ, xác minh main và CI main thành công tại đúng commit. Quy trình không cấp thêm quyền. [Workflow](AGENT_WORKFLOW.md) và [Security](REPOSITORY_SECURITY.md) giữ nguyên các gate.
 
 ## 1. Một nguồn chính cho mỗi thông tin
 - rules/: quy tắc; agents/: vai trò/năng lực; program/: roadmap, owner và tiến độ; tasks/: đặc tả; reports/: kết quả; reports/evidence/: bằng chứng; decisions/: quyền/quyết định; knowledge/: bài học tái sử dụng; checkpoints/: điểm tiếp tục phiên.
