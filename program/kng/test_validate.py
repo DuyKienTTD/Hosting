@@ -96,6 +96,9 @@ class Contract(unittest.TestCase):
         p='program/kng/migration.json';j=self.obj(p);j['proposed_updates'][0]['execution']='APPLY_NOW';self.put(p,j);self.err('UNSAFE_SHARED_WRITE')
     def test_duplicate_migration_target(self):
         p='program/kng/migration.json';j=self.obj(p);j['proposed_updates'].append(copy.deepcopy(j['proposed_updates'][0]));self.put(p,j);self.err('DUPLICATE_MIGRATION_TARGET')
+    def test_catalog_access_cannot_skip_machine_validation(self):
+        p='program/current.json';j=self.obj(p);j['catalog_access']='SKIP_VALIDATION';self.put(p,j);self.err('CATALOG_ACCESS_POLICY_MISMATCH')
+
     def test_missing_mandatory_rules(self):
         p='program/current.json';j=self.obj(p);j['must_read'].remove('rules/REPOSITORY_SECURITY.md');self.put(p,j);self.err('MISSING_MANDATORY_RULE')
     def test_invalid_sha(self):
