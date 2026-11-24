@@ -1,5 +1,6 @@
 schema_version: 1
-updated_at: 2026-11-23
+catalog_scope: durable_knowledge_only
+updated_at: 2026-11-24
 repository_visibility: public
 default_language: vi
 
@@ -15,7 +16,7 @@ entrypoints:
   contribution_workflow: CONTRIBUTING.md
   change_history: CHANGELOG.md
 
-# Read-only partition index; legacy CATALOG.yaml remains canonical during migration.
+# Read-only views of the durable CATALOG.yaml. Operational documents are linked directly from their tasks/roadmaps.
 partitions:
   knowledge:
     path: catalog/knowledge.yaml
@@ -23,21 +24,12 @@ partitions:
   script:
     path: catalog/scripts.yaml
     count: 3
-  report:
-    path: catalog/reports.yaml
-    count: 65
-  task:
-    path: catalog/tasks.yaml
-    count: 16
   inventory:
     path: catalog/inventory.yaml
     count: 1
   rule:
     path: catalog/rules.yaml
     count: 2
-  evidence:
-    path: catalog/evidence.yaml
-    count: 33
   decision:
     path: catalog/decisions.yaml
     count: 3

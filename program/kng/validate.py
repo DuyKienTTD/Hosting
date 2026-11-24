@@ -121,6 +121,9 @@ def validate(root, *, verify_objects=True):
                                         'historical integrated result '+x['path'])
                         if not actual_bytes.strip() or b'NOT_EFFECTIVE' not in actual_bytes and b'candidate' not in actual_bytes.lower():
                             reject('UNSAFE_CURRENT_RULE', x['path']+' must remain an explicitly non-effective candidate')
+                    elif x.get('path') == 'CATALOG.yaml' and b'catalog_scope: durable_knowledge_only' in actual_bytes.splitlines():
+                        validate_object('d549564de52429e777c68daf9df7a93df5f22f27', x['path'], x['result_blob'], 'historical integrated result CATALOG')
+                        # Current registry has its own strict partition/path checks below.
                     else:
                         reject('INTEGRATED_BLOB_MISMATCH', x.get('path')+' '+actual_hash)
 
@@ -164,6 +167,12 @@ def validate(root, *, verify_objects=True):
         ids=re.findall(r'^\s*- id:\s*(\S+)\s*$', catalog.read_text(encoding='utf8'),re.M)
         dupe=[k for k,n in Counter(ids).items() if n>1]
         if dupe:reject('DUPLICATE_CATALOG_ID',str(dupe))
+        if 'catalog_scope: durable_knowledge_only' in catalog.read_text(encoding='utf8').splitlines():
+            try:
+                import runpy
+                runpy.run_path(str(root/'scripts/validate-catalog-partitions.py'))['validate'](root)
+            except (ValueError, OSError, KeyError, AttributeError) as exc:
+                reject('CATALOG_PARTITION_INVALID', str(exc))
     return sorted(errors,key=lambda e:(e['code'],e['detail']))
 
 

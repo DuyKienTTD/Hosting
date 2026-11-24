@@ -287,6 +287,10 @@ def materialize_state(text, j, root='.'):
 def materialize_catalog(text, j, root='.'):
     _, _, _, report = verified_views(root, j)
     lines = []
+    # New durable registry never contains operational report entries.
+    # Keep historical schema behavior for old snapshots and fixtures.
+    if 'catalog_scope: durable_knowledge_only' in text.splitlines():
+        return _replace_markers(text, CAT_BEGIN, CAT_END, '', 'CATALOG')
     if report:
         lines = [
             '  - id: kng-derived-ws02-paper-report',
