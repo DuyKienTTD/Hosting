@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "target": "ES2023", "module": "NodeNext", "strict": true,
+    "outDir": "dist", "rootDir": "src", "jsx": "react-jsx",
+    "skipLibCheck": true, "types": ["node", "react", "react-dom"]
+  },
+  "include": ["src"]
+}

@@ -1,0 +1,27 @@
+---
+id: ttd-zalo-mvp01-dev-work
+type: report
+status: blocked-m0-runtime-acceptance
+owner: ChatGPT Work
+task_id: TTD-ZALO-MVP01-DEV
+lifecycle: DURABLE
+updated_at: 2026-11-25
+sensitivity: public
+---
+# TTD Zalo Assistant — M0 Foundation handoff
+
+TASK_ACKNOWLEDGED in recipient Work session. [Exact work order](https://github.com/DuyKienTTD/Hosting/blob/ab2eb39e657606a276d5bfe2dab03cae2fd1fc5e/tasks/2026-11-24-ttd-zalo-mvp01-dev.md) · [Execution authority](https://github.com/DuyKienTTD/Hosting/pull/51#issuecomment-7140477073) · [Approved-adjustments roadmap](https://github.com/DuyKienTTD/Hosting/blob/7e8d9b68715948bcfc53b2a2cf6543600e63db43/program/zalo-mvp01/ROADMAP.md).
+
+Base remote main 097c080cc6d7fb3ca36b1849d9c10375d5cbd67f, tree e323aa0a1a8b2d89e4c353cdf77f32c853ab153e. Branch dev/ttd-zalo-mvp01 was absent at preflight. Source and tests only under app write-set. HEAD/tree pinned in handoff. M0 foundation is reusable product code. M1–M5 remain gated on M0 acceptance.
+
+| Gate | Result |
+|---|---|
+| Toolchain and isolation | Node 24.22.3, npm 11.19.1, Linux x64. SQLite in-memory SELECT passed. unshare network namespace test to TEST-NET returned code 101 (ENETUNREACH). |
+| Dependency/build | npm lock SHA-256 a7fd482841c3e1c50c92daa945d89ac358567b86b141e7da9a8b30c027aba9b3. All 104 non-root lock records include npm registry resolution and integrity. Install scripts disabled; Electron/esbuild are the flagged lifecycle packages. Both Electron archives matched upstream v40.0.0 SHASUMS256.txt. TypeScript typecheck and build exit 0. |
+| Foundation | 5/5 native tests PASS (exit 0). Stable IDs, independent consent flags, denied defaults, wrong target/content, single fake receipt, SQLite reopen, STOP with separate connection during deferred preparation, opt-out, expiry, takeover, child exit after reservation and restart no replay. One fake receipt in positive test and zero in negatives. No real provider calls or charges. |
+| IPC / Electron | Sender/main-frame/document/arity and input validation, isolated sandboxed preload, CSP, web request allowlist, blocked permissions/downloads and navigation in source. Runtime IPC rejection and UI smoke BLOCKED. |
+| Linux desktop | Xvfb inside isolated namespace cannot establish Unix socket. Non-root Electron with headless Ozone fails at Chromium ProcessSingleton socket() EPERM. No sandbox disable flag used. No screenshot or UI PASS claimed. |
+| Windows x64 package | Offline package script exit 0; ZIP test passed and stock Windows x86-64 PE executable verified. ZIP SHA-256 d35d078cffa1a0fddd5787da0ac2d195af8f414c1ba2e9bbfbd4533e96687b8f. No Windows-native launch verified. |
+| Independent runtime | BLOCKED pending executable reviewer runner and ACK. Windows smoke instructions are in app README. |
+
+**Disposition M0_PARTIAL / RUNTIME_ACCEPTANCE_BLOCKED.** Next owner Coordinator for a verified sandbox-capable desktop runner and independent Windows launch/review. Run existing UI smoke with Chromium sandbox enabled in a blocked-egress environment that allows local IPC sockets, and record exact package hash, Windows build and screenshot/IPC results. Preserve branch for continuation on the same tree. No POC rerun, real Zalo, paid APIs, production, merge or new infrastructure.
