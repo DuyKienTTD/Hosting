@@ -9,7 +9,8 @@ export function setOfflineOutboundGuardRuntime(value: { readPolicy: PolicyReader
   runtime = value;
 }
 export class OutboundGuardDenied extends Error {
-  constructor(readonly reason: string) { super('outbound_guard_' + reason); }
+  readonly reason: string;
+  constructor(reason: string) { super('outbound_guard_' + reason); this.reason = reason; }
 }
 export async function sendWithOutboundGuard(input: {
   threadKey: string;
