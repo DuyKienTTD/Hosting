@@ -1,0 +1,53 @@
+diff --git a/src/zalo-bot/kenh-bot.ts b/src/zalo-bot/kenh-bot.ts
+--- a/src/zalo-bot/kenh-bot.ts
++++ b/src/zalo-bot/kenh-bot.ts
+@@ -53,10 +53,11 @@
+       // KHÔNG truyền `styles` (trường của zca-js, Bot API không hiểu) và KHÔNG
+       // truyền `quote` (Bot API không có trích dẫn - đo: không method nào). Bỏ
+       // lặng lẽ thay vì ném: cả hai là trang trí, mất vẫn trả lời được.
+-      return client.sendMessage(threadId, doan.text, null);
++      // Bot API excluded from personal-account PoC until separate transport fence.
++      throw new Error("offline_poc_bot_api_disabled");
+     },
+ 
+-    batDangNhap: (threadId) => {
++    batDangNhap: (_threadId) => { return () => {}; // Bot typing action disabled in offline PoC
+       // Vòng riêng thay vì `startTypingIndicator` của kênh cá nhân: hàm đó nhận
+       // `(threadId, threadType)` theo hình dạng zca-js. Nhưng GIỮ LẠI hai lưới
+       // đỡ của nó, vì thiếu chúng thì hỏng nặng hơn ở đây:
+diff --git a/src/scheduler/scheduled-job-cap-guard.ts b/src/scheduler/scheduled-job-cap-guard.ts
+--- a/src/scheduler/scheduled-job-cap-guard.ts
++++ b/src/scheduler/scheduled-job-cap-guard.ts
+@@ -96,6 +96,8 @@
+  * báo" nhầm ngày khiến hôm sau chạm trần thật lại không có thông báo nào.
+  */
+ async function notifyCapHit(job: ScheduledJob, target: ReplyTarget, timeZone: string, now: Date): Promise<void> {
++  // Notice has no validated requester/sender identity; fail closed until scoped.
++  return;
+   if (!reserveCapNotice(job.accountId, job.threadId, timeZone, now)) return; // job/tick khác đã giành hoặc đã gửi rồi
+   const notified = await sendCapNotice(job, target, timeZone, now);
+   if (!notified) revertCapNotice(job.accountId, job.threadId, timeZone, now);
+diff --git a/src/agent/tools/create-document-tools.ts b/src/agent/tools/create-document-tools.ts
+--- a/src/agent/tools/create-document-tools.ts
++++ b/src/agent/tools/create-document-tools.ts
+@@ -49,6 +49,8 @@
+   data: Buffer,
+   caption: string | undefined,
+ ): Promise<string> {
++  // Document delivery disabled: no approved stable attachment intent for this route.
++  throw Error("offline_poc_document_delivery_disabled");
+   const threadKey = `${ctx.account.id}:${ctx.message.threadId}`;
+   await withNamedTempFile(fileName, data, (filePath) =>
+     guiFileKemCaption(
+diff --git a/src/agent/tools/tai-video-tool.ts b/src/agent/tools/tai-video-tool.ts
+--- a/src/agent/tools/tai-video-tool.ts
++++ b/src/agent/tools/tai-video-tool.ts
+@@ -102,6 +102,8 @@
+       url: z.string().describe("Đường dẫn video TikTok, Facebook hoặc Instagram người dùng gửi"),
+     }),
+     execute: async ({ url }) => {
++      // Video source and send transport cannot be fenced here; fail closed before any fetch.
++      return ketQuaLoi("Offline PoC: video send disabled until atomic provider adapter is approved");
+       // Người dùng hiếm khi dán mỗi cái link. Bóc ở đây để luật whitelist luôn
+       // chạy trên chuỗi đã chuẩn hóa, thay vì phụ thuộc model bóc đúng.
+       const urlSach = timUrlTrongChu(url) ?? url.trim();
