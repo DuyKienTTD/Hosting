@@ -101,7 +101,7 @@ diff --git a/src/conversation/memory-edit-store.ts b/src/conversation/memory-edi
 diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filter.ts
 --- a/src/middleware/allowlist-filter.ts
 +++ b/src/middleware/allowlist-filter.ts
-@@ -4,17 +4,28 @@
+@@ -4,17 +4,29 @@
  export type FilterDecision = {
    /** Bot có chạy agent + trả lời không */
    respond: boolean;
@@ -117,6 +117,7 @@ diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filte
  
  const skip = (reason: string): FilterDecision => ({ respond: false, record: false, reason });
 -const recordOnly = (reason: string): FilterDecision => ({ respond: false, record: true, reason });
++/** A2 consumes the authoritative A1 snapshot. This type is NOT a second policy store. */
 +export type PrivacyConsent = {
 +  /** An independently verified, scoped snapshot; never infer from allowlist. */
 +  verified: true;
@@ -136,7 +137,7 @@ diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filte
  
  /**
   * Quyết định bot có trả lời tin nhắn này không - chạy TRƯỚC khi gọi LLM
-@@ -27,7 +38,18 @@
+@@ -27,7 +39,18 @@
    account: AccountConfig,
    msg: ParsedMessage,
    botEnabledForThread = true,
@@ -155,7 +156,7 @@ diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filte
    if (msg.isSelf) {
      return skip("tin của chính bot");
    }
-@@ -36,26 +58,33 @@
+@@ -36,26 +59,33 @@
      return skip("không có nội dung xử lý được (sticker/voice/...)");
    }
  
@@ -201,13 +202,101 @@ diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filte
 diff --git a/src/zalo/incoming-message-router.ts b/src/zalo/incoming-message-router.ts
 --- a/src/zalo/incoming-message-router.ts
 +++ b/src/zalo/incoming-message-router.ts
-@@ -77,12 +77,20 @@
+@@ -11,7 +11,8 @@
+   recordThreadActivity,
+   setThreadDisplayName,
+ } from "../conversation/thread-store.js";
+-import { shouldRespond } from "../middleware/allowlist-filter.js";
++import { shouldRespond, type PrivacyConsent } from "../middleware/allowlist-filter.js";
++import type { PolicyMutation } from "../agent/tools/atomic-send-admission.js";
+ import { enqueueMessage } from "../middleware/message-batcher.js";
+ import { createLogger } from "../shared/logger.js";
+ import { maybeNotifyBusyWait } from "./busy-wait-notice.js";
+@@ -26,6 +27,48 @@
+ const log = createLogger("message-router");
+ 
+ /**
++ * Read-only snapshot injected by A1-owned canonical policy authority.
++ * No policy table, writer, local cache, or implicit consent is allowed here.
++ * A1 MUST provide an authoritative reader before enabling behavior.
++ */
++export type InboundPolicyReader = (scope: {
++  accountId: string; senderId: string; threadId: string;
++  threadType: "dm" | "group";
++}) => (PolicyMutation & { passiveGroup?: boolean }) | null;
++
++export function readInboundConsent(
++  config: AccountConfig, msg: ParsedMessage, readPolicy?: InboundPolicyReader,
++): PrivacyConsent | undefined {
++  if (!readPolicy || !config.id || !msg.senderId || !msg.threadId) return undefined;
++  try {
++    const snapshot = readPolicy({
++      accountId: config.id, senderId: msg.senderId, threadId: msg.threadId,
++      threadType: msg.isGroup ? "group" : "dm",
++    });
++    if (!snapshot || snapshot.accountId !== config.id || snapshot.senderId !== msg.senderId ||
++        snapshot.threadId !== msg.threadId ||
++        snapshot.threadType !== (msg.isGroup ? "group" : "dm") ||
++        !snapshot.verified || snapshot.optedOut || snapshot.takeover || snapshot.stopped ||
++        !snapshot.running || !Number.isSafeInteger(snapshot.revision) || snapshot.revision < 1 ||
++        !Number.isSafeInteger(snapshot.expiresAtMs) || snapshot.expiresAtMs <= Date.now()) return undefined;
++    // A1 has not yet added passiveGroup to its current PolicyMutation;
++    // default deny on that extra permission until the canonical schema supplies it.
++    return {
++      verified: true, accountId: snapshot.accountId, senderId: snapshot.senderId,
++      threadId: snapshot.threadId, threadType: msg.threadType,
++      revision: snapshot.revision, expiresAt: snapshot.expiresAtMs,
++      revoked: snapshot.optedOut, humanTakeover: snapshot.takeover,
++      stopped: snapshot.stopped || !snapshot.running,
++      respond: snapshot.respond, retain: snapshot.retain,
++      passiveGroup: snapshot.passiveGroup === true,
++    };
++  } catch {
++    return undefined;
++  }
++}
++
++
++/**
+  * Mọi tin đến (kể cả tin sẽ bị lọc): ghi contact + thread ("auto-collected").
+  * Đọc config mới nhất từ DB mỗi tin để sửa policies từ dashboard ăn ngay.
+  */
+@@ -34,16 +77,17 @@
+   api: API,
+   selfId: string,
+   raw: unknown,
++  readPolicy?: InboundPolicyReader,
+ ): void {
+   const config = getAccount(accountId);
+   if (!config) return;
+ 
+   const msg = parseIncomingMessage(config.id, selfId, raw, getTuning("ZALO_IMAGE_QUALITY"));
+ 
+-  const ketQua = nhanVaGhiTinDen(config, api, msg);
++  const ketQua = nhanVaGhiTinDen(config, api, msg, readPolicy);
+   const layBu = layBuCuaAccount(config.id);
+   // Tin trực tiếp mới (không trùng, không self) đẩy mốc lấy bù khi hàng chờ Zalo đã bắt kịp
+-  if (layBu && ketQua !== "trung" && !msg.isSelf && msg.threadId) layBu.khiTinTrucTiep(msg);
++  if (layBu && (ketQua === "tra-loi" || ketQua === "ghi-thu-dong") && !msg.isSelf && msg.threadId) layBu.khiTinTrucTiep(msg);
+   if (ketQua !== "tra-loi") return;
+   // Người này nhắn lại và sắp được trả lời: họ biết bot chạy lại rồi, nên tin lấy
+   // bù cũ hơn CỦA HỌ bỏ hẳn - không trả lời riêng, không xin lỗi (vẫn trong lịch sử).
+@@ -65,6 +109,7 @@
+   config: AccountConfig,
+   api: API,
+   msg: ParsedMessage,
++  readPolicy?: InboundPolicyReader,
+ ): "trung" | "bo" | "ghi-thu-dong" | "tra-loi" {
+   // Cùng một tin tới hai lần (cmd 501 và 551; trực tiếp và trong trang lấy bù):
+   // bỏ lần sau, kể cả biên nhận - ghi hai dòng là model đọc hai lần, trả lời hai lần
+@@ -77,12 +122,21 @@
    // ở ngay dòng dưới, không cảnh báo ở đây thì không còn chỗ nào biết
    reportPayloadAnomalies(config.id, msg);
  
 +  // Fail closed before ANY contact/thread write, group-name network call,
 +  // history/media persistence, receipt, queue or agent.
-+  const decision = shouldRespond(config, msg, isBotEnabled(config.id, msg.threadId));
++  const consent = readInboundConsent(config, msg, readPolicy);
++  const decision = shouldRespond(config, msg, isBotEnabled(config.id, msg.threadId), consent);
 +  if (!decision.respond && !decision.record) return "bo";
 +  // Until downstream cache/replay/summary contracts are audited, response without
 +  // retention is not dispatched. The two authorizations remain distinct.
@@ -223,7 +312,7 @@ diff --git a/src/zalo/incoming-message-router.ts b/src/zalo/incoming-message-rou
      recordContactActivity(config.id, msg.senderId, msg.senderName);
      recordThreadActivity({
        accountId: config.id,
-@@ -96,7 +104,9 @@
+@@ -96,7 +150,9 @@
      }
    }
  
@@ -417,3 +506,92 @@ diff --git a/src/middleware/allowlist-filter.test.ts b/src/middleware/allowlist-
 +    assert.deepEqual([d.respond,d.record],[false,false]);
 +  });
 +});
+diff --git a/src/zalo/offline-replay/tiep-nhan-tin-lay-bu.ts b/src/zalo/offline-replay/tiep-nhan-tin-lay-bu.ts
+--- a/src/zalo/offline-replay/tiep-nhan-tin-lay-bu.ts
++++ b/src/zalo/offline-replay/tiep-nhan-tin-lay-bu.ts
+@@ -3,7 +3,7 @@
+ import { getTuning } from "../../config/runtime-tuning-settings.js";
+ import type { HangChoLayBu } from "../../conversation/offline-replay-cursor-store.js";
+ import { createLogger } from "../../shared/logger.js";
+-import { nhanVaGhiTinDen } from "../incoming-message-router.js";
++import { nhanVaGhiTinDen, type InboundPolicyReader } from "../incoming-message-router.js";
+ import { parseIncomingMessage } from "../zalo-message-parser.js";
+ import { doiSangMilli } from "../zalo-message-timestamp.js";
+ import type { HangChoTraLoiTre } from "./hang-cho-tra-loi-tre.js";
+@@ -48,6 +48,7 @@
+     hangCho: HangChoTraLoiTre;
+     now: Date;
+     tranTuoiGio: number;
++    readPolicy?: InboundPolicyReader;
+   },
+   hangChoZalo: HangChoLayBu,
+   tinTho: Record<string, unknown>,
+@@ -86,7 +87,7 @@
+ 
+     msg.layBu = true;
+     if (lech >= getTuning("LAY_BU_NGUONG_XIN_LOI_PHUT") * 60_000) msg.denTre = true;
+-    const kq = nhanVaGhiTinDen(ctx.config, ctx.api, msg);
++    const kq = nhanVaGhiTinDen(ctx.config, ctx.api, msg, ctx.readPolicy);
+     if (kq !== "tra-loi") return kq;
+     ctx.hangCho.them(threadKey, msg);
+     return "cho-tra-loi";
+diff --git a/src/zalo/offline-replay/lay-bu-cho-account.ts b/src/zalo/offline-replay/lay-bu-cho-account.ts
+--- a/src/zalo/offline-replay/lay-bu-cho-account.ts
++++ b/src/zalo/offline-replay/lay-bu-cho-account.ts
+@@ -7,6 +7,8 @@
+ import { createLogger } from "../../shared/logger.js";
+ import { kenhCaNhan } from "../kenh-ca-nhan.js";
+ import { processBatch } from "../message-turn-processor.js";
++import type { InboundPolicyReader } from "../incoming-message-router.js";
++import { readInboundConsent } from "../incoming-message-router.js";
+ import { ganAnhVaoHistory } from "../record-incoming-message.js";
+ import type { ParsedMessage } from "../zalo-message-parser.js";
+ import { docTrangLayBu, LENH_LAY_BU } from "./doc-trang-lay-bu.js";
+@@ -30,7 +32,7 @@
+   config: AccountConfig,
+   api: API,
+   selfId: string,
+-  tiem: { enqueue?: (threadKey: string, msg: ParsedMessage) => boolean } = {},
++  tiem: { enqueue?: (threadKey: string, msg: ParsedMessage) => boolean; readPolicy?: InboundPolicyReader } = {},
+ ): LayBuCuaAccount | null {
+   if (config.loai === "bot") return null;
+   const log = createLogger(`lay-bu:${config.id}`);
+@@ -40,17 +42,23 @@
+     accountId: config.id,
+     enqueue:
+       tiem.enqueue ??
+-      ((threadKey, msg) =>
+-        enqueueMessage(threadKey, msg, (batch) => {
++      ((threadKey, msg) => {
++        const c = getAccount(config.id);
++        if (!c || !readInboundConsent(c, msg, tiem.readPolicy)?.respond) return false;
++        return enqueueMessage(threadKey, msg, (batch) => {
+           // Account đã bị xóa trong lúc batch trễ còn đọng: bỏ lượt, không chạy bằng config cũ
+           const c = getAccount(config.id);
+           return c ? processBatch(c, kenhCaNhan(api), batch) : Promise.resolve();
+-        })),
++        });
++      }),
+     gianCachMs: () => [getTuning("LAY_BU_GIAN_CACH_MIN_GIAY") * 1000, getTuning("LAY_BU_GIAN_CACH_MAX_GIAY") * 1000],
+     luuAnhTinBoQua: (msgs) => {
+-      if (!msgs.some((m) => m.images.length > 0)) return;
+-      void persistBatchImages(config.id, msgs)
+-        .then(() => ganAnhVaoHistory(msgs))
++      const c = getAccount(config.id);
++      if (!c) return;
++      const allowed = msgs.filter((m) => readInboundConsent(c, m, tiem.readPolicy)?.retain === true);
++      if (!allowed.some((m) => m.images.length > 0)) return;
++      void persistBatchImages(config.id, allowed)
++        .then(() => ganAnhVaoHistory(allowed))
+         .catch((err) => log.debug({ err }, "Không gắn được ảnh tin lấy bù bị bỏ lượt"));
+     },
+     tranTinMoiNguoi: TRAN_TIN_DON,
+@@ -61,7 +69,7 @@
+     accountId: config.id,
+     guiLenh: (cmd, data) => api.listener.sendWs({ version: 1, cmd, subCmd: 1, data }),
+     onTin: (hangChoZalo, tinTho) => {
+-      const ctx = { config: cauHinh(), api, selfId, hangCho, now: new Date(), tranTuoiGio: getTuning("LAY_BU_TRAN_TUOI_GIO") };
++      const ctx = { config: cauHinh(), api, selfId, hangCho, now: new Date(), tranTuoiGio: getTuning("LAY_BU_TRAN_TUOI_GIO"), readPolicy: tiem.readPolicy };
+       const kq = tiepNhanTinLayBu(ctx, hangChoZalo, tinTho);
+       dem[kq] = (dem[kq] ?? 0) + 1;
+     },
