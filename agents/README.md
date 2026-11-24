@@ -1,6 +1,6 @@
 # TTD METAL — Danh bạ năng lực và nguồn hồ sơ
 
-**Chỉ mục năng lực, KHÔNG phải nguồn giao nhiệm vụ hiện hành.** Nguồn duy nhất về priority/role/status khi candidate được phê duyệt là [program/current.json](../program/current.json); phải đọc đầy đủ [AGENTS](../AGENTS.md), [workflow](../rules/AGENT_WORKFLOW.md), [repository security](../rules/REPOSITORY_SECURITY.md), [STATE](../STATE.md), các mục CATALOG liên quan đã được công cụ kiểm toàn vẹn, và task thật. Trên `main` quy tắc hiện hành vẫn có hiệu lực đến khi A0 duyệt merge.
+Danh bạ tra cứu hồ sơ, không cấp quyền. [AGENTS](../AGENTS.md) quy định ba nhóm đọc ban đầu và nguồn theo thao tác. Điều phối, Work, A2 và A0 dùng các phần vai trò trong [hồ sơ ChatGPT](chatgpt.md). [Trợ lý A0](a0-assistant.md) dùng hồ sơ riêng về thẩm định độc lập và phạm vi đại diện.
 
 **KNG-01 ONLY:** A1 viết code/tích hợp trên nhánh được giao; Work QA độc lập; Điều phối điều hành, A0 duyệt cuối. Không tự kích hoạt G0/UC01/infra/media/Ads, Hostinger hay Codex. Quyền kỹ thuật từ hồ sơ là session-scoped, không phải authorization. Không coi GitHub comment là Work ACK, không xác nhận production/live từ dữ liệu ngày 23/11.
 

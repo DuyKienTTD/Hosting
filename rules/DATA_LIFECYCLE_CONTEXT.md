@@ -24,7 +24,7 @@ Metadata mới khi phù hợp: lifecycle, owner, task_id, review_on (YYYY-MM-DD)
 Quyền, STOP, an toàn, tài chính, kiểm toán, rollback, QA độc lập, regression và dependency còn dùng phải giữ. Trước xóa: owner có quyền, kiểm tham chiếu ngược và nguồn ngoài repo khi cần, xác nhận retention, pin commit phục hồi, diff/QA và readback. Không rewrite Git history. Không coi xóa file là thu hồi bí mật.
 
 ## 3. Context theo nhiệm vụ
-Bắt đầu: xác minh main HEAD, quyết định mới nhất, đọc đủ rules/security/STATE/hồ sơ vai trò/đặc tả chính xác; CATALOG chỉ đọc mục cần. Nguồn dùng để ra quyết định phải đọc đủ; nếu truncation, chia khoảng dòng liên tục theo cùng SHA, kiểm đầu/cuối; PARTIAL_READ nếu thiếu. Không nạp toàn bộ báo cáo lịch sử hoặc toàn kho theo mặc định.
+Khởi động, điều kiện đọc sâu và tái sử dụng theo [AGENTS](../AGENTS.md). Đọc protocol này khi lưu, tái sử dụng, chuyển hoặc xóa dữ liệu quản trị.
 Trong task: READ_SET theo dependency, pin nguồn; dùng evidence tương đương, không rerun nếu không có change trigger. Tách facts, assumptions, authority, evidence và open blockers. Context ngắn gồm mục tiêu, quyền/STOP, SHA, trạng thái, evidence links, next action; không chép toàn chat. Không tự đặt giới hạn token khiến bỏ sót bảo mật. Đo byte/tài liệu thực tế; byte không đồng nghĩa token hoặc chi phí.
 Khi chuyển phiên: checkpoint tối thiểu trong nguồn đang dùng hoặc file riêng nếu cần, chỉ rõ completed, pending, first action, next owner và links; không tạo thêm checkpoint khi không có thay đổi. PREPARED không phải SENT/ACK.
 
