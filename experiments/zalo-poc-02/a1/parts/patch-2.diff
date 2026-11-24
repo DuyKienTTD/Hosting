@@ -1,0 +1,130 @@
+diff --git a/src/agent/tools/send-file-tool.ts b/src/agent/tools/send-file-tool.ts
+--- a/src/agent/tools/send-file-tool.ts
++++ b/src/agent/tools/send-file-tool.ts
+@@ -1,4 +1,5 @@
+ import fs from "node:fs";
++import { createHash } from "node:crypto";
+ import path from "node:path";
+ import { tool } from "ai";
+ import { z } from "zod";
+@@ -39,6 +40,7 @@
+       message.threadType,
+       filePath,
+       caption,
++      message.msgId ? `file_${account.id}_${message.msgId}_${createHash("sha256").update(filePath + "|" + (caption ?? "")).digest("hex").slice(0, 16)}` : undefined,
+     );
+     ghiNhanDaGui?.(ghiChuDaGuiFile(tenHienThi, caption));
+   };
+diff --git a/src/agent/tools/add-reaction-tool.ts b/src/agent/tools/add-reaction-tool.ts
+--- a/src/agent/tools/add-reaction-tool.ts
++++ b/src/agent/tools/add-reaction-tool.ts
+@@ -1,4 +1,5 @@
+ import { tool } from "ai";
++import { sendWithOutboundGuard } from "./outbound-guard-runtime.js";
+ import { Reactions } from "zca-js";
+ import { z } from "zod";
+ import type { ToolContext } from "./index.js";
+@@ -17,7 +18,7 @@
+ };
+ 
+ export function createAddReactionTool(ctx: ToolContext) {
+-  const { message } = ctx;
++  const { message, account } = ctx;
+   const api = apiCaNhan(ctx);
+   return tool({
+     description:
+@@ -30,10 +31,15 @@
+     execute: async ({ reaction }) => {
+       if (!message.msgId) return ketQuaLoi("Không thả được reaction: tin nhắn không có msgId");
+       try {
+-        await api.addReaction(REACTION_MAP[reaction], {
++        await sendWithOutboundGuard({
++          threadKey: `${account.id}:${message.threadId}`, threadId: message.threadId,
++          threadType: Number(message.threadType),
++          stableKey: `reaction_${account.id}_${message.msgId}_${reaction}`,
++          send: () => api.addReaction(REACTION_MAP[reaction], {
+           data: { msgId: message.msgId, cliMsgId: message.cliMsgId },
+           threadId: message.threadId,
+           type: message.threadType,
++        }),
+         });
+         return `Đã thả reaction ${reaction}`;
+       } catch (err) {
+diff --git a/src/agent/tools/tag-member-tool.ts b/src/agent/tools/tag-member-tool.ts
+--- a/src/agent/tools/tag-member-tool.ts
++++ b/src/agent/tools/tag-member-tool.ts
+@@ -1,4 +1,6 @@
+ import { tool } from "ai";
++import { createHash } from "node:crypto";
++import { sendWithOutboundGuard } from "./outbound-guard-runtime.js";
+ import { z } from "zod";
+ import { enqueueSend } from "../../middleware/rate-limiter.js";
+ import type { ToolContext } from "./index.js";
+@@ -35,7 +37,9 @@
+       try {
+         const mentionText = `@${memberName}`;
+         await enqueueSend(`${account.id}:${message.threadId}`, () =>
+-          api.sendMessage(
++          sendWithOutboundGuard({ threadKey: `${account.id}:${message.threadId}`, threadId: message.threadId, threadType: Number(message.threadType),
++            stableKey: message.msgId ? `tag_${account.id}_${message.msgId}_${createHash("sha256").update(memberId + "|" + noiDung).digest("hex").slice(0,16)}` : undefined,
++            send: () => api.sendMessage(
+             {
+               msg: `${mentionText} ${noiDung}`,
+               mentions: [{ pos: 0, uid: memberId, len: mentionText.length }],
+@@ -43,6 +47,7 @@
+             message.threadId,
+             message.threadType,
+           ),
++          }),
+         );
+         ghiNhanDaGui?.(ghiChuDaGuiChu(`${mentionText} ${noiDung}`));
+         return `Đã gửi tin nhắn tag ${memberName}`;
+diff --git a/src/agent/tools/create-image-tool.ts b/src/agent/tools/create-image-tool.ts
+--- a/src/agent/tools/create-image-tool.ts
++++ b/src/agent/tools/create-image-tool.ts
+@@ -1,4 +1,6 @@
+ import { tool } from "ai";
++import { createHash } from "node:crypto";
++import { sendWithOutboundGuard } from "./outbound-guard-runtime.js";
+ import { z } from "zod";
+ import { isImageGenConfigured } from "../../config/runtime-image-settings.js";
+ import { loadStoredImage } from "../../conversation/media-store.js";
+@@ -135,7 +137,9 @@
+ 
+       // Chỉ báo sau khi chắc chắn sẽ vẽ thật
+       await enqueueSend(threadKey, () =>
+-        api.sendMessage(
++        sendWithOutboundGuard({ threadKey, threadId: ctx.message.threadId, threadType: Number(ctx.message.threadType),
++          stableKey: ctx.message.msgId ? `image_notice_${ctx.account.id}_${ctx.message.msgId}` : undefined,
++          send: () => api.sendMessage(
+           {
+             // "1-3 phút" chứ không phải "1 phút": đo thật 60 giây cho ảnh
+             // thường, 135 giây cho trang nhiều chữ. Hứa 1 phút là hứa hụt.
+@@ -146,6 +150,7 @@
+           ctx.message.threadId,
+           ctx.message.threadType,
+         ),
++        }),
+       )
+         .then(() => {
+           // Câu báo trước cũng là tin THẬT người ta đọc được - vào history như
+@@ -165,7 +170,10 @@
+             // hụt vừa rồi đã tiêu mất một suất rồi. Bắt trả giá hai suất cho
+             // một tấm ảnh là phạt người dùng vì lỗi của provider.
+             await enqueueSend(threadKey, () =>
+-              api.sendMessage({ msg: TIN_THU_LAI }, ctx.message.threadId, ctx.message.threadType),
++              sendWithOutboundGuard({ threadKey, threadId: ctx.message.threadId, threadType: Number(ctx.message.threadType),
++                stableKey: ctx.message.msgId ? `image_retry_notice_${ctx.account.id}_${ctx.message.msgId}` : undefined,
++                send: () => api.sendMessage({ msg: TIN_THU_LAI }, ctx.message.threadId, ctx.message.threadType),
++              }),
+             );
+             ctx.ghiNhanDaGui?.(ghiChuDaGuiChu(TIN_THU_LAI));
+           },
+@@ -179,6 +187,7 @@
+             ctx.message.threadType,
+             filePath,
+             caption,
++            ctx.message.msgId ? `image_attachment_${ctx.account.id}_${ctx.message.msgId}_${createHash("sha256").update(image.data).digest("hex").slice(0,16)}` : undefined,
+           ),
+         );
+         ctx.ghiNhanDaGui?.(ghiChuDaGuiAnh(1, caption));
