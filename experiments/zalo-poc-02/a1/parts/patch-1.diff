@@ -8,16 +8,17 @@ diff --git a/src/zalo/send-reply-in-parts.ts b/src/zalo/send-reply-in-parts.ts
  import { createLogger } from "../shared/logger.js";
  import { trichDanTrongNganSach } from "./reply-quote.js";
  import { chiaTheoNganSachByte, demDoanBoDinhDang } from "./split-styled-message.js";
-@@ -80,6 +81,8 @@
+@@ -80,6 +81,9 @@
    mangDinhDang?: boolean;
    /** Khóa hàng đợi gửi của rate-limiter: `${accountId}:${threadId}` */
    threadKey: string;
 +  /** Stable per-turn/job id. Missing => fail closed for offline POC. */
 +  sendGuardRequestId?: string;
++  senderId?: string;
    threadId: string;
    threadType: ThreadType;
    /**
-@@ -116,8 +119,13 @@
+@@ -116,8 +120,13 @@
    text: string,
    styles?: Style[],
    quote?: SendMessageQuote,
@@ -25,14 +26,14 @@ diff --git a/src/zalo/send-reply-in-parts.ts b/src/zalo/send-reply-in-parts.ts
  ): Promise<unknown> {
 -  return enqueueSend(target.threadKey, () => target.guiMotDoan({ text, styles, quote }));
 +  return enqueueSend(target.threadKey, () => sendWithOutboundGuard({
-+    threadKey: target.threadKey, threadId: target.threadId, threadType: Number(target.threadType),
++    threadKey: target.threadKey, threadId: target.threadId, threadType: Number(target.threadType), senderId: target.senderId,
 +    stableKey: target.sendGuardRequestId ? `${target.sendGuardRequestId}:${segmentKey}` : undefined,
 +    send: () => target.guiMotDoan({ text, styles, quote }),
 +  }));
  }
  
  /**
-@@ -184,9 +192,10 @@
+@@ -184,9 +193,10 @@
    text: string,
    styles: Style[],
    quote?: SendMessageQuote,
@@ -44,7 +45,7 @@ diff --git a/src/zalo/send-reply-in-parts.ts b/src/zalo/send-reply-in-parts.ts
    } catch (err) {
      const coCaiDeBo = styles.length > 0 || quote !== undefined;
      if (!coCaiDeBo || !laLoiMayChuTuChoi(err)) throw err;
-@@ -197,7 +206,7 @@
+@@ -197,7 +207,7 @@
        { threadId: target.threadId, soStyle: styles.length, coTrichDan: quote !== undefined, err },
        "Zalo từ chối tin - gửi lại dạng chữ trơn, không định dạng và không trích dẫn",
      );
@@ -53,7 +54,7 @@ diff --git a/src/zalo/send-reply-in-parts.ts b/src/zalo/send-reply-in-parts.ts
    }
  }
  
-@@ -286,7 +295,7 @@
+@@ -286,7 +296,7 @@
      try {
        // Chỉ đoạn ĐẦU trích dẫn: các đoạn sau là phần nối tiếp của cùng một câu
        // trả lời, trích lại ở mỗi đoạn thì khối trích dẫn lặp đầy màn hình
@@ -62,7 +63,7 @@ diff --git a/src/zalo/send-reply-in-parts.ts b/src/zalo/send-reply-in-parts.ts
        delivered.push(part.text);
      } catch (err) {
        log.error(
-@@ -342,7 +351,7 @@
+@@ -342,7 +352,7 @@
    lanBaoLoiCuoi.set(khoa, bayGio);
  
    try {
@@ -74,11 +75,12 @@ diff --git a/src/zalo/send-reply-in-parts.ts b/src/zalo/send-reply-in-parts.ts
 diff --git a/src/zalo/message-turn-processor.ts b/src/zalo/message-turn-processor.ts
 --- a/src/zalo/message-turn-processor.ts
 +++ b/src/zalo/message-turn-processor.ts
-@@ -87,6 +87,7 @@
+@@ -87,6 +87,8 @@
      // khác nhau: reaction là phản hồi tin VỪA tới, trích dẫn là chỉ ra tin
      // ĐANG được trả lời. `trichDanTuTin` tự bỏ qua chat riêng.
      quote: trichDanTuTin(batch[0]!),
 +    sendGuardRequestId: batch[0]!.msgId ? `chat_${config.id}_${latest.threadId}_${batch[0]!.msgId}` : undefined,
++    senderId: latest.senderId,
    };
  
    // Mảng do CHỖ NÀY sở hữu: agent-loop chỉ push vào. Lượt ném lỗi vẫn còn đủ
@@ -104,27 +106,28 @@ diff --git a/src/agent/tools/send-attachment-with-caption.ts b/src/agent/tools/s
  import { createLogger } from "../../shared/logger.js";
  import { laLoiMayChuTuChoi } from "../../zalo/send-reply-in-parts.js";
  import { tinKemFile } from "./clean-tool-caption.js";
-@@ -25,12 +26,13 @@
+@@ -25,12 +26,14 @@
    threadType: ThreadType,
    filePath: string,
    caption: string | undefined,
 +  requestId?: string,
++  senderId?: string,
  ): Promise<void> {
    const tin = tinKemFile(caption);
  
    await enqueueSend(threadKey, async () => {
      try {
 -      return await api.sendMessage({ ...tin, attachments: [filePath] }, threadId, threadType);
-+      return await sendWithOutboundGuard({ threadKey, threadId, threadType: Number(threadType), stableKey: requestId ? `${requestId}:attachment` : undefined, send: () => api.sendMessage({ ...tin, attachments: [filePath] }, threadId, threadType) });
++      return await sendWithOutboundGuard({ threadKey, threadId, threadType: Number(threadType), senderId, stableKey: requestId ? `${requestId}:attachment` : undefined, send: () => api.sendMessage({ ...tin, attachments: [filePath] }, threadId, threadType) });
      } catch (err) {
        // Không có style để bỏ, hoặc lỗi đường truyền (tin có thể đã tới) thì
        // KHÔNG gửi lại - gửi lại lúc đó là nhân đôi file trước mặt người dùng.
-@@ -40,7 +42,7 @@
+@@ -40,7 +43,7 @@
          { threadId, soStyle: tin.styles.length, err },
          "Zalo từ chối caption có định dạng - gửi lại dạng chữ trơn",
        );
 -      return await api.sendMessage({ msg: tin.msg, attachments: [filePath] }, threadId, threadType);
-+      return await sendWithOutboundGuard({ threadKey, threadId, threadType: Number(threadType), stableKey: requestId ? `${requestId}:attachment_fallback` : undefined, send: () => api.sendMessage({ msg: tin.msg, attachments: [filePath] }, threadId, threadType) });
++      return await sendWithOutboundGuard({ threadKey, threadId, threadType: Number(threadType), senderId, stableKey: requestId ? `${requestId}:attachment_fallback` : undefined, send: () => api.sendMessage({ msg: tin.msg, attachments: [filePath] }, threadId, threadType) });
      }
    });
  }
