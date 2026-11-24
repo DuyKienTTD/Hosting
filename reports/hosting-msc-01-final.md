@@ -19,11 +19,14 @@ Compare the same synthetic task envelope for each role with the baseline/current
 | Role | Profile | Governance old → new | Reduction | With unchanged task proxy |
 |---|---|---:|---:|---:|
 | A1 | agents/a1.md | 32039 → 4980 | 84.46% | 44586 → 17527 |
-| A2, A0, Trợ lý A0, Điều phối, Work (each) | agents/chatgpt.md | 28423 → 5284 | 81.41% | 40970 → 17831 |
+| A2, A0, Điều phối, Work (each) | agents/chatgpt.md | 28423 → 5240 | 81.56% | 40970 → 17787 |
+| Trợ lý A0 | agents/a0-assistant.md (pinned profile → separate MSC profile) | 39331 → 6221 | 84.18% | 51878 → 18768 |
 | Codex | agents/codex.md | 31344 → 5009 | 84.02% | 43891 → 17556 |
 | Hermes | agents/hermes.md | 28454 → 4950 | 82.60% | 41001 → 17497 |
 | Hostinger | agents/hostinger.md | 33307 → 4979 | 85.05% | 45854 → 17526 |
 | n8n execution component (conservative profile comparison) | agents/n8n.md | 25165 → 4901 | 80.52% | 37712 → 17448 |
+
+Trợ lý A0 baseline = 23,480 common bytes + 15851 bytes of the [appointed role profile](https://github.com/DuyKienTTD/Hosting/blob/819249e1c08875f23041502c604c47928bf1bbdc/agents/a0-assistant.md) (blob `eaed4d33e3862d9a08a476bc288e7123431bbf25`), counted once despite its reread instruction. The role-specific legacy clause also names the full baseline CATALOG (6049 bytes). The primary denominator excludes it under the general index-only policy and to avoid inflating savings. Literal legacy route sensitivity including CATALOG: 45380 → 6221 bytes (86.29%). Candidate uses AGENTS and the separate role profile; detail and authority links are triggered when needed.
 
 Reduction = 100 × (before − after) / before. These are initial governance bytes, not whole-task reads or measured token/cost reductions. Triggered policy is additive per scenario. Warm reuse can avoid retransmission of verified unchanged policy; the live authority and state checks still run. No quantified warm savings.
 

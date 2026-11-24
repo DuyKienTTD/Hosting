@@ -1,6 +1,6 @@
 # TTD METAL — Danh bạ năng lực và nguồn hồ sơ
 
-Danh bạ tra cứu hồ sơ, không cấp quyền. [AGENTS](../AGENTS.md) quy định ba nhóm đọc ban đầu và nguồn theo thao tác. Điều phối, Work, A2, A0 và Trợ lý A0 dùng các phần vai trò trong [hồ sơ ChatGPT](chatgpt.md).
+Danh bạ tra cứu hồ sơ, không cấp quyền. [AGENTS](../AGENTS.md) quy định ba nhóm đọc ban đầu và nguồn theo thao tác. Điều phối, Work, A2 và A0 dùng các phần vai trò trong [hồ sơ ChatGPT](chatgpt.md). [Trợ lý A0](a0-assistant.md) dùng hồ sơ riêng về thẩm định độc lập và phạm vi đại diện.
 
 **KNG-01 ONLY:** A1 viết code/tích hợp trên nhánh được giao; Work QA độc lập; Điều phối điều hành, A0 duyệt cuối. Không tự kích hoạt G0/UC01/infra/media/Ads, Hostinger hay Codex. Quyền kỹ thuật từ hồ sơ là session-scoped, không phải authorization. Không coi GitHub comment là Work ACK, không xác nhận production/live từ dữ liệu ngày 23/11.
 

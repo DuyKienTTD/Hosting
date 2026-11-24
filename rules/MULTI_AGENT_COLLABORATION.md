@@ -21,8 +21,8 @@ Một AI có thể giữ nhiều vai trò, nhưng task phải ghi rõ vai trò �
 
 ## 2. Luồng bàn giao
 
-1. Đọc `README.md`, `PROJECT.md`, `STATE.md`, `CATALOG.yaml` và rule liên quan.
-2. Đọc task hiện tại và các report/evidence được liên kết.
+1. Theo [AGENTS](../AGENTS.md) trên main đã xác minh. Khi MSC có hiệu lực, đọc ba nhóm ban đầu và lấy nguồn chi tiết theo điều kiện trong AGENTS.
+2. Đọc đầy đủ report/evidence được liên kết khi chúng là căn cứ cho thao tác hoặc kết luận.
 3. Xác định mục tiêu, phạm vi, giả định, rủi ro và acceptance criteria.
 4. Thực hiện phần việc nhỏ nhất có thể kiểm chứng.
 5. Ghi kết quả, evidence, blocker và bước tiếp theo vào task/report.
