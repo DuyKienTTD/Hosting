@@ -307,3 +307,5 @@ Nguồn gốc PR31 tại [commit bất biến](https://github.com/DuyKienTTD/Hos
 - Kiểm thử đọc range: workflow 3/3, CATALOG 12/12 khớp SHA/nội dung. KNG historical result_blob validator dự kiến không khớp hai file mới; runtime QA chưa chạy, phải giải quyết trước tích hợp.
 
 - A0 bổ sung chính sách chống phình tri thức: DURABLE/ACTIVE/TEMPORARY; một báo cáo kết thúc ngắn cho thử nghiệm thất bại đã đóng; xóa báo cáo trung gian hết vòng đời sau reference/retention checks, giữ bằng chứng thiết yếu và Git provenance. Chưa áp dụng xóa backlog; CATALOG giữ nguyên.
+
+- A0 authorized removal of three superseded planning reports (agent reallocation, parallelism/dependencies, Hostinger portfolio assessment). Local baseline ZIP: 275 files, zero direct filename/ID/blob references for each; candidate branch delta also checked. Removed from candidate tree only, original content recoverable at baseline `d549564de52429e777c68daf9df7a93df5f22f27`. CATALOG unchanged. Other branches/PR comments not exhaustively scanned; five referenced candidates retained. No merge or history rewrite.
