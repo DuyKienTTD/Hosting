@@ -139,14 +139,25 @@ diff --git a/src/agent/tools/outbound-guard-runtime.ts b/src/agent/tools/outboun
 new file mode 100644
 --- /dev/null
 +++ b/src/agent/tools/outbound-guard-runtime.ts
-@@ -0,0 +1,31 @@
-+import { type SendBinding, type AdmissionOutcome } from './atomic-send-admission.js';
+@@ -0,0 +1,42 @@
++import { type SendBinding, type AdmissionOutcome, type PolicySnapshot } from './atomic-send-admission.js';
 +/** Offline injected authority only. Never constructs consent from botEnabled. */
 +export interface AtomicAdmissionPort {
 +  dispatch<T>(binding: SendBinding, transport: () => Promise<T>, nowMs: number): Promise<AdmissionOutcome<T>>;
++  readOnly?: {readSnapshot(identity:Pick<SendBinding,'accountId'|'threadId'|'senderId'|'threadType'>,nowMs?:number):PolicySnapshot|null};
 +}
 +let authority: AtomicAdmissionPort | null = null;
 +export function setSyntheticAtomicOutboundRuntime(value: AtomicAdmissionPort | null): void { authority=value; }
++/** A1-owned ephemeral response/retain gate; fails closed without injected authoritative snapshot. */
++export function readCurrentSyntheticPolicy(accountId:string,threadId:string,senderId:string,isGroup:boolean):PolicySnapshot|null {
++  const now=Date.now();
++  const snap=authority?.readOnly?.readSnapshot({accountId,threadId,senderId,threadType:isGroup?'group':'dm'},now);
++  if(!snap || !snap.verified || snap.optedOut || snap.takeover || snap.stopped ||
++    snap.globalStopped || snap.accountStopped || !snap.running || snap.expiresAtMs<=now ||
++    snap.accountId!==accountId || snap.threadId!==threadId || snap.senderId!==senderId ||
++    snap.threadType!==(isGroup?'group':'dm'))return null;
++  return snap;
++}
 +export class OutboundGuardDenied extends Error {
 +  readonly reason:string;
 +  constructor(reason:string){ super('outbound_guard_'+reason);this.reason=reason; }
@@ -191,7 +202,7 @@ diff --git a/src/agent/tools/atomic-send-admission.ts b/src/agent/tools/atomic-s
 new file mode 100644
 --- /dev/null
 +++ b/src/agent/tools/atomic-send-admission.ts
-@@ -0,0 +1,135 @@
+@@ -0,0 +1,138 @@
 +import { DatabaseSync } from 'node:sqlite';
 +
 +/** Offline synthetic policy authority, not connected to Zalo or real consent. */
@@ -214,6 +225,7 @@ new file mode 100644
 +const valid = (p: PolicyMutation) => p &&
 +  [p.accountId,p.threadId,p.senderId].every(id) &&
 +  (p.threadType === 'dm' || p.threadType === 'group') &&
++  (p.threadType !== 'dm' || p.senderId === p.threadId) &&
 +  Number.isSafeInteger(p.revision) && p.revision >= 1 && Number.isSafeInteger(p.expiresAtMs);
 +
 +/** All real policy writers must use the same transactional admission boundary.
@@ -222,7 +234,7 @@ new file mode 100644
 +export function openSyntheticAtomicAdmission(file: string) {
 +  if (!file || file === ':memory:') throw Error('durable_file_required');
 +  const db = new DatabaseSync(file);
-+  db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL;
++  db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=2500;
 +CREATE TABLE IF NOT EXISTS synthetic_outbound_policy (
 + account_id TEXT NOT NULL, thread_id TEXT NOT NULL, sender_id TEXT NOT NULL,
 + thread_type TEXT NOT NULL CHECK(thread_type IN ('dm','group')),
@@ -271,7 +283,9 @@ new file mode 100644
 +    } catch(e) {db.exec('ROLLBACK');throw e;}
 +  }
 +  function readSnapshot(identity:Pick<SendBinding,'accountId'|'threadId'|'senderId'|'threadType'>,nowMs=Date.now()):PolicySnapshot|null{
-+    if (![identity.accountId,identity.threadId,identity.senderId].every(id)) return null;
++    if (![identity.accountId,identity.threadId,identity.senderId].every(id) ||
++        (identity.threadType!=='dm'&&identity.threadType!=='group') ||
++        (identity.threadType==='dm'&&identity.senderId!==identity.threadId)) return null;
 +    const q=getPolicy.get(identity.accountId,identity.threadId,identity.senderId,identity.threadType) as Record<string,number>|undefined;
 +    if(!q||!Number.isSafeInteger(nowMs))return null;
 +    return Object.freeze({...identity,verified:Boolean(q.verified),respond:Boolean(q.can_respond),retain:Boolean(q.can_retain),
@@ -318,7 +332,7 @@ new file mode 100644
 +        else {try{began=true;call=Promise.resolve(transport())}catch{reason='transport_sync_throw'}}
 +      }
 +      db.exec('COMMIT');
-+    }catch{try{db.exec('ROLLBACK')}catch{};return {status:'unknown',reason:'admission_commit_uncertain_no_retry'}}
++    }catch{try{db.exec('ROLLBACK')}catch{}; if(call)void call.catch(()=>{});return {status:'unknown',reason:'admission_commit_uncertain_no_retry'}}
 +    if(reason)return began?{status:'unknown',reason}:{status:'blocked',reason};
 +    if(!call)return {status:'unknown',reason:'not_started'};
 +    try {const value=await call;try{if(sent.run(b.attemptKey).changes!==1)return {status:'unknown',reason:'receipt_missing'}}catch{return {status:'unknown',reason:'receipt_failed'}}return {status:'sent',value}}
