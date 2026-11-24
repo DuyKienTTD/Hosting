@@ -1,0 +1,252 @@
+26501ef7755965d6260f6bfbb3b518e5752955eaf35afb05cad163668997bd82  source-check.mjs
+SOURCE_REVIEW: raw durable ingress, skipped group history, route-scoped history key
+egress_probe 101
+v24.22.3
+12.15.0
+Scope: 7 of 215 workspace projects
+? Verifying lockfile against supply-chain policies (1764 entries)...
+✗ Lockfile failed supply-chain policy check (1764 entries in 326ms)
+Lockfile is up to date, resolution step is skipped
+Error: ERR_PNPM_META_FETCH_FAIL
+
+  × installing dependencies
+  ╰─▶ ERR_PNPM_NO_OFFLINE_META: Failed to resolve @anthropic-ai/claude-agent-
+      sdk-win32-arm64 in package mirror /tmp/openclaw-work/cache/pnpm/v12/
+      metadata-full/https%3A+registry.npmjs.org/@anthropic-ai/claude-agent-
+      sdk-win32-arm64.jsonl
+
+      90495c954b93733963187747830d2ddc1bdc583dc992856083964e911ae0568-exec" to
+      "/tmp/openclaw-work/verified/node_modules/.pnpm/@oxlint-tsgolint+linux-
+      x64@7.0.2005/node_modules/@oxlint-tsgolint/linux-x64_pacquet-
+      stage_10_1795514259055496059_3085/tsgolint": No space left on device (os
+      error 28)
+
+
+Workspace recovery and native output:
+egress_probe 101
+v24.22.3
+12.15.0
+Scope: all 215 workspace projects
+✓ Lockfile passes supply-chain policies (verified 1m ago)
+Lockfile is up to date, resolution step is skipped
+Already up to date
+Agent skills awaiting approval: @copilotkit/aimock, @solidjs/web, acpx, chrome-devtools-mcp, solid-js.
+Run "pnpm approve" to review them.
+Done in 542ms using pnpm v12.15.0
+
+ RUN  v5.0.5 /workspace/scratch/04c10b5e9a1d/openclaw-native-scratch/verified
+
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > rechecks the SDK fetch caller after effect preparation (retired=false) 61ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > rechecks the SDK fetch caller after effect preparation (retired=true) 10ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > stops a retired caller after SDK cookie preparation 9ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > stops a retired caller after dispatch notification 8ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > stops a retired caller after payload cancellation 9ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > sendPayload uploads and delivers an allowed group image 10ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > sendPayload preserves chunk progress and stops after its awaited callback 9ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > keeps overlapping caller checks separate on one cached SDK client 10ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > retires cookie-waiting upload requests when a parallel SDK request fails 7ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > rechecks SDK redirects when canceled=false 10ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > rechecks SDK redirects when canceled=true 7ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > does not mark image upload as visible delivery or send after its wait 8ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > does not mark upload completion as visible delivery or send after its wait 10ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > does not mark voice HEAD as visible delivery or send after its wait 8ms
+stderr | unknown test
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.agentDatabaseReaders
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.sqliteWalCheckpointListeners
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.stateDomainPublication.plugin-state
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.pluginStatePublication
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.pluginStateNamespaceOwner
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.agentDatabaseBorrowers
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.stateDomainPublication.personal-model-credentials
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.stateDomainPublication.auth-profile-credentials
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.devicePairingPublications
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.stateDomainPublication.github-publication
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.stateDomainPublication.repository-workspace
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.stateDomainPublication.exec-approvals
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.sessionStateNotices
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.stateDomainPublication.workspace-state
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.devicePairSetupChanges
+[sqlite-test-lifecycle] extensions/zalouser/src/send.handoff.test.ts: retiring openclaw.sessionGroupCatalog
+
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > delivers allowed audio after the SDK upload callback and HEAD 21ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > preserves audio caption visibility on upload failure 9ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > the optional tool preserves cancellation=false at the SDK wait 6ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.handoff.test.ts > Zalouser registered send handoff > the optional tool preserves cancellation=true at the SDK wait 6ms
+stderr | unknown test
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.agentDatabaseReaders
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.sqliteWalCheckpointListeners
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.stateDomainPublication.plugin-state
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.pluginStatePublication
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.pluginStateNamespaceOwner
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.agentDatabaseBorrowers
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.stateDomainPublication.personal-model-credentials
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.stateDomainPublication.auth-profile-credentials
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.devicePairingPublications
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.stateDomainPublication.github-publication
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.stateDomainPublication.repository-workspace
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.stateDomainPublication.exec-approvals
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.sessionStateNotices
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.stateDomainPublication.workspace-state
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.devicePairSetupChanges
+[sqlite-test-lifecycle] extensions/zalouser/src/send.media-handoff.test.ts: retiring openclaw.sessionGroupCatalog
+
+ ✓ |extension-zalo| extensions/zalouser/src/send.media-handoff.test.ts > Zalouser guarded media handoff > downloads through the guarded dispatcher (proxy=false) 210ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.media-handoff.test.ts > Zalouser guarded media handoff > downloads through the guarded dispatcher (proxy=true) 9ms
+ ✓ |extension-zalo| extensions/zalouser/src/send.media-handoff.test.ts > Zalouser guarded media handoff > makes no media or SDK request after cancellation during guarded DNS preparation 6ms
+
+ Test Files  2 passed (2)
+      Tests  21 passed (21)
+   Start at  17:00:05
+   Duration  37.49s (transform 78%, import 18%, worker 2%, tests 1%, setup 1%)
+
+send_exit=0
+
+ RUN  v5.0.5 /workspace/scratch/04c10b5e9a1d/openclaw-native-scratch/verified
+
+(node:228) PromiseRejectionHandledWarning: Promise rejection was handled asynchronously (rejection id: 19)
+(Use `node --trace-warnings ...` to show where the warning was created)
+ × |extension-database-workers| extensions/zalouser/src/ingress.test.ts > Zalouser durable ingress > finishes the durable append before dispatching 9508ms
+   → promise rejected "Error: Zalouser completed verdict for dur…" instead of resolving
+ ✓ |extension-database-workers| extensions/zalouser/src/ingress.test.ts > Zalouser durable ingress > recovers a pending event with a fresh drain and dispatches exactly once 2912ms
+ ✓ |extension-database-workers| extensions/zalouser/src/ingress.test.ts > Zalouser durable ingress > rejects a post-completion duplicate by platform msgId 3097ms
+ ✓ |extension-database-workers| extensions/zalouser/src/ingress.test.ts > Zalouser durable ingress > serializes same-conversation claims until adoption 3067ms
+ ✓ |extension-database-workers| extensions/zalouser/src/ingress.test.ts > Zalouser durable ingress > dispatches another conversation while a deferred delivery is still active 2818ms
+ ✓ |extension-database-workers| extensions/zalouser/src/ingress.test.ts > Zalouser durable ingress > releases deferred bookkeeping for retry when the adoption watchdog aborts a claim 2925ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.account-scope.test.ts > publishes ready and scopes DM pairing-store reads and requests to accountId 3191ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > logs missing mentions once with the authored scope after group-name resolution 3317ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > blocks mentioned group messages by default when groupPolicy is omitted 52ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > fails closed when requireMention=true but mention detection is unavailable 43ms
+ ✓ |extension-database-workers| extensions/zalouser/src/ingress.test.ts > Zalouser durable ingress > aborts deferred bookkeeping during shutdown without waiting for adoption 3209ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > dispatches authorized control command /status 3252ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > dispatches authorized control command @Bot /new 33ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > passes long markdown replies through once so formatting happens before chunking 51ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > reports first attachment tool delivery failures through the canonical dispatcher 54ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > reports later attachment block delivery failures through the canonical dispatcher 47ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > reports later text chunk block delivery failures through the canonical dispatcher 39ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > allows static access-group senders (group=false) 39ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > allows static access-group senders (group=true) 44ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > authorizes group control commands with {"allowFrom":["123"]} 28ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > authorizes group control commands with {"allowFrom":["999"],"groupAllowFrom":["123"]} 30ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > blocks groups when routed group lacks explicit sender allo… 25ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > blocks groups when sender absent from groupAllowFrom 32ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > gates mutable group-name matches (opt-in=false) 108ms
+ ✓ |extension-database-workers| extensions/zalouser/src/ingress.test.ts > Zalouser durable ingress > dead-letters malformed persisted envelopes without dispatch 2640ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > gates mutable group-name matches (opt-in=true) 35ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > gates startup name resolution (opt-in=false) 18ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > gates startup name resolution (opt-in=true) 10ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > surfaces quote metadata in inbound reply context 29ms
+ ✓ |extension-database-workers| extensions/zalouser/src/monitor.group-gating.test.ts > zalouser monitor group mention gating > includes skipped group messages as InboundHistory on the next processed message 67ms
+ ✓ |extension-database-workers| extensions/zalouser/src/ingress.test.ts > Zalouser durable ingress > dead-letters authentication failures without retry 2547ms
+ ✓ |extension-database-workers| extensions/zalouser/src/ingress.test.ts > Zalouser durable ingress > waits for in-flight admission and remains safe to stop twice 2698ms
+ ✓ |extension-database-workers| extensions/zalouser/src/ingress.test.ts > Zalouser durable ingress > waits for an adopted active delivery before stop returns 2810ms
+ ✓ |extension-database-workers| extensions/zalouser/src/ingress.test.ts > Zalouser durable ingress > releases a pre-adoption delivery for retry during shutdown 2760ms
+ ✓ |extension-database-workers| extensions/zalouser/src/ingress.test.ts > Zalouser durable ingress > does not start a claim after stop wins an async prune 2967ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |extension-database-workers| extensions/zalouser/src/ingress.test.ts > Zalouser durable ingress > finishes the durable append before dispatching
+AssertionError: promise rejected "Error: Zalouser completed verdict for dur…" instead of resolving
+ ❯ observeZalouserIngressVerdict extensions/zalouser/src/ingress.test-support.ts:121:4
+    119|   await expect(
+    120|     withTimeout(write, 5_000, `Zalouser ${expected} verdict for ${even…
+    121|   ).resolves.toBe(true);
+       |    ^
+    122|   const verdict = await queue.enqueue(eventId, {
+    123|     version: 1,
+ ❯ extensions/zalouser/src/ingress.test.ts:68:24
+ ❯ extensions/zalouser/src/ingress.test-support.ts:72:23
+ ❯ src/test-utils/openclaw-test-state.ts:468:64
+ ❯ src/shared/async-work-scope.ts:63:14
+ ❯ AsyncLocalStorage.enterAsyncStore src/shared/async-store.ts:9:10
+
+Caused by: Error: Zalouser completed verdict for durable-first timed out after 5000ms
+ ❯ node_modules/.pnpm/@openclaw+fs-safe@0.28.2/node_modules/@openclaw/fs-safe/dist/timing.js:39:16
+ ❯ Timeout.<anonymous> node_modules/.pnpm/@openclaw+fs-safe@0.28.2/node_modules/@openclaw/fs-safe/dist/timing.js:47:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+AssertionError: promise rejected "Error: Zalouser completed verdict for dur…" instead of resolving
+ ❯ _Assertion.__VITEST_RESOLVES__ node_modules/.pnpm/vitest@5.0.5_patch_hash=1aca6d2c713739c6cbd32d4af2aed8655bb01cd558d5a1cc86cf8187eaa5960_24318c583770ebb632204a4b55ceabf5/node_modules/vitest/dist/chunks/index.aTZaPVhf.js:2451:33
+ ❯ _Assertion.propertyGetter node_modules/.pnpm/chai@6.3.0/node_modules/chai/index.js:1607:27
+ ❯ Object.proxyGetter [as get] node_modules/.pnpm/chai@6.3.0/node_modules/chai/index.js:1696:22
+ ❯ observeZalouserIngressVerdict extensions/zalouser/src/ingress.test-support.ts:121:4
+    119|   await expect(
+    120|     withTimeout(write, 5_000, `Zalouser ${expected} verdict for ${even…
+    121|   ).resolves.toBe(true);
+       |    ^
+    122|   const verdict = await queue.enqueue(eventId, {
+    123|     version: 1,
+ ❯ extensions/zalouser/src/ingress.test.ts:68:24
+ ❯ extensions/zalouser/src/ingress.test-support.ts:72:23
+ ❯ src/test-utils/openclaw-test-state.ts:468:64
+ ❯ src/shared/async-work-scope.ts:63:14
+ ❯ AsyncLocalStorage.enterAsyncStore src/shared/async-store.ts:9:10
+
+This error originated in "extensions/zalouser/src/ingress.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The last test to run before this error was "finishes the durable append before dispatching". This means either:
+- the error was thrown while Vitest was running this test, or
+- the error was thrown after the test completed, and this was the most recent test at that point.
+Caused by: Error: Zalouser completed verdict for durable-first timed out after 5000ms
+ ❯ node_modules/.pnpm/@openclaw+fs-safe@0.28.2/node_modules/@openclaw/fs-safe/dist/timing.js:39:16
+ ❯ Timeout.<anonymous> node_modules/.pnpm/@openclaw+fs-safe@0.28.2/node_modules/@openclaw/fs-safe/dist/timing.js:47:32
+ ❯ listOnTimeout node:internal/timers:685:17
+ ❯ process.processTimers node:internal/timers:618:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 34 passed (35)
+     Errors  1 error
+   Start at  17:00:44
+   Duration  53.36s (transform 43%, tests 43%, import 12%, setup 2%)
+
+ingress_exit=1
+extensions/zalouser/doctor-contract-api.ts(4,37): error TS2307: Cannot find module 'openclaw/plugin-sdk/config-contracts' or its corresponding type declarations.
+extensions/zalouser/doctor-contract-api.ts(5,60): error TS2307: Cannot find module 'openclaw/plugin-sdk/routing' or its corresponding type declarations.
+extensions/zalouser/doctor-contract-api.ts(11,8): error TS2307: Cannot find module 'openclaw/plugin-sdk/runtime-doctor-migrations' or its corresponding type declarations.
+extensions/zalouser/doctor-contract-api.ts(14,46): error TS2307: Cannot find module 'openclaw/plugin-sdk/session-store-runtime' or its corresponding type declarations.
+extensions/zalouser/doctor-contract-api.ts(15,26): error TS2307: Cannot find module 'openclaw/plugin-sdk/string-coerce-runtime' or its corresponding type declarations.
+extensions/zalouser/doctor-contract-api.ts(86,41): error TS2307: Cannot find module 'openclaw/plugin-sdk/agent-scope-runtime' or its corresponding type declarations.
+extensions/zalouser/doctor-contract-api.ts(92,20): error TS2307: Cannot find module 'openclaw/plugin-sdk/session-store-runtime' or its corresponding type declarations.
+extensions/zalouser/doctor-contract-api.ts(103,53): error TS7031: Binding element 'sessionKey' implicitly has an 'any' type.
+extensions/zalouser/doctor-contract-api.ts(103,65): error TS7031: Binding element 'entry' implicitly has an 'any' type.
+extensions/zalouser/doctor-contract-api.ts(128,44): error TS2339: Property 'updatedAt' does not exist on type '{}'.
+extensions/zalouser/doctor-contract-api.ts(130,44): error TS2339: Property 'updatedAt' does not exist on type '{}'.
+extensions/zalouser/doctor-contract-api.ts(134,31): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+extensions/zalouser/doctor-contract-api.ts(162,29): error TS7006: Parameter 'params' implicitly has an 'any' type.
+extensions/zalouser/doctor-contract-api.ts(172,30): error TS7006: Parameter 'params' implicitly has an 'any' type.
+extensions/zalouser/doctor-contract-api.ts(176,21): error TS2347: Untyped function calls may not accept type arguments.
+extensions/zalouser/doctor-contract-api.ts(188,37): error TS18046: 'raw' is of type 'unknown'.
+extensions/zalouser/doctor-contract-api.ts(188,67): error TS18046: 'raw' is of type 'unknown'.
+extensions/zalouser/doctor-contract-api.ts(189,17): error TS18046: 'raw' is of type 'unknown'.
+extensions/zalouser/doctor-contract-api.ts(192,31): error TS2698: Spread types may only be created from object types.
+extensions/zalouser/doctor-contract-api.ts(198,18): error TS18046: 'error' is of type 'unknown'.
+Progress: resolved 1483, reused 1056, downloaded 416, added 1444
+Downloading @lancedb/lancedb-linux-x64-gnu@0.41.0: 16.62 MB/77.99 MB
+Downloading @lancedb/lancedb-linux-x64-gnu@0.41.0: 26.36 MB/77.99 MB
+Downloading @lancedb/lancedb-linux-x64-gnu@0.41.0: 39.84 MB/77.99 MB
+Downloading @lancedb/lancedb-linux-x64-gnu@0.41.0: 54.95 MB/77.99 MB
+Downloading @lancedb/lancedb-linux-x64-gnu@0.41.0: 68.22 MB/77.99 MB
+Downloading @openai/codex@0.169.0-linux-x64: 74.28 MB/167.00 MB
+Downloading @openai/codex@0.169.0-linux-x64: 97.45 MB/167.00 MB
+Downloading @openai/codex@0.169.0-linux-x64: 129.14 MB/167.00 MB
+Progress: resolved 1483, reused 1056, downloaded 427, added 1476
+Progress: resolved 1483, reused 1056, downloaded 427, added 1483, done
+Packages: +1483
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Done in 17.4s using pnpm v12.15.0
