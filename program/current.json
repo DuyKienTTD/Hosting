@@ -10,8 +10,7 @@
     "AGENTS.md",
     "rules/AGENT_WORKFLOW.md",
     "rules/REPOSITORY_SECURITY.md",
-    "STATE.md",
-    "CATALOG.yaml"
+    "STATE.md"
   ],
   "priority_owner": "Chat Điều phối",
   "implementation_owner": "A1",
@@ -108,5 +107,7 @@
     "verification_module": "program/kng/release_state.py",
     "approval_event": null,
     "remote_main_readback": null
-  }
+  },
+  "catalog_registry": "CATALOG.yaml",
+  "catalog_access": "INDEX_ONLY_VALIDATE_FULL_CATALOG_WITH_TOOL"
 }
