@@ -62,3 +62,22 @@ sensitivity: public-redacted
 **A2 author source work:** candidate patch + offline test file prepared, with known dependency and integration limitations. **Verifier:** Work independently runs patch and executable negative tests, including DB readback and multi-path race/restart. **Coordinator:** reconcile cross-writer interfaces and future approved patch boundaries. **A0:** decides after S3, no automatic merge or live Zalo.
 
 **FINAL VERDICT:** `PATCH_READY_AWAITING_WORK_VERIFICATION`. No `VERIFIED_OFFLINE` or `VERIFIED_MOCK` claim. **STOP:** no live or paid actions, no main merge.
+
+## Corrective continuation — 2026-11-24 / Coordinator comment 7124437685
+
+**FOLLOW_UP_ACKNOWLEDGED:** Same task `ZALO-POC-02-A2-DATA-PRIVACY`; no new work order or PR. Coordinator independently found invalid `git apply --check` in Work blocked-egress test, on original patch blob `4674c6e1fa4385ec97986113207e7c7b413c57e5` (memory-store:32, allowlist-filter:14, incoming-message-router:82). Original generator wrote additions before deletions and split adjacent edits into overlapping hunks; not a valid source-aligned unified diff.
+
+**Corrective action:** Read original pinned source for all 4 A2 paths via GitHub file API; match each proposed change against exact source context; regenerate unified hunks using a line-by-line sequence alignment, ordering context/deletions/additions correctly; merge overlapping 3-line contexts; calculate consistent original/target ranges. Reconstruct the complete patched text from corrected diff against source contents and compare byte-for-byte with the intended candidate representation for every path. No intended D1/D2 source logic changed.
+
+**New patch commit:** `ecb04dfe665f05c10f1e2825ab0c8d92f450f1f8`; **new patch blob:** `0a78460efa7110526a70983a6b47c2929ca8a3c0`.
+**Pinned source blobs / regenerated hunk counts / source reconstruction:**
+- `src/conversation/memory-store.ts`: `5b0bfda92887cb549ac6d784fe7690d66c98ac8d`; 4 hunks; in-memory patch reconstruction MATCH.
+- `src/conversation/memory-edit-store.ts`: `7bdbd56c51bf8e868c539906218ce78db6c04de8`; 3 hunks; reconstruction MATCH.
+- `src/middleware/allowlist-filter.ts`: `1046738507933c2907535c8f1172b62b6e9f81bd`; 4 hunks; reconstruction MATCH.
+- `src/zalo/incoming-message-router.ts`: `02bd7dbebea7a66a0d4d1022fb28e76e16503655`; 2 hunks; reconstruction MATCH.
+
+**Tool verification:** `git ls-remote https://github.com/vuhai2002/zalo-agent.git HEAD` exit 128 `Could not resolve host: github.com`; immutable checkout remains unavailable in local sandbox. **`git apply --check` NOT_RUN / UNVERIFIED_IN_A2_ENVIRONMENT**, not claimed PASS; exact check requires Work's isolated checkout at pinned SHA. Source roundtrip in GitHub tool orchestration is a **syntactic source-alignment check**, not executable git apply, typecheck, unit, integration, offline SQLite or security QA. Existing `privacy-sql.test.mjs` is unchanged and its five contract tests remain NOT_RUN.
+
+**Expected baseline test deltas / integration risks remain:** Old memory test expecting group-learned facts from any group in A's DM remains design-policy dependent; group edit fixture without `threadId` now must fail closed and test must pass scoped thread ID for authorized edit; old allowlist filter tests expecting default automatic response/passive retention must now expect deny without verified consent. Missing validated consent source and revocation/expiry, `src/agent/tools/save-memory-tool.ts` threadId handoff (A1 write set), cache/media/replay/summary enforcement remain integration blockers, not solved by patch formatting. Work should now rerun clean `git apply --check`, then actual negative SQLite and integration tests in verified blocked-egress environment.
+
+**Status after patch-regeneration:** `PATCH_READY_AWAITING_WORK_VERIFICATION` / `GIT_APPLY_CHECK_NOT_RUN_A2`; no production use. **NEXT_OWNER:** Work QA, Coordinator integration.
