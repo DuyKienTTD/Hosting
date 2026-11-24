@@ -34,6 +34,11 @@ class Contract(unittest.TestCase):
     def test_recovery_ref_plausible_nonexistent_commit(self):
         p='program/kng/inventory.json';j=self.obj(p);j['facts'][1]['recovery_ref']='PR39@'+'0'*40;self.put(p,j);self.err('SOURCE_PIN_MISMATCH')
 
+    def test_modified_rule_without_candidate_guard_is_rejected(self):
+        p=self.root/'AGENTS.md'
+        p.write_text('This is a silent effective authorization.\n')
+        self.err('UNSAFE_CURRENT_RULE')
+
     def test_integrated_catalog_result_pin_must_match_actual_blob(self):
         p='program/kng/migration.json'; j=self.obj(p)
         for x in j['proposed_updates']:
