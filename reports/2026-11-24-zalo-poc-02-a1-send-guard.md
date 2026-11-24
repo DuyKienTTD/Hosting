@@ -69,3 +69,55 @@ sensitivity: public-redacted
 4. Return independent findings and whether a narrow shared interface is approved; unresolved input means `BLOCKED_INTEGRATION_INPUT`, not PASS. No merge/live activation.
 
 **A1 final status:** `SOURCE_PATCH_PREPARED / BLOCKED_INTEGRATION_INPUT`. The code/tests and unified patch are a reproducible **candidate for review**. A0/Coordinator controls any interface or later implementation authorization; Work provides independent QA. No real Zalo, paid API, deployment or Hosting main merge.
+
+
+---
+
+## CONTINUATION — Coordinator corrective receipt and integrated candidate (2026-11-24)
+
+**ACTUAL SESSION ACK:** `TASK_ACKNOWLEDGED — ZALO-POC-02-A1-SEND-GUARD / CONTINUATION`. Exact instruction [PR #55 comment 7124438429](https://github.com/DuyKienTTD/Hosting/pull/55#issuecomment-7124438429), issued by repository OWNER; does **not** open new WBS, grant production or permit A2-owned writes. **Readback:** Hosting main `d549564de52429e777c68daf9df7a93df5f22f27`, PR55 former HEAD `5d6946449c5b7b9045aa7737c2f50ee749c5cb92`; candidate `vuhai2002/zalo-agent@2dc09de31cd99306bc1ab18e57aa0aa872618561` frozen.
+
+### Deliverable pins and scope
+
+- **Unified 14-file candidate patch:** `experiments/zalo-poc-02/a1/a1-send-guard.patch`; Git blob `1fa7e1ef70630c29685e70f923bac42590d463fb`, consolidated by commit `4ac271400b5dec49ee433f28bac5765e41c80760`.
+- **Eight upstream-path modifications in isolated copies (no upstream mutation):**
+  1. `src/zalo/send-reply-in-parts.ts` — enqueue-time closure now calls `sendWithOutboundGuard` for each segment and technical error, requiring deterministic per-segment/technical key; fallback also requires its own guarded key.
+  2. `src/zalo/message-turn-processor.ts` — stable chat intent based on account/thread/**original incoming msgId**; missing msgId fails closed (not turnId, which changes on restart).
+  3. `src/scheduler/scheduled-job-send.ts` — scheduler intent keyed by job ID and scheduled-for timestamp, routed through multipart guard.
+  4. `src/agent/tools/send-attachment-with-caption.ts` — guards attachment and style-fallback calls after queue; absent requestId fails closed.
+  5. `src/agent/tools/send-file-tool.ts` — supplies intent from synthetic context message ID and file/caption digest, no real URL call in tests.
+  6. `src/agent/tools/add-reaction-tool.ts` — wraps reaction API with guarded dispatch and stable message/reaction key.
+  7. `src/agent/tools/tag-member-tool.ts` — wraps direct send and hashes member/text into intent; missing message ID fails closed.
+  8. `src/agent/tools/create-image-tool.ts` — wraps advance-notice, retry notice and generated-image attachment; NO generation/paid provider invoked.
+- **Six add-only modules/tests:** `src/agent/tools/send-dispatch-guard.ts`, `send-dispatch-guard.test.ts`, `durable-attempt-store.ts`, `durable-attempt-store.test.ts`, `outbound-guard-runtime.ts`, `outbound-guard-runtime.test.ts`.
+- **Current integration form:** candidate original-path edits and tests stored as `experiments/zalo-poc-02/a1/source/**`, modules in `experiments/zalo-poc-02/a1/src/**` and corresponding unified patch. No real `zalo-agent` repository edited; no activation. Intermediate `parts/patch-1..3.diff` are build fragments; unified patch above is the canonical artifact.
+
+### Executed sandbox tests — expected / observed (Node 22.16.0, no Zalo / network / paid)
+
+| Case | Exact local command / target | Expected / actual | Status |
+|---|---|---|---|
+| A1-POC02-R01 | `node --experimental-strip-types --test /mnt/data/zalo_poc02_followup/durable-attempt-store.test.ts` | SQLite `INSERT OR IGNORE` unique reservation, sent receipt, no duplicate; exit 0, 3/3 PASS | `VERIFIED_OFFLINE_LOCAL_ADAPTED` |
+| A1-POC02-R02 | Same invocation, process-restart subtest | Close SQLite, spawn a **new Node process**, reopen same temp on-disk DB; reserved key still rejected; exit 0 | `VERIFIED_OFFLINE_LOCAL_ADAPTED` |
+| A1-POC02-R03 | `node --experimental-strip-types --test /mnt/data/zalo_poc02_followup/runtime-integration.test.ts` | Initial test stopped at `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX` (constructor parameter property), fixed in adapter; rerun exit 0, 4/4 PASS | `VERIFIED_OFFLINE_LOCAL_ADAPTED` |
+| A1-POC02-R04 | Runtime integration suite, one synthetic account `synthetic_1` | One fake send then durable duplicate blocked (fake outbound counter=1); late thread STOP, opt-out, human takeover and unknown/mismatched destination all block (counter=0) | `VERIFIED_OFFLINE_LOCAL_ADAPTED` |
+| A1-POC02-R05 | Pinned patch text generated from immutable upstream and isolated copies | The **eight modified files** were each replayed from patch hunks and compared line-for-line to its staged source copy; all 8/8 exact source comparisons matched | `VERIFIED_SOURCE_PATCH_REPLAY` |
+| A1-POC02-R06 | Original full project `pnpm build`, `pnpm typecheck`, original sender suites, combined A2 tree | Not executed by A1: no pnpm/tsx/full checkout in this session. Work previously verified **baseline** native build/typecheck/73 tests and exact previous detached patch 8/8, not this 14-file revision | `BLOCKED_RUNTIME / PENDING_INDEPENDENT_WORK` |
+
+**Key evidence nuance:** The local test runner uses local `.ts` import paths for Node's built-in type stripping; GitHub staged modules use upstream-conventional `.js` import specifiers and added tests are **not byte-identical to locally executed adapted tests**. Therefore do not label exact merged/native patch `VERIFIED_OFFLINE` until Work runs that exact checkout. Node's experimental `node:sqlite` warning was observed; no provider egress was used.
+
+### STOP/idempotency protocol and limitations
+
+- Guard defaults `DENY` when `setOfflineOutboundGuardRuntime` has no authoritative policy + attempt store. This **prevents live sends** for wired paths without integration but also means no successful real-mode functionality is claimed.
+- Late policy read occurs **inside the actual per-thread queue callback**, after queuing/delay. Checks exact account/thread/recipient/type, `opt_in`, explicit `humanTakeover=false`, STOP flags false, running true, version unchanged and stable key; a revoked/unknown state blocks.
+- Durable attempt implementation uses an on-disk SQLite file, `journal_mode=WAL`, `synchronous=FULL`, UNIQUE attempt key and `INSERT OR IGNORE`. A reserved/sent or uncertain key cannot be automatically retried; uncertainty returns fail-closed. **The running-process mock's positive send is a fake closure only.**
+- **ATOMIC_STOP_UNRESOLVED:** the policy read and transport do not share an atomic lock/fencing transaction with the A2 policy writer. A STOP committed immediately after last policy read could race with actual send. Do **not** claim `NO_POST_STOP_SEND` in all interleavings; require Coordinator/A2-authorized atomic admission or single shared lock and Work race tests.
+- **CONSENT_SOURCE_NOT_WIRED:** no approved real consent/opt-out/human-takeover store or epoch resolver is connected, by design. A2 owns inbound/group/privacy source; A1 only injected test policy and may not edit A2's paths. Unknown means block, not surrogate `bot_enabled`.
+- **SOME_PATHS_FAIL_CLOSED_NOT_FUNCTIONAL:** scheduler cap-notice and other callers constructing `ReplyTarget` without `sendGuardRequestId` now deny, as do document tools using `guiFileKemCaption` without `requestId`. These routes are not approved functional sends; supply stable context keys with new scoped approval.
+- **OTHER_OUTBOUND_BYPASSES_UNVERIFIED:** auto reaction, typing, seen/delivered receipts, busy-wait and other direct provider calls outside allowed modified set, especially `src/zalo/kenh-ca-nhan.ts`, `src/zalo/message-receipts.ts`, `src/zalo-bot/**` and `src/scheduler/scheduled-job-cap-guard.ts` remain outside A1's candidate WRITE_SET. A non-message side-effect manifest and shared lower transport boundary require Coordinator authorization. No "all sends guarded" assertion.
+- **RETRY/FENCING:** reservation-per-side-effect blocks duplicate stable keys across restart; different keys can still represent the same logical send if caller identity is wrong. No durable ack from real Zalo and no real network retry was tested. A2 memory edit/delete group `threadId` interface remains a separate A2/Work combined-tree integration dependency.
+
+### Author QA, STOP and NEXT_OWNER
+
+- **PR #55 remains draft**, no merge. This A1 continuation changes only `reports/2026-11-24-zalo-poc-02-a1-send-guard.md` and `experiments/zalo-poc-02/a1/**`; no A2 paths, provider, external account, main or paid actions. `real_outbound_calls=0` for A1 and `synthetic_accounts=1` per executed fixture; `paid_api_usd=0`.
+- **Current verdict:** `INTEGRATED_SOURCE_CANDIDATE_PARTIAL_BLOCKED` — patch is no longer just a detached guard, but it is **not** functionally integrated with authoritative privacy policy and not verified in upstream build/E2E. No product PASS or Zalo GO.
+- **NEXT_OWNER:** Work independently applies this exact new 14-file patch on pinned upstream in offline no-egress checkout, runs native TypeScript and negative/race/fault/restart tests; Coordinator resolves shared policy/fencing and out-of-scope transport interface (and reviews A2 patch separately). Without those gates, HOLD.
