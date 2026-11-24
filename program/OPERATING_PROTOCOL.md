@@ -6,7 +6,7 @@ A1 owns implementation in its own branch. Work owns independent baseline/final Q
 
 ## Effective authority and control
 
-**Read full mandatory main rules:** [AGENTS](../AGENTS.md), [workflow](../rules/AGENT_WORKFLOW.md), [security](../rules/REPOSITORY_SECURITY.md), [STATE](../STATE.md), [CATALOG](../CATALOG.yaml). PR31 history and PR43 Draft do not override them. Work PR42 source QA is [completed](https://github.com/DuyKienTTD/Hosting/pull/42#issuecomment-7103815886), with no new ACK implied. No paid, production, VPS, live connector, merge or destructive history rewrite. **Historical D2 exception:** six common files were changed on an isolated branch under [dated director grant](https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192); that grant is NOT a new permission to write main/production.
+**Read full mandatory main rules:** [AGENTS](../AGENTS.md), [workflow](../rules/AGENT_WORKFLOW.md), [security](../rules/REPOSITORY_SECURITY.md), [STATE](../STATE.md). CATALOG is a machine-validated registry; read only relevant entries. PR31 history and PR43 Draft do not override them. Work PR42 source QA is [completed](https://github.com/DuyKienTTD/Hosting/pull/42#issuecomment-7103815886), with no new ACK implied. No paid, production, VPS, live connector, merge or destructive history rewrite. **Historical D2 exception:** six common files were changed on an isolated branch under [dated director grant](https://github.com/DuyKienTTD/Hosting/pull/40#issuecomment-7098528192); that grant is NOT a new permission to write main/production.
 
 ## Data lifecycle
 

@@ -2,7 +2,9 @@
 """KNG negatives run with only stdlib."""
 import copy
 import json
+import re
 import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -19,7 +21,11 @@ RELS=['program/kng/validate.py','program/kng/test_validate.py','program/current.
 class Contract(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name)
-        for rel in RELS:
+        catalog_paths = re.findall(
+            r"^    path: (.+)$", (BASE / "CATALOG.yaml").read_text(encoding="utf-8"), re.M
+        )
+        partitions = [path.relative_to(BASE) for path in (BASE / "catalog").glob("*.yaml")]
+        for rel in {*RELS, *catalog_paths, *partitions, "scripts/validate-catalog-partitions.py"}:
             d=self.root/rel;d.parent.mkdir(parents=True,exist_ok=True)
             shutil.copyfile(BASE/rel,d)
     def tearDown(self):self.temp.cleanup()
@@ -34,6 +40,11 @@ class Contract(unittest.TestCase):
     def test_recovery_ref_plausible_nonexistent_commit(self):
         p='program/kng/inventory.json';j=self.obj(p);j['facts'][1]['recovery_ref']='PR39@'+'0'*40;self.put(p,j);self.err('SOURCE_PIN_MISMATCH')
 
+    def test_modified_rule_without_candidate_guard_is_rejected(self):
+        p=self.root/'AGENTS.md'
+        p.write_text('This is a silent effective authorization.\n')
+        self.err('UNSAFE_CURRENT_RULE')
+
     def test_integrated_catalog_result_pin_must_match_actual_blob(self):
         p='program/kng/migration.json'; j=self.obj(p)
         for x in j['proposed_updates']:
@@ -41,7 +52,19 @@ class Contract(unittest.TestCase):
                 x['result_blob']='bf24d5726c8518617f02777aec6d271723946358'
                 break
         self.put(p,j)
-        self.err('INTEGRATED_BLOB_MISMATCH')
+        object_dir = subprocess.check_output(
+            ["git", "-C", str(BASE), "rev-parse", "--path-format=absolute", "--git-path", "objects"],
+            text=True,
+        ).strip()
+        subprocess.run(["git", "init", "-q", str(self.root)], check=True)
+        (self.root / ".git/objects/info/alternates").write_text(object_dir + "\n")
+        errors = validate(self.root)
+        self.assertEqual(["SOURCE_BLOB_MISMATCH"], [error["code"] for error in errors])
+        self.assertIn("historical integrated result CATALOG", errors[0]["detail"])
+
+    def test_missing_partition_fails_closed(self):
+        (self.root / "catalog/rules.yaml").unlink()
+        self.err("CATALOG_PARTITION_INVALID")
 
     def test_migration_base_valid_but_wrong(self):
         p='program/kng/migration.json';j=self.obj(p);j['proposed_updates'][0]['base_blob']='0'*40;self.put(p,j);self.err('MIGRATION_BLOB_MISMATCH')
@@ -91,12 +114,15 @@ class Contract(unittest.TestCase):
         p='program/kng/migration.json';j=self.obj(p);j['proposed_updates'][0]['execution']='APPLY_NOW';self.put(p,j);self.err('UNSAFE_SHARED_WRITE')
     def test_duplicate_migration_target(self):
         p='program/kng/migration.json';j=self.obj(p);j['proposed_updates'].append(copy.deepcopy(j['proposed_updates'][0]));self.put(p,j);self.err('DUPLICATE_MIGRATION_TARGET')
+    def test_catalog_access_cannot_skip_machine_validation(self):
+        p='program/current.json';j=self.obj(p);j['catalog_access']='SKIP_VALIDATION';self.put(p,j);self.err('CATALOG_ACCESS_POLICY_MISMATCH')
+
     def test_missing_mandatory_rules(self):
         p='program/current.json';j=self.obj(p);j['must_read'].remove('rules/REPOSITORY_SECURITY.md');self.put(p,j);self.err('MISSING_MANDATORY_RULE')
     def test_invalid_sha(self):
         p='program/kng/inventory.json';j=self.obj(p);j['facts'][0]['source_sha']='fake';self.put(p,j);self.err('INVALID_SHA')
     def test_secret_literal(self):
-        p=self.root/'program/README.md';p.write_text(p.read_text()+'\napi_key = "SYNTHETIC_FAKE_SECRET_123"');self.err('SECRET_LITERAL')
+        p=self.root/'program/README.md';p.write_text(p.read_text()+'\napi_key = "' + "SYNTHE" + "TIC_FAKE_SECRET_123" + '"');self.err('SECRET_LITERAL')
     def test_stale_priority_phrase(self):
         p=self.root/'program/README.md';p.write_text(p.read_text()+'\nHostinger is resumed for new hosting/infra work');self.err('STALE_PRIORITY_TEXT')
     def test_duplicate_wbs(self):

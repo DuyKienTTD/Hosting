@@ -1,0 +1,49 @@
+schema_version: 1
+catalog_scope: durable_knowledge_only
+updated_at: 2026-11-24
+repository_visibility: public
+default_language: vi
+
+entrypoints:
+  read_first: README.md
+  project_charter: PROJECT.md
+  task_handoff_rules: rules/AGENT_WORKFLOW.md
+  current_state: STATE.md
+  knowledge_current_routing: program/current.json
+  knowledge_wbs: program/WORK_BREAKDOWN.md
+  agent_rules: AGENTS.md
+  agent_capability_directory: agents/README.md
+  contribution_workflow: CONTRIBUTING.md
+  change_history: CHANGELOG.md
+
+# Read-only views of the durable CATALOG.yaml. Operational documents are linked directly from their tasks/roadmaps.
+partitions:
+  knowledge:
+    path: catalog/knowledge.yaml
+    count: 7
+  script:
+    path: catalog/scripts.yaml
+    count: 4
+  inventory:
+    path: catalog/inventory.yaml
+    count: 1
+  rule:
+    path: catalog/rules.yaml
+    count: 3
+  decision:
+    path: catalog/decisions.yaml
+    count: 3
+
+collections:
+  agents: verified agent role profiles and capability evidence
+  tasks: committed work orders and acceptance criteria
+  inventory: current configuration updated in place
+  reports: dated evidence and historical assessments
+  knowledge: durable explanations and lessons
+  runbooks: step-by-step operational procedures
+  decisions: architecture decision records
+  references: external sources and citations
+  rules: mandatory repository and operating policies
+  scripts: reviewed automation and audit tools
+  templates: required starting points for new documents
+  archive: superseded material kept only for history

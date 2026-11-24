@@ -1,0 +1,24 @@
+documents:
+  - id: ttd-p0-reasoning-integration-proposal-2026-11-21
+    path: decisions/2026-11-21-p0-reasoning-integration-proposal.md
+    type: decision
+    status: approved_with_restrictions
+    authoritative_for: executed-level1-and-pending-level2-p0-decisions
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: ttd-hermes-aux-guard-bridge-approval-proposal-2026-11-21
+    path: decisions/2026-11-21-hermes-auxiliary-guard-bridge-approval-proposal.md
+    type: decision
+    status: partially_approved
+    authoritative_for: Gate-A-approved-and-complete-with-Gate-B-still-pending-separate-approval
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: ttd-hermes-gate-b-single-paid-call-proposal-2026-11-21
+    path: decisions/2026-11-21-hermes-gate-b-single-paid-call-proposal.md
+    type: decision
+    status: approved_with_restrictions
+    authoritative_for: pending-owner-approval-of-one-hermes-real-provider-paid-call
+    updated_at: 2026-11-21
+    sensitivity: public

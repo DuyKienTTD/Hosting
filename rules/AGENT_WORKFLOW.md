@@ -1,264 +1,71 @@
 ---
 id: multi-agent-handoff
 type: rule
-status: current
-updated_at: 2026-11-21
+status: draft
+updated_at: 2026-11-24
 sensitivity: public
 ---
 
-# Quy ước chung: giao việc và bàn giao qua GitHub
+# Quy tắc vận hành Agent
 
-Áp dụng cho Codex, ChatGPT Work và mọi tác nhân có quyền truy cập repository. Mục đích: **GitHub là nơi lưu tài liệu làm việc và kết quả có thể truy xuất**, còn tin nhắn giao việc chỉ cần ngắn gọn và dẫn link. Không áp đặt kỹ thuật triển khai, cấu trúc code hay checklist cứng khi không cần.
+Bản tinh gọn theo chỉ thị A0 ngày 24/11/2026; chỉ là candidate cho đến khi được tích hợp hợp lệ. Không tự cấp quyền. [Lịch sử và bằng chứng](../references/history/README.md).
 
-## 1. Nguồn chính, không dựa vào lịch sử chat
+## 1. Nguồn và quyền
 
-- Bắt đầu từ [README](../README.md) -> [PROJECT](../PROJECT.md) (mục tiêu) -> [STATE](../STATE.md) (tiến độ) -> [CATALOG](../CATALOG.yaml) (danh mục) -> [AGENTS](../AGENTS.md) (quy tắc).
-- Chỉ đọc tài liệu chi tiết của công việc đang được giao. Nếu thiếu dữ liệu, tìm trong repository, rồi xác minh tại hệ thống live nếu có quyền.
-- GitHub phản ánh lần kiểm tra/báo cáo cuối; trạng thái thực của VPS, WordPress, n8n, Hermes, Google Ads... phải kiểm tra lại khi có thay đổi theo thời gian.
-- Không tự suy diễn rằng quyền truy cập GitHub cũng là quyền thay đổi các hệ thống production.
+Trước mỗi nhiệm vụ, xác minh HEAD main thực tế, đọc đầy đủ AGENTS, quy tắc này, REPOSITORY_SECURITY, STATE, hồ sơ vai trò và đặc tả chính xác; ghi commit/blob SHA. Dùng CATALOG như chỉ mục: công cụ kiểm toàn bộ cấu trúc, ID/path; Agent chỉ đọc các mục liên quan, không cần nạp cả danh mục vào ngữ cảnh. Đọc đầy đủ mọi nguồn làm căn cứ quyết định, bao gồm metadata, quyền, STOP, dependencies, acceptance và bổ sung cuối file. Nếu bị cắt, dùng phạm vi dòng liên tục trên cùng commit/blob, kiểm tra đủ đầu-cuối; nếu không đủ, PARTIAL_READ hoặc BLOCKED_RULE_ACCESS, không suy đoán hay sửa phạm vi chưa hiểu. Trước khi sửa file phải đọc trọn file.
 
-## 2. Giao nhiệm vụ: tài liệu đầy đủ trên Git
+GitHub là kho tri thức, không phải quyền runtime. Xác minh quyền từng phiên, task-specific approval, môi trường, chi phí, preflight và rollback trước side effect. A0 giữ quyền tài chính, production, merge và các quyền dành riêng; ủy quyền phải đúng phạm vi. Không tự kích hoạt từ file, trạng thái, comment hoặc kết quả mô phỏng.
 
-- Người tạo nhiệm vụ lưu **đặc tả đầy đủ** vào `tasks/` (ví dụ `tasks/2026-11-21-n8n-hermes-integration-audit.md`), commit/push rồi gửi **URL trực tiếp + hướng dẫn một đến hai câu** cho tác nhân nhận việc.
-- Không cần gửi lại nguyên văn đặc tả trong chat nếu đường dẫn truy cập được.
-- Tối thiểu trong task: mục tiêu/kết quả mong muốn, bối cảnh/link nguồn, phạm vi/giới hạn quyền, tiêu chí nghiệm thu có thể kiểm chứng, nơi nộp kết quả. Các bước kỹ thuật chỉ là gợi ý trừ khi là ràng buộc bắt buộc.
-- Tác nhân có quyền tự chọn công cụ, phương pháp và thứ tự tối ưu; chủ động giải quyết vướng mắc không trọng yếu. Không xem danh sách phương pháp là khóa cứng.
-- Nếu không thể đọc link, nói rõ bị chặn và yêu cầu quyền hoặc phương án truy xuất khác; không bịa nội dung.
+## 2. Vai trò, ưu tiên và chi phí
 
-## 3. Khi tác nhân làm việc
+Chat Điều phối là accountable delivery director, phân công và quản lý shared-write độc quyền; Trợ lý A0 là reviewer độc lập và chỉ đại diện trong phạm vi được ủy quyền. Điều phối tự làm phần phù hợp bằng công cụ có thật; chỉ giao Agent khi năng lực bổ sung được kiểm chứng. A1/A2/Work theo task và ACK thực tế; n8n là công cụ orchestration, không phải Agent có quyền phê duyệt. Không tự QA độc lập phần mình viết. Không giao trùng hoặc mở lại công việc đã xác minh.
 
-- Xác nhận branch/commit của tài liệu nhận việc và trạng thái hiện hành; tránh ghi đè kết quả tác nhân khác.
-- Phân biệt **đã đo/đã làm**, **đề xuất**, **chưa kiểm chứng**, **bị chặn** và **không thực hiện**.
-- Được thực hiện công việc trong phạm vi đã giao. Các thao tác có thể phá hủy dữ liệu, làm gián đoạn dịch vụ, thay đổi chi phí/ngân sách hoặc xuất bản phải có ủy quyền cụ thể.
-- Nếu phát hiện thiếu quyền hoặc phụ thuộc bên ngoài, ghi BLOCKED rõ nguyên nhân, bằng chứng và hướng xử lý; vẫn hoàn thành phần độc lập có thể làm.
-- Tránh thiết kế thêm quy trình hành chính, biểu mẫu và phê duyệt không đem lại lợi ích thực tế.
+KNG-01 routing: đọc [source snapshot](../program/current.json) và [release-state gate](../program/kng/release_state.py). Chỉ coi KNG effective sau phê duyệt A0 đúng candidate SHA/tree, merge method merge và independent authenticated remote main readback đúng merge commit/tree/hai parent theo thứ tự. Thiếu/mâu thuẫn/stale: NOT_EFFECTIVE, STOP new dispatch; nguồn main có hiệu lực trước đó vẫn kiểm soát. Source snapshot KNG_ONLY, A1 scoped author, Work source QA đã hoàn thành, không phải ACK nhiệm vụ mới. Công việc ngoài KNG HOLD trừ quyền riêng được xác minh. Không mở WS-04. Hostinger PAUSED (resume cần A0 và ACK), Hermes HOLD_NO_NEW_TASKS, Codex NOT_AUTHORIZED; không tự kích hoạt. Giữ các gate VPS/SEC, paid, production, GATE B và real ledger. Không suy diễn quyền từ báo cáo lịch sử.
 
-## 4. Bàn giao: báo cáo được push lại GitHub
+Ưu tiên chi phí + thời gian + chất lượng + rủi ro. WHY_DELEGATE/COST_ROUTING ghi năng lực, công cụ, phương án rẻ hơn, quyền, reviewer và giới hạn. Codex chỉ ngoại lệ khi có ALTERNATIVES_CHECKED, WHY_ONLY_CODEX, MAX_SCOPE, ESTIMATED_COST_OR_CALL_CAP, STOP, ACCEPTANCE, INDEPENDENT_REVIEWER, A0_APPROVAL_ID; thiếu bất kỳ mục nào thì không dispatch. Hermes ngoại lệ cần chứng minh năng lực không thay thế và A0 duyệt cap token/USD. Không dùng token cộng dồn/ước tính làm invoice; đối soát usage/spend theo phạm vi. Không tìm cách vượt content_policy_blocked. Paid API, render/publish cần approved scope, cost cap, consent, credential, STOP và đối soát. Không tự retry paid hoặc side effect chưa chứng minh idempotency.
 
-- Lưu **báo cáo có bằng chứng** trong `reports/` với ngày và mã task liên quan. Các tài sản kết quả (code, script, cấu hình mẫu, artifact phù hợp Git) lưu ở thư mục tương ứng và dẫn link từ báo cáo.
-- Báo cáo tối thiểu: task/link; thời điểm; phạm vi thực tế; thay đổi đã thực hiện và nơi triển khai; kết quả kiểm thử (PASS/FAIL/BLOCKED); bằng chứng/log đã làm sạch; rủi ro còn lại; bước tiếp theo.
-- Cập nhật `STATE.md` khi trạng thái dự án đổi, `CATALOG.yaml` khi thêm tài liệu có thẩm quyền, `CHANGELOG.md` khi có thay đổi đáng kể. Đừng viết lại báo cáo lịch sử để che dấu lỗi.
-- Commit và push lên repository/nhánh được giao, xác minh đã xuất hiện trên remote. Nếu không được quyền push, cung cấp bản vá/tài liệu và ghi trạng thái `NOT_PUSHED`.
-- Tin nhắn bàn giao chỉ cần: **kết quả ngắn + link báo cáo + link commit/PR + việc còn vướng**. Không cần dán lại toàn bộ báo cáo.
+## 3. Đặc tả và giao việc
 
-## 5. Cập nhật đồng thời và xung đột
+Lưu task trong tasks/, commit/push và gửi URL cố định theo commit + hướng dẫn ngắn. Đặc tả chỉ định đường dẫn báo cáo dự kiến hoặc nguồn roadmap quản lý kết quả; báo cáo dùng cùng TASK_ID, dẫn về đúng phiên bản đặc tả và bằng chứng. Điều phối cập nhật liên kết kết quả trong roadmap hoặc đặc tả thuộc quyền ghi; không yêu cầu Agent tìm nhiệm vụ/báo cáo trong CATALOG. Một owner chính cho mỗi deliverable; phân vai theo kỹ năng, công cụ, quyền thực tế, không theo danh xưng. Tự thu thập bằng chứng nếu có thể; tham vấn đúng chuyên môn khi cần, đối chiếu nguồn chính thức đúng phiên bản và evidence runtime, không coi tài liệu hãng là bằng chứng quyền live. Không giao Codex khảo sát lại đầu vào đã có.
 
-- Mỗi tác vụ nên có file task và report riêng; ưu tiên branch/PR khi nhiều tác nhân cùng sửa hoặc thay đổi mã vận hành.
-- Trước khi push, lấy trạng thái mới của nhánh, kiểm tra diff và hòa giải xung đột. Không force-push ghi đè công việc người khác.
-- Khi xung đột thông tin, tài liệu có bằng chứng xác minh mới hơn và hệ thống live được ưu tiên, nhưng phải lưu vết thay đổi.
+Task phải nêu TASK_ID, OWNER, MODE, mục tiêu/outcome, FIRST_ACTION, BASE_SHA, READ_SET, PREVIOUSLY_VERIFIED, WRITE_SET, DO_NOT_TOUCH, DEPENDENCIES, TEST_DELTA, INVARIANTS, quyền/cost cap, STOP, rollback, ACCEPTANCE, EVIDENCE, NEXT_OWNER. Chỉ rõ môi trường, kỹ năng, tool, cách bắt đầu, positive/negative/fault cases, nơi nộp kết quả và fallback. Với task nhỏ có thể rút ngắn nhưng không bỏ owner, bước đầu, nghiệm thu, quyền và nơi bàn giao. Một writer trên mỗi path/field; tư vấn H1/H2 chỉ ghi report/evidence và handoff được phép, không sửa owner/status/approval task mẹ.
 
-## 6. Bảo mật và tính linh hoạt
+Handoff ghi task_id, from_agent, to_agent, why_this_agent, objective, first_action, inputs_and_urls, constraints_and_approval, acceptance, deliverable_path, next_owner_or_decision, handoff_state. PREPARED là tài liệu đã ghi; SENT cần kênh gửi thực; ACKNOWLEDGED cần receipt đúng task; IN_PROGRESS/DONE cần bằng chứng. Không có kênh thì PREPARED_FOR_OWNER_FORWARD; không giả định Agent chạy nền hoặc GitHub comment tự dừng runtime. Chuyển tiếp chính xác URL, không tạo task trùng.
 
-- Tuân thủ [quy tắc repository](REPOSITORY_SECURITY.md); thông tin nhạy cảm đã được chủ sở hữu quản lý, nhưng mọi dữ liệu **mới** trước khi commit phải được rà soát.
-- Không tự ý đưa bí mật hoặc dữ liệu cá nhân chưa được xử lý lên repository public.
-- Được đề xuất sửa quy ước nếu gây cản trở thực tế; giải thích lý do trong commit/report. Quy tắc này đặt **đích đến và tiêu chuẩn chứng cứ**, không áp đặt một lối làm việc duy nhất.
+## 4. Thực thi liên tục và STOP
 
-## Mẫu lời giao việc cực ngắn
+Theo đuổi outcome toàn phạm vi đã duyệt, tự phân rã và tiếp tục phần an toàn độc lập, không xin duyệt vi mô. Điều kiện chưa kiểm tra là việc cần làm, không mặc nhiên là blocker. Không deploy/recreate/dispatch trước khi gate bắt buộc PASS. Dừng đúng side effect nếu thiếu quyền, preflight, rollback, chi phí, phát hiện drift/bypass/lộ bí mật hoặc nguy cơ production; tiếp tục phần độc lập an toàn. Không tự đổi owner, mở quyền hoặc tăng ngân sách. Chỉ trình A0 khi cần quyền dành riêng hoặc blocker không thể tháo gỡ hợp lệ.
 
-> Đọc https://github.com/DuyKienTTD/Hosting/blob/main/README.md và tài liệu task tại [URL]. Thực hiện trong giới hạn nêu ở task; đẩy báo cáo, bằng chứng và cập nhật trạng thái lên GitHub. Trả lại các URL kết quả.
+BLOCKED ghi observed, evidence, tác động, owner, first safe action và điều kiện gỡ chặn; không gọi việc chưa làm là lỗi kỹ thuật. Có thể retry read-only/idempotent/mock an toàn có lý do. Handoff kết thúc khi DONE/PASS, BLOCKED cụ thể, NEEDS_OWNER_DECISION hoặc INTERRUPTED_BY_ENVIRONMENT; status update không đóng task. Checkpoint tối thiểu khi gián đoạn: task ID, evidence, phần chưa xong, first safe action. Không tuyên bố 24/7 khi runtime/scheduler/retry/recovery/alert chưa được xác minh.
 
-## Mẫu lời bàn giao cực ngắn
+## 5. Bằng chứng, kiểm thử và nghiệm thu
 
-> Task: [mã]. Kết quả: [PASS/PARTIAL/BLOCKED]. Báo cáo: [URL]. Commit/PR: [URL]. Việc cần quyết định: [nếu có].
+Đặc tả ghi trạng thái DONE_VERIFIED, DONE_REPORTED, PARTIAL, FAILED, BLOCKED, NOT_RUN kèm URL/commit/môi trường/thời gian/phạm vi. Reuse evidence tương đương; chỉ rerun khi change_trigger, thiếu bằng chứng, lỗi mới, không tái lập hoặc cần độ tươi trước thao tác rủi ro. Ưu tiên targeted tests; không phủ nhận historical PASS, không nâng mock/source/author report thành live hoặc QA độc lập. Phân biệt VERIFIED_LIVE, VERIFIED_MOCK, REPORTED, DOCUMENTED, UNKNOWN, BLOCKED, DESIGNED_NOT_RUN. Báo cáo tiến độ tách maturity/readiness, nêu nguồn, trọng số có căn cứ và sai số; không tính PR chưa merge là sản phẩm live. Nghiệm thu dựa trên khả năng sử dụng, outcome, evidence và reviewer khác tác giả; không dựa vào số test hoặc hình thức. Roadmap-level QA không miễn security/release gate.
 
+## 6. Toàn vẹn dữ liệu và cập nhật (thay thế mục 8 cũ)
 
-## 7. BẮT BUỘC: điều phối dựa trên tri thức và bằng chứng trước khi giao thực thi (bổ sung 2026-11-21)
+Tách tasks (đặc tả/quyền), reports/evidence (bằng chứng bất biến), rules (chính sách), inventory (snapshot), runbooks (thao tác), decisions (quyết định), references (tham khảo). Stable ID, nguồn, owner, verified_at và môi trường; một nguồn thẩm quyền mỗi sự kiện/trường. STATE là hiển thị dẫn xuất có provenance, CATALOG chỉ là registry tri thức dùng chung, không tự cấp quyền. Không đăng ký task, report hoặc evidence vào CATALOG hay các phân vùng của nó. Task ACK là sự kiện có ngày và receipt. Không trộn test với ledger live hoặc secrets. Lỗi cần component/environment/task/run/version, observed/expected, evidence, next owner; khử định danh.
 
-**Quy tắc này áp dụng cho ChatGPT, Codex, Hermes, Hostinger Agent và mọi AI tham gia qua GitHub hoặc chuyển tiếp thủ công.** Mọi agent **phải đọc lại** `AGENTS.md`, quy tắc này, `STATE.md`, `CATALOG.yaml`, `rules/REPOSITORY_SECURITY.md`, hồ sơ năng lực của mình và task liên quan **khi bắt đầu nhiệm vụ mới**, không chỉ dựa vào chat hay trí nhớ phiên trước. Agent nhận việc phải nêu rõ commit/phiên bản quy tắc đã đọc; nếu không thể đọc, `BLOCKED_RULE_ACCESS` trước thao tác có tác động.
+Pre-change: fetch latest, đọc trọn file, pin base, write-set, invariants và rollback. Patch tối thiểu, review toàn diff kể cả phần xóa, metadata, quyền, ngân sách, STOP, source/evidence; kiểm diff, validators, links, secret. Không force-push, phá lịch sử, ghi đè stale hoặc ngoài write-set. Sau push kiểm remote SHA và nội dung bằng readback/diff/hash, không coi HTTP success/test exit 0 là nghiệm thu. Nếu sai, dừng phần phụ thuộc, phục hồi có chọn lọc và ghi changelog. Tuân thủ CONTRIBUTING và REPOSITORY_SECURITY; kiểm soát GitHub/CI chỉ được coi bật khi có bằng chứng thật.
 
-### 7.1. ChatGPT chịu trách nhiệm tổng hợp kiến thức và nghiên cứu
+Khi cập nhật canonical event/field, sinh STATE bằng công cụ đã kiểm chứng; cập nhật CATALOG chỉ khi tri thức dùng chung thay đổi, không sinh mục báo cáo từ sự kiện nghiệm thu. Bảo toàn marker và stable ID/path. Quy tắc mới cần A0 approval phù hợp, coordinator exclusivity, security QA, append-only evidence/changelog, cập nhật nguồn có thẩm quyền và các điểm đọc liên quan; không tự merge. Lịch sử phải xác minh theo commit gốc, không sửa hash cũ để tạo PASS.
 
-- **Trước khi soạn task/ra phương án**, đọc trạng thái, chứng cứ mới nhất, phạm vi quyền; đặt các câu hỏi chuyên môn **có mục đích rõ** cho Hostinger Agent (hosting/VPS/hPanel/network), Hermes (runtime/inference/tool/serialization), Codex (mã/code/test) theo thế mạnh và bằng chứng năng lực ở `agents/README.md`.
-- **Tự nghiên cứu thêm tài liệu công khai có thẩm quyền** của vendor/chủ dự án công nghệ (official docs, API reference, release notes, standards); ưu tiên phiên bản/endpoint thực tế đang dùng. Ghi URL, ngày kiểm tra, phiên bản áp dụng, điểm rút ra và khác biệt với runtime. Chỉ dùng nguồn cộng đồng như tín hiệu bổ sung; không dùng bài cũ làm bằng chứng trạng thái live.
-- **Đối chiếu chéo** câu trả lời agent + tài liệu công khai + evidence runtime; phân tách `VERIFIED_LIVE`, `VERIFIED_MOCK`, `REPORTED`, `DOCUMENTED`, `UNKNOWN`, `BLOCKED`. Báo cáo agent không mặc nhiên là sự thật live; tài liệu hãng không chứng minh credential/permission đã bật.
-- **Nếu có thể tự thu thập bằng công cụ hiện hữu thì làm trước;** nếu không có đường truy cập trực tiếp đến Hermes/Hostinger, tạo câu hỏi cụ thể và thông điệp chuyển tiếp qua kênh đã kiểm chứng. `TASK_COMMITTED` không phải `SENT`, `SENT` không phải `ACCEPTED`, `ACCEPTED` không phải `RUNNING` hay `DONE`. Không nói đã yêu cầu agent thực hiện nếu mới chỉ viết file GitHub.
-- Không tạo nhiệm vụ Codex để Codex khảo sát lại những dữ kiện Hostinger/Hermes đã có thể báo cáo. Codex cần được giao việc triển khai/kiểm thử dựa trên thông tin đầu vào đã xác minh, đồng thời vẫn được dùng suy luận kỹ thuật ở điểm khó.
+## 7. Bàn giao và lưu lịch sử
 
-### 7.2. Đặc tả phải chỉ rõ cách bắt đầu, không chỉ nêu mục tiêu
+Lưu report ngày/task trong reports/, artifact đúng thư mục, log đã khử dữ liệu nhạy cảm; ghi scope, thay đổi, tests PASS/FAIL/BLOCKED, evidence, residual risks, next owner. Commit/push đúng branch, verify remote, cập nhật nguồn trạng thái/index/changelog khi phù hợp. Không ghi đè report cũ, không tạo hồ sơ hành chính trùng. Tin nhắn bàn giao chỉ cần kết quả ngắn, report/commit/PR URL, blocker và next action.
 
-Một task kỹ thuật/đa agent có tác động hoặc phụ thuộc phức tạp phải trả lời rõ:
-1. **Vì sao và kết quả nào:** vấn đề, mục tiêu đo được và điều kiện DONE/PASS.
-2. **Bối cảnh chính xác:** current task ID, branch/commit, môi trường/phiên bản, file/endpoint cần xem, evidence đã PASS để tránh làm lại.
-3. **Điều kiện bắt đầu:** cần quyền gì, cần môi trường Linux/Windows nào, key/connector nào phải xác minh **không lộ giá trị**, backup/rollback, giới hạn chi phí và dữ liệu.
-4. **Bắt đầu từ đâu và làm thế nào:** bước đầu tiên cụ thể (mở file nào, đối chiếu cấu hình nào, chạy kiểm tra chỉ đọc nào), thứ tự kiểm tra phụ thuộc, phương án test offline/mock trước khi ghi live; lệnh minh họa an toàn khi hữu ích. Không hướng dẫn giả định quyền chưa có; không áp đặt cứng giải pháp triển khai nếu agent phát hiện phương án tốt hơn trong giới hạn.
-5. **Ai làm phần nào:** một owner cho từng đầu ra; Hostinger/Hermes báo cáo đầu vào trước khi Codex viết mã nếu việc đó giúp tránh mò mẫm; các agent khác làm reviewer/consultant theo khả năng thật.
-6. **Kiểm thử và điểm dừng:** positive/negative/fault cases quan trọng, cách đo, evidence/link cần giao; trường hợp STOP và điều kiện phải xin duyệt.
-7. **Bàn giao tiếp theo:** agent/người nhận, artifact URL, quyết định cần đưa ra, trạng thái đã gửi/đã nhận; không viết mơ hồ \"tiếp tục\" hoặc \"xử lý đi\".
+Nội dung lịch sử được truy xuất khi cần bằng chứng qua [chỉ mục lịch sử](../references/history/README.md), không phải quyền mới hoặc luồng đọc bắt buộc.
 
-Với công việc nhỏ đã rõ, có thể rút ngắn nhưng **không bỏ owner, bước bắt đầu, nghiệm thu, giới hạn quyền và nơi nhận kết quả**.
+## 8. Vòng đời tri thức — chống phình kho (chỉ thị A0 24/11/2026)
 
-### 7.3. Chuyền bóng không được rơi: giao/nhận/hoàn thành có chứng cứ
+Chi tiết triển khai và validator: [Data Lifecycle & Context Management Protocol](DATA_LIFECYCLE_CONTEXT.md) (đã được A0 duyệt áp dụng về tổ chức).
 
-- Mỗi lượt chuyển giao có tối thiểu: `task_id`; `from_agent`; `to_agent` **một người chịu trách nhiệm chính**; `why_this_agent`; `objective`; `first_action`; `inputs_and_urls`; `constraints_and_approval`; `acceptance`; `deliverable_path`; `next_owner_or_decision`; `handoff_state`.
-- Trạng thái bàn giao: `PREPARED` (file đã tạo), `SENT` (gửi qua kênh thực có bằng chứng), `ACKNOWLEDGED` (agent nhận và xác nhận), `IN_PROGRESS`, `DONE`, `BLOCKED`, `NEEDS_OWNER_DECISION`. GitHub commit đơn thuần chỉ là `PREPARED`.
-- Agent nhận việc đọc lại quy tắc và task, đối chiếu quyền/runtime, xác nhận đầu vào đã nhận, báo `ACKNOWLEDGED` khi có kênh phản hồi. Agent giao việc theo dõi đúng kênh, không giả định agent kia chạy nền. Nếu không có kênh gửi/nhận trực tiếp, chủ dự án chuyển link và ghi rõ `PREPARED_FOR_OWNER_FORWARD`.
-- Khi `BLOCKED`, agent phải ghi **tác động, bằng chứng, owner giải quyết, first action an toàn, tiêu chí gỡ chặn**; phần độc lập đã PASS giữ nguyên. Không tạo liên tục nhiều task con cho cùng blocker nếu task hiện tại đủ phạm vi.
-- Khi `DONE`, report/link/commit, phần chưa kiểm chứng, owner kế tiếp và việc cần duyệt được ghi rõ. Không chuyển bóng ngầm hoặc tự đổi owner.
+Phân loại ngay khi tạo tài liệu: **DURABLE** (giữ lâu dài: quy tắc có hiệu lực, kiến trúc/ADR, đặc tả sản phẩm, hướng dẫn vận hành đã xác minh, mã/test hữu ích, nghiệm thu cuối và bằng chứng bắt buộc); **ACTIVE** (giữ đến khi đóng: task, roadmap, blocker, checkpoint và trạng thái đang dùng); **TEMPORARY** (dọn khi đóng: bản nháp, log thử, báo cáo tiến độ trung gian, phương án bị loại, các bản cập nhật cùng một thử nghiệm). Không biến tài liệu tạm thành tri thức lâu dài theo mặc định. Owner, task ID, loại lưu trữ và điều kiện hết hạn ghi trong metadata hoặc hồ sơ task hiện có; không tạo biểu mẫu riêng chỉ để phân loại.
 
-### 7.4. Phân vai theo năng lực, không theo thói quen
+Một mục đích có một nguồn chính. Cập nhật tài liệu hiện có hoặc log task, không tạo báo cáo/checkpoint mới cho mỗi lượt trao đổi. Chỉ tạo tài liệu độc lập khi có quyết định, artifact, bằng chứng bắt buộc hoặc kết quả có giá trị tái sử dụng mới. Không chép log dài, toàn bộ chat, nội dung quy tắc hay báo cáo cũ vào tài liệu vận hành. Dùng liên kết commit cố định; CATALOG là chỉ mục tra cứu, không là nội dung đọc tuần tự. Quy tắc mới phải hợp nhất hoặc thay thế điều khoản cũ, không nối thêm phiên bản mâu thuẫn.
 
-- **ChatGPT:** research chính thức + đối chiếu nguồn, tổng hợp báo cáo chuyên gia, thiết kế kiến trúc/phương án, ra đề thực thi có điểm bắt đầu, nghiệm thu và điều phối/ghi quy tắc bền vững. Không tự nhận quyền VPS hoặc phê duyệt chi phí.
-- **Hostinger Agent:** hPanel/hosting, VPS health, tài nguyên, Docker/network từ control plane, DNS/firewall/backup, khả năng và quy trình thao tác chính thức. Chỉ báo trạng thái live khi đã dùng công cụ live; đổi cấu hình theo quyền riêng.
-- **Hermes Agent:** agent runtime, session/tools, request serialization, behavior, provider compatibility và reasoning/tool analysis; phân biệt Hermes WebUI với auxiliary KVM2 và production runtime.
-- **Codex:** code review, viết mã, unit/integration/E2E, Docker Compose/config, triển khai sandbox/rollback, CI và chứng cứ kỹ thuật; không bị biến thành agent khảo sát mọi dịch vụ khi có chuyên gia phù hợp.
-- **n8n:** orchestration/scheduling/runtime job-state khi workflow đã triển khai/được bật; không phải AI chuyên môn hoặc quyền cấp phép.
-- Phân vai là **ưu tiên dựa trên khả năng đã kiểm chứng**, không độc quyền; đổi owner theo công cụ thực tế và giải thích trong handoff.
+Khi A0/Điều phối có thẩm quyền quyết định dừng một thử nghiệm/POC thất bại: đóng task, giữ **một báo cáo kết thúc ngắn, dễ hiểu** (mục tiêu, phiên bản/môi trường, kết quả thực tế, nguyên nhân đã chứng minh hoặc UNKNOWN, lý do dừng, bài học tái sử dụng, điều kiện duy nhất để mở lại nếu có, quyết định và liên kết bằng chứng thiết yếu). Mặc định tối đa một trang, dài hơn chỉ khi cần để bảo toàn an toàn hoặc nghĩa vụ kiểm toán. Không tạo thêm chuỗi báo cáo cho thử nghiệm đã đóng. Các báo cáo cập nhật/trung gian không còn giá trị độc lập phải xóa khỏi cây tài liệu hiện hành ngay trong đợt đóng, sau kiểm tra tham chiếu và phạm vi quyền; không chỉ đổi tên sang archive rồi để phình cây file. Có thể phục hồi bằng Git commit đã pin; không rewrite lịch sử.
 
-### 7.5. Quy tắc mới phải được ghi ngay vào kho tri thức
+Ngoại lệ bắt buộc giữ nguyên: phê duyệt/quyền/STOP, sự cố bảo mật hoặc dữ liệu, tài chính/kiểm toán, rollback, bằng chứng nghiệm thu độc lập, regression cần tái sử dụng và tài liệu còn dependency. Chỉ giữ phần thật sự thiết yếu và dẫn từ báo cáo kết thúc; không xóa khi retention/reference chưa rõ. Không ghi lại hash lịch sử hay làm mất provenance. Nếu xóa khiến link/ID hoặc validator hỏng, sửa tham chiếu về báo cáo kết thúc hoặc nguồn lịch sử bất biến, kiểm tra đầy đủ trước commit; không bỏ validator hoặc giả PASS. Chỉ thị A0 24/11/2026: tách đặc tả, báo cáo, bằng chứng khỏi CATALOG; giữ tệp nguồn và ID lịch sử tại commit gốc. Dọn backlog/xóa tệp nguồn là phạm vi riêng; không tự xóa. ID lịch sử không tái sử dụng.
 
-- Khi chủ dự án đưa ra **nguyên tắc chung, thay đổi cách phối hợp, điều kiện nghiệm thu hoặc bảo mật**, agent điều phối phải sửa `rules/AGENT_WORKFLOW.md` và/hoặc quy tắc chuyên đề tương ứng, đồng bộ `AGENTS.md`/agent profiles khi cần, `CATALOG.yaml`, `CHANGELOG.md`, entrypoint liên quan; commit/push rồi **đọc lại xác minh**. Tin nhắn chat chỉ giải thích, **không thay việc cập nhật tri thức**.
-- Ghi rõ: quy tắc mới là `APPROVED_BY_OWNER` nếu chủ dự án chỉ thị; đề xuất chưa duyệt là `PROPOSED`. Không suy diễn quy tắc mới thành quyền thao tác production/paid API.
-- Trong mọi thông điệp giao việc sau đó nhắc: \"Đọc `AGENTS.md`, `rules/AGENT_WORKFLOW.md`, `rules/REPOSITORY_SECURITY.md`, `STATE.md`, `CATALOG.yaml` và hồ sơ agent trước khi làm. Ghi commit rule đã đọc và tuân thủ quy tắc chung.\"
-- Cập nhật quy tắc nên ngắn gọn đủ vận hành, không sản xuất thêm tài liệu hành chính dư thừa. Nếu thiếu quyền GitHub, cung cấp patch chính xác + trạng thái `NOT_PUSHED`, không nói đã cập nhật.
-
-### 7.6. Không ghi đè task chính khi bàn giao tham vấn
-
-- **Không ghi đè task chính khi bàn giao tham vấn (H1/H2).** Agent tư vấn chỉ tạo report/evidence riêng và bổ sung link/status handoff vào mục phù hợp, không tự đổi owner, status, approval scope hoặc thay toàn bộ nội dung task mẹ. Chỉ chủ dự án hoặc owner được ủy quyền mới thay đổi các trường quyền hoặc đóng task mẹ; các nhiệm vụ paid vẫn BLOCKED cho tới nghiệm thu theo gate.
-- Trước khi `update_file`, phải fetch phiên bản mới và review diff để không xóa mục tiêu, điều kiện an toàn hay kết quả agent khác. Nếu xảy ra overwrite, phục hồi nội dung task mẹ từ commit xác minh được, giữ report lịch sử và ghi rõ sửa đổi trong changelog.
-
-### 7.7. Ví dụ áp dụng cho GATE B (không cấp quyền mới)
-
-- **Hostinger Agent (consult, read-only):** bắt đầu từ inventory và live hPanel/VPS network; báo bridge có thể truy cập proxy Level 2 qua interface/network nào, topology cô lập đề xuất, thao tác nào đòi approval và test no-bypass. **Không sửa network/firewall/DNS**.
-- **Hermes Agent (consult, read-only):** đối chiếu chính xác runtime auxiliary và serialized Responses request/cap/token/credential requirements; mô tả cách khóa fingerprint trên bytes cuối, cái gì đã mock PASS vs còn UNKNOWN. **Không dispatch paid**.
-- **ChatGPT:** nghiên cứu Docker networking/Compose chính thức và OpenAI Responses/token-counting; đối chiếu hai report, xác định phương án và kiểm tra quyền, sau đó mới giao Codex cách bắt đầu, tests và rollback.
-- **Codex:** sau khi nhận input, sửa sandbox network/guard theo task đã có và approval hiện hành, chạy negative network tests, mock E2E và bằng chứng. Paid GATE B vẫn `BLOCKED_PREFLIGHT` cho tới khi các điều kiện ADR-P0-003 được chứng minh; không mở thêm quyền nhờ quy tắc này.
-
-## Tham khảo công khai được dùng khi cập nhật quy tắc
-
-- OpenAI Agents SDK: https://developers.openai.com/api/docs/guides/agents/sdk (agent ownership, orchestration/handoffs, guardrails).
-- OpenAI Handoffs: https://openai.github.io/openai-agents-python/handoffs/ (truyền ngữ cảnh, quyền phải kiểm tra trước side effects).
-- OpenAI Guardrails: https://openai.github.io/openai-agents-python/guardrails/ (giới hạn kiểm tra ở ranh giới agent/tool).
-- OpenAI Tracing: https://developers.openai.com/api/docs/guides/agents/integrations-observability (theo dõi tool calls, handoffs, kiểm tra).
-- Google SRE incident response: https://sre.google/workbook/incident-response/ (rõ vai trò và kênh liên lạc).
-- Google SRE managing incidents: https://sre.google/sre-book/managing-incidents/ (handoff phải rõ người nhận và xác nhận).
-
-Đây là **nguyên tắc quản trị dự án**, tham khảo từ tài liệu công khai; không có nghĩa dự án đã cài OpenAI Agents SDK hoặc Google SRE tooling.
-
-## 8. BẮT BUỘC: chống thao tác sai, tránh làm lại và kiểm tra toàn vẹn tri thức (chỉ thị chủ dự án 2026-11-21)
-
-Áp dụng **ngay cho mọi agent**. Đây là kiểm soát **trước, trong và sau** thực thi, không chỉ là checklist khi viết báo cáo. Đơn giản hóa quy trình nếu tác vụ nhỏ, nhưng không miễn các ranh giới bảo toàn dữ liệu/quyền hoặc độ trung thực của bằng chứng.
-
-### 8.1. Đọc ĐỦ tài liệu trước khi kết luận — không dự đoán nội dung bị cắt
-
-- Với từng tài liệu làm căn cứ ra quyết định/đặc tả/sửa đổi: kiểm tra **đúng đường dẫn, branch, commit/SHA, kích thước hoặc giới hạn kết quả**, đọc **đủ toàn bộ phần liên quan** (đặc biệt metadata, quyền/approval, STOP, dependencies, acceptance, handoff và các phần bổ sung cuối file). **Không dựa vào đoạn preview, nội dung bị truncation, 4.000 ký tự đầu hoặc tìm kiếm snippet để suy đoán phần còn lại.**
-- Nếu công cụ trả thiếu/truncated, tiếp tục lấy các đoạn chưa đọc bằng phân trang/range/đọc tệp nguyên bản rồi đối chiếu đầu–cuối và section; nếu bất khả thi, ghi `PARTIAL_READ` cùng phần chưa đọc, **không xác nhận tài liệu đã đọc đủ**, không thực hiện thay đổi tác động vào tài liệu/phạm vi chưa hiểu.
-- Trước khi kết luận, đọc tài liệu **hiện hành và liên kết bằng chứng quyết định**; kiểm tra cả bổ sung gần nhất ở cuối task/report. Không dùng kết luận một bản cũ nếu bản mới đã supersede hoặc đã thay đổi điều kiện.
-- Trước khi cập nhật một file tồn tại: phải **đọc trọn file hiện tại**, không lấy nội dung cũ từ trí nhớ/session, không thay nội dung bằng bản tóm tắt; khi file rất lớn, đọc từng đoạn đủ bao phủ file hoặc dùng công cụ lấy toàn bộ. Không thể đọc trọn thì **không được overwrite**. Sau khi push: **đọc lại file đầy đủ hoặc xác minh nội dung bất biến bằng diff/hash/section checks**, không chỉ xem HTTP success.
-
-### 8.2. Trước mỗi task: đối chiếu công việc đã làm để không tiêu hao lại
-
-- Phải tạo **bảng trạng thái ngắn** ngay trong đặc tả (không tạo tài liệu riêng nếu không cần) phân loại: `DONE_VERIFIED`, `DONE_REPORTED`, `PARTIAL`, `FAILED`, `BLOCKED`, `NOT_RUN`, kèm **report/evidence URL, commit, môi trường, thời gian, phạm vi test**.
-- **Không yêu cầu chạy lại** phần `DONE_VERIFIED` khi cùng phiên bản mã, cấu hình, topology, dữ liệu và tiêu chí nghiệm thu. Nếu trạng thái có thể đổi theo thời gian, dùng kiểm tra **nhẹ nhất cần thiết** (health/diff/read-only) thay vì chạy lại toàn bộ suite.
-- Chỉ rerun khi **có điều kiện thay đổi có thể ảnh hưởng kết quả**, bằng chứng thiếu/không đúng phạm vi, lỗi mới, test không tái lập hoặc yêu cầu xác minh độ tươi trước thao tác rủi ro. Nêu rõ `change_trigger`, test bị ảnh hưởng, lý do, chi phí/tác động dự kiến; ưu tiên targeted tests trước full suite. Không viện dẫn \"chắc ăn\" hoặc \"kiểm tra lại tất cả\" nếu không có cơ sở.
-- Không phủ định historical PASS chỉ vì agent mới không tự chạy lại; không nâng historical PASS thành live PASS cho topology khác. Reuse evidence có **điều kiện tương đương rõ ràng**.
-- Khi xử lý BLOCKED: chỉ làm phần thiếu và phần bị ảnh hưởng theo dependency graph; tránh tạo task con/checkpoint trùng lặp nếu task mẹ vẫn đủ phạm vi.
-
-### 8.3. Thiết kế dữ liệu để khoanh vùng lỗi và giảm blast radius
-
-- Tách dữ liệu theo **trách nhiệm và vòng đời**: `tasks/` chứa đặc tả/owner/approval; `reports/` và `reports/evidence/` chứa kết quả bất biến, có nguồn/thời điểm; `STATE.md` tóm tắt hiện tại; `CATALOG.yaml` lập chỉ mục duy nhất; `rules/` là chính sách; `inventory/` là snapshot cấu hình; `runbooks/` là hướng dẫn thao tác. Không thay task mẹ bằng báo cáo agent tư vấn.
-- Mỗi artifact quan trọng có **stable ID**, owner, trạng thái, môi trường/commit/source, liên kết đến task và evidence, ranh giới `verified_at`/runtime version; dùng một **nguồn có thẩm quyền** cho mỗi sự kiện/trường, hạn chế sao chép trạng thái nhiều nơi. Bản tóm tắt phải trỏ nguồn và không tự biến thành bằng chứng.
-- Dùng **write-set/ownership contract** trong task: agent được quyền sửa chính xác những path/section/field nào; mục nào chỉ đọc; owner nào phải phê duyệt. Với H1/H2 tư vấn: chỉ tạo report/evidence và thêm mục handoff khi được phép; **không sửa metadata** `owner/status/approval_scope/paid_inference_approval` của task mẹ. Không sửa file ngoài write-set dù có quyền Git chung.
-- Chia module/test/ledger/state/secret theo boundary; thay đổi nhỏ, rollback được, có diff. Không trộn dữ liệu thử nghiệm vào ledger live; không dùng một file làm nơi vừa lưu cấu hình, vừa ghi kết quả thử nghiệm, vừa cấp quyền chi phí.
-- Mỗi lỗi cần có `component`, `environment`, `task_id/run_id` hoặc hash an toàn, `code_config_version`, `observed`, `expected`, `evidence`, `next_owner`; đủ khoanh vùng mà không công khai IP/secret/payload. Chỉ tạo mã máy-readable mới khi thực sự giúp chẩn đoán, không gia tăng hành chính.
-
-### 8.4. Trước khi sửa/push: kiểm tra thay đổi so với bản gốc
-
-- **Pre-change:** ghi base SHA/commit, danh sách path được phép sửa (`write_set`), trường/section bất biến (`invariants`), backup/rollback nếu cần. `fetch latest -> read whole -> patch minimal -> compare diff -> validate -> push -> re-fetch`; nếu base SHA stale phải refresh, merge có ý thức, **không force overwrite**.
-- **Review diff toàn bộ**, bao gồm deleted sections/metadata thay đổi, `git diff --check`, validators liên quan. Từ chối patch nếu xóa/đổi mục tiêu, owner, quyền, ngân sách, STOP, source hoặc evidence ngoài phạm vi. Với file quan trọng và diff lớn/đổi metadata: ưu tiên PR có review/CI; không khẳng định branch protection đang bật khi chưa kiểm chứng.
-- **Post-change:** đối chiếu đầy đủ file/sections trước–sau, xác minh link, metadata, references, trạng thái báo cáo, Git remote SHA, an toàn thông tin. Nếu phát hiện sai: dừng tác vụ kế tiếp, khôi phục nội dung có chọn lọc từ commit chuẩn, **không xóa lịch sử và không che lỗi**; cập nhật changelog và owner liên quan.
-- Mọi thao tác cập nhật tài liệu phải tuân thủ đồng thời `CONTRIBUTING.md`, `rules/REPOSITORY_SECURITY.md` và quy tắc này. Không coi `update_file` success hoặc test exit 0 là đã nghiệm thu đầy đủ khi chưa review invariants.
-
-### 8.5. Mẫu ranh giới bắt buộc trong đặc tả (nằm trong task, không tạo nhiều biểu mẫu)
-
-`READ_SET`: tài liệu/mã/evidence cần đọc đủ, ref/commit cụ thể. `PREVIOUSLY_VERIFIED`: các hạng mục và evidence có thể tái sử dụng. `WRITE_SET`: path, section/field được sửa. `DO_NOT_TOUCH`: production/approval/ledger/metadata hoặc dữ liệu khác. `FIRST_ACTION`: bước an toàn bắt đầu. `DEPENDENCIES`: điều kiện/công việc chuyên gia phải có trước. `TEST_DELTA`: chỉ test thay đổi và điều kiện bắt buộc, cùng lý do rerun. `INVARIANTS`: giá trị/trường phải giữ nguyên. `PASS`: phép đo/evidence. `STOP`: điểm dừng và owner xử lý. `HANDOFF`: ai nhận, kênh, trạng thái, link artifact.
-
-### 8.6. Kiểm soát bằng công cụ — phân biệt đã áp dụng và cần triển khai
-
-- **Hiệu lực ngay:** tất cả agent đọc đủ, lập phạm vi đọc/ghi, kiểm diff và xác minh sau push theo quy tắc này.
-- **Có thể tự động hóa tiếp:** quy tắc GitHub ruleset/branch protection, yêu cầu PR review, status checks, CI validator kiểm metadata bất biến, uniqueness ID, links, diff xóa section, secrets, và phân quyền write-path. **Chưa coi các kiểm soát này là đã bật** nếu chưa có bằng chứng cấu hình GitHub thật; đề xuất triển khai riêng khi đủ quyền và có sự đồng ý của chủ dự án.
-- Tài liệu tham khảo: Git diff https://git-scm.com/docs/git-diff ; GitHub rulesets https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets ; GitHub PR review https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/reviewing-proposed-changes-in-a-pull-request .
-
-## 9. BẮT BUỘC: thực thi nhiệm vụ liền mạch theo kết quả (2026-11-21)
-
-Quy tắc này bổ sung mục 7–8; **không thay thế STOP, approval, bảo mật, chi phí hoặc nghiệm thu trong task/ADR**. Áp dụng cho Codex và mọi agent khác theo phạm vi công cụ/quyền đã xác minh.
-
-### 9.1. Tiếp tục theo mặc định, chịu trách nhiệm đến kết quả
-
-- Nhận một task nghĩa là theo đuổi outcome/acceptance của toàn phạm vi đã được duyệt, không chỉ từng thao tác. Agent tự phân rã, sắp thứ tự và tiếp tục các bước độc lập, hợp lệ, an toàn còn lại mà không cần chủ dự án nhắc lại.
-- Điều kiện **chưa kiểm tra** (ví dụ backup hoặc baseline) là việc phải thực hiện, không mặc nhiên là một blocker. Kiểm tra xong mới quyết định GO/STOP cho thao tác rủi ro liên quan.
-- Không đổi BLOCKED thành PASS nếu preflight còn thiếu; không recreate/deploy/dispatch trước khi mọi gate bắt buộc PASS. Cập nhật tiến độ giữa chừng không có nghĩa kết thúc nhiệm vụ.
-
-### 9.2. STOP theo ranh giới rủi ro, không STOP toàn task khi có phần an toàn còn làm được
-
-- Dừng ngay **thao tác có side effect** nếu thiếu approval, quyền, bằng chứng an toàn, phát hiện drift/bypass/secret exposure, chưa kiểm soát rollback/chi phí hoặc nguy cơ ảnh hưởng production. Tiếp tục phép đọc/kiểm tra và phần độc lập đã được phép nếu không gia tăng rủi ro.
-- Chỉ bàn giao BLOCKED khi đã thử các bước hợp lệ để tháo gỡ và vẫn tồn tại trở ngại cụ thể, hoặc khi công cụ/phiên/đường truy cập không cho tiếp tục. Nêu observed, bằng chứng, next_action, owner và ranh giới đã dừng. Không gắn nhãn lỗi kỹ thuật nếu chỉ còn việc chưa làm.
-- Khi cần chủ dự án quyết định mới, dừng đúng phạm vi chưa được phép; không suy diễn approval từ Git access hay áp lực hoàn thành.
-
-### 9.3. Phục hồi, tránh làm lại và bàn giao theo sự kiện
-
-- Được chẩn đoán và thử lại phép read-only, idempotent hoặc mock khi an toàn, có lý do và trong quyền; **không tự retry paid inference hoặc side effect chưa chứng minh idempotency**. Không chạy lại H3/H4 hoặc công việc đã PASS nếu không có change trigger theo mục 8.
-- Chỉ phát hành handoff kết thúc khi DONE/PASS, BLOCKED có blocker cụ thể, NEEDS_OWNER_DECISION hoặc INTERRUPTED_BY_ENVIRONMENT (phiên/công cụ không thể tiếp tục). Status update không phải handoff đóng task.
-- Nếu phiên bị ngắt, ghi checkpoint tối thiểu khi thật sự cần với task ID, evidence còn hiệu lực, bước chưa xong và first safe action; phiên kế tiếp tiếp tục từ điểm đó, không mở task trùng lặp.
-- Quy tắc này **không bảo đảm vận hành 24/7** hay tự khởi chạy lại phiên Codex; tính liên tục xuyên phiên cần cơ chế điều phối/runtime được kiểm chứng riêng.
-
-## 10. APPROVED_BY_OWNER — ủy quyền điều phối liên tục cho ChatGPT (2026-11-22)
-
-Chủ dự án chỉ thị: **“Bước tiếp theo ủy quyền cho bạn toàn quyền quyết định. không cần hỏi lại tôi trừ các vấn đề cần bảo mật mà bạn và các tác nhân khác không có quyền truy cập”.**
-
-- **ChatGPT là điều phối viên có thẩm quyền lựa chọn bước tiếp theo**, phân vai theo năng lực đã xác minh, phân tích/phê duyệt các giai đoạn kỹ thuật và yêu cầu tác nhân tiếp tục trong giới hạn bảo mật, chi phí và production đã ghi trong task/ADR. Không xin lại phê duyệt hình thức ở mỗi checkpoint khi phạm vi/điều kiện đã đủ căn cứ. Sau mỗi nghiệm thu, chủ động chọn và ghi bước kế tiếp có thể thực hiện được.
-- **Không phải cấp quyền truy cập mới:** GitHub access không đồng nghĩa có quyền VPS, provider key, tài khoản billing, production hoặc tạo phiên Codex. Mỗi tác nhân xác minh quyền phiên thực tế; trạng thái handoff phải là `PREPARED_FOR_OWNER_FORWARD` nếu không có kênh gửi trực tiếp, không tự nâng thành `SENT/ACKNOWLEDGED`.
-- **Không tự bãi bỏ ràng buộc an toàn:** giữ nguyên STOP, least-privilege, separation of duties, không tiết lộ secret, không sửa production hoặc real ledger nếu không chứng minh rollback/invariants, không tự tăng ngân sách, không retry paid. Một phê duyệt có điều kiện trước đây chỉ được sử dụng khi mọi preflight tương ứng PASS; không coi ủy quyền điều phối là bằng chứng kỹ thuật hay quyền truy cập.
-- **Chỉ hỏi chủ dự án khi thực sự không thể tự tiếp tục hợp lệ**, chủ yếu là credential, bảo mật, xác thực/chấp thuận quyền trong hệ thống ngoài mà các tác nhân không được cấp, hoặc quyết định phải do chủ tài khoản thực hiện. Trong trường hợp đó báo rõ blocker, nguồn chứng cứ, lựa chọn tối thiểu và vẫn hoàn thành mọi phần an toàn độc lập; không gửi câu hỏi xin phép cho công việc đã nằm trong ủy quyền này.
-- **Quyết định phải tồn tại trên GitHub:** cập nhật task hiện hành với một owner thực thi, READ_SET/WRITE_SET/DO_NOT_TOUCH, first safe action, preflight, tests, rollback, STOP, acceptance, next owner; phân biệt quyết định phân công với bằng chứng tác nhân đã nhận. Giữ lịch sử nghiệm thu, không mở task trùng lặp hoặc chạy lại historical PASS vô lý.
-
-## 11. HISTORICAL COST-FIRST ROUTING (2026-11-23; superseded for new KNG-era dispatch by §13)
-
-### 11.1. Sáu vai trò không được nhầm lẫn
-- **A0:** chủ dự án phê duyệt quyền, ngân sách và hành động có tác động.
-- **ChatGPT Điều phối:** phân công, governance, review và đề xuất; không tự ký duyệt thay A0.
-- **A1 = ChatGPT Thông thường:** phiên chat riêng do chủ dự án chuyển đặc tả; không phải Điều phối hoặc Work và không chạy nền. Profile: [agents/a1.md](https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/agents/a1.md).
-- **ChatGPT Work:** kiểm thử, browser/UX và triển khai nhiều bước khi có công cụ trong phiên.
-- **Hermes WebUI:** business/content/agent semantics, validator/mock và code offline nếu có tool.
-- **Hostinger Agent:** hPanel/VPS/hosting/OPS/SEC, read-only hoặc thay đổi có approval riêng.
-- **Codex:** *exception-only* cho việc đã chứng minh không lựa chọn nào bên trên thực hiện đủ an toàn/chính xác trong công cụ hiện tại. **n8n không phải AI Agent.**
-
-### 11.1a. A0 override mới hơn — Hostinger PAUSED (2026-11-23)
-
-- **Hostinger Agent = PAUSED_FOR_NEW_AND_UNFINISHED_TASKS.** Không điều phối bất kỳ phần việc mới hoặc chưa thực thi nào cho Agent này, kể cả `SEC-02/S3-P0-R1`, `OPS-01A/S2-D2`, hoặc sửa frontmatter PR24. Lệnh pause đã ghi [PR24](https://github.com/DuyKienTTD/Hosting/pull/24#issuecomment-7093337445) và [PR29](https://github.com/DuyKienTTD/Hosting/pull/29#issuecomment-7093338761); **chưa có ACK phiên Hostinger**, không mạo nhận runtime đã dừng. Giữ nguyên evidence đã có.
-- **Sole writer thay thế:** A1 nhận `OPS-01A/S2-D2` trên **nhánh riêng stacked vào PR24** (PR24 HEAD pin `e9c2d8f759850ea9c654de7e103549e041f66679`), tuyệt đối không push/force-push lên nhánh Hostinger. [Đặc tả A1](https://github.com/DuyKienTTD/Hosting/pull/24#issuecomment-7093346631). A1 đã ACK và bàn giao [PR36](https://github.com/DuyKienTTD/Hosting/pull/36) HEAD `6838ca7d5e69b43f5272e5fe7f03ba5fff1d7222` (31/31 **author** tests offline); [Hermes QA độc lập D2](https://github.com/DuyKienTTD/Hosting/pull/36#issuecomment-7093565021) đã được Hermes ACK và thực thi; QA D2 19 PASS / 2 FAIL, verdict `NEEDS_A1_DELTA` [#7093801751](https://github.com/DuyKienTTD/Hosting/pull/36#issuecomment-7093801751). A1 đã ACK và bàn giao [OPS D3 PR36 HEAD `5626bb55072cdcca0d39f3ba57180d3c57af05ad`](https://github.com/DuyKienTTD/Hosting/pull/36#issuecomment-7093985995) (44/44 **author** tests offline); [Hermes QA D3 độc lập](https://github.com/DuyKienTTD/Hosting/pull/36#issuecomment-7094119127) đã được giao, chờ Hermes ACK và verdict trên HEAD mới, **chưa phải PASS độc lập**. Work QA 18 nhóm D1 là lịch sử, không giao trùng Work D2.
-- Năng lực hPanel/VPS của Hostinger trong hồ sơ là **bằng chứng lịch sử, không phải quyền giao việc hiện hành**. Chỉ tiếp tục khi **A0 chỉ thị resume + Hostinger ACK** và có owner được phân công lại; mọi gate VPS/production và 5 SEC work orders vẫn `NOT_AUTHORIZED`.
-
-### 11.2. Quy tắc giao việc tiết kiệm chi phí (bắt buộc)
-1. Điều phối tự làm trực tiếp bằng công cụ hiện hữu khi scope đơn giản và có quyền. Nếu phải giao, trước hết thử **A1/Work/Hermes** theo năng lực phù hợp; **Hostinger đang PAUSED** nên chỉ được xem xét sau chỉ thị A0 resume, *không ép thứ tự cứng nếu kỹ năng/quyền không khớp*.
-2. **Codex không mặc định sở hữu code, Python, API, JSON, CI hay Git.** Nếu agent khác có thể làm, phải giao agent đó; dùng reviewer khác tác giả.
-3. Chỉ đề xuất Codex khi có `ALTERNATIVES_CHECKED` (từng agent và bằng chứng thử/thiếu quyền), `WHY_ONLY_CODEX` (nút thắt kỹ thuật không thể chuyển), `MAX_SCOPE`, `ESTIMATED_COST_OR_CALL_CAP`, `STOP`, `ACCEPTANCE`, `INDEPENDENT_REVIEWER`, `A0_APPROVAL_ID`. Thiếu một mục → `CODEX_NOT_AUTHORIZED`. Không tự gửi lệnh Codex khi chưa được A0 duyệt chi phí cụ thể.
-4. **Thu hồi các lệnh Codex chưa thực thi thuộc loại đơn giản**, chuyển owner bằng task/handoff mới; không xóa code/report đã có, không lặp PASS lịch sử, không ghi nhận ACK chưa có. Lệnh đang chạy ở phiên ngoài cần chủ dự án chuyển thông báo thu hồi, xác nhận ACK; comment GitHub không tự dừng runtime.
-5. Ví dụ Codex có thể **đề xuất ngoại lệ** (không phải tự cấp quyền): xử lý race/crash multi-process có test isolation chưa agent nào tái hiện được; tích hợp kernel/Compose/network đặc thù có toolchain mà agent khác thiếu; migration critical có rollback đã được A0 duyệt. Việc đặc thù vẫn cần chứng minh actual capability/gates, không suy ra từ danh xưng.
-6. Chỉ tiêu điều phối là **chi phí + rủi ro + thời gian + chất lượng**; không tối ưu chỉ theo số task. Ghi `COST_ROUTING` trong đặc tả: agent được chọn, lựa chọn rẻ hơn được đối chiếu, vì sao chọn và trạng thái quyền.
-
-### 11.3. Bản phân công nguồn có hiệu lực
-[Master allocation v2](https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/tasks/2026-11-23-a1-cost-first-master-allocation.md) thay cho **các đề xuất phân vai Codex chung chung** trong PR #6 và profile cũ; mọi test/approval cụ thể ở task gốc vẫn giữ nguyên. Phần nào chưa bắt đầu chỉ thay phân công; phần đã PASS giữ evidence. A1 đã ACK vai trò và các nhiệm vụ đã bàn giao PR #32/#33; mỗi nhiệm vụ **mới** vẫn `PREPARED_FOR_OWNER_FORWARD` cho đến khi A1 ACK chính xác task đó. Quy tắc này không cấp GitHub credential, VPS access, production, paid inference hay merge.
-
-## 12. HISTORICAL PRE-KNG ROUTING (2026-11-23; retain safeguards, task evidence and cost gates; priority superseded by §13)
-
-**Áp dụng cho giao việc mới sau chỉ thị A0 ngày 23/11/2026; không xóa hoặc diễn giải lại nghiệm thu lịch sử.** Mục 12 là override mới hơn phần phân vai/ưu tiên tại mục 7 và 11 khi khác nhau. [Đánh giá tiến độ có căn cứ](https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/reports/2026-11-23-hosting-progress-and-target-capabilities.md) chỉ là ước lượng điều phối, không phải chứng nhận readiness.
-
-1. **Default = ChatGPT thông thường tự làm.** Điều phối đọc nguồn, nghiên cứu, viết đặc tả, phân tích mã tĩnh, tạo ma trận QA, cập nhật tài liệu và tổng hợp báo cáo trực tiếp bằng công cụ có thật và trong WRITE_SET đã cấp. Không tạo thêm phiên/agent chỉ để chuyển tiếp nhiệm vụ tương đương. A1 là phiên ChatGPT thường riêng, sử dụng khi có lý do phân chia đầu ra và chủ dự án thật sự chuyển tin nhắn; tên `A2` chưa phải vai trò/agent được đăng ký, không tự suy ra đã kích hoạt.
-2. **Chỉ giao Agent khi có năng lực bổ sung rõ ràng:** Work cho browser, Linux/fixture, công việc đa bước hoặc reviewer độc lập; A1 cho kiểm thử/QA độc lập hoặc tác vụ có write-set riêng. Quyết định phải nêu `WHY_DELEGATE`, công cụ thực sự cần, tác giả/reviewer, phạm vi nhỏ nhất, kết quả cũ có thể tái sử dụng, `MAX_COST_OR_CALL_CAP` nếu có rủi ro tính phí, và `STOP`. Không tự QA độc lập tác phẩm của chính mình.
-3. **Hermes = HOLD_NO_NEW_TASKS mặc định.** [A0 cost-control receipt](https://github.com/DuyKienTTD/Hosting/pull/31#issuecomment-7095081485). Chỉ đề xuất ngoại lệ với bằng chứng năng lực không thay thế được, giới hạn token/USD dự kiến và A0 duyệt cụ thể; không lấy token cumulative hoặc chi phí API ước tính làm invoice hay gán cho Hermes mà chưa có Usage/Spend theo key/project/model/ngày. Nếu nền tảng trả `content_policy_blocked`, dừng yêu cầu bị chặn, không viết lại nhằm vượt kiểm soát. Dừng luồng Hermes S3-P1 rộng còn mở; bản nháp read-only đã lưu bằng quyết định [PR36](https://github.com/DuyKienTTD/Hosting/pull/36#issuecomment-7094940856).
-4. **Hostinger = PAUSED và Codex = NOT_AUTHORIZED.** Không gọi/khởi động lại, không cho production/paid/merge mặc định. Mọi mở quyền mới đi theo A0 + preflight thực tế; một GitHub comment chỉ là `PREPARED_FOR_OWNER_FORWARD` nếu chưa có ACK đúng phiên.
-5. **Báo cáo tiến độ phân biệt maturity với readiness:** ước lượng theo workstream với trọng số và nguồn/HEAD, xác nhận phạm vi gồm design, mock/source, QA độc lập, live integration và operational recovery. Luôn ghi sai số, blockers và thời điểm; không tính `DESIGNED_NOT_RUN`, source author PASS, hay PR chưa merge là tính năng live đã hoàn thành. Với trạng thái vận hành, kiểm live tại thời điểm quyết định. Không đặt phần trăm có vẻ chính xác nếu chưa có WBS/định nghĩa đo và A0 phê duyệt trọng số.
-6. **Cost gate:** trước API trả phí hoặc render/publish phải có approved scope, token/credit/cost cap và cách dừng, consent/credential/đối soát spend. Không tuyên bố nền tảng 24/7 khi scheduler, retry, durable state, alert, con người trực vận hành chưa có evidence live.
-7. **Đầu ra/ghi tài liệu:** ghi chú quyết định vào nhánh governance draft, đọc lại toàn tệp trước sửa, diff/readback sau sửa, index vào CATALOG khi thêm báo cáo. QA độc lập yêu cầu khi thay đổi nguồn có tác động; không mở vòng lặp QA hình thức cho một câu chữ đã có bằng chứng và không có change trigger. Quyền merge và production thuộc A0 và gate hiện hành.
-
-## 13. A0 / Điều phối — KNG-01 controlling priority and normalized source (2026-11-23; candidate until verified main activation)
-
-**Two distinct authority contexts — no self-activation:** While PR #43 is Draft/unmerged, the KNG source is a **NOT_EFFECTIVE candidate** and the then-effective `main` rules remain binding. **Only after** separate A0 approval for the exact candidate SHA and target Git tree with merge method `merge`, followed by independently authenticated remote `main` readback of the exact merge commit/tree and its two ordered parents, may normalized routing be treated as **EFFECTIVE_IF_VERIFIED**. Missing/stale/contradictory evidence means **NOT_EFFECTIVE** and STOP new dispatch. A GitHub comment, source snapshot, commit or simulated verifier cannot grant authority. The [read-only release assessment](../program/kng/release_state.py) requires external evidence; it is not a merge/dispatch permission.
-
-**Current Work versus historical Work:** D2 ACK/pending status and the D1–D5 receipts are **dated historical evidence** only. The [typed source snapshot](../program/current.json) currently says `agent_status.Work=QA_COMPLETE_NO_NEW_TASK`, `work_ack=UNKNOWN`, `work_ack_task_id=null`, `work_ack_receipt=null`; [Work PR42 source QA](https://github.com/DuyKienTTD/Hosting/pull/42#issuecomment-7103815886) is completed with separate release gates. No new Work task/ACK is asserted. On post-merge use, revalidate real task/session receipts separately; do not promote an old ACK to current. Coordinator = accountable director/exclusive shared-writer allocator; A1 = scoped KNG source author; Work = independent reviewer. Other feature/infra/paid/production work outside KNG remains ON_HOLD unless separately authorized. Historical Hostinger, G0/UC01 and Codex routing above does not grant current permission. A0 retains merge, financial and production authority; no auto-dispatch or WS-04 activation.
-
-**Current point-of-use ownership:** [typed routing index](../program/current.json) for KNG priority and role labels, [WBS](../program/WORK_BREAKDOWN.md) for immutable 32 IDs/dependencies/skills/gates/deliverables, task-receipt source for a real ACK, dated report for acceptance/evidence, `rules/REPOSITORY_SECURITY.md` for secret handling, and this workflow for execution governance. `STATE.md` is a bounded generated/read-only human checkpoint with source SHA, not authoritative live service state. CATALOG is a stable document ID/path registry; historical CATALOG status labels and task frontmatter are source-time snapshots, not automatic runtime/current handoff verification. Do not manually repeat KNG current owner/status in multiple sources; derive displays using [KNG generator](../program/kng/derive.py) if deployed and checked. Do not edit another agent's task or acceptance evidence without permission.
-
-**Required full safety access remains:** Before the task, read complete AGENTS, this effective workflow, repository security, STATE, CATALOG, agent profile and pinned task. A compact quick-start does not waive these reads, while historical details should be opened only as needed. Read beyond the menu for real permission/STOP, and stop if live/paid/production authority cannot be verified. Immutable evidence, targeted tests, diff integrity, one writer, reviewer separation, recovery and A0 merge gates remain binding. No new external approval is inferred by this document alone.
-
-**Maintenance rule:** when the canonical status/role/receipt changes, update only the authorized source event/field, generate derived STATE/CATALOG views with deterministic checks and readback; a manual index/status recopy is not independent authority. Material rule change must be written to the operative rule source with security QA and an append-only dated evidence/changelog record; README is only a link, not another clause to edit. Required history and PR31 full text remain at [PR31 workflow](https://github.com/DuyKienTTD/Hosting/blob/a770de80a2467ca1789c820b63416209cf53b7d1/rules/AGENT_WORKFLOW.md), blob `3412e222364489e290be012f073f98f3ed77e3d3`.
+Điều phối chịu trách nhiệm dọn ngay khi đóng task/POC và rà soát tại cuối mỗi milestone: tài liệu trùng, ACTIVE đã đóng, TEMPORARY hết vòng đời, link hỏng, ID trùng, quy tắc mâu thuẫn. Đo số tài liệu đang hoạt động, số TEMPORARY tồn đọng và kích thước luồng đọc bắt buộc trước/sau; mục tiêu không có TEMPORARY hết hạn chưa xử lý (ngoại lệ có lý do/owner), không tăng luồng đọc nếu chỉ bổ sung lịch sử. Không tạo một dự án báo cáo định kỳ mới chỉ để theo dõi việc dọn. Nghiệm thu cleanup bằng diff, link/ID check, preservation checks và remote readback; reviewer độc lập khi ảnh hưởng rule/authority/security.

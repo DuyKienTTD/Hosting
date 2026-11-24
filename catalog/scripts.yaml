@@ -1,0 +1,32 @@
+documents:
+  - id: kng01-normalization-d2-source-validation
+    path: program/kng/validate.py
+    type: script
+    status: candidate-test-only
+    authoritative_for: kng01-source-pin-and-ack-contract-validator
+    updated_at: 2026-11-23
+    sensitivity: public
+
+  - id: safe-vps-audit-script
+    path: scripts/vps-audit-safe.sh
+    type: script
+    status: current
+    authoritative_for: repeatable-read-only-vps-audit
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: repository-validator
+    path: scripts/validate-repository.ps1
+    type: script
+    status: current
+    authoritative_for: repository-structure-and-safety-validation
+    updated_at: 2026-11-21
+    sensitivity: public
+
+  - id: automated-integrity-data-validator
+    path: scripts/validate-data-integrity.py
+    type: script
+    status: authorized-pending-verified-main-ci
+    authoritative_for: read-only-repository-delta-integrity-checks
+    updated_at: 2026-11-24
+    sensitivity: public

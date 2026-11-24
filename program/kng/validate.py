@@ -14,7 +14,7 @@ COMMON_PATHS={'README.md','PROJECT.md','STATE.md','AGENTS.md','CATALOG.yaml','ru
 
 ALLOWED = {'KEEP', 'MERGE', 'ARCHIVE', 'DELETE'}
 STATES = {'KNG_ONLY', 'ON_HOLD_DEPENDENCY_KNG01', 'DONE_WITH_EVIDENCE', 'BLOCKED_SECURITY', 'BLOCKED_TECHNICAL'}
-REQUIRED_RULES = {'AGENTS.md', 'rules/AGENT_WORKFLOW.md', 'rules/REPOSITORY_SECURITY.md', 'STATE.md', 'CATALOG.yaml'}
+REQUIRED_RULES = {'AGENTS.md', 'rules/AGENT_WORKFLOW.md', 'rules/REPOSITORY_SECURITY.md', 'STATE.md'}
 SECRET_RE = re.compile(r'(-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|(?i:password|client_secret|access_token|api_key)\s*[:=]\s*[\'\"]\S{8,}[\'\"])')
 LINK_RE = re.compile(r'(?<!!)\[[^]]+\]\(([^)]+)\)')
 ID_RE = re.compile(r'^\|\s*([A-Z][A-Z0-9-]+)\s*\|', re.M)
@@ -53,6 +53,8 @@ def validate(root, *, verify_objects=True):
     if not isinstance(gate, dict) or gate.get('phase') != 'PREMERGE_CANDIDATE' or gate.get('status') != 'NOT_EFFECTIVE' or gate.get('approval_event') is not None or gate.get('remote_main_readback') is not None:
         reject('UNVERIFIED_RELEASE_ACTIVATION', 'effective authority must be established by external authenticated A0 + main-tree readback')
     if set(state.get('must_read', [])) != REQUIRED_RULES: reject('MISSING_MANDATORY_RULE', state.get('must_read'))
+    if state.get('catalog_registry') != 'CATALOG.yaml' or state.get('catalog_access') != 'INDEX_ONLY_VALIDATE_FULL_CATALOG_WITH_TOOL':
+        reject('CATALOG_ACCESS_POLICY_MISMATCH', 'full registry must be machine-validated; agents read relevant entries only')
     if state.get('production_authorized') is not False or state.get('merge_authorized') is not False or state.get('codex_authorized') is not False: reject('UNSAFE_PERMISSION', 'production, merge and codex must remain false')
     # A real Work ACK must be bound to the exact dispatch, not a swapped task ID.
     if state.get('work_ack_task_id') is not None:
@@ -108,7 +110,22 @@ def validate(root, *, verify_objects=True):
             else:
                 actual_bytes=target.read_bytes()
                 actual_hash=hashlib.sha1(b'blob '+str(len(actual_bytes)).encode()+b'\0'+actual_bytes).hexdigest()
-                if x.get('result_blob') != actual_hash:reject('INTEGRATED_BLOB_MISMATCH', x.get('path')+' '+actual_hash)
+                if x.get('result_blob') != actual_hash:
+                    # The D2 result pin is an immutable historical claim, not the
+                    # hash of every future governance candidate. Verify it against
+                    # the independently pinned main integration commit; NEVER
+                    # move the D2 pin to match working-tree edits.
+                    if x.get('path') in ('AGENTS.md', 'rules/AGENT_WORKFLOW.md', 'README.md', 'STATE.md'):
+                        validate_object('d549564de52429e777c68daf9df7a93df5f22f27',
+                                        x['path'], x['result_blob'],
+                                        'historical integrated result '+x['path'])
+                        if not actual_bytes.strip() or b'NOT_EFFECTIVE' not in actual_bytes and b'candidate' not in actual_bytes.lower():
+                            reject('UNSAFE_CURRENT_RULE', x['path']+' must remain an explicitly non-effective candidate')
+                    elif x.get('path') == 'CATALOG.yaml' and b'catalog_scope: durable_knowledge_only' in actual_bytes.splitlines():
+                        validate_object('d549564de52429e777c68daf9df7a93df5f22f27', x['path'], x['result_blob'], 'historical integrated result CATALOG')
+                        # Current registry has its own strict partition/path checks below.
+                    else:
+                        reject('INTEGRATED_BLOB_MISMATCH', x.get('path')+' '+actual_hash)
 
         if x.get('path') in protected and not x.get('pr31_conflict_review'): reject('MISSING_CONFLICT_REVIEW', x['path'])
         if not re.fullmatch('[a-f0-9]{40}',x.get('base_blob','')): reject('INVALID_SHA',x.get('path'))
@@ -150,6 +167,12 @@ def validate(root, *, verify_objects=True):
         ids=re.findall(r'^\s*- id:\s*(\S+)\s*$', catalog.read_text(encoding='utf8'),re.M)
         dupe=[k for k,n in Counter(ids).items() if n>1]
         if dupe:reject('DUPLICATE_CATALOG_ID',str(dupe))
+        if 'catalog_scope: durable_knowledge_only' in catalog.read_text(encoding='utf8').splitlines():
+            try:
+                import runpy
+                runpy.run_path(str(root/'scripts/validate-catalog-partitions.py'))['validate'](root)
+            except (ValueError, OSError, KeyError, AttributeError) as exc:
+                reject('CATALOG_PARTITION_INVALID', str(exc))
     return sorted(errors,key=lambda e:(e['code'],e['detail']))
 
 

@@ -1,0 +1,38 @@
+name: Data integrity
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Test validator
+        run: python3 -m unittest discover -s scripts -p test_data_integrity.py
+      - name: Test KNG provenance regression
+        run: python3 -m unittest discover -s program/kng -p 'test_*.py'
+      - name: Check KNG provenance
+        run: python3 program/kng/validate.py --json
+      - name: Check catalog
+        run: python3 scripts/validate-catalog-partitions.py
+      - name: Check repository delta
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$BASE" =~ ^[0-9a-f]{40}$ || "$BASE" =~ ^0{40}$ ]]; then
+            echo "No trusted event baseline; delta check blocked"
+            exit 2
+          fi
+          python3 scripts/validate-data-integrity.py --root . --base "$BASE" --json
