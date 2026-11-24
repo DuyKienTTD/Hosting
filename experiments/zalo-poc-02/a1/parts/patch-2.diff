@@ -7,11 +7,12 @@ diff --git a/src/agent/tools/send-file-tool.ts b/src/agent/tools/send-file-tool.
  import path from "node:path";
  import { tool } from "ai";
  import { z } from "zod";
-@@ -39,6 +40,7 @@
+@@ -39,6 +40,8 @@
        message.threadType,
        filePath,
        caption,
 +      message.msgId ? `file_${account.id}_${message.msgId}_${createHash("sha256").update(filePath + "|" + (caption ?? "")).digest("hex").slice(0, 16)}` : undefined,
++      message.senderId,
      );
      ghiNhanDaGui?.(ghiChuDaGuiFile(tenHienThi, caption));
    };
@@ -40,7 +41,7 @@ diff --git a/src/agent/tools/add-reaction-tool.ts b/src/agent/tools/add-reaction
 -        await api.addReaction(REACTION_MAP[reaction], {
 +        await sendWithOutboundGuard({
 +          threadKey: `${account.id}:${message.threadId}`, threadId: message.threadId,
-+          threadType: Number(message.threadType),
++          threadType: Number(message.threadType), senderId: message.senderId,
 +          stableKey: `reaction_${account.id}_${message.msgId}_${reaction}`,
 +          send: () => api.addReaction(REACTION_MAP[reaction], {
            data: { msgId: message.msgId, cliMsgId: message.cliMsgId },
@@ -65,7 +66,7 @@ diff --git a/src/agent/tools/tag-member-tool.ts b/src/agent/tools/tag-member-too
          const mentionText = `@${memberName}`;
          await enqueueSend(`${account.id}:${message.threadId}`, () =>
 -          api.sendMessage(
-+          sendWithOutboundGuard({ threadKey: `${account.id}:${message.threadId}`, threadId: message.threadId, threadType: Number(message.threadType),
++          sendWithOutboundGuard({ threadKey: `${account.id}:${message.threadId}`, threadId: message.threadId, threadType: Number(message.threadType), senderId: message.senderId,
 +            stableKey: message.msgId ? `tag_${account.id}_${message.msgId}_${createHash("sha256").update(memberId + "|" + noiDung).digest("hex").slice(0,16)}` : undefined,
 +            send: () => api.sendMessage(
              {
@@ -94,7 +95,7 @@ diff --git a/src/agent/tools/create-image-tool.ts b/src/agent/tools/create-image
        // Chỉ báo sau khi chắc chắn sẽ vẽ thật
        await enqueueSend(threadKey, () =>
 -        api.sendMessage(
-+        sendWithOutboundGuard({ threadKey, threadId: ctx.message.threadId, threadType: Number(ctx.message.threadType),
++        sendWithOutboundGuard({ threadKey, threadId: ctx.message.threadId, threadType: Number(ctx.message.threadType), senderId: ctx.message.senderId,
 +          stableKey: ctx.message.msgId ? `image_notice_${ctx.account.id}_${ctx.message.msgId}` : undefined,
 +          send: () => api.sendMessage(
            {
@@ -113,18 +114,19 @@ diff --git a/src/agent/tools/create-image-tool.ts b/src/agent/tools/create-image
              // một tấm ảnh là phạt người dùng vì lỗi của provider.
              await enqueueSend(threadKey, () =>
 -              api.sendMessage({ msg: TIN_THU_LAI }, ctx.message.threadId, ctx.message.threadType),
-+              sendWithOutboundGuard({ threadKey, threadId: ctx.message.threadId, threadType: Number(ctx.message.threadType),
++              sendWithOutboundGuard({ threadKey, threadId: ctx.message.threadId, threadType: Number(ctx.message.threadType), senderId: ctx.message.senderId,
 +                stableKey: ctx.message.msgId ? `image_retry_notice_${ctx.account.id}_${ctx.message.msgId}` : undefined,
 +                send: () => api.sendMessage({ msg: TIN_THU_LAI }, ctx.message.threadId, ctx.message.threadType),
 +              }),
              );
              ctx.ghiNhanDaGui?.(ghiChuDaGuiChu(TIN_THU_LAI));
            },
-@@ -179,6 +187,7 @@
+@@ -179,6 +187,8 @@
              ctx.message.threadType,
              filePath,
              caption,
 +            ctx.message.msgId ? `image_attachment_${ctx.account.id}_${ctx.message.msgId}_${createHash("sha256").update(image.data).digest("hex").slice(0,16)}` : undefined,
++            ctx.message.senderId,
            ),
          );
          ctx.ghiNhanDaGui?.(ghiChuDaGuiAnh(1, caption));
