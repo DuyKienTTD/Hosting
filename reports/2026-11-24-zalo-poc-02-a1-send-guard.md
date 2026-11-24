@@ -189,3 +189,60 @@ sensitivity: public-redacted
 **Patch scope:** The canonical patch includes only approved upstream target file paths in `src/zalo/{send-reply-in-parts,message-turn-processor}.ts`, `src/scheduler/scheduled-job-send.ts`, and `src/agent/tools/**`. All source copies, tests, logs and this report live under the original A1 Hosting WRITE_SET. Actual additional paths above are **reported but not edited**.
 
 **P0 status:** `P0_ATOMIC_ADMISSION_CANDIDATE_READY_FOR_INDEPENDENT_QA / INTEGRATION_BLOCKED`. The exact Work-reproduced non-atomic legacy path is disabled, and new synthetic atomic mechanism is written and locally tested. Real STOP writer, all side effects and combined-tree acceptance remain **BLOCKED**. **NEXT_OWNER:** Work independent negative/fault/restart/native QA on patch SHA `22cba3430a569a9bdcafd0e205a11725b3f004ad`; Coordinator/A2 handle B01–B09 gates. No merge, live, paid, agent activation or production.
+
+
+---
+
+## SHARED POLICY INTEGRATION CONTINUATION — Coordinator Section 8 / 2026-11-24
+
+**ACTUAL A1 ACK:** \`TASK_ACKNOWLEDGED — ZALO-POC-02-A1-SEND-GUARD / SHARED-POLICY-INTEGRATION\`, received in A1 chat. **Source of exact authorization:** [PR #55 comment #7125938078](https://github.com/DuyKienTTD/Hosting/pull/55#issuecomment-7125938078), which pins [immutable S2 report Section 8](https://github.com/DuyKienTTD/Hosting/blob/bfa196c4216815e5ea5c7353c4e1f7a53f11bc2a/reports/2026-11-24-zalo-poc-02-s2-integration.md#8-p0-revised-artifacts-and-bounded-integration-ownership--2026-11-24), report blob \`280168cb932420674d8596a3f14e42d90b5a33ae\`. This is a bounded source-candidate WRITE_SET extension only; **no upstream, real account, paid, production or main authority**. Base source is still \`vuhai2002/zalo-agent@2dc09de31cd99306bc1ab18e57aa0aa872618561\`.
+
+### Author deliverables / updated immutable GitHub evidence
+
+- Canonical unified candidate [\`experiments/zalo-poc-02/a1/a1-send-guard.patch\`](../experiments/zalo-poc-02/a1/a1-send-guard.patch): **Git blob \`84f61e088eb3cdc6a7c55ca0124c0a3c3f536852\`** (26 target source paths, six staged patch parts; publish commit \`608a03b69b5ea3a7a4690172c3b9d5c6dbd09b37\`). **Previously pinned patches are superseded**, not retroactively tested.
+- Ownership: 18 candidate modifications, all from the A1 source-only list, and 8 new guard modules/tests. No source files edited under A2's inbound/retention/replay ownership.
+- A1's canonical \`src/agent/tools/atomic-send-admission.ts\` now exposes a **synthetic-only** policy record with exact account/thread/sender/type binding; separate \`respond\`, \`retain\`, \`passiveGroup\`, \`outbound\` booleans; verified/optedOut/takeover/running/stopped; numeric monotonic revision, expiry, read-only frozen \`readSnapshot\`; independent global/account STOP mutation. Policy mutation and admission both use \`BEGIN IMMEDIATE\` on one durable SQLite file and the same writer lock.
+- **Crash boundary corrected:** Phase 1 **COMMIT** a permanent attempt-key reservation *before* any possible send. Phase 2 freshly checks policy and starts transport synchronously under writer lock. Unknown commit/delivery/receipt does not reopen a retry. Previously admitted in-flight provider operation can still complete after STOP, which is not an admission after STOP.
+- Adapter \`outbound-guard-runtime.ts\` only accepts an injected synthetic atomic authority; \`readCurrentSyntheticPolicy\` supplies an independently checked **read-only** snapshot for A1's ephemeral response/retention checks. A1 \`message-turn-processor.ts\` denies the batch **before opening a turn or writing history/media/usage** if no trusted current \`respond && retain\`; response-only \`respond=true,retain=false\` remains **intentionally blocked** until an audited ephemeral no-persistence processor exists. A1 \`save-memory-tool.ts\` requires \`retain\` before tool writes, passes scoped group \`threadId\`, and refuses missing group/sender identity.
+- **No parallel A2 policy writer:** [Updated contract](../experiments/zalo-poc-02/a1/consent-atomic-interface.md) and [actual A2 PR #56 comment #7126159357](https://github.com/DuyKienTTD/Hosting/pull/56#issuecomment-7126159357) request A2's ACK and consumer binding. A2 \`ACK/combined ingestion\` has **NOT been verified here**. A2 consumes \`authority.readOnly.readSnapshot(...)\` and maps to \`PrivacyConsent\`; \`outbound\` cannot be inferred from \`respond\`, \`retain\`, allowlist or bot_enabled.
+
+### Outbound route disposition (candidate source, not all-channel acceptance)
+
+| Path / capability | A1 candidate handling | What remains unverified |
+|---|---|---|
+| \`src/zalo/send-reply-in-parts.ts\` multipart, technical error | Atomic adapter at each queued segment; missing intent/sender/policy DENY | Actual zca-js send-site initiation and retries under native test |
+| \`src/zalo/message-turn-processor.ts\`, \`src/zalo/reply-target-tu-kenh.ts\` | Sender and request-ID propagation; no response/retain without verified snapshot | A2 inbound consumption; exact caller identity and nested tool paths |
+| \`src/scheduler/scheduled-job-send.ts\` | Stable job/timestamp key; target through guarded multipart path | Group scheduler sender ID not established → denied; full E2E not tested |
+| \`src/agent/tools/send-file-tool.ts\`, \`send-attachment-with-caption.ts\`, \`create-image-tool.ts\`, \`tag-member-tool.ts\`, \`add-reaction-tool.ts\` | Guarded queue-side closure and context-sourced sender/attempt ID | Provider transport start may defer; fake-transport native suite pending |
+| \`src/zalo/kenh-ca-nhan.ts\` | Auxiliary auto-react, seen receipt, typing entry points explicitly disabled | No live side-effect validation |
+| \`src/zalo/message-receipts.ts\`, \`typing-indicator.ts\` | Receipt/typing public helpers fail-closed in candidate | Native API bypass test needed |
+| \`src/zalo/busy-wait-notice.ts\`, \`src/scheduler/scheduled-job-cap-guard.ts\` | Auxiliary unsourced messages disabled | Non-messaging job lifecycle still intact, native QA pending |
+| \`src/zalo-bot/kenh-bot.ts\` | Unsupported Bot API message/typing disallowed for personal-account PoC | Bot API future product not implemented |
+| \`src/agent/tools/create-document-tools.ts\`, \`tai-video-tool.ts\` | Unverified direct attachments/video explicitly disabled *before* send/fetch | No assertion of functioning document/video tools |
+| \`src/agent/tools/save-memory-tool.ts\` | Strict group ID/retention check; separate A1-owned caller adjustment | Requires A2's typed group edit interface in combined tree |
+
+**Safety semantics:** "DISABLED" is **not** "supported and guarded"; it is a known fail-closed exclusion from current functional scope. The scoped route list is source-reviewed, not certified exhaustive of all Zalo client internals. Provider-level zca-js implementation and future tools remain potential bypasses until Work source inventory and negative tests.
+
+### Author validation / test provenance
+
+| Gate | Status | Honest evidence |
+|---|---|---|
+| Shared policy source and immutable source pins | \`AUTHOR_SOURCE_REVIEW\` | Section 8 SHA and canonical patch Git blob as above |
+| Original adapted local atomic/STOP tests | **9/9 PASS** for earlier P0 source before this revision | [Local synthetic log](../experiments/zalo-poc-02/a1/p0-local-evidence.md), Node v22.16.0, no real outbound |
+| New read-only snapshot, passiveGroup, global/account STOP, crash reservation and invalid mutation | **TESTS_AUTHORED; NOT_RUN_EXACT_REVISION** | \`atomic-send-admission.test.ts\` has 10 cases; existing detached legacy-negative, durable and wrapper tests preserved or adjusted |
+| All supported outbound route/negative bypass and deferred transport | **SOURCE_ONLY / NOT_NATIVE_TESTED** | Staged source disabled ancillary paths; actual call graph and provider deferred-initiation race remain a Work acceptance gate |
+| Git apply / native TypeScript / original targeted suite / combined A1+A2 tree / offline network namespace | **NOT_RUN_A1** | Local A1 runtime has no full checkout/pnpm. Independent Work must verify exact new 26-path blob. No false \`build PASS\` or \`typecheck PASS\` |
+| Real Zalo/paid/API/production/main | **NOT_USED** | No external account actions or paid tool invocations from this candidate effort |
+
+### Consolidated residual blockers — **single escalation to Coordinator, not authorization to modify A2**
+
+1. **CRITICAL — A2_CONSUMER_NOT_ACKED:** A2 must ACK and consume the **same** A1 read-only snapshot by exact account/thread/sender/type, expiry, revision and separate retain/respond/passive scopes; no second writer; combined-tree native validation pending.
+2. **CRITICAL — EPHEMERAL_RESPONSE_UNSUPPORTED:** A1 currently denies \`respond=true,retain=false\` to avoid unintended trace/usage/media/replay writes. A complete no-persistence response engine and A2 inbound replay/cache policy must be separately accepted; do not count this as supported positive flow.
+3. **CRITICAL — PROVIDER_DEFERRED_INITIATION:** Holding SQLite admission lock through synchronous callback invocation cannot prove that \`zca-js\`/Bot API initiated its network operation before returning a Promise. Any deferred initiation is a STOP race; require a truly fenced low-level synchronous initiation adapter or keep the corresponding route disabled. Work must test deferred microtask and cross-process STOP race.
+4. **HIGH — AUTHORITATIVE_REAL_CONSENT_NOT_PROVEN:** The only writer is a **synthetic** SQLite test authority. No real consent/STOP provenance, identity attestation or customer consent is established; real Zalo strictly prohibited.
+5. **HIGH — OUTBOUND_ROUTE_AND_SOURCE_BOUNDARIES:** Some provider internals, \`src/video/gui-video-qua-zalo.ts\`, notifications, replay transport and future tool/queue sends may remain outside evidenced complete coverage. All newly permitted ancillary paths are disabled rather than silently allowed. Work to enumerate and test remaining bypasses before any claim of complete coverage.
+6. **HIGH — CROSS_PROCESS_CRASH_FAULT_TEST:** New two-phase durable reservation must be tested by Work at kill/commit-failure boundaries across independent SQLite connections/processes. Parent-local tests and old restart observations do not prove all crash interleavings.
+7. **HIGH — A2_COMBINED_SOURCE_DELTA:** A2 report/patch still owns inbound-memory SQLite TS2769, nine original allowlist test changes, retain-only positive, revoked replay/cache/media, group X/Y caller and persistence after restart. A1 must not edit A2 paths.
+8. **REVIEW — EXACT_PATCH_NATIVE_QA:** Apply exact 26-file patch against pinned candidate, compare source diff, run \`pnpm typecheck\`, \`pnpm build\`, targeted affected tests, old Work microtask fixture with new expected semantics, real child process restart, egress probe and combined A2 test. No automatic rerun of unrelated 73 baseline merely for accounting.
+
+**FINAL A1 HANDOFF:** \`SHARED_POLICY_SOURCE_PATCH_PREPARED / INDEPENDENT_NATIVE_QA_PENDING / PRODUCT_HOLD\`. **NEXT_OWNER:** A2 independently ACKs policy consumer and completes its owned patch; Work reviews only the complete paired author patches; Coordinator reconciles blockers and S3 readiness. No merge, no real Zalo, no paid requests.
