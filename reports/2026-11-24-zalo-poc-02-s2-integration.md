@@ -82,3 +82,42 @@ REAL_ZALO: PROHIBITED
 MAIN_MERGE: HOLD
 PLATFORM_GO: NO_GO_CURRENT
 ```
+
+
+## 6. S2 continuation — revised author patches received (2026-11-24)
+
+**Supersession:** Sections 1–5 above are a preserved source-time S2 snapshot based on A1 `5d694644...` and A2 `836d93dc...`. The earlier `A2_PATCH: FAILS_GIT_APPLY_CHECK` and `A1_SEND_WIRING: NOT_IMPLEMENTED_IN_PATCH` remain accurate **for those former revisions only**. This section is the current status. Do not cite the superseded fields as applying to the revised patches until Work independently tests them.
+
+- **A1 continuation ACK and revised author artifact:** [PR #55](https://github.com/DuyKienTTD/Hosting/pull/55), head `dc2265502b3e43851539e4a8033fcbcb48d34ed9`. Unified patch `experiments/zalo-poc-02/a1/a1-send-guard.patch`, Git blob `1fa7e1ef70630c29685e70f923bac42590d463fb`, targets **14 source files** (8 existing outbound call paths and 6 new guard/store/runtime/test files). Source-path patch inventory is disjoint from A2. Author reports local process-restart SQLite 3/3 and mock dispatch 4/4 tests; they are **AUTHOR_REPORTED** with adapted local test code, not yet independent execution of the exact GitHub patch. Guard still lacks an authenticated consent/STOP policy source and atomic send-versus-STOP fencing; outbound bypass paths remain under review.
+- **A2 continuation ACK and regenerated patch:** [PR #56](https://github.com/DuyKienTTD/Hosting/pull/56), head `70026ec7f9f030aa99ad585b514c4d6487897ac6`. Unified patch `experiments/zalo-poc-02/a2/privacy.patch`, Git blob `0a78460efa7110526a70983a6b47c2929ca8a3c0`, targets **4 source files**; A2 reports four-source reconstruction consistency but explicitly **did not run** `git apply --check` or native SQL tests. Existing `privacy-sql.test.mjs` remains five proposed contract cases NOT_RUN; group-memory tool thread scope and consent resolver remain missing inputs.
+- **Independent Work baseline evidence remains valid:** no-egress sandbox, frozen/offline dependency install, native build/typecheck, 73/73 selected baseline tests PASS; old detached A1 patch had 8/8 independent mock tests PASS. Those old patch tests do **not** prove the new 14-file A1 patch.
+- **Coordinator readback / provenance:** both new GitHub patch blobs, report blobs, PR heads and changed-file lists were directly fetched. No execution/patch application was performed by Coordinator. Both revised source-path inventories are disjoint: A1 14 and A2 4. This check alone is not `git apply --check`.
+- **Prepared handoff to Work:** [PR #54 comment #7124745888](https://github.com/DuyKienTTD/Hosting/pull/54#issuecomment-7124745888) gives exact source/patch pins, required clean `git apply --check`, combined tree digest, native targeted tests, SQLite restart and race/fault/consent cases. It is **PREPARED_FOR_OWNER_FORWARD**, not SENT/ACK; authorized sender must forward into Work's existing Agent session and obtain a continuation receipt. Work's prior task ACK and E0 test remain valid but do not prove Q0 resumed.
+
+**Unresolved acceptance gates:** verified shared consent/retention policy, correct `threadId` binding for group edit/delete, deny-before-persistence after opt-out and restart, full out-bound transport coverage, atomic STOP fencing, durable idempotency under real process restart, and independent QA against one immutable combined tree. Work is to report exact compiler/test failures without silently modifying authors' patches. No production, live Zalo, paid API, upstream/main changes or merge is authorized.
+
+```yaml
+PROJECT: ZALO-POC-02
+S0: APPROVED_WITH_GATES
+S1: THREE_INITIAL_ACKS_PLUS_A1_A2_CONTINUATION_ACKS_REPORTED
+S2: REVISED_PATCHES_READY_FOR_INDEPENDENT_Q0
+A1_PATCH_HEAD: dc2265502b3e43851539e4a8033fcbcb48d34ed9
+A1_PATCH_BLOB: 1fa7e1ef70630c29685e70f923bac42590d463fb
+A1_PATCH_TARGETS: 14
+A2_PATCH_HEAD: 70026ec7f9f030aa99ad585b514c4d6487897ac6
+A2_PATCH_BLOB: 0a78460efa7110526a70983a6b47c2929ca8a3c0
+A2_PATCH_TARGETS: 4
+A2_PATCH_APPLY_ON_CLEAN_GIT: NOT_VERIFIED
+A1_NEW_PATCH_NATIVE_BUILD: NOT_VERIFIED
+COMBINED_TREE: NOT_ESTABLISHED
+WORK_E0_BASELINE: VERIFIED_OFFLINE_73_73
+WORK_Q0_CONTINUATION_ACK: PENDING_OWNER_FORWARD
+INDEPENDENT_INTEGRATION_QA: PENDING
+S3: NOT_READY
+PLATFORM_SELECTION: NO_GO_CURRENT
+REAL_ZALO: PROHIBITED
+PAID_API_USD: 0
+PRODUCT_EXECUTION: HOLD
+MAIN_MERGE: HOLD
+NEXT_OWNER: WORK_AFTER_ACTUAL_FOLLOWUP_ACK
+```
