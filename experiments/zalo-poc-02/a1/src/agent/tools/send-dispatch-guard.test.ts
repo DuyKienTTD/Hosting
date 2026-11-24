@@ -13,10 +13,10 @@ const store = () => {
   };
   return { adapter, seen, sent };
 };
-test('one synthetic account: opt-in sends once', async () => {
+test('legacy send path is disabled even for synthetic opt-in', async () => {
   let sends = 0; const s = store();
   const r = await dispatchWithLateGuard(intent('msg_1'), async () => ok(), s.adapter, async () => { sends++; });
-  assert.equal(r.status, 'sent'); assert.equal(sends, 1); assert.equal(s.sent.size, 1);
+  assert.equal(r.status, 'blocked'); assert.equal(sends, 0); assert.equal(s.sent.size, 0);
 });
 test('unknown, opt-out, takeover, STOP and paused account fail closed', async () => {
   const scenarios: Array<Authorization | null> = [null, { ...ok(), consent: 'unknown' }, { ...ok(), consent: 'opt_out' }, { ...ok(), humanTakeover: true }, { ...ok(), humanTakeover: null }, { ...ok(), globalStop: true }, { ...ok(), threadStop: true }, { ...ok(), accountRunning: false }];
@@ -43,11 +43,11 @@ test('mid-multipart STOP blocks second part', async () => {
   assert.equal((await dispatchWithLateGuard(intent('part_1'), async () => p, s.adapter, async () => { sends++; p = { ...p, threadStop: true, version: 'v2' }; })).status, 'sent');
   assert.equal((await dispatchWithLateGuard(intent('part_2'), async () => p, s.adapter, async () => { sends++; })).status, 'blocked'); assert.equal(sends, 1);
 });
-test('ambiguous send and restart with shared reservation never retry', async () => {
+test('legacy ambiguous send never attempts transport', async () => {
   const s = store(); let sends = 0;
   const run = () => dispatchWithLateGuard(intent('retry_1'), async () => ok(), s.adapter, async () => { sends++; throw Error('ambiguous'); });
-  assert.equal((await run()).status, 'unknown'); assert.equal((await run()).status, 'blocked');
-  assert.equal((await dispatchWithLateGuard(intent('retry_1'), async () => ok(), s.adapter, async () => { sends++; })).status, 'blocked'); assert.equal(sends, 1);
+  assert.equal((await run()).status, 'blocked'); assert.equal((await run()).status, 'blocked');
+  assert.equal((await dispatchWithLateGuard(intent('retry_1'), async () => ok(), s.adapter, async () => { sends++; })).status, 'blocked'); assert.equal(sends, 0);
 });
 test('policy epoch change while queued blocks', async () => {
   let p = ok(); let sends = 0;
