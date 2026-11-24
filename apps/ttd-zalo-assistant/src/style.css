@@ -8,3 +8,6 @@ button,select,textarea{font:inherit}button{background:#075461;color:white;border
 button:disabled{background:#dfe7e9;color:#4d6269;cursor:default}.stop{background:#8b2824}
 textarea{width:100%;min-height:85px;margin:8px 0 12px;padding:8px;border:1px solid #7896a0;border-radius:6px}
 .actions{justify-content:flex-start}button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #0068a1;outline-offset:2px}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}nav button[aria-current=page]{background:#152c3c;box-shadow:0 0 0 2px #81b7bf}
+.customer{display:block;margin:8px 0}section>button{margin:8px 8px 8px 0}
+li{margin:8px 0;overflow-wrap:anywhere}section h3{margin-bottom:8px}

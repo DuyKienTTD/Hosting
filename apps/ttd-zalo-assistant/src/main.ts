@@ -53,14 +53,48 @@ async function start() {
     db.setConsent(target, { retain, respond, send }, Date.now() + 3_600_000, takeover);
     return db.status();
   });
-  handle("m0:approve", 2, ([target, content]) => {
-    if (!validTarget(target) || typeof content !== "string") throw new Error("INVALID_APPROVAL");
-    return db.approve(target, content);
+  handle("m0:approve", 3, ([target, content, intent]) => {
+    if (!validTarget(target) || typeof content !== "string" || typeof intent !== "string" || !intent) throw new Error("INVALID_APPROVAL");
+    return db.approve(target, content, intent);
   });
   handle("m0:send", 3, ([id, target, content]) => {
     if (typeof id !== "string" || !validTarget(target) || typeof content !== "string") throw new Error("INVALID_SEND");
     return db.send(id, target, content);
   });
+  handle("mvp:receive", 2, ([target, text]) => {
+    if (!validTarget(target) || typeof text !== "string") throw new Error("INVALID_DM");
+    return db.receive(target, crypto.randomUUID(), text);
+  });
+  handle("mvp:conversation", 1, ([target]) => {
+    if (!validTarget(target)) throw new Error("INVALID_TARGET");
+    return db.conversation(target);
+  });
+  handle("mvp:profile", 1, ([target]) => {
+    if (!validTarget(target)) throw new Error("INVALID_TARGET");
+    return db.profile(target);
+  });
+  handle("mvp:remember", 3, ([target, source, fact]) => {
+    if (!validTarget(target) || typeof source !== "string" || typeof fact !== "string") throw new Error("INVALID_FACT");
+    db.remember(target, source, fact);
+    return db.profile(target);
+  });
+  handle("mvp:invalidate", 1, ([target]) => {
+    if (!validTarget(target)) throw new Error("INVALID_TARGET");
+    db.invalidateApprovals(target);
+  });
+  handle("mvp:draft", 2, ([target, origin]) => {
+    if (!validTarget(target) || typeof origin !== "string") throw new Error("INVALID_DRAFT");
+    return db.draft(target, origin);
+  });
+  handle("mvp:import", 1, ([doc]) => {
+    if (typeof doc !== "string") throw new Error("INVALID_DOCUMENT");
+    return db.importKnowledge(doc);
+  });
+  handle("mvp:knowledge", 1, ([query]) => {
+    if (typeof query !== "string") throw new Error("INVALID_QUERY");
+    return db.knowledge(query);
+  });
+  handle("mvp:activity", 0, () => db.activity());
   await win.loadURL(index);
   if (smoke) {
     const result: unknown = await win.webContents.executeJavaScript(`(async () => {
@@ -78,7 +112,20 @@ async function start() {
       await until(() => document.querySelector("#stop").textContent.includes("Dừng"));
       document.querySelector("#stop").click();
       await until(() => document.querySelector("#stop").textContent.includes("Bỏ"));
-      return "UI launch, sandboxed renderer, invalid IPC and STOP control PASS";
+      expect(document.querySelectorAll("nav button").length === 6, "six screens");
+      document.querySelector("#stop").click();
+      await until(() => document.querySelector("#stop").textContent.includes("Dừng"));
+      await window.ttd.consent("customer-a", true, true, true, false);
+      await window.ttd.importDoc("SKU: MAU-01\\nTên: Mẫu A\\nThông tin: Thép mạ kẽm");
+      const inbound = await window.ttd.receive("customer-a", "Hỏi SKU MAU-01");
+      expect(inbound.canDraft, "fake inbound");
+      const draft = await window.ttd.draft("customer-a", inbound.id);
+      expect(draft.source.id === "MAU-01", "draft source");
+      const grant = await window.ttd.approve("customer-a", draft.text, inbound.id);
+      await window.ttd.send(grant, "customer-a", draft.text);
+      expect((await window.ttd.status()).fakeSends === 1, "one fake initiation");
+      await window.ttd.stop(true);
+      return "UI, six screens, IPC rejection, STOP and fake DM bridge PASS";
     })()`);
     console.log(result);
     if (process.env.TTD_SMOKE_PNG) {

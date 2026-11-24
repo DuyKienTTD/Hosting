@@ -1,7 +1,7 @@
 ---
 id: ttd-zalo-mvp01-dev-work
 type: report
-status: blocked-m0-runtime-acceptance
+status: ready-for-independent-mvp-runtime-review
 owner: ChatGPT Work
 task_id: TTD-ZALO-MVP01-DEV
 lifecycle: DURABLE
@@ -25,3 +25,23 @@ Base remote main 097c080cc6d7fb3ca36b1849d9c10375d5cbd67f, tree e323aa0a1a8b2d89
 | Independent runtime | BLOCKED pending executable reviewer runner and ACK. Windows smoke instructions are in app README. |
 
 **Disposition M0_PARTIAL / RUNTIME_ACCEPTANCE_BLOCKED.** Next owner Coordinator for a verified sandbox-capable desktop runner and independent Windows launch/review. Run existing UI smoke with Chromium sandbox enabled in a blocked-egress environment that allows local IPC sockets, and record exact package hash, Windows build and screenshot/IPC results. Preserve branch for continuation on the same tree. No POC rerun, real Zalo, paid APIs, production, merge or new infrastructure.
+
+## M1–M5 — Integrated offline MVP delivery
+
+TASK_ACKNOWLEDGED CONTINUATION in the Work session. [M0 acceptance and continuation](https://github.com/DuyKienTTD/Hosting/pull/51#issuecomment-7141667261) · [Independent M0 runtime receipt](https://github.com/DuyKienTTD/Hosting/pull/51#issuecomment-7141651032). Existing M0 limitations above reflect the original run; the Coordinator subsequently accepted M0 for offline continuation. M0 base b542486123b7eebe1b2a3cd0dbd2614c512d0ec0, tree fcac92bac892c27cf544021939b63e22e9c3e66a. Foundation shared code changed, so affected M0 cases were rerun. No upstream or POC execution. Reused A1 STOP/identity/idempotency scenarios and A2 consent, raw-store sentinel and scoped memory scenarios from the approved roadmap. M0 Windows receipt is historical evidence, not a pass for the new package.
+
+| Scope | Delivered and evidence |
+|---|---|
+| M1 | Vietnamese conversation list/details, synthetic DM input, per-target retain/respond/send, STOP and takeover. Denied messages leave audit metadata only. Response-only retains dedup ID and timestamp, never raw body. |
+| M2 | Source-linked customer memories from authorized retained messages and structured local TXT knowledge import/search. Same-name customers stay separated by stable IDs. No remote document reads or instruction execution. |
+| M3 | Deterministic Fake LLM uses exact SKU evidence. Unknown price asks for clarification. Editable draft, exact target/content approval, revision and STOP recheck, one fake receipt per inbound event. |
+| M4 | SQLite schema 1-to-2 migration preserves M0 receipts and policy. Durable unique reservation, STOP/revoke during deferred preparation, interrupted-attempt view and fail-closed restart. Content-free audit with no automatic retries. Previously lawfully retained text remains on disk, access gated on current retain permission. |
+| M5 | Windows x64 portable ZIP, six functional screens in source, offline instructions and targeted automated smoke entrypoint. Independent exact-tree UI, real Windows launch and runtime IPC/sandbox QA remain open. |
+
+### Work evidence
+
+Node 24.22.3, npm 11.19.1, Electron 40.0.0. Lock SHA-256 a7fd482841c3e1c50c92daa945d89ac358567b86b141e7da9a8b30c027aba9b3 unchanged from M0. Egress probe 101 ENETUNREACH. In fresh network namespace: npm run typecheck exit 0; npm run build exit 0; npm test exit 0, 10/10 (5 new, 5 affected Foundation regressions). New cases cover positive fake DM/edit/approve/one receipt, wrong recipient, draft invalidation, duplicate intent/reopen, raw denial and ephemeral sentinels absent from SQLite, scoped provenance, unknown price, takeover after reserve, no retry and exact M0 schema migration. Real outbound 0, paid calls 0. The positive vertical-slice test directly executes integrated business methods against SQLite; it does not exercise Electron IPC or rendered UI.
+
+Package script ran offline and verified Electron distribution checksum and ZIP integrity. TTD-Zalo-Assistant-MVP01-win-x64.zip SHA-256 a2f7651e3472fd6963ec7d3fe6e3e541634912768302eb8869d4b8a27a3cf0b7. No binary in Git. Executable extracted from pinned Windows x64 distribution with bundled app. Exact Linux runtime probe used non-root mapped user + isolated net + Chromium sandbox, but exited before IPC/UI at ProcessSingleton socket() EPERM. No final screenshot or fresh Windows run claimed.
+
+**Disposition: MVP_DEVELOPER_BUILD_READY / INDEPENDENT_RUNTIME_QA_BLOCKED.** NEXT_OWNER Chat Điều phối. Schedule independent executable QA on isolated Windows x64 with final archive hash and exact branch commit/tree, following [application instructions](../apps/ttd-zalo-assistant/README.md). Verify launch, IPC rejection, positive and negative GUI journeys, persistence/restart and zero real outbound. Compare authorized UI and packaged behavior to native data-path tests. No real Zalo, paid APIs, deployment, production, merge or new infrastructure.

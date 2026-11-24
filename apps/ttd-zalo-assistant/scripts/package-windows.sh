@@ -11,7 +11,7 @@ rm -f "$stage/resources/default_app.asar"
 mkdir -p "$stage/resources/app" artifacts
 cp -r dist "$stage/resources/app/dist"
 printf '%s\n' '{"name":"ttd-zalo-assistant","version":"0.1.0","type":"module","main":"dist/main.js"}' > "$stage/resources/app/package.json"
-bundle="$PWD/artifacts/TTD-Zalo-Assistant-M0-win-x64.zip"
+bundle="$PWD/artifacts/TTD-Zalo-Assistant-MVP01-win-x64.zip"
 (
   cd "$stage"
   zip -q -r "$bundle" .
