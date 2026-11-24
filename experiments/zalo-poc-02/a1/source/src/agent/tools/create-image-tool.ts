@@ -137,7 +137,7 @@ export function createImageTool(ctx: ToolContext, generate = generateImage) {
 
       // Chỉ báo sau khi chắc chắn sẽ vẽ thật
       await enqueueSend(threadKey, () =>
-        sendWithOutboundGuard({ threadKey, threadId: ctx.message.threadId, threadType: Number(ctx.message.threadType),
+        sendWithOutboundGuard({ threadKey, threadId: ctx.message.threadId, threadType: Number(ctx.message.threadType), senderId: ctx.message.senderId,
           stableKey: ctx.message.msgId ? `image_notice_${ctx.account.id}_${ctx.message.msgId}` : undefined,
           send: () => api.sendMessage(
           {
@@ -170,7 +170,7 @@ export function createImageTool(ctx: ToolContext, generate = generateImage) {
             // hụt vừa rồi đã tiêu mất một suất rồi. Bắt trả giá hai suất cho
             // một tấm ảnh là phạt người dùng vì lỗi của provider.
             await enqueueSend(threadKey, () =>
-              sendWithOutboundGuard({ threadKey, threadId: ctx.message.threadId, threadType: Number(ctx.message.threadType),
+              sendWithOutboundGuard({ threadKey, threadId: ctx.message.threadId, threadType: Number(ctx.message.threadType), senderId: ctx.message.senderId,
                 stableKey: ctx.message.msgId ? `image_retry_notice_${ctx.account.id}_${ctx.message.msgId}` : undefined,
                 send: () => api.sendMessage({ msg: TIN_THU_LAI }, ctx.message.threadId, ctx.message.threadType),
               }),
