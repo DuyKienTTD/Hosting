@@ -208,46 +208,36 @@ diff --git a/src/zalo/incoming-message-router.ts b/src/zalo/incoming-message-rou
  } from "../conversation/thread-store.js";
 -import { shouldRespond } from "../middleware/allowlist-filter.js";
 +import { shouldRespond, type PrivacyConsent } from "../middleware/allowlist-filter.js";
-+import type { PolicyMutation } from "../agent/tools/atomic-send-admission.js";
++import { readCurrentSyntheticPolicy } from "../agent/tools/outbound-guard-runtime.js";
  import { enqueueMessage } from "../middleware/message-batcher.js";
  import { createLogger } from "../shared/logger.js";
  import { maybeNotifyBusyWait } from "./busy-wait-notice.js";
-@@ -26,6 +27,48 @@
+@@ -26,6 +27,38 @@
  const log = createLogger("message-router");
  
  /**
-+ * Read-only snapshot injected by A1-owned canonical policy authority.
-+ * No policy table, writer, local cache, or implicit consent is allowed here.
-+ * A1 MUST provide an authoritative reader before enabling behavior.
++ * A1 alone owns policy persistence and STOP; A2 reads its current snapshot.
++ * No locally fabricated consent or second policy writer.
 + */
-+export type InboundPolicyReader = (scope: {
-+  accountId: string; senderId: string; threadId: string;
-+  threadType: "dm" | "group";
-+}) => (PolicyMutation & { passiveGroup?: boolean }) | null;
-+
 +export function readInboundConsent(
-+  config: AccountConfig, msg: ParsedMessage, readPolicy?: InboundPolicyReader,
++  config: AccountConfig, msg: ParsedMessage,
 +): PrivacyConsent | undefined {
-+  if (!readPolicy || !config.id || !msg.senderId || !msg.threadId) return undefined;
++  if (!config.id || !msg.senderId || !msg.threadId) return undefined;
 +  try {
-+    const snapshot = readPolicy({
-+      accountId: config.id, senderId: msg.senderId, threadId: msg.threadId,
-+      threadType: msg.isGroup ? "group" : "dm",
-+    });
++    const snapshot = readCurrentSyntheticPolicy(config.id, msg.threadId, msg.senderId, msg.isGroup);
 +    if (!snapshot || snapshot.accountId !== config.id || snapshot.senderId !== msg.senderId ||
 +        snapshot.threadId !== msg.threadId ||
 +        snapshot.threadType !== (msg.isGroup ? "group" : "dm") ||
 +        !snapshot.verified || snapshot.optedOut || snapshot.takeover || snapshot.stopped ||
-+        !snapshot.running || !Number.isSafeInteger(snapshot.revision) || snapshot.revision < 1 ||
++        snapshot.globalStopped || snapshot.accountStopped || !snapshot.running ||
++        !Number.isSafeInteger(snapshot.revision) || snapshot.revision < 1 ||
 +        !Number.isSafeInteger(snapshot.expiresAtMs) || snapshot.expiresAtMs <= Date.now()) return undefined;
-+    // A1 has not yet added passiveGroup to its current PolicyMutation;
-+    // default deny on that extra permission until the canonical schema supplies it.
 +    return {
 +      verified: true, accountId: snapshot.accountId, senderId: snapshot.senderId,
 +      threadId: snapshot.threadId, threadType: msg.threadType,
 +      revision: snapshot.revision, expiresAt: snapshot.expiresAtMs,
 +      revoked: snapshot.optedOut, humanTakeover: snapshot.takeover,
-+      stopped: snapshot.stopped || !snapshot.running,
++      stopped: snapshot.stopped || snapshot.globalStopped || snapshot.accountStopped || !snapshot.running,
 +      respond: snapshot.respond, retain: snapshot.retain,
 +      passiveGroup: snapshot.passiveGroup === true,
 +    };
@@ -261,19 +251,8 @@ diff --git a/src/zalo/incoming-message-router.ts b/src/zalo/incoming-message-rou
   * Mọi tin đến (kể cả tin sẽ bị lọc): ghi contact + thread ("auto-collected").
   * Đọc config mới nhất từ DB mỗi tin để sửa policies từ dashboard ăn ngay.
   */
-@@ -34,16 +77,17 @@
-   api: API,
-   selfId: string,
-   raw: unknown,
-+  readPolicy?: InboundPolicyReader,
- ): void {
-   const config = getAccount(accountId);
-   if (!config) return;
- 
-   const msg = parseIncomingMessage(config.id, selfId, raw, getTuning("ZALO_IMAGE_QUALITY"));
- 
--  const ketQua = nhanVaGhiTinDen(config, api, msg);
-+  const ketQua = nhanVaGhiTinDen(config, api, msg, readPolicy);
+@@ -43,7 +76,7 @@
+   const ketQua = nhanVaGhiTinDen(config, api, msg);
    const layBu = layBuCuaAccount(config.id);
    // Tin trực tiếp mới (không trùng, không self) đẩy mốc lấy bù khi hàng chờ Zalo đã bắt kịp
 -  if (layBu && ketQua !== "trung" && !msg.isSelf && msg.threadId) layBu.khiTinTrucTiep(msg);
@@ -281,15 +260,7 @@ diff --git a/src/zalo/incoming-message-router.ts b/src/zalo/incoming-message-rou
    if (ketQua !== "tra-loi") return;
    // Người này nhắn lại và sắp được trả lời: họ biết bot chạy lại rồi, nên tin lấy
    // bù cũ hơn CỦA HỌ bỏ hẳn - không trả lời riêng, không xin lỗi (vẫn trong lịch sử).
-@@ -65,6 +109,7 @@
-   config: AccountConfig,
-   api: API,
-   msg: ParsedMessage,
-+  readPolicy?: InboundPolicyReader,
- ): "trung" | "bo" | "ghi-thu-dong" | "tra-loi" {
-   // Cùng một tin tới hai lần (cmd 501 và 551; trực tiếp và trong trang lấy bù):
-   // bỏ lần sau, kể cả biên nhận - ghi hai dòng là model đọc hai lần, trả lời hai lần
-@@ -73,16 +118,24 @@
+@@ -73,16 +106,26 @@
      return "trung";
    }
  
@@ -298,12 +269,14 @@ diff --git a/src/zalo/incoming-message-router.ts b/src/zalo/incoming-message-rou
 -  reportPayloadAnomalies(config.id, msg);
 +  // Fail closed before ANY contact/thread write, group-name network call,
 +  // history/media persistence, receipt, queue or agent.
-+  const consent = readInboundConsent(config, msg, readPolicy);
++  const consent = readInboundConsent(config, msg);
 +  const decision = shouldRespond(config, msg, isBotEnabled(config.id, msg.threadId), consent);
 +  if (!decision.respond && !decision.record) return "bo";
 +  // Until downstream cache/replay/summary contracts are audited, response without
 +  // retention is not dispatched. The two authorizations remain distinct.
 +  if (decision.respond && !decision.record) return "bo";
++  // Recheck before synchronous durable writes; Work must validate cross-process revocation.
++  if (!readInboundConsent(config, msg)?.retain) return "bo";
  
 +  // Do not log/raw-report denied input before retention authorization.
 +  reportPayloadAnomalies(config.id, msg);
@@ -318,7 +291,7 @@ diff --git a/src/zalo/incoming-message-router.ts b/src/zalo/incoming-message-rou
      recordContactActivity(config.id, msg.senderId, msg.senderName);
      recordThreadActivity({
        accountId: config.id,
-@@ -91,12 +144,12 @@
+@@ -91,12 +134,12 @@
        displayName: msg.isGroup ? "" : msg.senderName,
        lastSenderName: msg.senderName,
      });
@@ -521,54 +494,18 @@ diff --git a/src/middleware/allowlist-filter.test.ts b/src/middleware/allowlist-
 diff --git a/src/zalo/offline-replay/tiep-nhan-tin-lay-bu.ts b/src/zalo/offline-replay/tiep-nhan-tin-lay-bu.ts
 --- a/src/zalo/offline-replay/tiep-nhan-tin-lay-bu.ts
 +++ b/src/zalo/offline-replay/tiep-nhan-tin-lay-bu.ts
-@@ -3,7 +3,7 @@
- import { getTuning } from "../../config/runtime-tuning-settings.js";
- import type { HangChoLayBu } from "../../conversation/offline-replay-cursor-store.js";
- import { createLogger } from "../../shared/logger.js";
--import { nhanVaGhiTinDen } from "../incoming-message-router.js";
-+import { nhanVaGhiTinDen, type InboundPolicyReader } from "../incoming-message-router.js";
- import { parseIncomingMessage } from "../zalo-message-parser.js";
- import { doiSangMilli } from "../zalo-message-timestamp.js";
- import type { HangChoTraLoiTre } from "./hang-cho-tra-loi-tre.js";
-@@ -48,6 +48,7 @@
-     hangCho: HangChoTraLoiTre;
-     now: Date;
-     tranTuoiGio: number;
-+    readPolicy?: InboundPolicyReader;
-   },
-   hangChoZalo: HangChoLayBu,
-   tinTho: Record<string, unknown>,
-@@ -86,7 +87,7 @@
- 
-     msg.layBu = true;
-     if (lech >= getTuning("LAY_BU_NGUONG_XIN_LOI_PHUT") * 60_000) msg.denTre = true;
--    const kq = nhanVaGhiTinDen(ctx.config, ctx.api, msg);
-+    const kq = nhanVaGhiTinDen(ctx.config, ctx.api, msg, ctx.readPolicy);
-     if (kq !== "tra-loi") return kq;
-     ctx.hangCho.them(threadKey, msg);
-     return "cho-tra-loi";
 diff --git a/src/zalo/offline-replay/lay-bu-cho-account.ts b/src/zalo/offline-replay/lay-bu-cho-account.ts
 --- a/src/zalo/offline-replay/lay-bu-cho-account.ts
 +++ b/src/zalo/offline-replay/lay-bu-cho-account.ts
-@@ -7,6 +7,8 @@
+@@ -7,6 +7,7 @@
  import { createLogger } from "../../shared/logger.js";
  import { kenhCaNhan } from "../kenh-ca-nhan.js";
  import { processBatch } from "../message-turn-processor.js";
-+import type { InboundPolicyReader } from "../incoming-message-router.js";
 +import { readInboundConsent } from "../incoming-message-router.js";
  import { ganAnhVaoHistory } from "../record-incoming-message.js";
  import type { ParsedMessage } from "../zalo-message-parser.js";
  import { docTrangLayBu, LENH_LAY_BU } from "./doc-trang-lay-bu.js";
-@@ -30,7 +32,7 @@
-   config: AccountConfig,
-   api: API,
-   selfId: string,
--  tiem: { enqueue?: (threadKey: string, msg: ParsedMessage) => boolean } = {},
-+  tiem: { enqueue?: (threadKey: string, msg: ParsedMessage) => boolean; readPolicy?: InboundPolicyReader } = {},
- ): LayBuCuaAccount | null {
-   if (config.loai === "bot") return null;
-   const log = createLogger(`lay-bu:${config.id}`);
-@@ -38,19 +40,27 @@
+@@ -38,19 +39,27 @@
  
    const hangCho = new HangChoTraLoiTre({
      accountId: config.id,
@@ -583,11 +520,11 @@ diff --git a/src/zalo/offline-replay/lay-bu-cho-account.ts b/src/zalo/offline-re
 +    enqueue: (threadKey, msg) => {
 +      // Injected test enqueue MUST NOT bypass A1 policy snapshot.
 +      const c = getAccount(config.id);
-+      if (!c || !readInboundConsent(c, msg, tiem.readPolicy)?.respond) return false;
++      if (!c || !readInboundConsent(c, msg)?.respond) return false;
 +      if (tiem.enqueue) return tiem.enqueue(threadKey, msg);
 +      return enqueueMessage(threadKey, msg, (batch) => {
 +        const latest = getAccount(config.id);
-+        if (!latest || !batch.every((m) => readInboundConsent(latest, m, tiem.readPolicy)?.respond)) {
++        if (!latest || !batch.every((m) => readInboundConsent(latest, m)?.respond)) {
 +          return Promise.resolve();
 +        }
 +        return processBatch(latest, kenhCaNhan(api), batch);
@@ -600,19 +537,97 @@ diff --git a/src/zalo/offline-replay/lay-bu-cho-account.ts b/src/zalo/offline-re
 -        .then(() => ganAnhVaoHistory(msgs))
 +      const c = getAccount(config.id);
 +      if (!c) return;
-+      const allowed = msgs.filter((m) => readInboundConsent(c, m, tiem.readPolicy)?.retain === true);
++      const allowed = msgs.filter((m) => readInboundConsent(c, m)?.retain === true);
 +      if (!allowed.some((m) => m.images.length > 0)) return;
 +      void persistBatchImages(config.id, allowed)
 +        .then(() => ganAnhVaoHistory(allowed))
          .catch((err) => log.debug({ err }, "Không gắn được ảnh tin lấy bù bị bỏ lượt"));
      },
      tranTinMoiNguoi: TRAN_TIN_DON,
-@@ -61,7 +71,7 @@
-     accountId: config.id,
-     guiLenh: (cmd, data) => api.listener.sendWs({ version: 1, cmd, subCmd: 1, data }),
-     onTin: (hangChoZalo, tinTho) => {
--      const ctx = { config: cauHinh(), api, selfId, hangCho, now: new Date(), tranTuoiGio: getTuning("LAY_BU_TRAN_TUOI_GIO") };
-+      const ctx = { config: cauHinh(), api, selfId, hangCho, now: new Date(), tranTuoiGio: getTuning("LAY_BU_TRAN_TUOI_GIO"), readPolicy: tiem.readPolicy };
-       const kq = tiepNhanTinLayBu(ctx, hangChoZalo, tinTho);
-       dem[kq] = (dem[kq] ?? 0) + 1;
-     },
+diff --git a/src/zalo/record-incoming-message.ts b/src/zalo/record-incoming-message.ts
+--- a/src/zalo/record-incoming-message.ts
++++ b/src/zalo/record-incoming-message.ts
+@@ -1,6 +1,7 @@
+ import { appendMessage, setMessageImages } from "../conversation/history-store.js";
+ import { imagePathsOf, persistBatchImages } from "../conversation/media-store.js";
+ import { describeForHistory, type ParsedMessage } from "./zalo-message-parser.js";
++import { readCurrentSyntheticPolicy } from "../agent/tools/outbound-guard-runtime.js";
+ 
+ /**
+  * Ghi một tin đến vào lịch sử NGAY LÚC NHẬN, và đóng dấu id dòng lên chính tin
+@@ -48,6 +49,8 @@
+   msg: ParsedMessage,
+   { luuAnhNgay }: TuyChonGhiTinDen,
+ ): number {
++  const current = readCurrentSyntheticPolicy(accountId, msg.threadId, msg.senderId, msg.isGroup);
++  if (!current?.retain) return 0;
+   const rowId = appendMessage(accountId, msg.threadId, {
+     role: "user",
+     content: describeForHistory(msg),
+@@ -66,7 +69,11 @@
+     // `persistBatchImages` không reject, nhưng `setMessageImages` chạm DB nên
+     // vẫn phải có `.catch` - không thì thành unhandledRejection
+     void persistBatchImages(accountId, [msg])
+-      .then(() => setMessageImages(rowId, imagePathsOf(msg.images)))
++      .then(() => {
++        if (readCurrentSyntheticPolicy(accountId, msg.threadId, msg.senderId, msg.isGroup)?.retain) {
++          setMessageImages(rowId, imagePathsOf(msg.images));
++        }
++      })
+       .catch(() => {});
+   }
+   return rowId;
+@@ -81,7 +88,9 @@
+ export function ganAnhVaoHistory(danhSach: ParsedMessage[]): void {
+   for (const msg of danhSach) {
+     const paths = imagePathsOf(msg.images);
+-    if (msg.historyRowId !== undefined && paths.length > 0) {
++    // The callback may run after STOP or consent withdrawal.
++    if (msg.historyRowId !== undefined && paths.length > 0 &&
++        readCurrentSyntheticPolicy(msg.accountId, msg.threadId, msg.senderId, msg.isGroup)?.retain) {
+       setMessageImages(msg.historyRowId, paths);
+     }
+   }
+diff --git a/src/conversation/media-store.ts b/src/conversation/media-store.ts
+--- a/src/conversation/media-store.ts
++++ b/src/conversation/media-store.ts
+@@ -1,4 +1,5 @@
+ import fs from "node:fs";
++import { readCurrentSyntheticPolicy } from "../agent/tools/outbound-guard-runtime.js";
+ import path from "node:path";
+ import { pruneOldTraces } from "../agent/agent-trace-store.js";
+ import { dataDir } from "../config/env.js";
+@@ -31,6 +32,8 @@
+ }
+ 
+ export type PersistableMessage = {
++  senderId?: string;
++  isGroup?: boolean;
+   threadId: string;
+   msgId: string;
+   images: { url: string; localPath?: string }[];
+@@ -51,10 +54,15 @@
+   download: ImageDownloader = downloadImage,
+ ): Promise<void> {
+   for (const msg of messages) {
++    // Fail closed for unscoped batches, including legacy calls without sender.
++    if (!msg.senderId || typeof msg.isGroup !== "boolean" ||
++        !readCurrentSyntheticPolicy(accountId, msg.threadId, msg.senderId, msg.isGroup)?.retain) continue;
+     for (const [index, image] of msg.images.entries()) {
+       try {
+         const downloaded = await download(image.url);
+         if (!downloaded) continue;
++        // Permission can be revoked while async download is in flight.
++        if (!readCurrentSyntheticPolicy(accountId, msg.threadId, msg.senderId, msg.isGroup!)?.retain) continue;
+         const ext = EXT_BY_MEDIA_TYPE[downloaded.mediaType.split(";")[0]!.trim()] ?? "jpg";
+         const relPath = [
+           "media",
+@@ -63,6 +71,8 @@
+           `${sanitizeSegment(msg.msgId)}-${index}.${ext}`,
+         ].join("/");
+         const absPath = path.join(dataDir, relPath);
++        // Immediately recheck before durable write; no default opt-in.
++        if (!readCurrentSyntheticPolicy(accountId, msg.threadId, msg.senderId, msg.isGroup!)?.retain) continue;
+         fs.mkdirSync(path.dirname(absPath), { recursive: true });
+         fs.writeFileSync(absPath, downloaded.data);
+         image.localPath = relPath;
