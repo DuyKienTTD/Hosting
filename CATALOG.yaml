@@ -1,5 +1,5 @@
 schema_version: 1
-updated_at: 2026-11-23
+updated_at: 2026-11-24
 repository_visibility: public
 default_language: vi
 
@@ -16,6 +16,41 @@ entrypoints:
   change_history: CHANGELOG.md
 
 documents:
+  - id: zalo-poc-01-s0-readiness-2026-11-24
+    path: reports/2026-11-24-zalo-poc-01-s0-readiness.md
+    type: report
+    status: s0-source-verified-handoff-prepared
+    authoritative_for: bounded-a0-fast-track-source-preflight-and-handoff-snapshot
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: zalo-poc-01-a1-core-2026-11-24
+    path: tasks/2026-11-24-zalo-poc-01-a1-core-test.md
+    type: task
+    status: prepared-owner-forward
+    authoritative_for: source-time-task-for-a1-synthetic-offline-core-tests
+    updated_at: 2026-11-24
+    dispatch_eligible: false
+    sensitivity: public
+
+  - id: zalo-poc-01-a2-memory-2026-11-24
+    path: tasks/2026-11-24-zalo-poc-01-a2-memory-kb.md
+    type: task
+    status: prepared-owner-forward
+    authoritative_for: source-time-task-for-a2-synthetic-memory-kb-tests
+    updated_at: 2026-11-24
+    dispatch_eligible: false
+    sensitivity: public
+
+  - id: zalo-poc-01-work-safety-2026-11-24
+    path: tasks/2026-11-24-zalo-poc-01-work-safety-qa.md
+    type: task
+    status: prepared-owner-forward
+    authoritative_for: source-time-task-for-work-independent-safety-negative-tests
+    updated_at: 2026-11-24
+    dispatch_eligible: false
+    sensitivity: public
+
   # KNG:BEGIN_GENERATED_REPORTS
   # KNG:END_GENERATED_REPORTS
   - id: kng01-current-routing-candidate
