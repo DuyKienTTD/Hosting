@@ -9,3 +9,5 @@
 **Security:** the full [Repository Security rule](rules/REPOSITORY_SECURITY.md) is authoritative; this quick-start does not duplicate or supersede any clause. STOP unapproved live/paid/production/merge/force-push. Reuse prior verified tests, validate diff and readback.
 
 **Previous full README** remains retrievable at [main `e385c1be`](https://github.com/DuyKienTTD/Hosting/blob/e385c1bea2070973e3007e5717f7e980348d6ab3/README.md).
+
+Đọc [AGENTS](AGENTS.md), hồ sơ đúng vai trò và task pin commit để bắt đầu. Các tài liệu đọc sâu theo điều kiện trong AGENTS.

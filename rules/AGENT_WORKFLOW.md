@@ -12,7 +12,7 @@ Bản tinh gọn theo chỉ thị A0 ngày 24/11/2026; chỉ là candidate cho �
 
 ## 1. Nguồn và quyền
 
-Trước mỗi nhiệm vụ, xác minh HEAD main thực tế, đọc đầy đủ AGENTS, quy tắc này, REPOSITORY_SECURITY, STATE, hồ sơ vai trò và đặc tả chính xác; ghi commit/blob SHA. Dùng CATALOG như chỉ mục: công cụ kiểm toàn bộ cấu trúc, ID/path; Agent chỉ đọc các mục liên quan, không cần nạp cả danh mục vào ngữ cảnh. Đọc đầy đủ mọi nguồn làm căn cứ quyết định, bao gồm metadata, quyền, STOP, dependencies, acceptance và bổ sung cuối file. Nếu bị cắt, dùng phạm vi dòng liên tục trên cùng commit/blob, kiểm tra đủ đầu-cuối; nếu không đủ, PARTIAL_READ hoặc BLOCKED_RULE_ACCESS, không suy đoán hay sửa phạm vi chưa hiểu. Trước khi sửa file phải đọc trọn file.
+[AGENTS](../AGENTS.md) là quy tắc cốt lõi và quy định ba nhóm đọc ban đầu. File này là nguồn chi tiết khi thao tác kích hoạt điều kiện điều phối, review, quyền, chi phí hoặc ghi dùng chung. Tuân thủ quy tắc đọc đủ và tái sử dụng theo blob trong AGENTS.
 
 GitHub là kho tri thức, không phải quyền runtime. Xác minh quyền từng phiên, task-specific approval, môi trường, chi phí, preflight và rollback trước side effect. A0 giữ quyền tài chính, production, merge và các quyền dành riêng; ủy quyền phải đúng phạm vi. Không tự kích hoạt từ file, trạng thái, comment hoặc kết quả mô phỏng.
 
