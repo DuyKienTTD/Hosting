@@ -14,3 +14,11 @@ documents:
     authoritative_for: task-handoff-multi-agent-collaboration-mandatory-research-specialist-routing-and-acknowledged-handoffs-mandatory-complete-reading-evidence-reuse-scoped-writes-integrity-checks-continuous-outcome-owned-execution-event-based-handoff
     updated_at: 2026-11-21
     sensitivity: public
+
+  - id: data-lifecycle-context-management
+    path: rules/DATA_LIFECYCLE_CONTEXT.md
+    type: rule
+    status: candidate
+    authoritative_for: data-lifecycle-context-and-task-linked-retrieval
+    updated_at: 2026-11-24
+    sensitivity: public

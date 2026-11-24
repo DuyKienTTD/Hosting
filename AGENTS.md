@@ -14,4 +14,6 @@ Chat Điều phối phân công và quản lý shared-write; A0 Assistant review
 
 Thực thi theo task, một writer, read/write set, invariants, preflight, cost, STOP, rollback và targeted tests. Tiếp tục phần an toàn không cần duyệt vi mô; không làm lại evidence tương đương. Không tự nghiệm thu độc lập. GitHub commit không phải SENT/ACK; xác minh remote sau push và bàn giao đúng owner.
 
+[Data Lifecycle & Context Management](rules/DATA_LIFECYCLE_CONTEXT.md) (candidate) quy định lưu giữ và truy xuất theo nhiệm vụ; không thay quyền/STOP.
+
 [Quy tắc chi tiết](rules/AGENT_WORKFLOW.md) là nguồn chính; [lịch sử](references/history/README.md) chỉ tra cứu khi cần. Không lặp quy tắc hoặc status ở nhiều nơi.

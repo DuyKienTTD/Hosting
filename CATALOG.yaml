@@ -150,6 +150,22 @@ documents:
     updated_at: 2026-11-21
     sensitivity: public
 
+  - id: data-lifecycle-context-management
+    path: rules/DATA_LIFECYCLE_CONTEXT.md
+    type: rule
+    status: candidate
+    authoritative_for: data-lifecycle-context-and-task-linked-retrieval
+    updated_at: 2026-11-24
+    sensitivity: public
+
+  - id: automated-integrity-data-validator
+    path: scripts/validate-data-integrity.py
+    type: script
+    status: candidate-test-only
+    authoritative_for: read-only-repository-delta-integrity-checks
+    updated_at: 2026-11-24
+    sensitivity: public
+
 collections:
   agents: verified agent role profiles and capability evidence
   tasks: committed work orders and acceptance criteria

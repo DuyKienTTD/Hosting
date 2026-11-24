@@ -23,13 +23,13 @@ partitions:
     count: 7
   script:
     path: catalog/scripts.yaml
-    count: 3
+    count: 4
   inventory:
     path: catalog/inventory.yaml
     count: 1
   rule:
     path: catalog/rules.yaml
-    count: 2
+    count: 3
   decision:
     path: catalog/decisions.yaml
     count: 3
