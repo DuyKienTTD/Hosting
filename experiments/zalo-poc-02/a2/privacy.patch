@@ -1,22 +1,20 @@
 diff --git a/src/conversation/memory-store.ts b/src/conversation/memory-store.ts
 --- a/src/conversation/memory-store.ts
 +++ b/src/conversation/memory-store.ts
-@@ -26,7 +26,8 @@
+@@ -26,13 +26,14 @@
  `);
  
  const trungStmt = db.prepare(`
+-  SELECT id FROM memories WHERE account_id = ? AND subject_id = ? AND content = ? LIMIT 1
 +  SELECT id FROM memories WHERE account_id = ? AND subject_id = ? AND content = ?
 +    AND learned_in_thread_id = ? AND learned_in_group = ? LIMIT 1
--  SELECT id FROM memories WHERE account_id = ? AND subject_id = ? AND content = ? LIMIT 1
  `);
  
  export type KetQuaGhiNho =
-@@ -32,7 +33,7 @@
- export type KetQuaGhiNho =
    | { ghi: true }
    /** Đã có sẵn một fact y hệt - không ghi bản thứ hai */
-+  | { ghi: false; lyDo: "trung" | "pham_vi_khong_hop_le" };
 -  | { ghi: false; lyDo: "trung" };
++  | { ghi: false; lyDo: "trung" | "pham_vi_khong_hop_le" };
  
  /**
   * So khớp TRÙNG KHÍT (sau khi cắt khoảng trắng hai đầu), không chuẩn hóa gì
@@ -24,11 +22,11 @@ diff --git a/src/conversation/memory-store.ts b/src/conversation/memory-store.ts
    learnedInGroup: boolean;
  }): KetQuaGhiNho {
    const noiDung = params.content.trim();
+-  if (trungStmt.get(params.accountId, params.subjectId, noiDung)) {
 +  if (!params.accountId?.trim() || !params.subjectId?.trim() || !params.learnedInThreadId?.trim() || !noiDung) {
 +    return { ghi: false, lyDo: "pham_vi_khong_hop_le" };
 +  }
 +  if (trungStmt.get(params.accountId, params.subjectId, noiDung, params.learnedInThreadId, params.learnedInGroup ? 1 : 0)) {
--  if (trungStmt.get(params.accountId, params.subjectId, noiDung)) {
      return { ghi: false, lyDo: "trung" };
    }
  
@@ -36,9 +34,9 @@ diff --git a/src/conversation/memory-store.ts b/src/conversation/memory-store.ts
  const groupStmt = db.prepare(`
    SELECT id, subject_id, content, created_at FROM memories
    WHERE account_id = ?
+-    AND (subject_id = ? OR (subject_id = ? AND learned_in_group = 1))
 +    AND learned_in_group = 1 AND learned_in_thread_id = ?
 +    AND (subject_id = ? OR subject_id = ?)
--    AND (subject_id = ? OR (subject_id = ? AND learned_in_group = 1))
    ORDER BY id
  `);
  
@@ -50,8 +48,8 @@ diff --git a/src/conversation/memory-store.ts b/src/conversation/memory-store.ts
 +  if (!params.isGroup && params.threadId !== params.senderId) return [];
    const rows = (
      params.isGroup
-+      ? groupStmt.all(params.accountId, params.threadId, params.threadId, params.senderId)
 -      ? groupStmt.all(params.accountId, params.threadId, params.senderId)
++      ? groupStmt.all(params.accountId, params.threadId, params.threadId, params.senderId)
        : directStmt.all(params.accountId, params.senderId, params.threadId)
    ) as unknown as Row[];
  
@@ -85,31 +83,30 @@ diff --git a/src/conversation/memory-edit-store.ts b/src/conversation/memory-edi
 +  }
    const dangCo = (
      pham.chiFactHocTrongNhom
-+      ? factNhinThayTrongNhomStmt.all(pham.accountId, pham.subjectId, pham.threadId)
 -      ? factNhinThayTrongNhomStmt.all(pham.accountId, pham.subjectId)
++      ? factNhinThayTrongNhomStmt.all(pham.accountId, pham.subjectId, pham.threadId)
        : factNhinThayStmt.all(pham.accountId, pham.subjectId)
    ) as unknown as Row[];
  
 diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filter.ts
 --- a/src/middleware/allowlist-filter.ts
 +++ b/src/middleware/allowlist-filter.ts
-@@ -4,11 +4,7 @@
+@@ -4,17 +4,19 @@
  export type FilterDecision = {
    /** Bot có chạy agent + trả lời không */
    respond: boolean;
-+  /** Quyền retention độc lập với quyền phản hồi, không tự động thu thập. */
 -  /**
 -   * Không trả lời nhưng vẫn ghi vào history (passive listening): tin group
 -   * thiếu @mention, hoặc thread đang tắt bot. Lần tương tác sau agent sẽ
 -   * thấy được ngữ cảnh xung quanh thay vì chỉ các lần mention rời rạc.
 -   */
++  /** Quyền retention độc lập với quyền phản hồi, không tự động thu thập. */
    record: boolean;
    reason: string;
  };
-@@ -14,7 +10,13 @@
- };
  
  const skip = (reason: string): FilterDecision => ({ respond: false, record: false, reason });
+-const recordOnly = (reason: string): FilterDecision => ({ respond: false, record: true, reason });
 +export type PrivacyConsent = {
 +  /** Phải được xác thực từ nguồn cấp consent phù hợp thread/sender/account. */
 +  verified: true;
@@ -117,7 +114,6 @@ diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filte
 +  retain: boolean;
 +  passiveGroup: boolean;
 +};
--const recordOnly = (reason: string): FilterDecision => ({ respond: false, record: true, reason });
  
  /**
   * Quyết định bot có trả lời tin nhắn này không - chạy TRƯỚC khi gọi LLM
@@ -136,12 +132,12 @@ diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filte
        return skip("account tắt trả lời group");
      }
      if (account.groupRequireMention && !msg.mentionsMe) {
-+      return consent.retain && consent.passiveGroup && account.groupPassiveListen
-+        ? { respond: false, record: true, reason: "passive consent riêng đã xác minh" }
-+        : skip("group không @mention và chưa có quyền passive retention");
 -      return account.groupPassiveListen
 -        ? recordOnly("group không @mention - chỉ ghi history")
 -        : skip("group yêu cầu @mention bot");
++      return consent.retain && consent.passiveGroup && account.groupPassiveListen
++        ? { respond: false, record: true, reason: "passive consent riêng đã xác minh" }
++        : skip("group không @mention và chưa có quyền passive retention");
      }
    }
  
@@ -149,24 +145,24 @@ diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filte
    // Check kill switch SAU allowlist: người ngoài allowlist không được ghi history
    // dù thread tắt bot
    if (!botEnabledForThread) {
+-    return recordOnly("thread đang tắt bot - chỉ ghi history");
 +    return consent.retain
 +      ? { respond: false, record: true, reason: "thread tắt bot, retention đã được cho phép" }
 +      : skip("thread tắt bot và không có retention consent");
--    return recordOnly("thread đang tắt bot - chỉ ghi history");
    }
  
+-  return { respond: true, record: true, reason: "ok" };
 +  return {
 +    respond: consent.respond,
 +    record: consent.retain,
 +    reason: consent.respond || consent.retain ? "consent_scoped" : "opt_out",
 +  };
--  return { respond: true, record: true, reason: "ok" };
  }
  
 diff --git a/src/zalo/incoming-message-router.ts b/src/zalo/incoming-message-router.ts
 --- a/src/zalo/incoming-message-router.ts
 +++ b/src/zalo/incoming-message-router.ts
-@@ -77,6 +77,14 @@
+@@ -77,12 +77,20 @@
    // ở ngay dòng dưới, không cảnh báo ở đây thì không còn chỗ nào biết
    reportPayloadAnomalies(config.id, msg);
  
@@ -181,12 +177,10 @@ diff --git a/src/zalo/incoming-message-router.ts b/src/zalo/incoming-message-rou
    if (!msg.isSelf && msg.threadId) {
      // "Đã nhận" cho MỌI tin về tới listener, kể cả tin sắp bị lọc - client Zalo
      // thật cũng báo nhận tự động, không phụ thuộc người dùng có đọc hay không.
-@@ -82,7 +90,7 @@
-     // thật cũng báo nhận tự động, không phụ thuộc người dùng có đọc hay không.
      // Trừ tin LẤY BÙ: một lượt có thể chở hàng trăm tin cũ, bắn từng biên nhận một
      // trong vài giây là tải dồn dập; lượt trả lời trễ vẫn gửi "đã xem" theo batch.
-+    if (decision.respond && !msg.layBu) sendDeliveredReceipt(api, msg);
 -    if (!msg.layBu) sendDeliveredReceipt(api, msg);
++    if (decision.respond && !msg.layBu) sendDeliveredReceipt(api, msg);
      recordContactActivity(config.id, msg.senderId, msg.senderName);
      recordThreadActivity({
        accountId: config.id,
@@ -194,10 +188,10 @@ diff --git a/src/zalo/incoming-message-router.ts b/src/zalo/incoming-message-rou
      }
    }
  
+-  const decision = shouldRespond(config, msg, isBotEnabled(config.id, msg.threadId));
 +  // Không có verified consent resolver trong baseline AccountConfig: mặc định deny.
 +  // INTEGRATION_BLOCKER: cần consent resolver gắn account+sender+thread+expiry,
 +  // và gác tất cả cache/replay/summary trước khi bật respond-only.
--  const decision = shouldRespond(config, msg, isBotEnabled(config.id, msg.threadId));
  
    if (!decision.respond) {
      if (decision.record) {
