@@ -181,3 +181,22 @@ Coordinator assigns the following additional candidate-copy paths solely to the 
 **Work:** independent QA after complete author patches and ACKs, not author of fixes. Verify both apply, same tree digest, native build/typecheck, updated legacy tests and positive authorized inbound->fake outbound, retain-only, respond-only without persistence, revocation and race/restart including crash/unknown outcomes; verify route inventory and disabled unsupported paths. Existing 73 baseline and previous privacy evidence preserved. No repetitive QA of unfinished patch pair solely for accounting. If any critical condition remains unprovable, report exact blocker and conclude bounded PoC NO-GO rather than looping indefinitely.
 
 Status: S2_INTEGRATION_REMEDIATION; P0_AUTHOR_PATCHES_SOURCE_VERIFIED; SHARED_POLICY_NOT_INTEGRATED; WORK_Q0_WAITING_COMPLETE_PATCHES; S3_NOT_READY; PRODUCT_EXECUTION HOLD; REAL_ZALO PROHIBITED; MAIN_MERGE HOLD.
+
+
+## 9. Final S3 disposition — bounded PoC closed for decision, 2026-11-24
+
+Work final Q0 recipient ACK received via owner-forward. Independent QA evidence at commit fabbd23512e25197a23af8557f3a48db6f101d26, report blob 54e04ad274a516e1834efa180880557b4d5fb3f4, log blob ef54a65f39c356c11cacd4f7c525e258412fd435. Coordinator remotely read both artifacts; no independent rerun by Coordinator. Baseline 2dc09de31cd99306bc1ab18e57aa0aa872618561, final A1 HEAD 16ecbfde6a6acb897a6d22e1589afd047a619013 patch bcd862a722a16da3f59134becaaac8f8a7574c07, final A2 HEAD 57a8eaf655ce32096570f59b85dd7157c25382f7 patch cf68d5c85215008c9fb6c3d0013c69397e9c15d0.
+
+Final A1 apply exit 0; A2 and joint apply exit 128: header-only tiep-nhan-tin-lay-bu.ts at lines 494–496, parser error line 497. No final combined tree digest. A1-only typecheck exit 1/build exit 2, including paired threadId dependency and separate diagnostics in video tool, Bot channel, busy-wait, personal channel and receipts. Bounded suite 23/24 PASS, one child-process import FAIL; separate cross-process contention test times out at 12 seconds. Earlier baseline 73/73 and earlier group-isolation fixture on tree 4970b45336c9dd67b389ca434e79bcb1794bde15 remain historical limited evidence, not final-pair PASS.
+
+P0 decisive reproduced defect: Work fixture admits an asynchronous callback, commits STOP before actual fake transport initiation, resumes callback, observes one fake initiation and sent status. This differs from a transport initiated before STOP completing later. Atomic reservation/admission is insufficient to establish actual initiation safety. No real message sent. FB-01 atomic write admission, FB-02 replay/cache lifecycle, FB-03 writer coverage, FB-04 response-only functionality, FB-05 existing-data lifecycle, FB-06 final combined native QA remain open/blocked. Authorized inbound-to-fake-outbound and retain-only positives not demonstrated. No inference of final combined compiler failure or actual live data leak.
+
+Coordinator verdict: NO_GO_CURRENT_CANDIDATE for platform selection; bounded POC02 execution ends with unsuccessful acceptance, S3 evidence synthesis complete and ready for independent report review, not S3 technical readiness. Do not launch another remediation loop or assign new work. Preserve reusable verified offline runner, scoped memory fixtures and durable reservation evidence at their exact historical revisions. Recommend A0 independently decide whether to discontinue candidate or separately authorize a narrower runnable single-owner vertical slice with independent QA; no next implementation authorized by this report. If revisiting, first require clean reproducible checkout/patch application and native compile, then one consented DM fake roundtrip with actual dispatch initiation and retention fence, before extending to groups/replay/media. Official personal-account connection permission remains unverified. No real Zalo, paid calls, production, upstream/main writes or merge. Work reported zero paid API and blocked network during tests.
+
+S3_REPORT=READY_FOR_INDEPENDENT_REVIEW
+S3_TECHNICAL_ACCEPTANCE=FAIL
+PLATFORM_SELECTION=NO_GO_CURRENT_CANDIDATE
+POC02_EXECUTION=STOPPED_PENDING_DECISION
+NEXT_OWNER=A0_INDEPENDENT_ADVISOR
+PRODUCT_EXECUTION=HOLD
+MAIN_MERGE=HOLD
