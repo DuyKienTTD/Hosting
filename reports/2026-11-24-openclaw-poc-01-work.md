@@ -20,3 +20,25 @@ Node 24.22.3, pinned native pnpm 12.15.0, Vitest 5.0.5, plugin 2026.11.7, zca-js
 Native totals: send command 21/21 PASS, exit 0; ingress/group/account command 34/35 PASS, exit 1. Totals include successful assertion of existing history behavior and do not constitute retention acceptance. Preserve native timeout and retention findings for S3. No business source changes. Independent reviewer must be separate from Work. No live readiness or activation.
 
 [Native log](../experiments/openclaw-poc-01/work/native.log) · [Sandbox runner](../experiments/openclaw-poc-01/work/sandbox.sh) · [Source-only fixture](../experiments/openclaw-poc-01/work/source-check.mjs). Runner SHA-256 `823b8cc1b6603909ee1e1e8e68533d8d66c87b63a5ed56a5a6cdaa6a7fda84fa`; source fixture SHA-256 `26501ef7755965d6260f6bfbb3b518e5752955eaf35afb05cad163668997bd82`.
+
+## Final bounded S2 — 24/11/2026
+
+**TASK_ACKNOWLEDGED CONTINUATION — OPENCLAW-POC-01-WORK-NATIVE. NEXT_OWNER Coordinator. Verdict PARTIAL / HOLD.** [S2 directive](https://github.com/DuyKienTTD/Hosting/blob/f3ca095fdadb57a95cb583f8937008e04b2a52ca/reports/2026-11-24-openclaw-poc-01-coordinator.md).
+
+Same upstream SHA, lock blob, Node, pnpm and Vitest as S1. Existing runner SHA-256 823b8cc1b6603909ee1e1e8e68533d8d66c87b63a5ed56a5a6cdaa6a7fda84fa. Fresh clean environment and temporary state per invocation, network namespace with TCP denial, no paid services or real outbound. Stock synthetic account per fixture. No edits to product code. Prior passed suites were not rerun. A1/A2 branches checked with no peer design reports surfaced in comparison.
+
+| Case | Final disposition |
+|---|---|
+| OC01 | PARTIAL / BLOCKED packaged build: S1 source-module load evidence retained; generated SDK declaration gate untouched. |
+| OC02 | PASS at fake transport boundary / BLOCKED authoritative STOP. S1 stock test explicitly counted zero requests when canceled during effect preparation and one when first dispatched, canceled, then allowed to finish. In S2 a new synthetic STOP during SDK cookie wait caused 0 stopped DM requests, with 1 allowed group request. No claim that real or cross-process business STOP reaches that cancellation signal. |
+| OC03 | PARTIAL: stock multipart/media/attachment evidence retained. Reaction/scheduler excluded. |
+| OC04 | PASS bounded same-ID type/cancellation fixture: canceled user:201 and allowed group:201 on same cached SDK client. Asserted single group transport request with grid=201, correct body, no DM request. Broader identity authorization matrix not established. |
+| OC05 | FAIL/PARTIAL from S1. Recovered/drained and dedup passed in S1, durable-first timeout twice. S2 raw enqueue fixture passes, without asserting exactly once through actual process restart. No timeout inflation or diagnostic rerun, because consent blocks OC08 independently. |
+| OC06 | FEATURE_GAP. Native parsed stock schema preserves allowlist and historyLimit=0 and strips proposed independent consent keys. Source schema exposes no separate per-sender retention/response controls. New broker-backed fixture captures raw payload accepted by real test queue before downstream decision seam; this is a queue instrumentation result, not a denied DM/group end-to-end scenario. S1 native stock group fixture demonstrates skipped no-mention text reaching subsequent InboundHistory. No transcript/cache/media/memory consent lifecycle established. |
+| OC07 | BLOCKED: no DM/X/Y shared-workspace isolation proof. |
+| OC08 | BLOCKED_FEATURE_GAP: stock configuration lacks consent primitive required by slice. No fabricated policy, KB/LLM success or restart claim. |
+| OC-Q01 | BLOCKED: Work authored and executed fixtures; no independent reviewer runner/ACK evidence. |
+
+New unique assertions: schema 1 PASS; same-ID fake transport 1 PASS (exit 0); broker-backed raw queue 1 PASS (exit 0, previously passed schema skipped). First raw queue attempt in non-broker Vitest shard failed with Shared-state admission requires the host broker. First wrapper selected no files because extensions dir expects a relative include; exit zero there was not evidence. Corrected test-only config uses broker and disables passWithNoTests. Log includes both diagnostic attempts.
+
+[Native log](../experiments/openclaw-poc-01/work/s2-native.log) · [Test-only fixtures and invocation](../experiments/openclaw-poc-01/work/s2-fixtures.md). Fixture SHA-256 (send, schema/queue, config): `397842f1c93387dd267fcdc67716b7216d91861c5f71a93cd71b1fa4b9fab598`, `ec8bc13148955cb61cfeef777085055553c319aec0d4ac0b40458645105ac4bb`, `58ed0609dc9cafa543b5c31481f46f8488f929668d7850d21aa99c886a82bf4d`. No production, merge, upstream or live account changes.
