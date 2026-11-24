@@ -25,3 +25,27 @@
 **A1 owned caller fix:** `src/agent/tools/save-memory-tool.ts` now forwards `threadId: message.isGroup ? message.threadId : undefined` into `PhamViSuaFact`; group message without thread/sender identity returns an error. A2's group edit/delete SQL retains its own independent authorization.
 
 **Status:** `INTERFACE_PROPOSED_AWAITING_A2_COORDINATOR_ACK`; no real consent resolver, no live policy storage, no product GO.
+
+
+## Coordinator section 8 binding update — 2026-11-24
+
+**Authority:** [immutable Section 8](https://github.com/DuyKienTTD/Hosting/blob/bfa196c4216815e5ea5c7353c4e1f7a53f11bc2a/reports/2026-11-24-zalo-poc-02-s2-integration.md). **Sole policy writer = A1**; **A2 consumes `ReadOnlySyntheticPolicy.readSnapshot` only**. Neither author may maintain a second policy table or write path. This is a synthetic QA authority, not real user consent.
+
+Canonical interface implemented in `src/agent/tools/atomic-send-admission.ts`:
+
+```ts
+const authority = openSyntheticAtomicAdmission(pinnedTestDbPath);
+const readonlyPort = authority.readOnly;
+const snapshot = readonlyPort.readSnapshot({ accountId, threadId, senderId, threadType }, nowMs);
+// A2 maps verified && unexpired && !optedOut && !takeover && !stopped
+// && !globalStopped && !accountStopped && running to its own scopes;
+// NEVER infer outbound from retain/respond, nor treat missing snapshot as consent.
+```
+
+- Scoped record: `accountId, senderId, threadId, threadType, verified, respond, retain, passiveGroup, outbound, optedOut, takeover, stopped, running, revision, expiresAtMs`. Global and account STOP are separate monotonic-revision mutations under the same lock.
+- `readSnapshot` is a **read-only frozen point-in-time value**, not an authorization to dispatch. Use fresh time/expiry and exact identity each call; do not cache beyond its revision/expiry. A2 retention replay must inspect new snapshot independently at each write gate.
+- `dispatch` reserves and **commits** the idempotency attempt before any external initiation, then obtains a fresh policy under `BEGIN IMMEDIATE`, checks global/account/thread STOP, and initiates transport synchronously while that writer lock is held. STOP committed earlier denies; already admitted operations may complete later. If COMMIT fails after initiation, durable reservation still prevents retry. Provider deferred-initiation behavior remains a Work verification gate.
+- All scopes default deny for missing/mismatched/expired records, including group sender identity. A2 must not use an independent `policyWriter` and must not modify A1 module.
+- A2's `PrivacyConsent {verified:true, respond,retain,passiveGroup}` can be projected from this snapshot only when identity, expiry and STOP/revocation checks pass. The caller must **not** synthesize `verified:true` from `allowlist`, `bot_enabled`, account running, or source profile.
+
+**Interface maturity:** `IMPLEMENTED_AS_SYNTHETIC_CANDIDATE / A2_CONSUMER_NOT_YET_VERIFIED`. Work owns integrated negative QA. No live binding or customer opt-in.
