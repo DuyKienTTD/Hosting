@@ -33,7 +33,7 @@ export function createAddReactionTool(ctx: ToolContext) {
       try {
         await sendWithOutboundGuard({
           threadKey: `${account.id}:${message.threadId}`, threadId: message.threadId,
-          threadType: Number(message.threadType),
+          threadType: Number(message.threadType), senderId: message.senderId,
           stableKey: `reaction_${account.id}_${message.msgId}_${reaction}`,
           send: () => api.addReaction(REACTION_MAP[reaction], {
           data: { msgId: message.msgId, cliMsgId: message.cliMsgId },
