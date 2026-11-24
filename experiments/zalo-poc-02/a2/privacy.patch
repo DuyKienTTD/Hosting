@@ -289,10 +289,13 @@ diff --git a/src/zalo/incoming-message-router.ts b/src/zalo/incoming-message-rou
  ): "trung" | "bo" | "ghi-thu-dong" | "tra-loi" {
    // Cùng một tin tới hai lần (cmd 501 và 551; trực tiếp và trong trang lấy bù):
    // bỏ lần sau, kể cả biên nhận - ghi hai dòng là model đọc hai lần, trả lời hai lần
-@@ -77,12 +122,21 @@
-   // ở ngay dòng dưới, không cảnh báo ở đây thì không còn chỗ nào biết
-   reportPayloadAnomalies(config.id, msg);
+@@ -73,16 +118,24 @@
+     return "trung";
+   }
  
+-  // Chạy TRƯỚC mọi nhánh return bên dưới: tin thiếu threadId bị bỏ qua lặng lẽ
+-  // ở ngay dòng dưới, không cảnh báo ở đây thì không còn chỗ nào biết
+-  reportPayloadAnomalies(config.id, msg);
 +  // Fail closed before ANY contact/thread write, group-name network call,
 +  // history/media persistence, receipt, queue or agent.
 +  const consent = readInboundConsent(config, msg, readPolicy);
@@ -301,19 +304,28 @@ diff --git a/src/zalo/incoming-message-router.ts b/src/zalo/incoming-message-rou
 +  // Until downstream cache/replay/summary contracts are audited, response without
 +  // retention is not dispatched. The two authorizations remain distinct.
 +  if (decision.respond && !decision.record) return "bo";
-+
+ 
++  // Do not log/raw-report denied input before retention authorization.
++  reportPayloadAnomalies(config.id, msg);
    if (!msg.isSelf && msg.threadId) {
      // "Đã nhận" cho MỌI tin về tới listener, kể cả tin sắp bị lọc - client Zalo
      // thật cũng báo nhận tự động, không phụ thuộc người dùng có đọc hay không.
      // Trừ tin LẤY BÙ: một lượt có thể chở hàng trăm tin cũ, bắn từng biên nhận một
      // trong vài giây là tải dồn dập; lượt trả lời trễ vẫn gửi "đã xem" theo batch.
 -    if (!msg.layBu) sendDeliveredReceipt(api, msg);
-+    if (decision.respond && !msg.layBu) sendDeliveredReceipt(api, msg);
++    // Receipt and group-lookup are outbound Zalo effects: A1 admission gate owns them.
++    // No automatic receipt is permitted in the isolated inbound candidate.
      recordContactActivity(config.id, msg.senderId, msg.senderName);
      recordThreadActivity({
        accountId: config.id,
-@@ -96,7 +150,9 @@
-     }
+@@ -91,12 +144,12 @@
+       displayName: msg.isGroup ? "" : msg.senderName,
+       lastSenderName: msg.senderName,
+     });
+-    if (msg.isGroup && !hasDisplayName(config.id, msg.threadId)) {
+-      void resolveGroupName(config.id, api, msg.threadId);
+-    }
++    // No api.getGroupInfo side effect without A1 outbound admission.
    }
  
 -  const decision = shouldRespond(config, msg, isBotEnabled(config.id, msg.threadId));
@@ -556,22 +568,31 @@ diff --git a/src/zalo/offline-replay/lay-bu-cho-account.ts b/src/zalo/offline-re
  ): LayBuCuaAccount | null {
    if (config.loai === "bot") return null;
    const log = createLogger(`lay-bu:${config.id}`);
-@@ -40,17 +42,23 @@
+@@ -38,19 +40,27 @@
+ 
+   const hangCho = new HangChoTraLoiTre({
      accountId: config.id,
-     enqueue:
-       tiem.enqueue ??
+-    enqueue:
+-      tiem.enqueue ??
 -      ((threadKey, msg) =>
 -        enqueueMessage(threadKey, msg, (batch) => {
-+      ((threadKey, msg) => {
-+        const c = getAccount(config.id);
-+        if (!c || !readInboundConsent(c, msg, tiem.readPolicy)?.respond) return false;
-+        return enqueueMessage(threadKey, msg, (batch) => {
-           // Account đã bị xóa trong lúc batch trễ còn đọng: bỏ lượt, không chạy bằng config cũ
-           const c = getAccount(config.id);
-           return c ? processBatch(c, kenhCaNhan(api), batch) : Promise.resolve();
+-          // Account đã bị xóa trong lúc batch trễ còn đọng: bỏ lượt, không chạy bằng config cũ
+-          const c = getAccount(config.id);
+-          return c ? processBatch(c, kenhCaNhan(api), batch) : Promise.resolve();
 -        })),
-+        });
-+      }),
++    enqueue: (threadKey, msg) => {
++      // Injected test enqueue MUST NOT bypass A1 policy snapshot.
++      const c = getAccount(config.id);
++      if (!c || !readInboundConsent(c, msg, tiem.readPolicy)?.respond) return false;
++      if (tiem.enqueue) return tiem.enqueue(threadKey, msg);
++      return enqueueMessage(threadKey, msg, (batch) => {
++        const latest = getAccount(config.id);
++        if (!latest || !batch.every((m) => readInboundConsent(latest, m, tiem.readPolicy)?.respond)) {
++          return Promise.resolve();
++        }
++        return processBatch(latest, kenhCaNhan(api), batch);
++      });
++    },
      gianCachMs: () => [getTuning("LAY_BU_GIAN_CACH_MIN_GIAY") * 1000, getTuning("LAY_BU_GIAN_CACH_MAX_GIAY") * 1000],
      luuAnhTinBoQua: (msgs) => {
 -      if (!msgs.some((m) => m.images.length > 0)) return;
@@ -586,7 +607,7 @@ diff --git a/src/zalo/offline-replay/lay-bu-cho-account.ts b/src/zalo/offline-re
          .catch((err) => log.debug({ err }, "Không gắn được ảnh tin lấy bù bị bỏ lượt"));
      },
      tranTinMoiNguoi: TRAN_TIN_DON,
-@@ -61,7 +69,7 @@
+@@ -61,7 +71,7 @@
      accountId: config.id,
      guiLenh: (cmd, data) => api.listener.sendWs({ version: 1, cmd, subCmd: 1, data }),
      onTin: (hangChoZalo, tinTho) => {
