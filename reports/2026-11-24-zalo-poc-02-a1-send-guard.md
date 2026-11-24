@@ -246,3 +246,14 @@ sensitivity: public-redacted
 8. **REVIEW — EXACT_PATCH_NATIVE_QA:** Apply exact 26-file patch against pinned candidate, compare source diff, run \`pnpm typecheck\`, \`pnpm build\`, targeted affected tests, old Work microtask fixture with new expected semantics, real child process restart, egress probe and combined A2 test. No automatic rerun of unrelated 73 baseline merely for accounting.
 
 **FINAL A1 HANDOFF:** \`SHARED_POLICY_SOURCE_PATCH_PREPARED / INDEPENDENT_NATIVE_QA_PENDING / PRODUCT_HOLD\`. **NEXT_OWNER:** A2 independently ACKs policy consumer and completes its owned patch; Work reviews only the complete paired author patches; Coordinator reconciles blockers and S3 readiness. No merge, no real Zalo, no paid requests.
+
+
+### Final S8 test-coverage refinement and current patch pin
+
+**Current/final candidate patch (supersedes previous intermediate Section 8 pin):** \`experiments/zalo-poc-02/a1/a1-send-guard.patch\` **Git blob \`bcd862a722a16da3f59134becaaac8f8a7574c07\`**, publish commit \`1193341884557dbed71fbcf7f11f9fe0bbf46820\`, still **26 distinct pinned upstream paths**. Earlier patch SHAs in this report are retained as chronological evidence only, not current artifacts.
+
+**Additional authored negative case:** \`atomic-send-admission.test.ts\` now includes a deterministic cross-process SQLite writer-contention fixture: child process opens the same durable file, parent holds \`BEGIN IMMEDIATE\`, child STOP writer waits, then parent releases and verifies later dispatch denial. There are now **11 atomic suite cases** and 3 wrapper cases (plus 8 legacy-negative and 3 durable-store tests). These are **authored but not run on the exact staged revision by A1**; an independent Work blocked-egress run, full compiler test and signal/timeout evaluation remain required. This fixture is not evidence that arbitrary async provider transports cannot defer actual initiation.
+
+**Priority safety issue kept open, not hidden by patch:** A provider can return a Promise but defer the *actual* network send until after SQLite admission lock release. The source callback contract and synthetic success fixture alone do not guarantee physical side-effect timing. All such unverified providers must remain disabled under product gate; Work must independently test or prove the exact initiation boundary and fail closed if deferred. No real Zalo needed or permitted.
+
+**S8 verdict:** \`AUTHOR_PATCH_SOURCE_READY / A2_READONLY_CONSUMER_PENDING / WORK_QA_PENDING / PRODUCT_HOLD\`. No live traffic, credentials, paid service, upstream edits or merge.
