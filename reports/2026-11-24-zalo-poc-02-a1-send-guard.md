@@ -121,3 +121,22 @@ sensitivity: public-redacted
 - **PR #55 remains draft**, no merge. This A1 continuation changes only `reports/2026-11-24-zalo-poc-02-a1-send-guard.md` and `experiments/zalo-poc-02/a1/**`; no A2 paths, provider, external account, main or paid actions. `real_outbound_calls=0` for A1 and `synthetic_accounts=1` per executed fixture; `paid_api_usd=0`.
 - **Current verdict:** `INTEGRATED_SOURCE_CANDIDATE_PARTIAL_BLOCKED` — patch is no longer just a detached guard, but it is **not** functionally integrated with authoritative privacy policy and not verified in upstream build/E2E. No product PASS or Zalo GO.
 - **NEXT_OWNER:** Work independently applies this exact new 14-file patch on pinned upstream in offline no-egress checkout, runs native TypeScript and negative/race/fault/restart tests; Coordinator resolves shared policy/fencing and out-of-scope transport interface (and reviews A2 patch separately). Without those gates, HOLD.
+
+
+---
+
+## A1 continuation: TS5097 exact import-only correction (2026-11-24)
+
+**TASK_ACKNOWLEDGED — ZALO-POC-02-A1-SEND-GUARD / TS5097-FIX.** Owner-forwarded [Coordinator comment 7124889257](https://github.com/DuyKienTTD/Hosting/pull/55#issuecomment-7124889257) received in this A1 chat. **Same task, same A1 branch/PR; no new work order.**
+
+**Work's prior independent Q0 (reported by Coordinator, NOT A1 re-executed):** on immutable upstream `vuhai2002/zalo-agent@2dc09de31cd99306bc1ab18e57aa0aa872618561`, prior patch Git blob `1fa7e1ef70630c29685e70f923bac42590d463fb`, `git apply --check` PASS, native build PASS, targeted tests **15/15 PASS**, but typecheck FAIL TS5097 at `src/agent/tools/send-dispatch-guard.test.ts:3:39`. Preserve this as **previous-patch evidence**; do not transfer its status to revised patch.
+
+**Correction (exactly two test-import lines, no behavioral edits):**
+- `experiments/zalo-poc-02/a1/src/agent/tools/send-dispatch-guard.test.ts`, old blob `763361e1dba82bc17b651a46496f59f3ea3525a2` → new blob `6e270c1b7c35b5c5eda1c437513e244ee7f47ead`. Lines 3 and 4 both changed `from './send-dispatch-guard.ts';` to `from './send-dispatch-guard.js';`. This matches project TypeScript NodeNext ESM import convention; all other test content is identical.
+- Updated `experiments/zalo-poc-02/a1/parts/patch-3.diff` blob `a7044a977fed869c9e7c07ce408e4c67e2616fee` and canonical unified `experiments/zalo-poc-02/a1/a1-send-guard.patch` blob **`65ad964d1c371b3124b7d09b3ba81320044e7a4f`**, replacing old unified blob `1fa7e1ef70630c29685e70f923bac42590d463fb`. No `tsconfig` or guard runtime/behavior modified.
+- **Remote readback QA:** both test import specifiers are now `.js`; the canonical 14-file unified patch equals concatenation of three patch parts; patch's exact added-test content matches staged test line-for-line; scanner detects **0** added import specifiers ending `.ts`. Other two newly added tests had **0** such imports before correction.
+- **A1 compile/typecheck:** `NOT_RUN_A1` (native pnpm/project checkout unavailable in A1 environment). This is a source-only correction. **Do not claim TS5097 resolution proven by native typecheck** until Work runs exact new patch.
+- **Next Work action:** apply **new exact patch blob** to same pinned candidate in existing blocked-egress sandbox; run native `pnpm typecheck` and *targeted affected tests only*. Keep prior 15/15 evidence attributed to old patch; new patch gets its own report.
+- **Unchanged blockers:** authoritative consent/STOP/takeover policy source, atomic STOP/send fence, remaining outbound side effects and combined-tree privacy/retention QA. Project remains `PARTIAL_BLOCKED`, not product PASS/GO. No real Zalo, paid service, upstream or Hosting main writes, merge or A2 edits.
+
+**A1 handoff verdict:** `IMPORT_FIX_PUSHED_READY_FOR_WORK_RECHECK`; **NEXT_OWNER: Work**, then Coordinator for S2 synthesis. Remote GitHub readback verified; no claim of new native test success.
