@@ -41,6 +41,7 @@ export function createSendFileTool(ctx: ToolContext) {
       filePath,
       caption,
       message.msgId ? `file_${account.id}_${message.msgId}_${createHash("sha256").update(filePath + "|" + (caption ?? "")).digest("hex").slice(0, 16)}` : undefined,
+      message.senderId,
     );
     ghiNhanDaGui?.(ghiChuDaGuiFile(tenHienThi, caption));
   };
