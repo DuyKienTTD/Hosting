@@ -12,3 +12,52 @@ test('STOP, opt-out, takeover, expiry and unknown deny',async()=>{for(const chan
 test('actual process restart durable idempotency and no retry after unknown',async()=>{const f=fixture();const s=openSyntheticAtomicAdmission(f.file);try{s.mutatePolicy(p());assert.equal((await s.dispatch(base,async()=>{throw Error('ambiguous')},Date.now())).status,'unknown');s.close();const source=new URL('./atomic-send-admission.js',import.meta.url).href;const js='import {openSyntheticAtomicAdmission} from '+JSON.stringify(source)+';const s=openSyntheticAtomicAdmission(process.argv[1]);const result=await s.dispatch('+JSON.stringify(base)+',async()=>{throw Error("duplicate transport invoked")},Date.now());process.stdout.write(result.status+":"+result.reason);s.close()';const child=spawnSync(process.execPath,['--input-type=module','-e',js,f.file],{encoding:'utf8',env:{PATH:process.env.PATH}});assert.equal(child.status,0,child.stderr);assert.equal(child.stdout,'blocked:duplicate_or_uncertain_attempt')}finally{fs.rmSync(f.dir,{recursive:true,force:true})}});
 test('policy revision monotonic and group/type binding',async()=>{const f=fixture();const s=openSyntheticAtomicAdmission(f.file);try{s.mutatePolicy(p());assert.equal(s.mutatePolicy(p()),false);assert.throws(()=>s.mutatePolicy({...p(0),stopped:true}),/invalid_policy_mutation/);let sends=0;const bad=await s.dispatch({...base,threadType:'group' as const,recipientId:'group_1'},async()=>{sends++;return 'x'},Date.now());assert.equal(bad.status,'blocked');assert.equal(sends,0);}finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true})}});
 test('concurrent updates and sends linearize by transaction in one process',async()=>{const f=fixture();const s=openSyntheticAtomicAdmission(f.file);try{s.mutatePolicy(p());const events:string[]=[];let calls=0;const send=s.dispatch(base,async()=>{events.push('admitted');calls++;return 'ok'},Date.now());const stop=Promise.resolve().then(()=>{s.mutatePolicy({...p(2),stopped:true});events.push('stopped')});await Promise.all([send,stop]);assert.deepEqual(events,['admitted','stopped']);assert.equal(calls,1);assert.equal((await s.dispatch({...base,attemptKey:'next'},async()=>{calls++;return 'wrong'},Date.now())).status,'blocked');assert.equal(calls,1);}finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true})}});
+
+test('scoped read-only snapshot exposes independent passive/retain/outbound and STOP',async()=>{
+  const f=fixture(),s=openSyntheticAtomicAdmission(f.file);
+  try {
+    s.mutatePolicy({...p(),respond:false,retain:true,passiveGroup:true,outbound:false});
+    const read=s.readOnly.readSnapshot({accountId:base.accountId,threadId:base.threadId,senderId:base.senderId,threadType:'dm'},Date.now());
+    assert.ok(read);assert.equal(read!.respond,false);assert.equal(read!.retain,true);
+    assert.equal(read!.passiveGroup,true);assert.equal(read!.outbound,false);assert.equal(Object.isFrozen(read),true);
+    assert.equal(s.readOnly.readSnapshot({accountId:base.accountId,threadId:'other',senderId:base.senderId,threadType:'group'}),null);
+  } finally {s.close();fs.rmSync(f.dir,{recursive:true,force:true});}
+});
+test('global STOP and account STOP share policy admission fence',async()=>{
+  for(const scope of ['global','account'] as const){
+    const f=fixture(),s=openSyntheticAtomicAdmission(f.file);let called=0;
+    try {
+      s.mutatePolicy(p());
+      assert.equal(s.mutateStop(scope,'synthetic_1',true,1),true);
+      assert.equal(s.mutateStop(scope,'synthetic_1',false,1),false);
+      const snap=s.readOnly.readSnapshot(base)!;
+      assert.equal(scope==='global'?snap.globalStopped:snap.accountStopped,true);
+      const r=await s.dispatch({...base,attemptKey:'stop_'+scope},async()=>{called++;return 'bad'},Date.now());
+      assert.equal(r.status,'blocked');assert.equal(called,0);
+      assert.equal(s.mutateStop(scope,'synthetic_1',false,2),true);
+      assert.equal((await s.dispatch({...base,attemptKey:'resume_'+scope},async()=>{called++;return 'ok'},Date.now())).status,'sent');
+      assert.equal(called,1);
+    }finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true});}
+  }
+});
+test('reservation remains durable if transport throws synchronously, no resend after reopen',async()=>{
+  const f=fixture(),s=openSyntheticAtomicAdmission(f.file);let calls=0;
+  try {
+    s.mutatePolicy(p());
+    const r=await s.dispatch({...base,attemptKey:'crash_key'},()=>{calls++;throw Error('synchronous start failed')},Date.now());
+    assert.equal(r.status,'unknown');assert.equal(calls,1);
+    s.close();
+    const reopened=openSyntheticAtomicAdmission(f.file);
+    try {
+      const retry=await reopened.dispatch({...base,attemptKey:'crash_key'},async()=>{calls++;return 'unsafe'},Date.now());
+      assert.equal(retry.status,'blocked');assert.equal(calls,1);
+    }finally{reopened.close();}
+  }finally{fs.rmSync(f.dir,{recursive:true,force:true});}
+});
+test('mutation rejects non-boolean consent scopes instead of fabricating opt-in',async()=>{
+  const f=fixture(),s=openSyntheticAtomicAdmission(f.file);
+  try {
+    assert.throws(()=>s.mutatePolicy({...p(),passiveGroup:undefined as unknown as boolean}),/invalid_policy_mutation/);
+    assert.equal(s.readOnly.readSnapshot(base),null);
+  }finally{s.close();fs.rmSync(f.dir,{recursive:true,force:true});}
+});
