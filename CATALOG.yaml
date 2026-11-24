@@ -16,6 +16,14 @@ entrypoints:
   change_history: CHANGELOG.md
 
 documents:
+  - id: zalo-poc-02-s2-integration-2026-11-24
+    path: reports/2026-11-24-zalo-poc-02-s2-integration.md
+    type: report
+    status: s2-partial-blocked-patches-awaiting-integration
+    authoritative_for: zalo-poc02-coordinator-a1-a2-work-integrated-s2-evidence-and-corrective-routing
+    updated_at: 2026-11-24
+    sensitivity: public-redacted
+
   - id: zalo-poc-02-s0-readiness-2026-11-24
     path: reports/2026-11-24-zalo-poc-02-s0-readiness.md
     type: report
