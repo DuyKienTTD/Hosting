@@ -1,0 +1,112 @@
+egress_probe 101
+
+ RUN  v5.0.5 /workspace/scratch/04c10b5e9a1d/openclaw-native-scratch/verified
+
+ ✓ |extension-zalo| extensions/zalouser/src/work-s2.test.ts > stock configuration keeps reply controls but strips independent retention and response consent fields 53ms
+stderr | unknown test
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2.test.ts: retiring openclaw.agentDatabaseReaders
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2.test.ts: retiring openclaw.sqliteWalCheckpointListeners
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2.test.ts: retiring openclaw.sqliteWorkerBroker
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2.test.ts: retiring openclaw.sharedStateWorkerOwner
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2.test.ts: retiring openclaw.devicePairingPublications
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2.test.ts: retiring openclaw.stateDomainPublication.personal-model-credentials
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2.test.ts: retiring openclaw.stateDomainPublication.auth-profile-credentials
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2.test.ts: retiring openclaw.agentDatabaseBorrowers
+
+ × |extension-zalo| extensions/zalouser/src/work-s2.test.ts > records raw payload upstream of the downstream decision seam 429ms
+   → Zalouser durable ingress append failed.
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |extension-zalo| extensions/zalouser/src/work-s2.test.ts > records raw payload upstream of the downstream decision seam
+Error: Zalouser durable ingress append failed.
+ ❯ Object.receive extensions/zalouser/src/ingress.ts:212:15
+    210|           throw error;
+    211|         }
+    212|         throw new Error("Zalouser durable ingress append failed.", { c…
+       |               ^
+    213|       }
+    214|     },
+ ❯ extensions/zalouser/src/work-s2.test.ts:37:7
+
+Caused by: SqliteWorkerError: Shared-state admission requires the host broker
+ ❯ openSharedStateSqliteWorkerStore src/infra/sqlite-worker-store.ts:258:7
+ ❯ src/state/openclaw-state-worker-owner.ts:412:13
+ ❯ Object.run src/state/openclaw-state-worker-operation.ts:123:22
+ ❯ open src/state/openclaw-state-worker-owner.ts:411:24
+ ❯ runInDetachedAsyncContext src/shared/detached-async-context.ts:15:54
+ ❯ Object.open src/state/openclaw-state-worker-owner.ts:450:64
+ ❯ src/state/openclaw-state-worker-store.ts:98:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'unavailable' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  17:06:05
+   Duration  9.81s (transform 48%, import 32%, worker 11%, tests 5%, setup 3%)
+
+exit=1
+
+ RUN  v5.0.5 /workspace/scratch/04c10b5e9a1d/openclaw-native-scratch/verified
+
+stdout | extensions/zalouser/src/work-s2-send.test.ts > canceled DM and allowed group with the same target ID stay separated at fake transport
+fake transport: stopped DM=0, allowed group=1
+
+stderr | unknown test
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.agentDatabaseReaders
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.stateDatabaseLifecycle
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.stateSnapshotOwners
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.sqliteWalCheckpointListeners
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.stateDomainPublication.plugin-state
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.pluginStatePublication
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.pluginStateNamespaceOwner
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.agentDatabaseLifecycle
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.agentDatabaseBorrowers
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.stateDomainPublication.personal-model-credentials
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.stateDomainPublication.auth-profile-credentials
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.devicePairingPublications
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.stateDomainPublication.github-publication
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.stateDomainPublication.repository-workspace
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.sessionDiskBudgetWorkers
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.stateDomainPublication.exec-approvals
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.sessionStateNotices
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.stateDomainPublication.workspace-state
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.devicePairSetupChanges
+[sqlite-test-lifecycle] extensions/zalouser/src/work-s2-send.test.ts: retiring openclaw.sessionGroupCatalog
+
+ ✓ |extension-zalo| extensions/zalouser/src/work-s2-send.test.ts > canceled DM and allowed group with the same target ID stay separated at fake transport 60ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  17:06:25
+   Duration  13.75s (transform 55%, import 38%, worker 4%, setup 2%, tests 1%)
+
+exit=0
+
+ RUN  v5.0.5 /workspace/scratch/04c10b5e9a1d/openclaw-native-scratch/verified
+
+No test files found, exiting with code 0
+
+filter: extensions/zalouser/src/work-s2.test.ts
+include: extensions/zalouser/src/work-s2.test.ts
+exclude:  dist/**, test/fixtures/**, apps/macos/**, apps/macos/.build/**, **/node_modules/**, **/vendor/**, dist/OpenClaw.app/**, **/._*, **/*.live.test.?(c|m)[jt]s?(x), **/*.e2e.test.?(c|m)[jt]s?(x), */browser/**
+
+exit=0
+
+ RUN  v5.0.5 /workspace/scratch/04c10b5e9a1d/openclaw-native-scratch/verified
+
+ ↓ |extension-database-workers| extensions/zalouser/src/work-s2.test.ts > stock configuration keeps reply controls but strips independent retention and response consent fields
+ ✓ |extension-database-workers| extensions/zalouser/src/work-s2.test.ts > records raw payload upstream of the downstream decision seam 7975ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 1 skipped (2)
+   Start at  17:07:10
+   Duration  27.06s (transform 55%, tests 30%, import 12%, setup 3%)
+
+exit=0
