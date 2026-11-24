@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {join} from 'node:path';
+const root=process.argv[2];
+const read=name=>readFileSync(join(root,'extensions/zalouser/src',name),'utf8');
+const ingress=read('ingress.ts');
+assert.match(ingress,/rawMessage: serializeZalouserIngressMessage\(message\)/);
+assert.match(ingress,/await monitor\.admit\(message/);
+const monitor=read('monitor.ts');
+assert.match(monitor,/if \(isGroup && mentionDecision\.shouldSkip\) \{\s*channelHistory\.record/);
+assert.match(read('monitor.group-gating.test.ts'),/includes skipped group messages as InboundHistory/);
+assert.match(monitor,/const historyKey = isGroup \? route\.sessionKey/);
+console.log('SOURCE_REVIEW: raw durable ingress, skipped group history, route-scoped history key');
