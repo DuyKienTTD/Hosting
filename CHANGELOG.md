@@ -299,3 +299,9 @@ Nguồn gốc PR31 tại [commit bất biến](https://github.com/DuyKienTTD/Hos
 - Ghi nhận cấu hình n8n, Hermes Agent, Docker, PostgreSQL, Nginx, UFW, Fail2ban, SSH và sao lưu.
 - Thêm đánh giá bảo mật và lộ trình cải thiện.
 - Thêm quy tắc chống commit bí mật và script kiểm kê chỉ đọc.
+
+## 2026-11-24 — Candidate: tinh gọn luồng đọc
+
+- A0 chỉ thị tinh gọn trên nhánh riêng; rút gọn AGENTS và workflow, đưa tham khảo lịch sử về references/history/README.md (Git pin nguyên bản).
+- CATALOG 130 ID/path, security, STATE, source/receipt/pins và báo cáo gốc giữ nguyên. Không merge, không mở quyền mới.
+- Kiểm thử đọc range: workflow 3/3, CATALOG 12/12 khớp SHA/nội dung. KNG historical result_blob validator dự kiến không khớp hai file mới; runtime QA chưa chạy, phải giải quyết trước tích hợp.
