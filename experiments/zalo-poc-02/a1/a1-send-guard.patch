@@ -1,3 +1,263 @@
+diff --git a/src/zalo/send-reply-in-parts.ts b/src/zalo/send-reply-in-parts.ts
+--- a/src/zalo/send-reply-in-parts.ts
++++ b/src/zalo/send-reply-in-parts.ts
+@@ -1,5 +1,6 @@
+ import type { API, SendMessageQuote, Style, ThreadType } from "zca-js";
+ import { enqueueSend } from "../middleware/rate-limiter.js";
++import { sendWithOutboundGuard } from "../agent/tools/outbound-guard-runtime.js";
+ import { createLogger } from "../shared/logger.js";
+ import { trichDanTrongNganSach } from "./reply-quote.js";
+ import { chiaTheoNganSachByte, demDoanBoDinhDang } from "./split-styled-message.js";
+@@ -80,6 +81,8 @@
+   mangDinhDang?: boolean;
+   /** Khóa hàng đợi gửi của rate-limiter: `${accountId}:${threadId}` */
+   threadKey: string;
++  /** Stable per-turn/job id. Missing => fail closed for offline POC. */
++  sendGuardRequestId?: string;
+   threadId: string;
+   threadType: ThreadType;
+   /**
+@@ -116,8 +119,13 @@
+   text: string,
+   styles?: Style[],
+   quote?: SendMessageQuote,
++  segmentKey = "single",
+ ): Promise<unknown> {
+-  return enqueueSend(target.threadKey, () => target.guiMotDoan({ text, styles, quote }));
++  return enqueueSend(target.threadKey, () => sendWithOutboundGuard({
++    threadKey: target.threadKey, threadId: target.threadId, threadType: Number(target.threadType),
++    stableKey: target.sendGuardRequestId ? `${target.sendGuardRequestId}:${segmentKey}` : undefined,
++    send: () => target.guiMotDoan({ text, styles, quote }),
++  }));
+ }
+ 
+ /**
+@@ -184,9 +192,10 @@
+   text: string,
+   styles: Style[],
+   quote?: SendMessageQuote,
++  segmentKey = "single",
+ ): Promise<unknown> {
+   try {
+-    return await sendOne(target, text, styles, quote);
++    return await sendOne(target, text, styles, quote, segmentKey);
+   } catch (err) {
+     const coCaiDeBo = styles.length > 0 || quote !== undefined;
+     if (!coCaiDeBo || !laLoiMayChuTuChoi(err)) throw err;
+@@ -197,7 +206,7 @@
+       { threadId: target.threadId, soStyle: styles.length, coTrichDan: quote !== undefined, err },
+       "Zalo từ chối tin - gửi lại dạng chữ trơn, không định dạng và không trích dẫn",
+     );
+-    return await sendOne(target, text);
++    return await sendOne(target, text, undefined, undefined, `${segmentKey}:fallback`);
+   }
+ }
+ 
+@@ -286,7 +295,7 @@
+     try {
+       // Chỉ đoạn ĐẦU trích dẫn: các đoạn sau là phần nối tiếp của cùng một câu
+       // trả lời, trích lại ở mỗi đoạn thì khối trích dẫn lặp đầy màn hình
+-      await sendOneCoDuongLui(target, part.text, part.styles, delivered.length === 0 ? trichDan.quote : undefined);
++      await sendOneCoDuongLui(target, part.text, part.styles, delivered.length === 0 ? trichDan.quote : undefined, `segment_${delivered.length + 1}`);
+       delivered.push(part.text);
+     } catch (err) {
+       log.error(
+@@ -342,7 +351,7 @@
+   lanBaoLoiCuoi.set(khoa, bayGio);
+ 
+   try {
+-    await sendOne(target, cauLoiTheoLoai(loaiLoi));
++    await sendOne(target, cauLoiTheoLoai(loaiLoi), undefined, undefined, `technical_${loaiLoi ?? "general"}`);
+   } catch (err) {
+     log.error({ threadId: target.threadId, err }, "Không gửi được cả thông báo lỗi");
+   }
+diff --git a/src/zalo/message-turn-processor.ts b/src/zalo/message-turn-processor.ts
+--- a/src/zalo/message-turn-processor.ts
++++ b/src/zalo/message-turn-processor.ts
+@@ -87,6 +87,7 @@
+     // khác nhau: reaction là phản hồi tin VỪA tới, trích dẫn là chỉ ra tin
+     // ĐANG được trả lời. `trichDanTuTin` tự bỏ qua chat riêng.
+     quote: trichDanTuTin(batch[0]!),
++    sendGuardRequestId: batch[0]!.msgId ? `chat_${config.id}_${latest.threadId}_${batch[0]!.msgId}` : undefined,
+   };
+ 
+   // Mảng do CHỖ NÀY sở hữu: agent-loop chỉ push vào. Lượt ném lỗi vẫn còn đủ
+diff --git a/src/scheduler/scheduled-job-send.ts b/src/scheduler/scheduled-job-send.ts
+--- a/src/scheduler/scheduled-job-send.ts
++++ b/src/scheduler/scheduled-job-send.ts
+@@ -94,7 +94,7 @@
+     // Dịch markdown SÁT lúc gửi, không sớm hơn: chữ ghi vào history bên dưới
+     // phải đúng bằng chữ người dùng thấy trên Zalo.
+     const { text: chuGui, styles } = dinhDangNeuBat(text);
+-    const r = await sendReplyInParts(target, chuGui, styles);
++    const r = await sendReplyInParts({ ...target, sendGuardRequestId: `schedule_${job.id}_${scheduledFor}` }, chuGui, styles);
+     if (r.deliveredText) {
+       try {
+         appendMessage(job.accountId, job.threadId, { role: "assistant", content: r.deliveredText });
+diff --git a/src/agent/tools/send-attachment-with-caption.ts b/src/agent/tools/send-attachment-with-caption.ts
+--- a/src/agent/tools/send-attachment-with-caption.ts
++++ b/src/agent/tools/send-attachment-with-caption.ts
+@@ -1,5 +1,6 @@
+ import type { API, ThreadType } from "zca-js";
+ import { enqueueSend } from "../../middleware/rate-limiter.js";
++import { sendWithOutboundGuard } from "./outbound-guard-runtime.js";
+ import { createLogger } from "../../shared/logger.js";
+ import { laLoiMayChuTuChoi } from "../../zalo/send-reply-in-parts.js";
+ import { tinKemFile } from "./clean-tool-caption.js";
+@@ -25,12 +26,13 @@
+   threadType: ThreadType,
+   filePath: string,
+   caption: string | undefined,
++  requestId?: string,
+ ): Promise<void> {
+   const tin = tinKemFile(caption);
+ 
+   await enqueueSend(threadKey, async () => {
+     try {
+-      return await api.sendMessage({ ...tin, attachments: [filePath] }, threadId, threadType);
++      return await sendWithOutboundGuard({ threadKey, threadId, threadType: Number(threadType), stableKey: requestId ? `${requestId}:attachment` : undefined, send: () => api.sendMessage({ ...tin, attachments: [filePath] }, threadId, threadType) });
+     } catch (err) {
+       // Không có style để bỏ, hoặc lỗi đường truyền (tin có thể đã tới) thì
+       // KHÔNG gửi lại - gửi lại lúc đó là nhân đôi file trước mặt người dùng.
+@@ -40,7 +42,7 @@
+         { threadId, soStyle: tin.styles.length, err },
+         "Zalo từ chối caption có định dạng - gửi lại dạng chữ trơn",
+       );
+-      return await api.sendMessage({ msg: tin.msg, attachments: [filePath] }, threadId, threadType);
++      return await sendWithOutboundGuard({ threadKey, threadId, threadType: Number(threadType), stableKey: requestId ? `${requestId}:attachment_fallback` : undefined, send: () => api.sendMessage({ msg: tin.msg, attachments: [filePath] }, threadId, threadType) });
+     }
+   });
+ }
+diff --git a/src/agent/tools/send-file-tool.ts b/src/agent/tools/send-file-tool.ts
+--- a/src/agent/tools/send-file-tool.ts
++++ b/src/agent/tools/send-file-tool.ts
+@@ -1,4 +1,5 @@
+ import fs from "node:fs";
++import { createHash } from "node:crypto";
+ import path from "node:path";
+ import { tool } from "ai";
+ import { z } from "zod";
+@@ -39,6 +40,7 @@
+       message.threadType,
+       filePath,
+       caption,
++      message.msgId ? `file_${account.id}_${message.msgId}_${createHash("sha256").update(filePath + "|" + (caption ?? "")).digest("hex").slice(0, 16)}` : undefined,
+     );
+     ghiNhanDaGui?.(ghiChuDaGuiFile(tenHienThi, caption));
+   };
+diff --git a/src/agent/tools/add-reaction-tool.ts b/src/agent/tools/add-reaction-tool.ts
+--- a/src/agent/tools/add-reaction-tool.ts
++++ b/src/agent/tools/add-reaction-tool.ts
+@@ -1,4 +1,5 @@
+ import { tool } from "ai";
++import { sendWithOutboundGuard } from "./outbound-guard-runtime.js";
+ import { Reactions } from "zca-js";
+ import { z } from "zod";
+ import type { ToolContext } from "./index.js";
+@@ -17,7 +18,7 @@
+ };
+ 
+ export function createAddReactionTool(ctx: ToolContext) {
+-  const { message } = ctx;
++  const { message, account } = ctx;
+   const api = apiCaNhan(ctx);
+   return tool({
+     description:
+@@ -30,10 +31,15 @@
+     execute: async ({ reaction }) => {
+       if (!message.msgId) return ketQuaLoi("Không thả được reaction: tin nhắn không có msgId");
+       try {
+-        await api.addReaction(REACTION_MAP[reaction], {
++        await sendWithOutboundGuard({
++          threadKey: `${account.id}:${message.threadId}`, threadId: message.threadId,
++          threadType: Number(message.threadType),
++          stableKey: `reaction_${account.id}_${message.msgId}_${reaction}`,
++          send: () => api.addReaction(REACTION_MAP[reaction], {
+           data: { msgId: message.msgId, cliMsgId: message.cliMsgId },
+           threadId: message.threadId,
+           type: message.threadType,
++        }),
+         });
+         return `Đã thả reaction ${reaction}`;
+       } catch (err) {
+diff --git a/src/agent/tools/tag-member-tool.ts b/src/agent/tools/tag-member-tool.ts
+--- a/src/agent/tools/tag-member-tool.ts
++++ b/src/agent/tools/tag-member-tool.ts
+@@ -1,4 +1,6 @@
+ import { tool } from "ai";
++import { createHash } from "node:crypto";
++import { sendWithOutboundGuard } from "./outbound-guard-runtime.js";
+ import { z } from "zod";
+ import { enqueueSend } from "../../middleware/rate-limiter.js";
+ import type { ToolContext } from "./index.js";
+@@ -35,7 +37,9 @@
+       try {
+         const mentionText = `@${memberName}`;
+         await enqueueSend(`${account.id}:${message.threadId}`, () =>
+-          api.sendMessage(
++          sendWithOutboundGuard({ threadKey: `${account.id}:${message.threadId}`, threadId: message.threadId, threadType: Number(message.threadType),
++            stableKey: message.msgId ? `tag_${account.id}_${message.msgId}_${createHash("sha256").update(memberId + "|" + noiDung).digest("hex").slice(0,16)}` : undefined,
++            send: () => api.sendMessage(
+             {
+               msg: `${mentionText} ${noiDung}`,
+               mentions: [{ pos: 0, uid: memberId, len: mentionText.length }],
+@@ -43,6 +47,7 @@
+             message.threadId,
+             message.threadType,
+           ),
++          }),
+         );
+         ghiNhanDaGui?.(ghiChuDaGuiChu(`${mentionText} ${noiDung}`));
+         return `Đã gửi tin nhắn tag ${memberName}`;
+diff --git a/src/agent/tools/create-image-tool.ts b/src/agent/tools/create-image-tool.ts
+--- a/src/agent/tools/create-image-tool.ts
++++ b/src/agent/tools/create-image-tool.ts
+@@ -1,4 +1,6 @@
+ import { tool } from "ai";
++import { createHash } from "node:crypto";
++import { sendWithOutboundGuard } from "./outbound-guard-runtime.js";
+ import { z } from "zod";
+ import { isImageGenConfigured } from "../../config/runtime-image-settings.js";
+ import { loadStoredImage } from "../../conversation/media-store.js";
+@@ -135,7 +137,9 @@
+ 
+       // Chỉ báo sau khi chắc chắn sẽ vẽ thật
+       await enqueueSend(threadKey, () =>
+-        api.sendMessage(
++        sendWithOutboundGuard({ threadKey, threadId: ctx.message.threadId, threadType: Number(ctx.message.threadType),
++          stableKey: ctx.message.msgId ? `image_notice_${ctx.account.id}_${ctx.message.msgId}` : undefined,
++          send: () => api.sendMessage(
+           {
+             // "1-3 phút" chứ không phải "1 phút": đo thật 60 giây cho ảnh
+             // thường, 135 giây cho trang nhiều chữ. Hứa 1 phút là hứa hụt.
+@@ -146,6 +150,7 @@
+           ctx.message.threadId,
+           ctx.message.threadType,
+         ),
++        }),
+       )
+         .then(() => {
+           // Câu báo trước cũng là tin THẬT người ta đọc được - vào history như
+@@ -165,7 +170,10 @@
+             // hụt vừa rồi đã tiêu mất một suất rồi. Bắt trả giá hai suất cho
+             // một tấm ảnh là phạt người dùng vì lỗi của provider.
+             await enqueueSend(threadKey, () =>
+-              api.sendMessage({ msg: TIN_THU_LAI }, ctx.message.threadId, ctx.message.threadType),
++              sendWithOutboundGuard({ threadKey, threadId: ctx.message.threadId, threadType: Number(ctx.message.threadType),
++                stableKey: ctx.message.msgId ? `image_retry_notice_${ctx.account.id}_${ctx.message.msgId}` : undefined,
++                send: () => api.sendMessage({ msg: TIN_THU_LAI }, ctx.message.threadId, ctx.message.threadType),
++              }),
+             );
+             ctx.ghiNhanDaGui?.(ghiChuDaGuiChu(TIN_THU_LAI));
+           },
+@@ -179,6 +187,7 @@
+             ctx.message.threadType,
+             filePath,
+             caption,
++            ctx.message.msgId ? `image_attachment_${ctx.account.id}_${ctx.message.msgId}_${createHash("sha256").update(image.data).digest("hex").slice(0,16)}` : undefined,
+           ),
+         );
+         ctx.ghiNhanDaGui?.(ghiChuDaGuiAnh(1, caption));
 diff --git a/src/agent/tools/send-dispatch-guard.ts b/src/agent/tools/send-dispatch-guard.ts
 new file mode 100644
 --- /dev/null
@@ -117,3 +377,83 @@ new file mode 100644
 +  const broken: AttemptStore = { reserveOnce: async () => { throw Error('db'); }, markSent: async () => {} };
 +  assert.equal((await dispatchWithLateGuard(intent('db_1'), async () => ok(), broken, async () => { sends++; })).status, 'blocked'); assert.equal(sends, 0);
 +});
+diff --git a/src/agent/tools/durable-attempt-store.ts b/src/agent/tools/durable-attempt-store.ts
+new file mode 100644
+--- /dev/null
++++ b/src/agent/tools/durable-attempt-store.ts
+@@ -0,0 +1,17 @@
++import { DatabaseSync } from 'node:sqlite';
++import type { AttemptStore } from './send-dispatch-guard.js';
++/** One SQLite file per isolated sandbox. Reserve is a transactional UNIQUE insert. */
++export function openDurableAttemptStore(filename: string): AttemptStore & { close(): void; status(key: string): string | undefined } {
++  if (!filename || filename === ':memory:') throw Error('durable_file_required');
++  const db = new DatabaseSync(filename);
++  db.exec("PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS outbound_attempts (attempt_key TEXT PRIMARY KEY, state TEXT NOT NULL CHECK(state IN ('reserved','sent')), created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)");
++  const reserve = db.prepare("INSERT OR IGNORE INTO outbound_attempts(attempt_key,state) VALUES(?, 'reserved')");
++  const mark = db.prepare("UPDATE outbound_attempts SET state='sent' WHERE attempt_key=? AND state='reserved'");
++  const read = db.prepare('SELECT state FROM outbound_attempts WHERE attempt_key=?');
++  return {
++    reserveOnce: async (key: string) => { if (!key) throw Error('invalid_key'); return reserve.run(key).changes === 1; },
++    markSent: async (key: string) => { if (mark.run(key).changes !== 1) throw Error('missing_or_duplicate_attempt'); },
++    status: (key: string) => (read.get(key) as {state:string}|undefined)?.state,
++    close: () => db.close(),
++  };
++}
+diff --git a/src/agent/tools/durable-attempt-store.test.ts b/src/agent/tools/durable-attempt-store.test.ts
+new file mode 100644
+--- /dev/null
++++ b/src/agent/tools/durable-attempt-store.test.ts
+@@ -0,0 +1,11 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import fs from 'node:fs';
++import os from 'node:os';
++import path from 'node:path';
++import { spawnSync } from 'node:child_process';
++import { openDurableAttemptStore } from './durable-attempt-store.js';
++function fixture() { const dir=fs.mkdtempSync(path.join(os.tmpdir(),'poc02-')); return {dir,db:path.join(dir,'attempts.db')}; }
++test('transactional same key reserve only once',async()=>{const f=fixture();try{const s=openDurableAttemptStore(f.db);assert.equal(await s.reserveOnce('a1:dm:u1:part1'),true);assert.equal(await s.reserveOnce('a1:dm:u1:part1'),false);await s.markSent('a1:dm:u1:part1');assert.equal(s.status('a1:dm:u1:part1'),'sent');s.close();}finally{fs.rmSync(f.dir,{recursive:true,force:true})}});
++test('actual Node process restart keeps uncertain reservation',async()=>{const f=fixture();try{const s=openDurableAttemptStore(f.db);assert.equal(await s.reserveOnce('a1:dm:u1:file1'),true);s.close();const child=spawnSync(process.execPath,['--experimental-strip-types','--input-type=module','-e',"import {openDurableAttemptStore} from "+JSON.stringify(new URL('./durable-attempt-store.ts',import.meta.url).href)+"; const s=openDurableAttemptStore(process.argv[1]);const result=await s.reserveOnce('a1:dm:u1:file1');s.close();process.stdout.write(String(result));",f.db],{encoding:'utf8',env:{PATH:process.env.PATH}});assert.equal(child.status,0,child.stderr);assert.equal(child.stdout,'false');}finally{fs.rmSync(f.dir,{recursive:true,force:true})}});
++test('different segment key distinct, missing receipt rejected',async()=>{const f=fixture();try{const s=openDurableAttemptStore(f.db);assert.equal(await s.reserveOnce('a1:dm:u1:p1'),true);assert.equal(await s.reserveOnce('a1:dm:u1:p2'),true);assert.equal(s.status('a1:dm:u1:p2'),'reserved');await assert.rejects(s.markSent('a1:dm:u1:never'));s.close();}finally{fs.rmSync(f.dir,{recursive:true,force:true})}});
+diff --git a/src/agent/tools/outbound-guard-runtime.ts b/src/agent/tools/outbound-guard-runtime.ts
+new file mode 100644
+--- /dev/null
++++ b/src/agent/tools/outbound-guard-runtime.ts
+@@ -0,0 +1,37 @@
++import { dispatchWithLateGuard, type PolicyReader, type AttemptStore, type Destination } from './send-dispatch-guard.js';
++
++/** OFFLINE POC: nothing registers this in production; missing binding denies every send.
++ * Integration owner must replace this per-process adapter with A2-approved durable
++ * policy/consent snapshots, including a shared STOP fence.
++ */
++let runtime: { readPolicy: PolicyReader; attempts: AttemptStore } | null = null;
++export function setOfflineOutboundGuardRuntime(value: { readPolicy: PolicyReader; attempts: AttemptStore } | null): void {
++  runtime = value;
++}
++export class OutboundGuardDenied extends Error {
++  constructor(readonly reason: string) { super('outbound_guard_' + reason); }
++}
++export async function sendWithOutboundGuard(input: {
++  threadKey: string;
++  threadId: string;
++  threadType: number;
++  stableKey: string | undefined;
++  send: () => Promise<unknown>;
++}): Promise<unknown> {
++  if (!runtime) throw new OutboundGuardDenied('missing_authoritative_policy');
++  const pos = input.threadKey.indexOf(':');
++  const accountId = pos > 0 ? input.threadKey.slice(0,pos) : '';
++  const binding = pos > 0 ? input.threadKey.slice(pos+1) : '';
++  if (!accountId || binding !== input.threadId || !input.stableKey) throw new OutboundGuardDenied('missing_or_mismatched_binding');
++  const kind = input.threadType === 0 ? 'dm' : input.threadType === 1 ? 'group' : null;
++  if (!kind) throw new OutboundGuardDenied('unknown_thread_type');
++  const destination: Destination = { accountId, threadId: input.threadId, recipientId: input.threadId, threadType: kind };
++  let value: unknown;
++  const result = await dispatchWithLateGuard({
++    destination,
++    expected: destination,
++    idempotencyKey: input.stableKey,
++  }, runtime.readPolicy, runtime.attempts, async () => { value = await input.send(); });
++  if (result.status !== 'sent') throw new OutboundGuardDenied(result.reason);
++  return value;
++}
