@@ -1,3 +1,15 @@
+---
+id: zalo-poc-01-a1-core
+type: task
+status: prepared-owner-forward
+dispatch_eligible: false
+owner: A1
+updated_at: 2026-11-24
+sensitivity: public
+---
+
+**HANDOFF_STATE:** `PREPARED_FOR_OWNER_FORWARD` — original task committed but no verified session delivery or ACK. Do not infer `SENT` from the GitHub PR.
+
 # ZALO-POC-01 — A1 Core Test
 
 **TASK_ID:** `ZALO-POC-01-A1-CORE`  
