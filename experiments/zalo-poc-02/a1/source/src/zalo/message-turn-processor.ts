@@ -87,7 +87,7 @@ async function xuLyLuot(
     // khác nhau: reaction là phản hồi tin VỪA tới, trích dẫn là chỉ ra tin
     // ĐANG được trả lời. `trichDanTuTin` tự bỏ qua chat riêng.
     quote: trichDanTuTin(batch[0]!),
-    sendGuardRequestId: `chat_${config.id}_${turnId}`,
+    sendGuardRequestId: batch[0]!.msgId ? `chat_${config.id}_${latest.threadId}_${batch[0]!.msgId}` : undefined,
   };
 
   // Mảng do CHỖ NÀY sở hữu: agent-loop chỉ push vào. Lượt ném lỗi vẫn còn đủ
