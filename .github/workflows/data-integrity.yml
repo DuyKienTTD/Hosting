@@ -3,8 +3,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   push:
-    branches: [main, 'a0-assistant/knowledge-streamline-2026-11-24']
-  workflow_dispatch:
+    branches: [main]
 permissions:
   contents: read
 jobs:
@@ -19,6 +18,10 @@ jobs:
           persist-credentials: false
       - name: Test validator
         run: python3 -m unittest discover -s scripts -p test_data_integrity.py
+      - name: Test KNG provenance regression
+        run: python3 -m unittest discover -s program/kng -p 'test_*.py'
+      - name: Check KNG provenance
+        run: python3 program/kng/validate.py --json
       - name: Check catalog
         run: python3 scripts/validate-catalog-partitions.py
       - name: Check repository delta
