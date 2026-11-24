@@ -83,6 +83,7 @@ export type ReplyTarget = {
   threadKey: string;
   /** Stable per-turn/job id. Missing => fail closed for offline POC. */
   sendGuardRequestId?: string;
+  senderId?: string;
   threadId: string;
   threadType: ThreadType;
   /**
@@ -122,7 +123,7 @@ function sendOne(
   segmentKey = "single",
 ): Promise<unknown> {
   return enqueueSend(target.threadKey, () => sendWithOutboundGuard({
-    threadKey: target.threadKey, threadId: target.threadId, threadType: Number(target.threadType),
+    threadKey: target.threadKey, threadId: target.threadId, threadType: Number(target.threadType), senderId: target.senderId,
     stableKey: target.sendGuardRequestId ? `${target.sendGuardRequestId}:${segmentKey}` : undefined,
     send: () => target.guiMotDoan({ text, styles, quote }),
   }));
