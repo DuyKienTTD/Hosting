@@ -1,0 +1,93 @@
+diff --git a/src/zalo/kenh-ca-nhan.ts b/src/zalo/kenh-ca-nhan.ts
+--- a/src/zalo/kenh-ca-nhan.ts
++++ b/src/zalo/kenh-ca-nhan.ts
+@@ -16,6 +16,8 @@
+  * chậm hay chết đường trả lời.
+  */
+ function tuThaCamXuc(config: AccountConfig, api: API, msg: ParsedMessage): void {
++  // Personal-account PoC: ancillary automatic reaction disabled until consent-bound dispatch is proven.
++  return;
+   if (!config.autoReactEnabled || !msg.msgId) return;
+   void api
+     .addReaction(toZaloReaction(config.autoReactIcon), {
+@@ -45,13 +47,8 @@
+   return {
+     api,
+     duongGui: (threadId, threadType) => duongGuiZcaJs(api, threadId, threadType),
+-    baoDaXem: (batch) => sendSeenReceipt(api, batch),
++    baoDaXem: (_batch) => {}, // denied ancillary receipt on offline candidate
+     tuThaCamXuc: (config, msg) => tuThaCamXuc(config, api, msg),
+-    batDangNhap: (threadId, threadType) =>
+-      startTypingIndicator({
+-        send: (t, ty) => api.sendTypingEvent(t, ty),
+-        threadId,
+-        threadType,
+-      }),
++    batDangNhap: (_threadId, _threadType) => () => {}, // disabled typing events
+   };
+ }
+diff --git a/src/zalo/message-receipts.ts b/src/zalo/message-receipts.ts
+--- a/src/zalo/message-receipts.ts
++++ b/src/zalo/message-receipts.ts
+@@ -81,6 +81,8 @@
+ 
+ /** "Đã nhận" - fire-and-forget, gọi ngay khi tin về tới listener */
+ export function sendDeliveredReceipt(api: API, message: ParsedMessage): void {
++  // No receipt side effects without a scoped atomic admission path.
++  return;
+   const batch = buildBatch([message]);
+   if (!batch) return;
+ 
+@@ -92,6 +94,8 @@
+ 
+ /** "Đã xem" - fire-and-forget, gọi khi bot bắt đầu xử lý lượt tin */
+ export function sendSeenReceipt(api: API, messages: ParsedMessage[]): void {
++  // No seen receipt in offline PoC; unguarded transport prohibited.
++  return;
+   const batch = buildBatch(messages);
+   if (!batch) return;
+ 
+diff --git a/src/zalo/typing-indicator.ts b/src/zalo/typing-indicator.ts
+--- a/src/zalo/typing-indicator.ts
++++ b/src/zalo/typing-indicator.ts
+@@ -38,6 +38,8 @@
+   intervalMs = getTuning("TYPING_REFRESH_MS"),
+   maxDurationMs = DEFAULT_MAX_DURATION_MS,
+ }: TypingIndicatorParams): () => void {
++  // Offline PoC disables unguarded timed network sends.
++  return () => {};
+   let stopped = false;
+ 
+   const swallow = (err: unknown) => log.debug({ threadId, err }, "Bắn typing thất bại - bỏ qua");
+diff --git a/src/zalo/busy-wait-notice.ts b/src/zalo/busy-wait-notice.ts
+--- a/src/zalo/busy-wait-notice.ts
++++ b/src/zalo/busy-wait-notice.ts
+@@ -64,6 +64,8 @@
+  * đường nhận tin.
+  */
+ export async function maybeNotifyBusyWait(muc: MucTieuTranAn): Promise<boolean> {
++  // Busy-wait notices lack stable policy-bound idempotency; fail closed.
++  return false;
+   const nguong = getTuning("BUSY_ACK_AFTER_MS");
+   if (nguong <= 0) return false;
+ 
+diff --git a/src/zalo/reply-target-tu-kenh.ts b/src/zalo/reply-target-tu-kenh.ts
+--- a/src/zalo/reply-target-tu-kenh.ts
++++ b/src/zalo/reply-target-tu-kenh.ts
+@@ -24,12 +24,16 @@
+   threadType: ThreadType;
+   /** Khóa hàng đợi gửi: `${accountId}:${threadId}` */
+   threadKey: string;
++  senderId?: string;
++  sendGuardRequestId?: string;
+ }): ReplyTarget {
+   return {
+     guiMotDoan: p.kenh.duongGui(p.threadId, p.threadType),
+     tranKyTuMotTin: p.kenh.tranKyTuMotTin,
+     mangDinhDang: p.kenh.mangDinhDang,
+     threadKey: p.threadKey,
++    senderId: p.senderId,
++    sendGuardRequestId: p.sendGuardRequestId,
+     threadId: p.threadId,
+     threadType: p.threadType,
+   };
