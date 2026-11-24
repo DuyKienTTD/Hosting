@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { dispatchWithLateGuard } from './send-dispatch-guard.ts';
-import type { Authorization, Destination, DispatchIntent, AttemptStore } from './send-dispatch-guard.ts';
+import { dispatchWithLateGuard } from './send-dispatch-guard.js';
+import type { Authorization, Destination, DispatchIntent, AttemptStore } from './send-dispatch-guard.js';
 const destination: Destination = { accountId: 'synthetic_1', threadId: 'user_1', recipientId: 'user_1', threadType: 'dm' };
 const intent = (key: string, d: Destination = destination): DispatchIntent => ({ idempotencyKey: key, expected: destination, destination: d });
 const ok = (): Authorization => ({ destination, consent: 'opt_in', humanTakeover: false, threadStop: false, globalStop: false, accountRunning: true, version: 'v1' });
