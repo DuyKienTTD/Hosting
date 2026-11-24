@@ -37,7 +37,7 @@ export function createTagMemberTool(ctx: ToolContext) {
       try {
         const mentionText = `@${memberName}`;
         await enqueueSend(`${account.id}:${message.threadId}`, () =>
-          sendWithOutboundGuard({ threadKey: `${account.id}:${message.threadId}`, threadId: message.threadId, threadType: Number(message.threadType),
+          sendWithOutboundGuard({ threadKey: `${account.id}:${message.threadId}`, threadId: message.threadId, threadType: Number(message.threadType), senderId: message.senderId,
             stableKey: message.msgId ? `tag_${account.id}_${message.msgId}_${createHash("sha256").update(memberId + "|" + noiDung).digest("hex").slice(0,16)}` : undefined,
             send: () => api.sendMessage(
             {
