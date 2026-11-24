@@ -188,6 +188,7 @@ export function createImageTool(ctx: ToolContext, generate = generateImage) {
             filePath,
             caption,
             ctx.message.msgId ? `image_attachment_${ctx.account.id}_${ctx.message.msgId}_${createHash("sha256").update(image.data).digest("hex").slice(0,16)}` : undefined,
+            ctx.message.senderId,
           ),
         );
         ctx.ghiNhanDaGui?.(ghiChuDaGuiAnh(1, caption));
