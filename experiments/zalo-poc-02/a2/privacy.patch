@@ -73,25 +73,35 @@ diff --git a/src/conversation/memory-edit-store.ts b/src/conversation/memory-edi
  };
  
  function timFactKhop(
-@@ -65,9 +68,13 @@
+@@ -65,11 +68,19 @@
    doanChu: string,
  ): { chon: Row } | { loi: KetQuaSuaFact } {
    const can = doanChu.trim().toLowerCase();
-+  if (!pham.accountId?.trim() || !pham.subjectId?.trim() || !can ||
-+      (pham.chiFactHocTrongNhom && !pham.threadId?.trim())) {
+-  const dangCo = (
+-    pham.chiFactHocTrongNhom
+-      ? factNhinThayTrongNhomStmt.all(pham.accountId, pham.subjectId)
+-      : factNhinThayStmt.all(pham.accountId, pham.subjectId)
+-  ) as unknown as Row[];
++  if (!pham.accountId?.trim() || !pham.subjectId?.trim() || !can) {
 +    return { loi: { ok: false, loai: "khong_khop", factHienCo: [] } };
 +  }
-   const dangCo = (
-     pham.chiFactHocTrongNhom
--      ? factNhinThayTrongNhomStmt.all(pham.accountId, pham.subjectId)
-+      ? factNhinThayTrongNhomStmt.all(pham.accountId, pham.subjectId, pham.threadId)
-       : factNhinThayStmt.all(pham.accountId, pham.subjectId)
-   ) as unknown as Row[];
++  let dangCo: Row[];
++  if (pham.chiFactHocTrongNhom) {
++    const threadId = pham.threadId;
++    if (!threadId?.trim()) {
++      return { loi: { ok: false, loai: "khong_khop", factHienCo: [] } };
++    }
++    dangCo = factNhinThayTrongNhomStmt.all(pham.accountId, pham.subjectId, threadId) as Row[];
++  } else {
++    dangCo = factNhinThayStmt.all(pham.accountId, pham.subjectId) as Row[];
++  }
+ 
+   const khop = dangCo.filter((r) => r.content.toLowerCase().includes(can));
  
 diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filter.ts
 --- a/src/middleware/allowlist-filter.ts
 +++ b/src/middleware/allowlist-filter.ts
-@@ -4,17 +4,19 @@
+@@ -4,17 +4,28 @@
  export type FilterDecision = {
    /** Bot có chạy agent + trả lời không */
    respond: boolean;
@@ -108,8 +118,17 @@ diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filte
  const skip = (reason: string): FilterDecision => ({ respond: false, record: false, reason });
 -const recordOnly = (reason: string): FilterDecision => ({ respond: false, record: true, reason });
 +export type PrivacyConsent = {
-+  /** Phải được xác thực từ nguồn cấp consent phù hợp thread/sender/account. */
++  /** An independently verified, scoped snapshot; never infer from allowlist. */
 +  verified: true;
++  accountId: string;
++  senderId: string;
++  threadId: string;
++  threadType: number;
++  revision: number;
++  expiresAt: number;
++  revoked: boolean;
++  humanTakeover: boolean;
++  stopped: boolean;
 +  respond: boolean;
 +  retain: boolean;
 +  passiveGroup: boolean;
@@ -117,7 +136,7 @@ diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filte
  
  /**
   * Quyết định bot có trả lời tin nhắn này không - chạy TRƯỚC khi gọi LLM
-@@ -27,7 +29,10 @@
+@@ -27,7 +38,18 @@
    account: AccountConfig,
    msg: ParsedMessage,
    botEnabledForThread = true,
@@ -125,10 +144,28 @@ diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filte
  ): FilterDecision {
 +  // Không có bộ chứng thực consent: cả phản hồi lẫn retention đều đóng.
 +  if (!consent || consent.verified !== true) return skip("thiếu consent được xác minh");
++  if (!account.id || !msg.senderId || !msg.threadId ||
++      consent.accountId !== account.id || consent.senderId !== msg.senderId ||
++      consent.threadId !== msg.threadId || consent.threadType !== msg.threadType ||
++      !Number.isSafeInteger(consent.revision) || consent.revision < 1 ||
++      !Number.isFinite(consent.expiresAt) || consent.expiresAt <= Date.now() ||
++      consent.revoked || consent.humanTakeover || consent.stopped) {
++    return skip("consent không hợp lệ, hết hạn, thu hồi hoặc STOP");
++  }
    if (msg.isSelf) {
      return skip("tin của chính bot");
    }
-@@ -41,9 +46,9 @@
+@@ -36,26 +58,33 @@
+     return skip("không có nội dung xử lý được (sticker/voice/...)");
+   }
+ 
++  // Apply allowlist before any group passive retention branch.
++  if (account.allowlist.mode === "list" && !account.allowlist.userIds.includes(msg.senderId)) {
++    return skip(`sender ${msg.senderId} ngoài allowlist`);
++  }
++
+   if (msg.isGroup) {
+     if (!account.respondToGroups) {
        return skip("account tắt trả lời group");
      }
      if (account.groupRequireMention && !msg.mentionsMe) {
@@ -141,7 +178,10 @@ diff --git a/src/middleware/allowlist-filter.ts b/src/middleware/allowlist-filte
      }
    }
  
-@@ -54,8 +59,14 @@
+-  if (account.allowlist.mode === "list" && !account.allowlist.userIds.includes(msg.senderId)) {
+-    return skip(`sender ${msg.senderId} ngoài allowlist`);
+-  }
+-
    // Check kill switch SAU allowlist: người ngoài allowlist không được ghi history
    // dù thread tắt bot
    if (!botEnabledForThread) {
@@ -194,3 +234,186 @@ diff --git a/src/zalo/incoming-message-router.ts b/src/zalo/incoming-message-rou
  
    if (!decision.respond) {
      if (decision.record) {
+diff --git a/src/middleware/allowlist-filter.test.ts b/src/middleware/allowlist-filter.test.ts
+--- a/src/middleware/allowlist-filter.test.ts
++++ b/src/middleware/allowlist-filter.test.ts
+@@ -3,7 +3,7 @@
+ import { ThreadType } from "zca-js";
+ import type { AccountConfig } from "../config/account-store.js";
+ import type { ParsedMessage } from "../zalo/zalo-message-parser.js";
+-import { shouldRespond } from "./allowlist-filter.js";
++import { shouldRespond, type PrivacyConsent } from "./allowlist-filter.js";
+ 
+ // allowlist-filter không chạm src/config/env.ts nên import tĩnh được bình thường
+ 
+@@ -49,31 +49,44 @@
+   };
+ }
+ 
++function syntheticConsent(account: AccountConfig, msg: ParsedMessage, override: Partial<PrivacyConsent> = {}): PrivacyConsent {
++  return {
++    verified: true, accountId: account.id, senderId: msg.senderId,
++    threadId: msg.threadId, threadType: msg.threadType, revision: 1,
++    expiresAt: Number.MAX_SAFE_INTEGER, revoked: false,
++    humanTakeover: false, stopped: false, respond: true,
++    retain: true, passiveGroup: true, ...override,
++  };
++}
++function decideAuthorized(account: AccountConfig, msg: ParsedMessage, enabled = true) {
++  return shouldRespond(account, msg, enabled, syntheticConsent(account, msg));
++}
++
+ describe("shouldRespond", () => {
+   it("bỏ qua tin do chính bot gửi", () => {
+-    const decision = shouldRespond(makeAccount(), makeMessage({ isSelf: true }));
++    const decision = decideAuthorized(makeAccount(), makeMessage({ isSelf: true }));
+     assert.equal(decision.respond, false);
+   });
+ 
+   it("bỏ qua tin không có text lẫn ảnh (sticker, voice...)", () => {
+-    const decision = shouldRespond(makeAccount(), makeMessage({ text: "   " }));
++    const decision = decideAuthorized(makeAccount(), makeMessage({ text: "   " }));
+     assert.equal(decision.respond, false);
+   });
+ 
+   it("nhận tin chỉ có ảnh, không có chữ", () => {
+     const msg = makeMessage({ text: "", images: [{ url: "https://example.com/a.jpg" }] });
+-    assert.equal(shouldRespond(makeAccount(), msg).respond, true);
++    assert.equal(decideAuthorized(makeAccount(), msg).respond, true);
+   });
+ 
+   it("bỏ qua group khi account tắt trả lời group", () => {
+     const account = makeAccount({ respondToGroups: false });
+     const msg = makeMessage({ isGroup: true, threadType: ThreadType.Group, mentionsMe: true });
+-    assert.equal(shouldRespond(account, msg).respond, false);
++    assert.equal(decideAuthorized(account, msg).respond, false);
+   });
+ 
+   it("group không @mention + passive listen: không trả lời nhưng ghi history", () => {
+     const msg = makeMessage({ isGroup: true, threadType: ThreadType.Group, mentionsMe: false });
+-    const decision = shouldRespond(makeAccount(), msg);
++    const decision = decideAuthorized(makeAccount(), msg);
+     assert.equal(decision.respond, false);
+     assert.equal(decision.record, true);
+   });
+@@ -81,59 +94,110 @@
+   it("group không @mention + tắt passive listen: bỏ qua hẳn", () => {
+     const account = makeAccount({ groupPassiveListen: false });
+     const msg = makeMessage({ isGroup: true, threadType: ThreadType.Group, mentionsMe: false });
+-    const decision = shouldRespond(account, msg);
++    const decision = decideAuthorized(account, msg);
+     assert.equal(decision.respond, false);
+     assert.equal(decision.record, false);
+   });
+ 
+   it("thread tắt bot: không trả lời nhưng vẫn ghi history", () => {
+-    const decision = shouldRespond(makeAccount(), makeMessage(), false);
++    const decision = decideAuthorized(makeAccount(), makeMessage(), false);
+     assert.equal(decision.respond, false);
+     assert.equal(decision.record, true);
+   });
+ 
+   it("ngoài allowlist thì không ghi gì kể cả khi thread tắt bot", () => {
+     const account = makeAccount({ allowlist: { mode: "list", userIds: ["user-9"] } });
+-    const decision = shouldRespond(account, makeMessage({ senderId: "user-1" }), false);
++    const decision = decideAuthorized(account, makeMessage({ senderId: "user-1" }), false);
+     assert.equal(decision.record, false);
+   });
+ 
+   it("tin của chính bot không bao giờ được ghi passive", () => {
+-    const decision = shouldRespond(makeAccount(), makeMessage({ isSelf: true }));
++    const decision = decideAuthorized(makeAccount(), makeMessage({ isSelf: true }));
+     assert.equal(decision.record, false);
+   });
+ 
+   it("tin được trả lời thì cũng được ghi history", () => {
+-    const decision = shouldRespond(makeAccount(), makeMessage());
++    const decision = decideAuthorized(makeAccount(), makeMessage());
+     assert.equal(decision.respond, true);
+     assert.equal(decision.record, true);
+   });
+ 
+   it("trả lời trong group khi có @mention bot", () => {
+     const msg = makeMessage({ isGroup: true, threadType: ThreadType.Group, mentionsMe: true });
+-    assert.equal(shouldRespond(makeAccount(), msg).respond, true);
++    assert.equal(decideAuthorized(makeAccount(), msg).respond, true);
+   });
+ 
+   it("trả lời trong group không cần mention khi groupRequireMention=false", () => {
+     const account = makeAccount({ groupRequireMention: false });
+     const msg = makeMessage({ isGroup: true, threadType: ThreadType.Group, mentionsMe: false });
+-    assert.equal(shouldRespond(account, msg).respond, true);
++    assert.equal(decideAuthorized(account, msg).respond, true);
+   });
+ 
+   it("chặn sender ngoài allowlist khi mode=list", () => {
+     const account = makeAccount({ allowlist: { mode: "list", userIds: ["user-9"] } });
+-    const decision = shouldRespond(account, makeMessage({ senderId: "user-1" }));
++    const decision = decideAuthorized(account, makeMessage({ senderId: "user-1" }));
+     assert.equal(decision.respond, false);
+     assert.match(decision.reason, /allowlist/);
+   });
+ 
+   it("cho qua sender nằm trong allowlist khi mode=list", () => {
+     const account = makeAccount({ allowlist: { mode: "list", userIds: ["user-1"] } });
+-    assert.equal(shouldRespond(account, makeMessage({ senderId: "user-1" })).respond, true);
++    assert.equal(decideAuthorized(account, makeMessage({ senderId: "user-1" })).respond, true);
+   });
+ 
+   it("mode=all thì không lọc theo userIds", () => {
+     const account = makeAccount({ allowlist: { mode: "all", userIds: ["user-9"] } });
+-    assert.equal(shouldRespond(account, makeMessage({ senderId: "user-1" })).respond, true);
++    assert.equal(decideAuthorized(account, makeMessage({ senderId: "user-1" })).respond, true);
+   });
+ });
++
++describe("explicit synthetic consent scope and independent permissions", () => {
++  function examine(overrides: Partial<PrivacyConsent>) {
++    const account = makeAccount(), msg = makeMessage();
++    return shouldRespond(account, msg, true, syntheticConsent(account, msg, overrides));
++  }
++  it("missing consent denies response and retention", () => {
++    const d = shouldRespond(makeAccount(), makeMessage());
++    assert.deepEqual([d.respond, d.record], [false, false]);
++  });
++  it("authorized response-only never grants retention", () => {
++    const d = examine({ respond: true, retain: false });
++    assert.deepEqual([d.respond, d.record], [true, false]);
++  });
++  it("authorized retain-only never grants response", () => {
++    const d = examine({ respond: false, retain: true });
++    assert.deepEqual([d.respond, d.record], [false, true]);
++  });
++  it("explicit deny of both scopes", () => {
++    const d = examine({ respond: false, retain: false });
++    assert.deepEqual([d.respond, d.record], [false, false]);
++  });
++  it("expired, revoked, human takeover, STOP or invalid revision deny both", () => {
++    for (const o of [{ expiresAt: 1 }, { revoked: true },
++      { humanTakeover: true }, { stopped: true }, { revision: 0 }]) {
++      const d = examine(o);
++      assert.deepEqual([d.respond, d.record], [false, false]);
++    }
++  });
++  it("scope mismatch across account, sender, thread and type denies", () => {
++    for (const o of [{ accountId: "acc-other" }, { senderId: "sender-other" },
++      { threadId: "group-other" }, { threadType: -1 }]) {
++      const d = examine(o);
++      assert.deepEqual([d.respond, d.record], [false, false]);
++    }
++  });
++  it("passive group retention requires distinct passive consent", () => {
++    const account = makeAccount();
++    const msg = makeMessage({ isGroup: true, threadType: ThreadType.Group });
++    const ok = syntheticConsent(account, msg, { respond: false, retain: true });
++    assert.deepEqual([shouldRespond(account,msg,true,ok).respond,shouldRespond(account,msg,true,ok).record],[false,true]);
++    const no = { ...ok, passiveGroup: false };
++    assert.equal(shouldRespond(account,msg,true,no).record,false);
++  });
++  it("outside allowlist never passively retains with consent", () => {
++    const account = makeAccount({ allowlist: { mode: "list", userIds: ["other-user"] } });
++    const msg = makeMessage({ isGroup: true, threadType: ThreadType.Group });
++    const d = shouldRespond(account,msg,true,syntheticConsent(account,msg));
++    assert.deepEqual([d.respond,d.record],[false,false]);
++  });
++});
