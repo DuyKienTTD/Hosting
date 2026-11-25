@@ -22,7 +22,7 @@ PR #61 mở dạng nháp tại lần đọc đầu, nhánh `coordinator/hosting-
 | POST-02 | DONE | Kiểm tám CV theo nguồn có tên vai trò và mức xác minh. Khoảng trống giữ UNKNOWN. [Danh bạ tám CV](../agents/CAPABILITIES.md) |
 | POST-03 | DONE | Bộ T1–T3, đáp án dành cho Claude, bảng chấm và thứ tự phiên thử. Trạng thái thực nghiệm PREPARED. [Quy trình](../program/hosting-post-61/ab/PROTOCOL.md) |
 | POST-04 | DONE | 0/56 ô đạt giảm 30% về ký tự Unicode trong phép đo định mức. [Số đo và phương pháp](#post-04--đo-read_set) |
-| POST-05 | DONE | Đã đánh giá S1–S3 và vòng 1; số đo của phiên POST-61 chờ Claude. [Đánh giá](#post-05--đánh-giá-dừng-sớm) |
+| POST-05 | DONE | Đã đánh giá S1–S3 và vòng 1, đồng thời ghi số đo phiên POST-61 do Claude giám sát. [Đánh giá](#post-05--đánh-giá-dừng-sớm) · [Số đo phiên](#số-đo-phiên-post-61) |
 
 ## POST-04 — Đo READ_SET
 
@@ -82,6 +82,21 @@ Nguồn S1–S3 là trao đổi điều tra do Claude/chủ dự án cung cấp 
 
 Vòng 1 do Claude báo cáo gồm **10/10 phiên mới hoàn tất lượt đầu**, **0/10 dừng sớm**, cùng GPT-6.2 Sol mức Vừa, Code Mode + GitHub, trong khoảng 16:28–16:36 ICT. Nhiệm vụ chung VERIFY-61 chỉ đọc một SHA. Tóm tắt kết quả ghi thời lượng 44–129 giây, trung vị 66 giây, và 4/10 phiên gắn F4 CLOSED. Chấm độ đúng tách khỏi completion: một số phiên nêu F4 vẫn còn lỗi. Việc đọc lại trong POST-61 xác nhận off-by-one và preflight thiếu tại [index trước sửa](https://github.com/DuyKienTTD/Hosting/blob/d7b2cc9bb2e458e31d334b362bffc40eae329ed2/rules/GATE-B-INDEX.md#L11). Dữ liệu chi tiết phiên vẫn là số do Claude báo cáo, không có transcript/telemetry công khai trong Git.
 
-Hai nhóm khác loại việc, quyền ghi, cấu trúc yêu cầu, nguồn pin và điều kiện phiên. S1–S3 là ca được chọn để điều tra; vòng 1 dùng một tác vụ đọc lặp lại. Mẫu hiện tại chưa tách hiệu ứng phiên mới khỏi điều kiện công việc hay chứng minh nguyên nhân context/tool. Số nhắc, độ dài context và compaction theo từng lượt chưa đủ nguồn đối chiếu. POST-61 giữ số đo phiên hiện tại ở trạng thái chờ Claude cung cấp. [Đánh giá vận hành trước đây](https://github.com/DuyKienTTD/Hosting/blob/d7b2cc9bb2e458e31d334b362bffc40eae329ed2/reports/hosting-operational-reliability-validation-01.md) · [Đặc tả A/B](../program/hosting-post-61/ab/PROTOCOL.md).
+Hai nhóm khác loại việc, quyền ghi, cấu trúc yêu cầu, nguồn pin và điều kiện phiên. S1–S3 là ca được chọn để điều tra; vòng 1 dùng một tác vụ đọc lặp lại. Mẫu hiện tại chưa tách hiệu ứng phiên mới khỏi điều kiện công việc hay chứng minh nguyên nhân context/tool. Số nhắc, độ dài context và compaction chưa đủ dữ liệu để đối chiếu giữa các nhóm. [Đánh giá vận hành trước đây](https://github.com/DuyKienTTD/Hosting/blob/d7b2cc9bb2e458e31d334b362bffc40eae329ed2/reports/hosting-operational-reliability-validation-01.md) · [Đặc tả A/B](../program/hosting-post-61/ab/PROTOCOL.md).
 
-**Nghiệm thu:** A0 đọc báo cáo và delta nhánh POST-61. Điều phối thực hiện POST-01 sau khi chủ dự án merge #61. Claude chạy và chấm A/B ở các phiên riêng, bổ sung số đo phiên POST-61 khi có.
+### Số đo phiên POST-61
+
+Nguồn: Claude giám sát phiên HOSTING-POST-61 và cung cấp số đo cho Điều phối trong HOSTING-POST-61b ngày 25/11/2026. Các số liệu dưới đây là `REPORTED`.
+
+| Chỉ số | Quan sát của Claude |
+| --- | --- |
+| Work order | 2.238 ký tự. Hành động đầu tiên và tiêu chí hoàn thành nằm ở hai dòng đầu. |
+| Cách báo cáo | Không gửi ACK riêng. Báo cáo một lần ở cuối lượt. |
+| Thời điểm gửi | 16:59 ICT, 25/11/2026. |
+| Thực thi | Một lượt, 11 phút 45 giây. |
+| Dừng sớm và số lần nhắc | 0 lần dừng sớm, 0 lần nhắc. |
+| Lỗi công cụ | Không thấy lỗi công cụ. |
+
+So sánh số lượt dừng sớm do Claude báo cáo: POST-61 **0/1**, Điều phối cũ MKOE **3/6**, vòng thử 1 **0/10**. POST-61 mới có một lần chạy và các nhóm khác nhau về điều kiện, nên chưa đủ dữ liệu để kết luận nhân quả.
+
+**Nghiệm thu:** A0 đọc báo cáo và delta nhánh POST-61. Điều phối thực hiện POST-01 sau khi chủ dự án merge #61. Claude chạy và chấm A/B ở các phiên riêng.
