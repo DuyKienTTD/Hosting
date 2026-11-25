@@ -5,24 +5,30 @@ status: draft
 owner: Chat Dieu phoi
 task_id: HOSTING-POST-61
 lifecycle: DURABLE
-updated_at: 2026-11-25
-verified_at: 2026-11-25
+updated_at: 2026-11-26
+verified_at: 2026-11-26
 sensitivity: public-redacted
 ---
 # HOSTING-POST-61 — Báo cáo kết quả
 
 [Đặc tả pin](https://github.com/DuyKienTTD/Hosting/blob/cbb60147caed49467d76c71b84139e00b4fd3e61/tasks/hosting-post-61.md) · [Kế hoạch](../program/hosting-post-61/README.md) · [Trạng thái chuẩn](../program/hosting-post-61/WORK_ITEMS.md)
 
-PR #61 mở dạng nháp tại lần đọc đầu, nhánh `coordinator/hosting-mkoe-01` → `main`, HEAD `d7b2cc9bb2e458e31d334b362bffc40eae329ed2`. FIX-F4 đưa HEAD lên `c0720d7d81d6956f2c7bcf7a65cc3a2d218a9bcb`. GitHub Actions **Data integrity** tại HEAD sau sửa báo success. PR chưa merge ở lần kiểm trạng thái gần nhất dùng để lập báo cáo. [PR #61](https://github.com/DuyKienTTD/Hosting/pull/61) · [CI của HEAD sau sửa](https://github.com/DuyKienTTD/Hosting/actions/runs/45590897631).
+PR #61 mở dạng nháp tại lần đọc đầu, nhánh `coordinator/hosting-mkoe-01` → `main`, HEAD `d7b2cc9bb2e458e31d334b362bffc40eae329ed2`. FIX-F4 đưa HEAD lên `c0720d7d81d6956f2c7bcf7a65cc3a2d218a9bcb`. GitHub Actions **Data integrity** tại HEAD sau sửa báo success. PR #61 đã merge vào `main`. Xem bằng chứng POST-01 bên dưới. [PR #61](https://github.com/DuyKienTTD/Hosting/pull/61) · [CI của HEAD sau sửa](https://github.com/DuyKienTTD/Hosting/actions/runs/45590897631).
 
 | Mục | Trạng thái | Kết quả và nguồn |
 | --- | --- | --- |
 | FIX-F4 | DONE | Dòng 11 thêm preflight L57–L59 và sửa endpoint H5/H6 từ 719 thành 718. Nguồn pin vẫn có 718 dòng và giữ cùng blob. [Chỉ mục](https://github.com/DuyKienTTD/Hosting/blob/c0720d7d81d6956f2c7bcf7a65cc3a2d218a9bcb/rules/GATE-B-INDEX.md#L11) · [Nguồn L57–L59](https://github.com/DuyKienTTD/Hosting/blob/097c080cc6d7fb3ca36b1849d9c10375d5cbd67f/tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md#L57-L59) |
-| POST-01 | BLOCKED | Chủ dự án chưa merge #61. Đã đọc [main hiện tại](https://github.com/DuyKienTTD/Hosting/commit/097c080cc6d7fb3ca36b1849d9c10375d5cbd67f) và [workflow](https://github.com/DuyKienTTD/Hosting/blob/097c080cc6d7fb3ca36b1849d9c10375d5cbd67f/.github/workflows/data-integrity.yml). Sau merge, Điều phối lấy merge SHA, parents, tree và CI event push đúng main. |
+| POST-01 | DONE | PR #61 đã tích hợp vào `main`. [Merge commit](https://github.com/DuyKienTTD/Hosting/commit/f9dcdb5299489099add2d7d5e0263e0b81f4d12c) · [CI main](https://github.com/DuyKienTTD/Hosting/actions/runs/45677702167) · [Bằng chứng POST-01](#post-01--tích-hợp-main-và-ci) |
 | POST-02 | DONE | Kiểm tám CV theo nguồn có tên vai trò và mức xác minh. Khoảng trống giữ UNKNOWN. [Danh bạ tám CV](../agents/CAPABILITIES.md) |
 | POST-03 | DONE (đã chạy) | Hoàn thành 12 phiên A/B T1–T3. [Bảng chấm](../program/hosting-post-61/ab/SCORECARD.md) · [Tổng hợp A/B](#post-03--tổng-hợp-ab-read_set) |
 | POST-04 | DONE | 0/56 ô đạt giảm 30% về ký tự Unicode trong phép đo định mức. [Số đo và phương pháp](#post-04--đo-read_set) |
 | POST-05 | DONE | Đã đánh giá S1–S3 và vòng 1, đồng thời ghi số đo phiên POST-61 do Claude giám sát. [Đánh giá](#post-05--đánh-giá-dừng-sớm) · [Số đo phiên](#số-đo-phiên-post-61) |
+
+## POST-01 — Tích hợp main và CI
+
+- Merge commit của [PR #61](https://github.com/DuyKienTTD/Hosting/pull/61) và HEAD `main` tại lần đọc lại GitHub là [`f9dcdb5299489099add2d7d5e0263e0b81f4d12c`](https://github.com/DuyKienTTD/Hosting/commit/f9dcdb5299489099add2d7d5e0263e0b81f4d12c).
+- Hai parent theo thứ tự là [`097c080cc6d7fb3ca36b1849d9c10375d5cbd67f`](https://github.com/DuyKienTTD/Hosting/commit/097c080cc6d7fb3ca36b1849d9c10375d5cbd67f) (main cũ) và [`c0720d7d81d6956f2c7bcf7a65cc3a2d218a9bcb`](https://github.com/DuyKienTTD/Hosting/commit/c0720d7d81d6956f2c7bcf7a65cc3a2d218a9bcb) (candidate). Tree sau merge `2e604002dd1f5bc7c4e0ac51eb54306821a677f2` khớp candidate đã nghiệm thu. [Biên nhận nghiệm thu độc lập](https://github.com/DuyKienTTD/Hosting/pull/61#issuecomment-7171088669).
+- GitHub Actions **Data integrity** trên `main`, event `push`, run [`45677702167`](https://github.com/DuyKienTTD/Hosting/actions/runs/45677702167) thành công. Claude đọc trực tiếp trên GitHub lúc 01:43 ICT ngày 26/11/2026. Phiên Điều phối POST-01 đọc lại job `integrity` và xác nhận kết quả `success`.
 
 ## POST-03 — Tổng hợp A/B READ_SET
 
@@ -117,4 +123,4 @@ Nguồn: Claude giám sát phiên HOSTING-POST-61 và cung cấp số đo cho Đ
 
 So sánh số lượt dừng sớm do Claude báo cáo: POST-61 **0/1**, Điều phối cũ MKOE **3/6**, vòng thử 1 **0/10**. POST-61 mới có một lần chạy và các nhóm khác nhau về điều kiện, nên chưa đủ dữ liệu để kết luận nhân quả.
 
-**Nghiệm thu:** A0 đọc báo cáo và delta nhánh POST-61. Điều phối thực hiện POST-01 sau khi chủ dự án merge #61. Claude đã chạy và chấm A/B ở các phiên riêng, A0 đã hiệu chỉnh điểm. [Bảng chấm](../program/hosting-post-61/ab/SCORECARD.md).
+**Nghiệm thu:** A0 đọc báo cáo và delta nhánh POST-61. Điều phối đã xác minh tích hợp main và CI ở POST-01. Claude đã chạy và chấm A/B ở các phiên riêng, A0 đã hiệu chỉnh điểm. [Bảng chấm](../program/hosting-post-61/ab/SCORECARD.md).
