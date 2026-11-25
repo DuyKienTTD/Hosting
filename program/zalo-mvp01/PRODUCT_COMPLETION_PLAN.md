@@ -247,6 +247,8 @@ Cost controls at implementation: per-request input/output caps; retrieval top-k 
 
 ## 10. Immediate next actions
 
+[ZPC-01/02 decision packages and dependencies for ZPC-08/09](zpc-01-02/README.md).
+
 1. **Coordinator:** prepare the Zalo inquiry for the project owner to send and the provider comparison for A0, using public documentation and zero API calls.
 2. **A2 / A1 / Work:** carry forward the offline items in the 26/11/2026 status within their work orders. Work remains the sole app source writer.
 3. **A0:** decide separately on any Windows runner access, live Zalo integration, provider calls or spend, pilot and production after the applicable evidence and gates.
