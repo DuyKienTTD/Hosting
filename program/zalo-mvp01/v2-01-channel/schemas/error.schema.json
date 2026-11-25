@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Channel error",
+  "type": "object",
+  "properties": {
+    "code": {
+      "enum": [
+        "rate_limited",
+        "auth",
+        "not_supported",
+        "unknown_delivery",
+        "invalid_input",
+        "policy_denied",
+        "temporary_failure"
+      ]
+    },
+    "retryAfterSeconds": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "code"
+  ],
+  "additionalProperties": false
+}
