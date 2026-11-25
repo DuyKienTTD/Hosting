@@ -17,9 +17,11 @@ sensitivity: public
 **Implementation owner:** ChatGPT Work (single app source writer for the offline scope on `dev/ttd-zalo-product-01`)\
 **Independent review:** Codex Windows runtime; A1 security/test design; A2 customer/knowledge UX data (each only after task-specific ACK and authority)\
 **Plan baseline:** main `097c080cc6d7fb3ca36b1849d9c10375d5cbd67f`; accepted offline product `dev/ttd-zalo-mvp01` candidate `d49d795aca2550cb143957141aaf60ed304b28e0`, tree `81b4c0b86a1e9b67da6eddb47a52c9c8c5e167d1`; current report-only update `52b7c5ccac572b170925d28c44c5613c1e73a849`.\
-**Plan state:** Active offline execution.
+**Plan state:** Kế hoạch MVP-01 và checkpoint offline. Định hướng sản phẩm hiện hành theo quyết định V2 bên dưới.
 
 ## Trạng thái 26/11/2026
+
+A0 đã ban hành [ZALO-PRODUCT-DIRECTION-02](../../decisions/ZALO-PRODUCT-DIRECTION-02.md). [Roadmap V2](PRODUCT_V2_ROADMAP.md) điều khiển các outcome tích hợp và vận hành tiếp theo. Các mục kiến trúc, quyền và gate bên dưới ghi lại phạm vi MVP-01 theo quyết định cũ.
 
 Checkpoint theo báo cáo Điều phối: các phiên chế độ Công việc bị chặn bởi thông báo hết lượt sử dụng đến 29/11/2026 04:06 ICT. IN_PROGRESS chỉ biểu thị việc đang hoàn thiện, không xác nhận phiên đang chạy hoặc outcome đã hoàn thành.
 
@@ -31,12 +33,12 @@ Checkpoint theo báo cáo Điều phối: các phiên chế độ Công việc b
 | ZPC-04 | IN_PROGRESS | Làm lại ở chế độ Trò chuyện; chưa có kết quả trên GitHub tại checkpoint. |
 | ZPC-06 / ZPC-07 / ZPC-08-seam / ZPC-10-offline | BLOCKED_USAGE_UNTIL_2026-11-29 | TTD-ZALO-P1-OFFLINE chưa có commit trên `dev/ttd-zalo-product-01`; chờ hạn mức. ZPC-08-seam chỉ là giao diện adapter và mock, ZPC-10-offline dùng luồng mô phỏng. |
 | ZPC-05 | BLOCKED | Cần Windows runner và quyền chạy mới cho kiểm tra startup. |
-| ZPC-09 | BLOCKED | Cần văn bản cho phép của Zalo và phạm vi tích hợp được duyệt. |
+| ZPC-09 | CHUYỂN HƯỚNG → V2-01 | Theo dõi Subiz API/webhook, Zalo Bot cho nhóm và phương án dự phòng tại [V2-01](PRODUCT_V2_ROADMAP.md). |
 | ZPC-11 | BLOCKED | Cần bản tích hợp, Windows runner, phê duyệt chạy QA và các điều kiện kết nối Zalo, paid API. |
 | ZPC-12 | BLOCKED | Cần nghiệm thu QA và phê duyệt pilot riêng. |
 | ZPC-13 | BLOCKED | Cần nghiệm thu pilot và quyết định production riêng. |
 
-Chỉ dùng dữ liệu tổng hợp. Cấm production, paid API, gọi nhà cung cấp AI thật, tài khoản Zalo thật, gửi tin thật và dữ liệu khách thật. Dùng lại kết quả đã nghiệm thu của M0–M5, POC-01/02 và OpenClaw.
+Phạm vi offline tại checkpoint chỉ dùng dữ liệu tổng hợp. Dùng lại kết quả đã nghiệm thu của M0–M5, POC-01/02 và OpenClaw.
 
 [Theo dõi lỗi vận hành Agent](../../reports/agent-operational-issues.md)
 
