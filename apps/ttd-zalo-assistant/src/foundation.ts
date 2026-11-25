@@ -5,15 +5,15 @@ import { Knowledge, localDate, migrateKnowledge, type Source } from "./knowledge
 import { FakeProvider, asksReference, extractSkus, questionDate, validatedDraft, type AIAdapter, type MemoryEvidence } from "./ai.js";
 import { messageIdentity, migrateCustomer, validField, type FieldKind } from "./customer.js";
 
+import { effectivePolicy, transaction, type Consent, type Policy, type PolicyRow } from "./policy-core.js";
+export type { Consent, Policy } from "./policy-core.js";
+
 export const accountId = "synthetic-ttd";
 export const customers = [
   { id: "customer-a", thread: "dm-a", name: "Nguyễn Minh" },
   { id: "customer-b", thread: "dm-b", name: "Nguyễn Minh" },
 ] as const;
 export type Target = (typeof customers)[number]["id"];
-export type Consent = { retain: boolean; respond: boolean; send: boolean };
-export type Policy = Consent & { revision: number; expires: number; takeover: boolean };
-type Row = { revision: number; expires: number; retain: number; respond: number; send: number; takeover: number };
 type Approval = { intent?: string; id: string; target: Target; digest: string; revision: number; epoch: number; expires: number; generation: number };
 
 type DraftOrigin = { target: Target; question: string; revision: number; epoch: number };
@@ -79,15 +79,7 @@ export class Foundation {
   }
 
   private transaction<T>(fn: () => T): T {
-    this.db.exec("BEGIN IMMEDIATE");
-    try {
-      const result = fn();
-      this.db.exec("COMMIT");
-      return result;
-    } catch (error) {
-      this.db.exec("ROLLBACK");
-      throw error;
-    }
+    return transaction(this.db, fn);
   }
 
   close() { this.approvals.clear(); this.origins.clear(); this.refused.clear(); this.db.close(); }
@@ -98,17 +90,12 @@ export class Foundation {
 
   private row(target: Target) {
     if (!validTarget(target)) throw new Error("INVALID_TARGET");
-    return this.db.prepare("SELECT * FROM consent WHERE target=?").get(target) as Row | undefined;
+    return this.db.prepare("SELECT * FROM consent WHERE target=?").get(target) as PolicyRow | undefined;
   }
 
   policy(target: Target, now = Date.now()): Policy {
     const row = this.row(target);
-    const active = Boolean(row && row.expires > now && !row.takeover && !this.state().stopped);
-    return {
-      retain: active && row?.retain === 1, respond: active && row?.respond === 1,
-      send: active && row?.send === 1, takeover: row?.takeover === 1,
-      expires: row?.expires ?? 0, revision: row?.revision ?? 0,
-    };
+    return effectivePolicy(row, Boolean(this.state().stopped), now);
   }
 
   status() {
