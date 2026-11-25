@@ -20,9 +20,27 @@ PR #61 mở dạng nháp tại lần đọc đầu, nhánh `coordinator/hosting-
 | FIX-F4 | DONE | Dòng 11 thêm preflight L57–L59 và sửa endpoint H5/H6 từ 719 thành 718. Nguồn pin vẫn có 718 dòng và giữ cùng blob. [Chỉ mục](https://github.com/DuyKienTTD/Hosting/blob/c0720d7d81d6956f2c7bcf7a65cc3a2d218a9bcb/rules/GATE-B-INDEX.md#L11) · [Nguồn L57–L59](https://github.com/DuyKienTTD/Hosting/blob/097c080cc6d7fb3ca36b1849d9c10375d5cbd67f/tasks/2026-11-21-hermes-gate-b-one-shot-paid-e2e.md#L57-L59) |
 | POST-01 | BLOCKED | Chủ dự án chưa merge #61. Đã đọc [main hiện tại](https://github.com/DuyKienTTD/Hosting/commit/097c080cc6d7fb3ca36b1849d9c10375d5cbd67f) và [workflow](https://github.com/DuyKienTTD/Hosting/blob/097c080cc6d7fb3ca36b1849d9c10375d5cbd67f/.github/workflows/data-integrity.yml). Sau merge, Điều phối lấy merge SHA, parents, tree và CI event push đúng main. |
 | POST-02 | DONE | Kiểm tám CV theo nguồn có tên vai trò và mức xác minh. Khoảng trống giữ UNKNOWN. [Danh bạ tám CV](../agents/CAPABILITIES.md) |
-| POST-03 | DONE | Bộ T1–T3, đáp án dành cho Claude, bảng chấm và thứ tự phiên thử. Trạng thái thực nghiệm PREPARED. [Quy trình](../program/hosting-post-61/ab/PROTOCOL.md) |
+| POST-03 | DONE (đã chạy) | Hoàn thành 12 phiên A/B T1–T3. [Bảng chấm](../program/hosting-post-61/ab/SCORECARD.md) · [Tổng hợp A/B](#post-03--tổng-hợp-ab-read_set) |
 | POST-04 | DONE | 0/56 ô đạt giảm 30% về ký tự Unicode trong phép đo định mức. [Số đo và phương pháp](#post-04--đo-read_set) |
 | POST-05 | DONE | Đã đánh giá S1–S3 và vòng 1, đồng thời ghi số đo phiên POST-61 do Claude giám sát. [Đánh giá](#post-05--đánh-giá-dừng-sớm) · [Số đo phiên](#số-đo-phiên-post-61) |
+
+## POST-03 — Tổng hợp A/B READ_SET
+
+Claude chạy và chấm 12 phiên ngày 25/11/2026, A0 hiệu chỉnh điểm. Mỗi điều kiện có sáu phiên trên ba đề T1–T3. [Cấu hình, refs và số liệu từng phiên](../program/hosting-post-61/ab/SCORECARD.md).
+
+| Chỉ số | A | B | Kết quả đối chiếu |
+| --- | --- | --- | --- |
+| Hoàn thành lượt đầu | 6/6 | 6/6 | 12/12 |
+| Dừng sớm | 0/6 | 0/6 | 0/12 |
+| Số lần nhắc | 0 | 0 | 0 |
+| Lỗi bắt buộc | 0/6 | 0/6 | 0/12 |
+| Tổng thời gian đến final đầu tiên | 199 giây | 242 giây | B lâu hơn 21,6% |
+| Tổng số tệp các phiên nêu đã mở | 33 | 80 | B cao hơn 142,4% |
+| Tổng điểm | 21/24 | 24/24 | B cao hơn 3 điểm |
+
+Trong mẫu này, chưa thấy chất lượng giảm ở B. Ở cả hai cặp T2, B đạt 4/4 theo quy tắc B2 về kiểm ACK, còn A đạt 3/4 do thiếu thời điểm và nguồn của R1. Kết quả T2 cho thấy B2 giúp kiểm ACK đầy đủ hơn trong các phiên thử. Với MKOE hiện tại, các phiên B nêu đã mở nhiều tệp hơn và mất nhiều thời gian hơn. Đề xuất READSET-OPT-01 nhắm vào phần tài liệu phải đọc. [PR #63](https://github.com/DuyKienTTD/Hosting/pull/63).
+
+Số tệp do phiên tự báo. Bản tổng hợp A0 chuyển giao ghi A 31, B 80 (+158%), trong khi cộng sáu dòng A trong SCORECARD ra 33 (6 + 4 + 7 + 6 + 4 + 6). Bảng trên dùng tổng từ các dòng phiên. Chưa đo ký tự hoặc byte thực tế, nên mức giảm 30% về lượng đọc duy nhất chưa xác minh được. Mẫu nhỏ và chưa tách riêng tác động của B4.
 
 ## POST-04 — Đo READ_SET
 
@@ -68,7 +86,7 @@ Với C1–C6, before luôn đọc hết [Workflow nguyên khối](https://githu
 | Hostinger Agent | 8.073 → 8.444 | 23.019 → 18.478 | 27.466 → 28.782 | 27.397 → 24.285 | 27.466 → 28.782 | 44.246 → 48.118 | 36.578 → 33.466 |
 | Work | 8.334 → 7.988 | 23.280 → 18.022 | 27.727 → 28.326 | 27.658 → 23.829 | 27.727 → 28.326 | 44.507 → 47.662 | 36.839 → 33.010 |
 
-Tỷ lệ = (trước − sau) / trước. Giảm nhiều nhất 19,9% (A2, C1). C2 và C4 tăng cho cả tám vai trò; C5 tăng đến 8,7%. Mốc 30% chưa đạt trong điều kiện đo. Khả năng đọc theo module giúp giảm ở ca review hẹp; các ca đòi gần trọn Workflow tăng độ dài do index/module và metadata. Đánh giá không làm suy giảm chất lượng có dữ liệu độc lập khi Claude hoàn thành [A/B](../program/hosting-post-61/ab/PROTOCOL.md).
+Tỷ lệ = (trước − sau) / trước. Giảm nhiều nhất 19,9% (A2, C1). C2 và C4 tăng cho cả tám vai trò; C5 tăng đến 8,7%. Mốc 30% chưa đạt trong điều kiện đo. Khả năng đọc theo module giúp giảm ở ca review hẹp; các ca đòi gần trọn Workflow tăng độ dài do index/module và metadata. Chất lượng đầu ra được đánh giá riêng trong [kết quả A/B](#post-03--tổng-hợp-ab-read_set).
 
 ## POST-05 — Đánh giá dừng sớm
 
@@ -99,4 +117,4 @@ Nguồn: Claude giám sát phiên HOSTING-POST-61 và cung cấp số đo cho Đ
 
 So sánh số lượt dừng sớm do Claude báo cáo: POST-61 **0/1**, Điều phối cũ MKOE **3/6**, vòng thử 1 **0/10**. POST-61 mới có một lần chạy và các nhóm khác nhau về điều kiện, nên chưa đủ dữ liệu để kết luận nhân quả.
 
-**Nghiệm thu:** A0 đọc báo cáo và delta nhánh POST-61. Điều phối thực hiện POST-01 sau khi chủ dự án merge #61. Claude chạy và chấm A/B ở các phiên riêng.
+**Nghiệm thu:** A0 đọc báo cáo và delta nhánh POST-61. Điều phối thực hiện POST-01 sau khi chủ dự án merge #61. Claude đã chạy và chấm A/B ở các phiên riêng, A0 đã hiệu chỉnh điểm. [Bảng chấm](../program/hosting-post-61/ab/SCORECARD.md).
