@@ -2,12 +2,20 @@
   "name": "ttd-zalo-agent-server",
   "private": true,
   "type": "module",
-  "engines": {"node": ">=24 <25"},
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "node --test test/*.test.mjs",
     "start": "node --env-file-if-exists=.env dist/ttd-zalo-agent-server/src/main.js"
   },
-  "devDependencies": {"typescript": "5.9.3", "@types/node": "24.10.0"}
+  "devDependencies": {
+    "@types/node": "24.10.0",
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "playwright": "1.60.0"
+  }
 }

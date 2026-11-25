@@ -2,15 +2,18 @@ import { createServer } from "node:http";
 import { chmodSync, readFileSync, renameSync, existsSync } from "node:fs";
 import { backup } from "node:sqlite";
 import { defaults, day } from "./config.js";
-import { MockChannel, SubizAdapter } from "./channel.js";
+import { MockChannel } from "./channel.js";
 import { ClaudeProvider, FakeProvider, isAgent } from "./provider.js";
 import { Runtime, type Schedule } from "./runtime.js";
 import { operator } from "./operator.js";
 import { Store } from "./store.js";
+import { readRoutes, setupChannels, webhookHandler } from "./adapters/setup.js";
+import { smoke } from "./adapters/smoke.js";
 
 process.umask(0o077);
 const command = process.argv[2] ?? "serve";
 const mode = process.env.CHANNEL_MODE ?? "mock";
+const smokeOnly = process.env.CHANNEL_SMOKE_ONLY === "1";
 const path = process.env.DB_PATH ?? "./runtime.sqlite";
 const key = process.env.IDENTITY_KEY || (mode === "mock" && !process.env.ANTHROPIC_API_KEY ? "offline-fixture" : "");
 const config = structuredClone(defaults);
@@ -28,6 +31,21 @@ const store = new Store(path, key);
 if (path !== ":memory:") chmodSync(path, 0o600);
 const input = () => JSON.parse(readFileSync(0, "utf8"));
 const commands: Record<string, () => unknown> = {
+  smoke: async () => {
+    if (mode !== "subiz" || !smokeOnly || process.env.CLAUDE_ENABLED === "1") {
+      console.log(JSON.stringify({ status: "FAIL", step: "smoke_mode_required" }));
+      process.exitCode = 1;
+      return;
+    }
+    let outcome;
+    try {
+      const routes = readRoutes();
+      const active = await setupChannels(store, routes, true);
+      outcome = await smoke(store, config, routes, active, process.env.SUBIZ_SMOKE_CONTACT, process.env.SUBIZ_SMOKE_NONCE);
+    } catch { outcome = { status: "FAIL", step: "configuration_or_transport" }; }
+    console.log(JSON.stringify(outcome));
+    if (outcome.status !== "PASS") process.exitCode = 1;
+  },
   stop: () => {
     const agent = process.argv[3] ?? "global";
     if (agent !== "global" && !isAgent(agent)) throw Error("INVALID_AGENT");
@@ -60,11 +78,12 @@ if (command !== "serve") {
   try { await commands[command](); }
   finally { store.db.close(); }
 } else {
-  const channel = mode === "mock" ? new MockChannel() : new SubizAdapter();
-  // The Subiz scaffold cannot enter live operation. Exercising real Claude requires explicit opt-in.
+  const active = mode === "subiz" ? await setupChannels(store, readRoutes(), smokeOnly) : undefined;
+  if (active && !smokeOnly && !(await active.subiz.authenticate()).ok) throw Error("SUBIZ_AUTH_FAILED");
+  const channel = active?.channel ?? new MockChannel();
   const claudeKey = process.env.ANTHROPIC_API_KEY;
   const enableClaude = process.env.CLAUDE_ENABLED === "1";
-  if (enableClaude && (!claudeKey || process.env.CLAUDE_CREDIT_CONFIRMED !== "1" || mode !== "mock")) {
+  if (enableClaude && (!claudeKey || process.env.CLAUDE_CREDIT_CONFIRMED !== "1" || smokeOnly)) {
     throw Error("CLAUDE_CREDIT_CONFIGURATION_REQUIRED");
   }
   const provider = enableClaude && claudeKey ? new ClaudeProvider(claudeKey, config.budget) : new FakeProvider();
@@ -74,30 +93,41 @@ if (command !== "serve") {
     typeof task.target !== "string" || !Number.isSafeInteger(task.at) ||
     !(task.agent === "campaign" ? task.kind === "advertising" : task.agent === "community" &&
       ["group_post", "group_create", "group_moderate"].includes(task.kind)) ||
+    (active && task.kind === "group_create" && (!Array.isArray(task.memberIds) || !task.memberIds.length ||
+      !task.memberIds.every(member => typeof member === "string" && /^[A-Za-z0-9_-]{1,180}$/.test(member)))) ||
     (task.kind === "group_moderate" ? typeof task.message !== "string" :
       typeof task.text !== "string" || !task.text.trim() || task.text.length > config.scheduling.maxText)) ||
     new Set(schedule.map(task => task.key)).size !== schedule.length) throw Error("INVALID_SCHEDULE");
   const runtime = new Runtime(store, channel, provider, config, Date.now, schedule);
+  const hooks = active && webhookHandler(active.subiz, active.bot, smokeOnly ? undefined : event => {
+    // The signed inbound event is already durable. Apply opt-out without waiting for the next poll.
+    runtime.ingest(event);
+  });
   let lastTick = Date.now();
-  const interval = setInterval(() => {
-    void runtime.readChannel().catch(() => runtime.guard.failure());
-    void runtime.tick(false).then(done => { if (done) lastTick = Date.now(); }, () => {
+  const interval = smokeOnly ? undefined : setInterval(() => {
+    void Promise.resolve().then(() => { active?.journal.prune(); return runtime.tick(); }).then(done => { if (done) lastTick = Date.now(); }, () => {
       store.notice("runtime-error", Date.now(), "Một chu kỳ xử lý không hoàn tất.");
     });
   }, config.scheduling.pollMs);
+  const pruneSmoke = smokeOnly && active ? setInterval(() => active.journal.prune(), config.scheduling.pollMs) : undefined;
   const operatorPassword = process.env.OPERATOR_PASSWORD;
   if (operatorPassword && (operatorPassword.length < 24 || operatorPassword.includes(":"))) throw Error("INVALID_OPERATOR_PASSWORD");
   const operatorHandler = operator(store, operatorPassword);
   const server = createServer((req, res) => {
+    void handle(req, res).catch(() => { if (!res.headersSent) res.writeHead(503); res.end(); });
+  });
+  const handle = async (req: import("node:http").IncomingMessage, res: import("node:http").ServerResponse) => {
+    if (hooks && await hooks(req, res)) return;
     if (req.url !== "/health" || req.method !== "GET") {
       void operatorHandler(req, res).catch(() => { if (!res.headersSent) res.writeHead(500); res.end(); });
       return;
     }
-    const okay = Date.now() - lastTick < 4 * config.scheduling.pollMs;
+    const okay = smokeOnly || Date.now() - lastTick < 4 * config.scheduling.pollMs;
     res.writeHead(okay ? 200 : 503, { "content-type": "application/json" }).end(JSON.stringify({
-      ready: okay, channel: mode === "mock" ? "mock" : "not_supported", stopped: store.stopped("global"),
+      ready: okay, channel: mode, smokeOnly, stopped: store.stopped("global"),
     }));
-  }).listen(8080, process.env.HTTP_BIND === "container" ? "0.0.0.0" : "127.0.0.1");
+  };
+  server.listen(8080, process.env.HTTP_BIND === "container" ? "0.0.0.0" : "127.0.0.1");
   let backingUp = false;
   const backupDir = process.env.BACKUP_DIR;
   const dailyBackup = async () => {
@@ -118,6 +148,7 @@ if (command !== "serve") {
   }
   process.once("SIGTERM", () => {
     clearInterval(interval);
+    clearInterval(pruneSmoke);
     server.close(() => process.exit(0));
   });
 }
