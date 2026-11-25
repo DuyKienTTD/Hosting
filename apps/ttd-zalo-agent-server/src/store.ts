@@ -102,6 +102,9 @@ export class Store {
       this.db.prepare("DELETE FROM customer_field WHERE target=?").run(target);
       this.db.prepare("DELETE FROM jobs WHERE target=?").run(target);
       this.db.prepare("UPDATE inbound SET received=0 WHERE target=?").run(target);
+      if (this.db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='adapter_inbox'").get()) {
+        this.db.prepare("DELETE FROM adapter_inbox WHERE sender=?").run(target);
+      }
     });
   }
 }

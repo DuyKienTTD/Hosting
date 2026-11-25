@@ -16,7 +16,7 @@ const choices = {
 const deferredSend = ["hours", "ad_limit", "budget_held"];
 type ScheduleKind = "advertising" | "group_post" | "group_create" | "group_moderate";
 export type Schedule = { key: string; agent: "campaign" | "community"; kind: ScheduleKind; at: number;
-  target: string; text?: string; message?: string; campaign?: "offer" | "check-in" | "new-product" };
+  target: string; text?: string; message?: string; memberIds?: string[]; campaign?: "offer" | "check-in" | "new-product" };
 function sanitized(text: string) {
   return text.replace(/(?:\+?\d[\d.() -]{7,}\d)/gu, "[số đã ẩn]")
     .replace(/[\w.+-]+@[\w.-]+\.[a-z]+/giu, "[email đã ẩn]").replace(/https?:\/\/\S+/giu, "[link đã ẩn]");
@@ -117,7 +117,7 @@ export class Runtime {
       return policy.respond && revision === policy.revision && epoch === store.setting("epoch");
     };
     const send = (agent: Agent, kind: Kind, text?: string) =>
-      this.guard.dispatch({ id, agent, kind, text, target: event.contact, revision, epoch, origin: id });
+      this.guard.dispatch({ id, agent, kind, text, target: event.contact, revision, epoch, origin: id, thread: event.kind === "dm" ? event.thread : undefined });
     if (event.at < now - this.config.scheduling.maxInboundAgeMs || !allowed.some(valid)) return true;
     const contact = store.contact(target);
     const inbound = event.kind === "dm";
@@ -251,23 +251,26 @@ export class Runtime {
     }
   }
   async readChannel() {
-    if (this.reading) return;
+    if (this.reading) return false;
     this.reading = true;
     try {
       const now = this.clock();
       const req = { key: String(now), target: "channel" };
       const reads = await Promise.allSettled([this.channel.receiveMessage(req), this.channel.onFriendAccepted(req)]);
-      for (const read of reads) {
-        if (read.status !== "fulfilled" || !read.value.ok) { this.guard.failure(); continue; }
+      let okay = true;
+      for (const [index, read] of reads.entries()) {
+        if (read.status !== "fulfilled" || !read.value.ok) { this.guard.failure(); okay = false; continue; }
         for (const event of read.value.value) this.ingest(event);
+        this.channel.acknowledge?.(index === 0 ? "message" : "friend");
       }
+      return okay;
     } finally { this.reading = false; }
   }
   async tick(read = true) {
     if (this.busy) return false;
     this.busy = true;
     try {
-      if (read) await this.readChannel();
+      if (read && !await this.readChannel()) return false;
       const now = this.clock();
       for (const [id, payload] of [...this.pending].slice(0, this.config.scheduling.maxJobsPerTick)) {
         if (!this.pending.has(id)) continue;

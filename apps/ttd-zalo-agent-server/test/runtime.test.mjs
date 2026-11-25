@@ -4,7 +4,7 @@ import { readFile, mkdtemp, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { defaults, day, minute, light, strong } from "../dist/ttd-zalo-agent-server/src/config.js";
-import { MockChannel, SubizAdapter } from "../dist/ttd-zalo-agent-server/src/channel.js";
+import { MockChannel, UnsupportedChannel } from "../dist/ttd-zalo-agent-server/src/channel.js";
 import { Guard } from "../dist/ttd-zalo-agent-server/src/guard.js";
 import { Store } from "../dist/ttd-zalo-agent-server/src/store.js";
 import { Budget } from "../dist/ttd-zalo-agent-server/src/budget.js";
@@ -153,11 +153,11 @@ test("same intent starts once, unknown delivery never retries after reopening SQ
   assert.equal(f.channel.sent.size, 1);
 });
 
-test("group commands require trusted operator schedule; Subiz shell has no live behavior", async t => {
+test("group commands require trusted operator schedule; unconfigured channel has no live behavior", async t => {
   const f = fixture(t);
   assert.equal(await f.guard.dispatch(f.draft("g", "group", "group_create", "community")), "group_denied");
-  const subiz = new SubizAdapter();
-  for (const key of Object.keys(subiz)) assert.deepEqual(await subiz[key]({ key, target: "fixture" }),
+  const unconfigured = new UnsupportedChannel();
+  for (const key of Object.keys(unconfigured)) assert.deepEqual(await unconfigured[key]({ key, target: "fixture" }),
     { ok: false, error: "not_supported" });
   const mock = f.channel;
   await mock.createGroup({ key: "group-create", target: "group" });

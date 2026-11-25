@@ -9,7 +9,11 @@ RUN npm run build
 
 FROM node:24-bookworm-slim
 WORKDIR /app
-COPY apps/ttd-zalo-agent-server/package.json ./
+COPY apps/ttd-zalo-agent-server/package*.json ./
+RUN npm ci --omit=dev --no-audit --no-fund
+ARG INSTALL_UI_BROWSER=0
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright
+RUN if [ "$INSTALL_UI_BROWSER" = 1 ]; then npx playwright install --with-deps chromium && rm -rf /var/lib/apt/lists/*; fi
 RUN mkdir /data /backups && chown node:node /data /backups
 COPY --from=build /workspace/ttd-zalo-agent-server/dist ./dist
 USER node

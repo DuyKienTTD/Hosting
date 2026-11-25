@@ -7,7 +7,7 @@ import { Store } from "./store.js";
 export type Kind = "reply" | "advertising" | "invite" | "group_post" | "group_create" | "group_moderate";
 export type Proposal = {
   agent: Agent; kind: Kind; id: string; target: string; text?: string; message?: string;
-  revision: number; epoch: number; groupApproved?: boolean; origin?: string;
+  revision: number; epoch: number; groupApproved?: boolean; origin?: string; thread?: string; memberIds?: string[];
 };
 export class Guard {
   constructor(private store: Store, private channel: ChannelAdapter, private config: Config,
@@ -97,7 +97,7 @@ export class Guard {
       }
       db.prepare("UPDATE outbound SET at=?,state='started' WHERE id=?").run(now, key);
       if (p.kind === "invite" && !this.store.setting("firstInvite")) this.store.set("firstInvite", now);
-      const request: Request = { key, target: p.target, message: p.message,
+      const request: Request = { key, target: p.target, message: p.message, thread: p.thread, memberIds: p.memberIds,
         text: p.kind === "advertising" ? `${p.text}\n\n${this.config.advertising.footer}` : p.text };
       const methods = {
         reply: "sendMessage", advertising: "sendMessage", invite: "sendFriendRequest",

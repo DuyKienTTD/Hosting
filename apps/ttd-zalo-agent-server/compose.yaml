@@ -3,6 +3,8 @@ services:
     build:
       context: ../..
       dockerfile: apps/ttd-zalo-agent-server/Dockerfile
+      args:
+        INSTALL_UI_BROWSER: ${INSTALL_UI_BROWSER:-0}
     env_file: .env
     environment:
       HTTP_BIND: container

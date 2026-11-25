@@ -1,10 +1,12 @@
-export type ChannelError = "rate_limited" | "auth" | "not_supported" | "unknown_delivery";
+export type { ChannelErrorCode as ChannelError } from "./adapters/contract.js";
+import type { ChannelErrorCode as ChannelError } from "./adapters/contract.js";
 export type Result<T = void> = { ok: true; value: T } | { ok: false; error: ChannelError };
-export type Request = { key: string; target: string; text?: string; message?: string };
+export type Request = { key: string; target: string; text?: string; message?: string; thread?: string; memberIds?: string[] };
 export type Contact = { id: string; friend: boolean };
 export type Event = { id: string; contact: string; thread: string; at: number } & (
   { kind: "dm" | "group"; text: string } | { kind: "accepted" | "spam" });
 export interface ChannelAdapter {
+  acknowledge?(stream: "message" | "friend"): void;
   receiveMessage(req: Request): Promise<Result<Event[]>>;
   sendMessage(req: Request): Promise<Result>;
   listGroups(req: Request): Promise<Result<string[]>>;
@@ -18,7 +20,7 @@ export interface ChannelAdapter {
 }
 const unsupported = async <T>(): Promise<Result<T>> => ({ ok: false, error: "not_supported" });
 
-export class SubizAdapter implements ChannelAdapter {
+export class UnsupportedChannel implements ChannelAdapter {
   receiveMessage = unsupported<Event[]>;
   sendMessage = unsupported<void>;
   listGroups = unsupported<string[]>;
