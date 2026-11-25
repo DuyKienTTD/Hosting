@@ -7,6 +7,8 @@ Phiên bản **1.0.0**, ngày phát hành **2026-11-26**, owner A2. Bộ dữ li
 - [A2, thiết kế 17 ca OC05–OC08](https://github.com/DuyKienTTD/Hosting/blob/45813a3/reports/2026-11-24-openclaw-poc-01-a2.md#4-test-matrix--expected-observable-passfail-all-not_run) cung cấp ý tưởng về cặp kiểm chứng cùng/khác khách, giá chưa biết, thu hồi và suy luận sai do tên trùng.
 - [MVP offline ở revision 52b7c5c](https://github.com/DuyKienTTD/Hosting/tree/52b7c5ccac572b170925d28c44c5613c1e73a849/apps/ttd-zalo-assistant) là nguồn tham khảo cho ID khách ổn định, TXT đính kèm SKU và làm rõ khi thiếu giá. Corpus dùng hợp đồng dữ liệu kiểm thử độc lập với trình nhập TXT của MVP.
 
+[ZPC-02 dùng corpus này để đánh giá ứng viên AI](../zpc-01-02/README.md).
+
 ## Tệp và cách dùng
 
 | Tệp | Nội dung |
