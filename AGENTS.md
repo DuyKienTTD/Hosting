@@ -1,6 +1,6 @@
 # HOSTING — Quy tắc cốt lõi MSC
 
-MSC candidate: áp dụng chính sách này sau nghiệm thu MSC-08 và xác minh tích hợp main. Trước đó dùng main hiện hành.
+MKOE candidate; no activation before independent acceptance and approved merge/readback. MSC candidate: áp dụng chính sách này sau nghiệm thu MSC-08 và xác minh tích hợp main. Trước đó dùng main hiện hành.
 
 ## Ba nhóm đọc ban đầu
 
@@ -22,7 +22,7 @@ Danh bạ, CATALOG và các entrypoint khác dùng để tra cứu. Chỉ đọc
 
 | Khi làm | Đọc đầy đủ trước phần phụ thuộc |
 |---|---|
-| Điều phối, phân công, ghi dùng chung, review, thay đổi quyền hoặc chi phí | [Workflow](rules/AGENT_WORKFLOW.md) và quyết định A0 có hiệu lực |
+| Điều phối, phân công, ghi dùng chung, review, thay đổi quyền hoặc chi phí | [Workflow index và module bắt buộc](rules/AGENT_WORKFLOW.md) và quyết định A0 có hiệu lực |
 | Git write, release, credential hoặc dữ liệu nhạy cảm | [Security](rules/REPOSITORY_SECURITY.md); thao tác Git đọc thêm [CONTRIBUTING](CONTRIBUTING.md) |
 | Lưu, tái sử dụng, chuyển hoặc xóa dữ liệu quản trị | [Lifecycle](rules/DATA_LIFECYCLE_CONTEXT.md), các nguồn quyền và tham chiếu cần bảo toàn |
 | Routing, dependency trạng thái, STOP/HOLD hoặc release | [STATE](STATE.md), nguồn live/authority tương ứng. Với KNG, đọc [snapshot](program/current.json) và [release gate](program/kng/release_state.py). Exact approval, main tree, merge parents và remote readback độc lập là bắt buộc; thiếu thì STOP dispatch. |
