@@ -1,0 +1,61 @@
+{
+  "id": "ZPC-03-CONTEXT",
+  "version": "1.0.0",
+  "synthetic": true,
+  "account_id": "acct-syn-01",
+  "default_as_of": "2026-12-02",
+  "display_note": "Nhãn hiển thị là mã giả, không phải tên người.",
+  "customers": [
+    {
+      "customer_id": "cust-A",
+      "thread_id": "dm-A",
+      "display_label": "KH-MÔ-PHỎNG-TRÙNG",
+      "consent": {
+        "respond": true,
+        "retain": true,
+        "send": false
+      },
+      "memory": [
+        {
+          "id": "MEM-A-SKU",
+          "text": "Khách đang xem SYN-RAIL-01."
+        },
+        {
+          "id": "MEM-A-REF",
+          "text": "Mã tham chiếu đơn mô phỏng REF-MOCK-A."
+        }
+      ]
+    },
+    {
+      "customer_id": "cust-B",
+      "thread_id": "dm-B",
+      "display_label": "KH-MÔ-PHỎNG-TRÙNG",
+      "consent": {
+        "respond": true,
+        "retain": true,
+        "send": false
+      },
+      "memory": [
+        {
+          "id": "MEM-B-SKU",
+          "text": "Khách đang xem SYN-RAIL-06."
+        },
+        {
+          "id": "MEM-B-REF",
+          "text": "Mã tham chiếu đơn mô phỏng REF-MOCK-B."
+        }
+      ]
+    },
+    {
+      "customer_id": "cust-C",
+      "thread_id": "dm-C",
+      "display_label": "KH-MÔ-PHỎNG-C",
+      "consent": {
+        "respond": true,
+        "retain": false,
+        "send": false
+      },
+      "memory": []
+    }
+  ]
+}
