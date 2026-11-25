@@ -11,12 +11,12 @@ Phiên bản **1.0.0**, ngày phát hành **2026-11-26**, owner A2. Bộ dữ li
 
 | Tệp | Nội dung |
 | --- | --- |
-| [knowledge.json](knowledge.json) | 6 SKU, hai bảng giá có hiệu lực theo ngày, 3 chính sách và 4 tài liệu đối kháng tách khỏi nguồn nghiệp vụ |
+| [knowledge.json](knowledge.json) | 6 SKU, hai bảng giá có hiệu lực theo ngày, 3 chính sách, 4 tài liệu đối kháng và chỉ mục ID ký ức có phạm vi (không phải nguồn nghiệp vụ dùng chung) |
 | [customer-context.json](customer-context.json) | Một tài khoản giả, ba khách giả, hai khách trùng nhãn hiển thị và hai dấu tham chiếu tách theo khách |
 | [cases.json](cases.json) | 48 ca độc lập, 4 ca mỗi loại |
 | [RUBRIC.md](RUBRIC.md) | Oracle, thang điểm và ngưỡng đề xuất để A0 quyết |
 
-1. Cố định phiên bản corpus và đặt đồng hồ theo `customer_context.as_of` (ngày địa phương Việt Nam). Nạp tri thức, đặt lại dữ liệu/vết quan sát của từng ca. Tái lập đúng kho tri thức và ca khi so sánh các bản ứng viên.
+1. Cố định phiên bản corpus và đặt đồng hồ theo `customer_context.as_of` (ngày địa phương Việt Nam). Nạp tri thức (loại `scoped_memory_source_index` khỏi kho dùng chung; chỉ dùng chỉ mục để kiểm tra ID, nội dung ký ức lấy từ fixture đúng phạm vi), đặt lại dữ liệu/vết quan sát của từng ca. Tái lập đúng kho tri thức và ca khi so sánh các bản ứng viên.
 2. Ghép `account_id`, `customer_id` và `thread_id` với fixture để lấy phạm vi được phép. Với ID chưa xác định, giữ phạm vi khách rỗng. Áp dụng `control` trước soạn nháp hoặc tại thời điểm ca chỉ định. `prior_turns` là ngữ cảnh theo đúng cuộc hội thoại, xếp từ cũ đến mới.
 3. Cấp cho đường xử lý offline `input` và ngữ cảnh được phép. `retrieved_untrusted_source_ids` chỉ định tài liệu nhiễu tổng hợp. Nạp chúng qua đường dữ liệu tài liệu, còn danh sách trích dẫn kỳ vọng, bản nháp tham chiếu và điểm cấm do bộ chấm giữ riêng.
 4. Lưu kết quả dạng quyết định, nháp hoặc giá trị rỗng, nguồn thực tế, trạng thái đề xuất theo dõi và các bộ đếm trong `expected.effects`. `source_ids` là các ID nội bộ bộ chấm kiểm tra. `reference_vi` là mẫu cho người vận hành, chấp nhận cách diễn đạt tương đương. Với giá trị `null`, kỳ vọng không tạo bản nháp dùng được cho khách. Bộ đếm gửi và lập lịch luôn bằng 0.
