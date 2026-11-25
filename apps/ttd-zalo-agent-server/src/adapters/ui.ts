@@ -59,7 +59,6 @@ export class SubizUiAdapter extends BaseAdapter {
     map: (receipt: string) => Results[K]): Promise<Result<Results[K]>> {
     if (this.disabled || this.journal.paused(this.breaker)) return Promise.resolve(fail("not_supported"));
     if (c.accountId !== this.config.accountId) return Promise.resolve(fail("policy_denied"));
-    if (!id(c.idempotencyKey)) return Promise.resolve(fail("invalid_input"));
     const { selectors: s, workspaceId, origin } = this.config;
     return this.journal.write(this.scope, c, async () => {
       let prior: string | null;

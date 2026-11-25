@@ -6,8 +6,11 @@ export const fail = (code: ChannelErrorCode, retryAfterSeconds?: number): { ok: 
   ({ ok: false, error: retryAfterSeconds === undefined ? { code } : { code, retryAfterSeconds } });
 export const ok = <T>(value: T): Result<T> => ({ ok: true, value });
 export const id = (v: unknown): v is string => typeof v === "string" && /^[A-Za-z0-9_-]{1,180}$/.test(v);
+export const validIdempotencyKey = (v: unknown): v is string =>
+  typeof v === "string" && v.length > 0 && [...v].length <= 128;
 export const unsupported = async () => fail("not_supported");
 export class BaseAdapter implements ChannelAdapter {
+  localContact(_accountId: string, _contactId: string): Result<Results["getContact"]> | undefined { return undefined; }
   receiveMessage(_c: Command<"receiveMessage">): Promise<Result<Results["receiveMessage"]>> { return unsupported(); }
   sendMessage(_c: Command<"sendMessage">): Promise<Result<Results["sendMessage"]>> { return unsupported(); }
   listGroups(_c: Command<"listGroups">): Promise<Result<Results["listGroups"]>> { return unsupported(); }
@@ -73,6 +76,7 @@ export class ChannelJournal {
   }
   write<K extends Operation>(scope: string, command: Command<K>, start: () => Promise<Result<Results[K]>>): Promise<Result<Results[K]>> {
     const db = this.store.db;
+    if (!validIdempotencyKey(command.idempotencyKey)) return Promise.resolve(fail("invalid_input"));
     const writeScope = "account:" + command.accountId;
     const key = this.store.hash(command.idempotencyKey);
     const fingerprint = this.store.hash(JSON.stringify([scope, command.operation, command.payload]));

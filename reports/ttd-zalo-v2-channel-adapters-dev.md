@@ -33,3 +33,13 @@ Router chọn đúng một adapter cho mỗi lệnh, không tự thử kênh kh�
 | Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |
 
 INCIDENT: CDN Playwright trả 403 và Chromium hệ thống thiếu binary. Test Playwright chạy đạt với Chromium headless từ gói npm tạm ngoài cây Git. Sandbox thiếu Docker nên chưa chạy image/Compose.
+
+## V2-02B-FIX1 · 26/11/2026
+
+Guard kiểm tra điều kiện cục bộ, kể cả bằng chứng bạn bè đã cấu hình, giờ gửi, consent, quota, ngân sách và idempotency, trước khi xác minh hội thoại qua HTTP. Lượt hợp lệ vẫn xác minh bằng GET và kiểm tra lại policy trong transaction trước POST. Probe HTTP loopback ghi nhận chưa kết bạn và 22:30 ICT đều 0 GET/0 POST, còn lượt hợp lệ 1 GET/1 POST. Router và journal dùng giới hạn idempotencyKey 128 ký tự của schema V2-01. Probe dispatch chấp nhận 128, từ chối 129 trước mọi HTTP.
+
+| Lệnh | Exit | Kết quả |
+|---|---:|---|
+| Cả hai app `npm ci --no-audit --no-fund`, `npm run typecheck`, `npm run build`, `npm test` | 0 | Server 43/43 với `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium`, desktop 20/20 với `ELECTRON_SKIP_BINARY_DOWNLOAD=1` khi cài |
+| Server `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium node --test --test-name-pattern='Playwright fixture' test/adapters.test.mjs` | 0 | 1/1 |
+| Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |

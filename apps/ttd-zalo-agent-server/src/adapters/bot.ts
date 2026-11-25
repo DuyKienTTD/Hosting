@@ -62,7 +62,7 @@ export class ZaloBotAdapter extends BaseAdapter {
   override postToGroup(c: Command<"postToGroup">): Promise<Result<DeliveryReceipt>> {
     if (!this.enabled) return Promise.resolve(fail("not_supported"));
     if (c.accountId !== this.config.accountId || !this.config.groups.includes(c.payload.groupId)) return Promise.resolve(fail("policy_denied"));
-    if (!id(c.idempotencyKey) || typeof c.payload.text !== "string" || !c.payload.text.trim() || c.payload.text.length > 2000) {
+    if (typeof c.payload.text !== "string" || !c.payload.text.trim() || c.payload.text.length > 2000) {
       return Promise.resolve(fail("invalid_input"));
     }
     return this.journal.write(this.scope, c, async () => {

@@ -27,7 +27,7 @@ export class Guard {
     this.store.set("epoch", this.store.setting("epoch") + 1);
     this.store.notice("channel-paused", now, "Kênh đã tự tạm dừng.");
   }
-  private deny(p: Proposal, target: string, friend: boolean, now: number): string | undefined {
+  private deny(p: Proposal, target: string, friend: boolean | undefined, now: number): string | undefined {
     const { db } = this.store;
     const policy = this.store.policy(target, p.agent, now);
     const contact = this.store.contact(target);
@@ -39,7 +39,7 @@ export class Guard {
       if (p.kind === "invite") {
         if (p.agent !== "sales" || friend || !contact?.interest || now - contact.interest > this.config.invitations.interestMs ||
           contact.opted_out || db.prepare("SELECT 1 FROM outbound WHERE target=? AND kind='invite' AND state IN ('started','sent','unknown','failed')").get(target)) return "invite_denied";
-      } else if (!friend) return "not_friend";
+      } else if (friend === false) return "not_friend";
       if (p.kind === "reply" && (p.agent !== "support" || !policy.respond ||
         !db.prepare("SELECT 1 FROM inbound WHERE id=? AND target=? AND received>=?").get(p.origin ?? "", target, now - this.config.scheduling.maxInboundAgeMs))) return "reply_denied";
       if (p.kind === "advertising" && (!["sales","campaign"].includes(p.agent) || !contact?.ads || contact.opted_out ||
@@ -73,12 +73,22 @@ export class Guard {
     const target = this.store.hash(p.target);
     const { db } = this.store;
     const key = this.store.hash(p.id);
-    if (this.store.stopped(p.agent)) return "stopped";
     const group = p.kind.startsWith("group_");
+    const lookup = { key, target: p.target, thread: p.thread };
+    const local = group ? undefined : this.channel.localContact?.(lookup);
+    const preflight = this.store.atomic(() => {
+      const now = this.clock();
+      if (this.store.stopped(p.agent) || p.epoch !== this.store.setting("epoch")) return "stopped";
+      if (db.prepare("SELECT 1 FROM outbound WHERE id=?").get(key)) return "duplicate";
+      if (this.budget.blocked(now)) return "budget_held";
+      if (local && !local.ok) return local.error;
+      return this.deny(p, target, local?.value.friend, now);
+    });
+    if (preflight) return preflight;
     let friend = false;
     if (!group) {
       let result;
-      try { result = await this.channel.getContact({ key, target: p.target }); }
+      try { result = await this.channel.getContact(lookup); }
       catch { this.failure(); return "channel_error"; }
       if (!result.ok || result.value.id !== p.target) { this.failure(); return "channel_error"; }
       friend = result.value.friend === true;

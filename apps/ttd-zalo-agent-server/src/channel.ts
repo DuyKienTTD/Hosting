@@ -16,6 +16,7 @@ export interface ChannelAdapter {
   moderateGroup(req: Request): Promise<Result>;
   sendFriendRequest(req: Request): Promise<Result>;
   onFriendAccepted(req: Request): Promise<Result<Event[]>>;
+  localContact?(req: Request): Result<Contact> | undefined;
   getContact(req: Request): Promise<Result<Contact>>;
 }
 const unsupported = async <T>(): Promise<Result<T>> => ({ ok: false, error: "not_supported" });

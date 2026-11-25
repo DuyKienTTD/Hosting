@@ -1,17 +1,22 @@
-import { fail } from "./common.js";
+import { fail, validIdempotencyKey, type BaseAdapter } from "./common.js";
 import type { ChannelAdapter as Contract, ChannelEvent, Command, Operation, Results, Result } from "./contract.js";
 import type { ChannelAdapter, ChannelError, Contact, Event, Request } from "../channel.js";
 
 export type Source = "api" | "bot" | "ui";
 export type Capability = Partial<Record<Operation, Source>>;
-type Adapter = { adapter: Contract; operations: readonly Operation[] };
+type Adapter = { adapter: Contract & Partial<Pick<BaseAdapter, "localContact">>; operations: readonly Operation[] };
 export class CapabilityRouter {
   constructor(readonly capabilities: Capability, private adapters: Partial<Record<Source, Adapter>>) {
     for (const [operation, source] of Object.entries(capabilities)) {
       if (!adapters[source]?.operations.includes(operation as Operation)) throw Error("UNSUPPORTED_CAPABILITY_CONFIG");
     }
   }
+  localContact(accountId: string, contactId: string) {
+    const source = this.capabilities.getContact;
+    return source ? this.adapters[source]?.adapter.localContact?.(accountId, contactId) : fail("not_supported");
+  }
   run<K extends Operation>(command: Command<K>): Promise<Result<Results[K]>> {
+    if (!validIdempotencyKey(command.idempotencyKey)) return Promise.resolve(fail("invalid_input"));
     const source = this.capabilities[command.operation];
     const adapter = source && this.adapters[source]?.adapter;
     if (!adapter) return Promise.resolve(fail("not_supported"));
@@ -71,6 +76,11 @@ export class RuntimeChannel implements ChannelAdapter {
     const r = await this.router.run(command(this.account, req.key, "onFriendAccepted", { cursor: this.cursors.get(key) }));
     if (r.ok) this.remember(key, r.value.nextCursor);
     return convert(r, v => v.items.map(runtimeEvent));
+  }
+  localContact(req: Request) {
+    if (req.thread && this.direct.get(req.target) !== req.thread) return { ok: false as const, error: "policy_denied" as const };
+    const r = this.router.localContact(this.account, req.target);
+    return r && convert(r, v => ({ id: v.contactId, friend: v.friendship === "accepted" }));
   }
   async getContact(req: Request): Promise<import("../channel.js").Result<Contact>> {
     const r = await this.router.run(command(this.account, req.key, "getContact", { contactId: req.target }));

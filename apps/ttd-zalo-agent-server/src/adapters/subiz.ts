@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { BaseAdapter, ChannelJournal, fail, id, ok } from "./common.js";
-import type { ChannelEvent, Command, DeliveryReceipt, Result } from "./contract.js";
+import type { ChannelEvent, Command, DeliveryReceipt, Result, Results } from "./contract.js";
 
 export type Direct = { contactId: string; conversationId: string; userId: string; profileId: string; friendUntil?: number };
 export type SubizConfig = { accountId: string; agentId: string; channel: string; source: string; direct: Direct[] };
@@ -101,17 +101,22 @@ export class SubizAdapter extends BaseAdapter {
     const page = this.journal.page(this.scope, "direct", c.payload);
     return page.ok ? ok({ ...page.value, items: page.value.items.filter((e): e is ChannelEvent<"messageReceived"> => e.type === "messageReceived") }) : page;
   }
+  override localContact(accountId: string, contactId: string): Result<Results["getContact"]> {
+    const route = this.config.direct.find(r => r.contactId === contactId);
+    if (accountId !== this.config.accountId || !route) return fail("policy_denied");
+    return ok({ contactId: route.contactId, friendship: route.friendUntil && route.friendUntil > this.clock() ? "accepted" : "unknown" });
+  }
   override async getContact(c: Command<"getContact">) {
-    const route = this.config.direct.find(r => r.contactId === c.payload.contactId);
-    if (c.accountId !== this.config.accountId || !route) return fail("policy_denied");
+    const local = this.localContact(c.accountId, c.payload.contactId);
+    if (!local.ok) return local;
+    const route = this.config.direct.find(r => r.contactId === c.payload.contactId)!;
     const checked = await this.verifyConversation(route);
-    if (!checked.ok) return checked;
-    return ok({ contactId: route.contactId, friendship: route.friendUntil && route.friendUntil > this.clock() ? "accepted" as const : "unknown" as const });
+    return checked.ok ? this.localContact(c.accountId, c.payload.contactId) : checked;
   }
   override sendMessage(c: Command<"sendMessage">): Promise<Result<DeliveryReceipt>> {
     const route = this.config.direct.find(r => r.conversationId === c.payload.conversationId);
     if (c.accountId !== this.config.accountId || !route?.friendUntil || route.friendUntil <= this.clock()) return Promise.resolve(fail("policy_denied"));
-    if (!id(c.idempotencyKey) || typeof c.payload.text !== "string" || !c.payload.text.trim() || c.payload.text.length > 2000) return Promise.resolve(fail("invalid_input"));
+    if (typeof c.payload.text !== "string" || !c.payload.text.trim() || c.payload.text.length > 2000) return Promise.resolve(fail("invalid_input"));
     if (!process.env.SUBIZ_API_TOKEN) return Promise.resolve(fail("auth"));
     return this.journal.write(this.scope, c, async () => {
       if ((this.verified.get(route.conversationId) ?? 0) <= this.clock()) return fail("policy_denied");

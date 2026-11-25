@@ -56,9 +56,10 @@ async function subizFixture(t, f) {
   writeEnv(t, "SUBIZ_API_TOKEN", "synthetic-pat");
   writeEnv(t, "SUBIZ_WEBHOOK_SECRET", "synthetic-hook");
   const events = [eventData(f.clock())];
-  const state = { writes: 0, mode: "normal" };
+  const state = { writes: 0, reads: 0, mode: "normal" };
   const url = await serve(t, async (req, res) => {
     assert.equal(req.headers.authorization, "Bearer synthetic-pat");
+    if (req.method === "GET") state.reads++;
     const json = payload => res.setHeader("Content-Type", "application/json").end(JSON.stringify(payload));
     if (req.url === "/4.1/me" && req.method === "GET") {
       if (state.mode === "auth") { res.statusCode = 400; json({ code: "access_deny,internal" }); return; }
@@ -299,4 +300,46 @@ test("signed Subiz opt-out during contact preflight prevents any provider send",
   assert.equal(result, "consent");
   assert.equal(f.store.contact(target).opted_out, 1);
   assert.equal(state.writes, 0);
+});
+
+for (const reason of ["not_friend", "hours", "allowed"]) {
+  test(`Subiz advertising preflight ${reason} counts GET and POST separately`, async t => {
+    const f = setup(t);
+    const at = Date.parse(reason === "hours" ? "2026-11-26T15:30:00Z" : "2026-11-26T03:00:00Z");
+    f.advance(at - f.clock());
+    const { adapter, config, state, providerFetch } = await subizFixture(t, f);
+    if (reason === "not_friend") config.direct[0].friendUntil = f.clock() - 1;
+    const sourceAdapter = reason === "not_friend" ? new SubizAdapter(config, f.journal, providerFetch, f.clock) : adapter;
+    const router = new CapabilityRouter({ sendMessage: "api", getContact: "api" },
+      { api: { adapter: sourceAdapter, operations: ["sendMessage", "getContact"] } });
+    const bridge = new RuntimeChannel(router, account, new Map([[contact, cid]]), []);
+    const { Guard } = await import("../dist/ttd-zalo-agent-server/src/guard.js");
+    f.store.stop("global", false);
+    const target = f.store.hash(contact);
+    f.store.consent(target, f.clock() + 50000, false, true, true, true);
+    const result = await new Guard(f.store, bridge, defaults, f.clock).dispatch({
+      agent: "campaign", kind: "advertising", id: "preflight-offer", target: contact, thread: cid,
+      text: "Ưu đãi fixture", revision: f.store.contact(target).revision, epoch: f.store.setting("epoch"),
+    });
+    assert.equal(result, reason === "allowed" ? "sent" : reason);
+    assert.deepEqual([state.reads, state.writes], reason === "allowed" ? [1, 1] : [0, 0]);
+  });
+}
+
+test("128-character idempotency key passes dispatch; 129 fails before any provider request", async t => {
+  const f = setup(t);
+  const { adapter, state } = await subizFixture(t, f);
+  const router = new CapabilityRouter({ sendMessage: "api", getContact: "api" },
+    { api: { adapter, operations: ["sendMessage", "getContact"] } });
+  const bridge = new RuntimeChannel(router, account, new Map([[contact, cid]]), []);
+  const send = key => bridge.sendMessage({ key, target: contact, thread: cid, text: "fixture reply" });
+  const longKey = "x".repeat(129);
+  assert.equal((await bridge.getContact({ key: longKey, target: contact })).error, "invalid_input");
+  assert.equal((await send(longKey)).error, "invalid_input");
+  assert.deepEqual([state.reads, state.writes], [0, 0]);
+  const key = "x".repeat(128);
+  assert.equal((await bridge.getContact({ key, target: contact })).ok, true);
+  assert.equal((await send(key)).ok, true);
+  assert.equal((await adapter.sendMessage(commandFor(longKey, "sendMessage", { conversationId: cid, text: "fixture reply" }))).error.code, "invalid_input");
+  assert.deepEqual([state.reads, state.writes], [1, 1]);
 });
