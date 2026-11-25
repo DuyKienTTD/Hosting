@@ -21,13 +21,15 @@ sensitivity: public
 
 ## Trạng thái 26/11/2026
 
+Checkpoint theo báo cáo Điều phối: các phiên chế độ Công việc bị chặn bởi thông báo hết lượt sử dụng đến 29/11/2026 04:06 ICT. IN_PROGRESS chỉ biểu thị việc đang hoàn thiện, không xác nhận phiên đang chạy hoặc outcome đã hoàn thành.
+
 | Công việc | Trạng thái | Phạm vi hoặc điều kiện |
 | --- | --- | --- |
-| ZPC-01 | IN_PROGRESS | Điều phối chuẩn bị bản nháp thư hỏi Zalo để chủ dự án tự gửi. |
-| ZPC-02 | IN_PROGRESS | Điều phối chuẩn bị gói so sánh nhà cung cấp AI, không gọi API. |
-| ZPC-03 | IN_PROGRESS | A2 chuẩn bị corpus tiếng Việt với dữ liệu tổng hợp. |
-| ZPC-04 | IN_PROGRESS | A1 chuẩn bị ma trận kiểm thử bảo mật. |
-| ZPC-06 / ZPC-07 / ZPC-08-seam / ZPC-10-offline | IN_PROGRESS | Work thực hiện phần offline trên `dev/ttd-zalo-product-01`. ZPC-08-seam chỉ là giao diện adapter và mock, ZPC-10-offline dùng luồng mô phỏng. |
+| ZPC-01 | IN_PROGRESS | Làm lại ở chế độ Trò chuyện; chưa có kết quả trên GitHub tại checkpoint. Chủ dự án tự gửi thư hỏi Zalo. |
+| ZPC-02 | IN_PROGRESS | Làm lại ở chế độ Trò chuyện; chưa có kết quả trên GitHub tại checkpoint; không gọi API. |
+| ZPC-03 | IN_PROGRESS | Có 1 commit trên `a2/zalo-zpc-03-corpus`; đang hoàn thiện ở chế độ Trò chuyện. |
+| ZPC-04 | IN_PROGRESS | Làm lại ở chế độ Trò chuyện; chưa có kết quả trên GitHub tại checkpoint. |
+| ZPC-06 / ZPC-07 / ZPC-08-seam / ZPC-10-offline | BLOCKED_USAGE_UNTIL_2026-11-29 | TTD-ZALO-P1-OFFLINE chưa có commit trên `dev/ttd-zalo-product-01`; chờ hạn mức. ZPC-08-seam chỉ là giao diện adapter và mock, ZPC-10-offline dùng luồng mô phỏng. |
 | ZPC-05 | BLOCKED | Cần Windows runner và quyền chạy mới cho kiểm tra startup. |
 | ZPC-09 | BLOCKED | Cần văn bản cho phép của Zalo và phạm vi tích hợp được duyệt. |
 | ZPC-11 | BLOCKED | Cần bản tích hợp, Windows runner, phê duyệt chạy QA và các điều kiện kết nối Zalo, paid API. |
@@ -119,17 +121,17 @@ Provider adapter contract should normalize: model ID/version, request/response s
 
 ### 4.2 Shortlist — planning comparison, not provider selection
 
-Public list prices observed 2026-11-25 (USD per 1M text tokens; verify again before procurement because pricing/model availability changes):
+Public list prices observed 2026-11-25 (USD per 1M text tokens; reference only, reverify before procurement — chỉ tham chiếu, xác minh lại trước khi mua):
 
 | Candidate | Input / output | Data handling signal | Planning role |
 |---|---:|---|---|
-| OpenAI GPT-6.2 Sol | $2 / $10 | API data not used for training by default; abuse-monitoring logs up to 30 days by default. Modified Abuse Monitoring/ZDR require prior approval and feature eligibility. | Balanced benchmark candidate |
-| Anthropic Claude Sonnet 5 | $3 / $15 | Commercial API inputs/outputs not used for training without express permission; retention varies by feature. ZDR requires an approved organization arrangement. | Quality/long-context benchmark candidate |
+| OpenAI GPT-6.2 Sol | $2 / $10 | API data not used for training by default; abuse-monitoring logs up to 30 days by default, distinct from endpoint-specific application-state retention. Modified Abuse Monitoring/ZDR require prior approval and feature/endpoint eligibility. | Balanced benchmark candidate |
+| Anthropic Claude Sonnet 5 | $2 / $10 | Commercial API inputs/outputs not used for training without express permission; standard API inputs/outputs deleted within 30 days, subject to documented exceptions. ZDR is a separately approved organization arrangement subject to feature/model eligibility. | Quality/long-context benchmark candidate |
 | Google Gemini 3.5 Flash-Lite | $0.30 / $2.50 | Paid tier states content is not used to improve products; Free tier states content may be used to improve products. | Low-cost benchmark candidate; do not send real customer content on Free tier |
 
 Official pricing/data sources:
-- [OpenAI API pricing](https://developers.openai.com/api/docs/pricing) · [OpenAI API data controls](https://developers.openai.com/api/docs/guides/your-data)
-- [Anthropic API pricing](https://platform.claude.com/docs/en/about-claude/pricing) · [Anthropic API retention/ZDR](https://platform.claude.com/docs/en/manage-claude/api-and-data-retention) · [commercial data use](https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training)
+- [OpenAI API pricing](https://developers.openai.com/api/docs/pricing) · [GPT-6.2 Sol model](https://developers.openai.com/api/docs/models/gpt-6.2-sol) · [OpenAI API data controls](https://developers.openai.com/api/docs/guides/your-data)
+- [Claude Sonnet 5 announcement, updated 2026-08-10: $2/$10 permanent](https://www.anthropic.com/research/claude-sonnet-5) · [Anthropic API pricing](https://platform.claude.com/docs/en/about-claude/pricing) · [commercial data retention](https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data) · [Anthropic API retention/ZDR](https://platform.claude.com/docs/en/manage-claude/api-and-data-retention) · [commercial data use](https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training)
 - [Gemini API pricing and Free/Paid data-use distinction](https://ai.google.dev/gemini-api/docs/pricing)
 
 These prices are token list rates, not a monthly operating estimate. Monthly AI cost formula:
