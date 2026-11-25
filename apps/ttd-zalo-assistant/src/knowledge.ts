@@ -79,6 +79,18 @@ export class Knowledge {
       .all(filter, filter) as Source[];
   }
 
+  findDocuments(question: string, date: string, sku?: string) {
+    const words = question.normalize("NFC").toLocaleLowerCase("vi-VN").match(/[\p{L}\p{N}]+/gu) ?? [];
+    const stop = new Set("cho tôi em mình anh chị bạn biết hỏi về là gì có không được như thế nào xin vui lòng giúp nhé ạ quy trình".split(" "));
+    const terms = words.filter(word => !stop.has(word) && !/^\d+$/u.test(word)).slice(0, 24);
+    const phrases = [...new Set(terms.slice(1).map((word, i) => `"${terms[i]} ${word}"`))];
+    if (!phrases.length) return [];
+    return this.db.prepare(`SELECT c.* FROM catalogue_fts f JOIN catalogue c ON c.rowid=f.rowid
+      WHERE catalogue_fts MATCH ? AND c.kind='document' AND (c.sku IS NULL OR c.sku=?)
+        AND c.effective<=? AND (c.until IS NULL OR c.until>?)
+      ORDER BY bm25(catalogue_fts),c.id LIMIT 3`).all(phrases.join(" OR "), sku ?? null, date, date) as Source[];
+  }
+
   bySku(sku: string) {
     return this.db.prepare("SELECT * FROM catalogue WHERE sku=? ORDER BY id").all(sku) as Source[];
   }

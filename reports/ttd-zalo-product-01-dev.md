@@ -36,3 +36,19 @@ sensitivity: public
 7 test mới kiểm migration/restart, FTS và các phần áp dụng của N01/N02/N06/N07/N09/N16/N24/N25/N27/N28/N30/N37/N38, cùng kiểm lại phiên sau callback đồng bộ. Corpus chạy trên Foundation/FakeProvider với SQLite trong bộ nhớ, ánh xạ hai khách trùng tên vào hai định danh riêng và chạy ca khách C trên DB riêng. 48/48 là kết quả kiểm tự động, còn giọng điệu, edit distance và nghiệm thu độc lập chưa được chấm.
 
 **Giới hạn.** Windows launch `NOT_VERIFIED`. Electron UI smoke chưa chạy vì Linux không có display, `apt-get download xvfb` exit 100 với `Unable to locate package xvfb`. Kết quả IPC runtime của smoke còn mở. Thử nghiệm dùng dữ liệu tổng hợp, không gọi nhà cung cấp thật và không kết nối Zalo thật. Nghiệm thu độc lập thuộc A0 và reviewer được chỉ định.
+
+## FIX1 · 26/11/2026
+
+Sửa hai lỗi ZPC-07 trên PR #68 theo [biên nhận nghiệm thu độc lập](https://github.com/DuyKienTTD/Hosting/pull/68#issuecomment-7173315862). Baseline trước sửa: `713dfbfa68cb1ec1bcd7eb2e2eb76d9a54cfabb8`.
+
+- Câu hỏi có cả giá và thông số trả phần thông số có nguồn, đồng thời hỏi lại khi giá thiếu hoặc xung đột. Nháp có đủ hai nguồn khi có giá và thông số hợp lệ.
+- FTS5/BM25 truy xuất tài liệu liên quan cho luồng nháp. FakeProvider nhận định danh tham khảo và trích đúng ID. Nháp hướng người vận hành đối chiếu tài liệu, không diễn giải nội dung tài liệu thành kết luận nghiệp vụ. Nội dung tài liệu không đi vào adapter và giá chỉ lấy từ bản ghi giá có thẩm quyền.
+- Ba test hồi quy bao phủ câu hỏi nhiều ý, trích nguồn Markdown sau mở lại DB và ca Markdown chứa lệnh thay đổi STOP/quyền/gửi hoặc giá giả.
+
+| Lệnh chạy lại trong app | Exit | Kết quả |
+|---|---:|---|
+| `npm ci` | 0 | 79 package theo lockfile |
+| `npm run typecheck` | 0 | PASS |
+| `npm run build` | 0 | PASS |
+| `npm test` | 0 | 20/20, gồm 17 test trước FIX1 và 3 hồi quy |
+| `node scripts/evaluate-corpus.mjs` | 0 | 48/48 theo các tiêu chí tự động của corpus |

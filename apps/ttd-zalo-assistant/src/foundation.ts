@@ -310,9 +310,11 @@ export class Foundation {
         }
       }
     }
+    const date = questionDate(question, this.today());
     const result = validatedDraft(this.ai, {
-      question, sku, date: questionDate(question, this.today()), memory,
-      sources: [...(sku ? this.catalogue.bySku(sku) : []), ...this.catalogue.policies()],
+      question, sku, date, memory,
+      sources: [...(sku ? this.catalogue.bySku(sku) : []), ...this.catalogue.policies(),
+        ...this.catalogue.findDocuments(question, date, sku)],
     });
     this.requireOrigin(target, intent);
     if (result.action === "từ chối") {

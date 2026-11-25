@@ -37,6 +37,14 @@ export function questionDate(question: string, fallback: string) {
 
 export const asksReference = (text: string) => /mã.*(?:tham chiếu|đơn).*lưu|lưu mã tham chiếu|nhắc lại mã đơn/iu.test(text);
 
+const explicitPrice = /(?<![\p{L}])(?:giá|price|hết nhiêu|chiếc tính sao|bảng mới)(?![\p{L}])/iu;
+const specification = /(?<![\p{L}])(?:cao|nặng|tối thiểu|kích thước|khối lượng|chiều (?:cao|rộng|dài|sâu)|vật liệu|chất liệu|làm bằng)(?![\p{L}])/iu;
+
+function productDetails(product?: Source) {
+  if (!product || /giá\s*[:=]|\bVND\b|\bUSD\b/iu.test(product.summary)) return undefined;
+  return product.title + ": " + product.summary;
+}
+
 export class FakeProvider implements AIAdapter {
   draft({ question, date, sources, sku, memory = [] }: AIInput) {
     if (/khách (?:còn lại|khác)|thời tiết|tạo đơn|thu tiền|cước|chắc chắn giao/iu.test(question)) {
@@ -55,29 +63,43 @@ export class FakeProvider implements AIAdapter {
     const follow = policies.find(row => /theo dõi/iu.test(row.title));
     const skuFact = memory.find(row => row.type === "sku");
     const scope = skuFact ? [{ id: skuFact.id, title: "Tin nhắn nguồn" }] : [];
-    const wantsPrice = /giá|price|bao nhiêu|hết nhiêu|chiếc tính sao|bảng mới/iu.test(question) &&
-      !/cao|nặng|tối thiểu/iu.test(question);
+    const wantsSpecification = specification.test(question);
+    const wantsPrice = explicitPrice.test(question) || (!wantsSpecification && /bao nhiêu/iu.test(question));
     if (wantsPrice) {
+      const product = wantsSpecification && products.length === 1 ? products[0] : undefined;
+      const details = productDetails(product);
+      const priceReply = (action: Action, text: string, evidence: readonly Pick<Source, "id" | "title">[],
+        suggestFollowUp = false) => {
+        if (!wantsSpecification) return result(action, text, evidence, suggestFollowUp);
+        const missingWeight = /nặng|khối lượng/iu.test(question) && /khối lượng: chưa có/iu.test(details ?? "");
+        const specificationReply = details ?? "Thông số bạn hỏi cần được xác minh thêm.";
+        return result(action === "trả lời" && details && !missingWeight ? action : "hỏi lại",
+          specificationReply + " " + text, [...new Map([
+            ...scope, ...evidence, ...(details && product ? [product] : []),
+          ].map(row => [row.id, row])).values()]);
+      };
       const prices = sources.filter(row => row.kind === "price" && row.sku === sku);
       const [price] = prices;
       if (follow && sku && /kiểm tra.*giá/iu.test(question) && /báo em|đừng chủ động|^vâng/iu.test(question)) {
         const suggest = !/đừng chủ động/iu.test(question);
-        return result("trả lời", suggest ? `Có thể đề xuất người phụ trách xác minh giá ${sku}. Thời điểm phản hồi còn chờ xác nhận.` :
+        return priceReply("trả lời", suggest ? `Có thể đề xuất người phụ trách xác minh giá ${sku}. Thời điểm phản hồi còn chờ xác nhận.` :
           `Giá ${sku} cần xác minh. Bạn có thể hỏi lại trong phiên này khi thuận tiện.`, [follow, ...prices], suggest);
       }
       if (!price || price.amount === null || prices.some(row => row.amount !== price.amount || row.unit !== price.unit)) {
-        return result("hỏi lại", "Bạn vui lòng xác nhận mã và số lượng để nhân viên kiểm tra giá hiện hành.", prices);
+        return priceReply("hỏi lại", "Chưa xác minh được giá hiện hành. Bạn vui lòng xác nhận mã và số lượng để nhân viên kiểm tra.", prices);
       }
-      const quantity = /(?<![\d.,])\b([1-9]\d{0,5})\s+(chiếc|mét)\b/iu.exec(question);
+      const priceQuestion = wantsSpecification ?
+        question.split(/[,;?\n]|\s+(?:và|còn)\s+/iu).filter(part => explicitPrice.test(part)).join(" ") : question;
+      const quantity = /(?<![\d.,])\b([1-9]\d{0,5})\s+(chiếc|mét)\b/iu.exec(priceQuestion);
       if (quantity && quantity[2].toLowerCase() !== price.unit) {
-        return result("hỏi lại", "Bạn vui lòng xác nhận đơn vị để nhân viên đối chiếu bảng giá.", prices);
+        return priceReply("hỏi lại", "Bạn vui lòng xác nhận đơn vị để nhân viên đối chiếu bảng giá.", prices);
       }
       const amount = price.amount.toLocaleString("vi-VN");
       if (quantity && Number(quantity[1]) > 1 && quantity[2].toLowerCase() === price.unit &&
           Number.isSafeInteger(price.amount * Number(quantity[1])) && products.length === 1) {
-        return result("trả lời", `${quantity[1]} ${quantity[2]} ${sku} là ${(price.amount * Number(quantity[1])).toLocaleString("vi-VN")} VND theo đơn giá ${amount} VND/${price.unit}.`, [...scope, ...prices, ...products]);
+        return priceReply("trả lời", `${quantity[1]} ${quantity[2]} ${sku} là ${(price.amount * Number(quantity[1])).toLocaleString("vi-VN")} VND theo đơn giá ${amount} VND/${price.unit}.`, [...scope, ...prices, ...products]);
       }
-      return result("trả lời", `${sku} có giá ${amount} VND/${price.unit}.`, [...scope, ...prices]);
+      return priceReply("trả lời", `${sku} có giá ${amount} VND/${price.unit}.`, [...scope, ...prices]);
     }
     const topics = policies.filter(row => (/đổi|trả hàng/iu.test(question) && /đổi trả/iu.test(row.title)) ||
       (/bảo hành/iu.test(question) && /bảo hành/iu.test(row.title)));
@@ -113,24 +135,30 @@ export class FakeProvider implements AIAdapter {
     if (follow && /theo dõi/iu.test(question)) {
       return result("hỏi lại", "Bạn muốn người phụ trách theo dõi việc gì?", [follow]);
     }
-    if (products.length === 1 && !/giá\s*[:=]|\bVND\b|\bUSD\b/iu.test(products[0].summary)) {
+    const details = productDetails(products.length === 1 ? products[0] : undefined);
+    if (details) {
       const product = products[0];
       if (/nặng|khối lượng/iu.test(question) && /khối lượng: chưa có/iu.test(product.summary)) {
         return result("hỏi lại", product.summary + " Bạn có muốn người phụ trách kiểm tra khối lượng?", [product]);
       }
-      return result("trả lời", product.title + ": " + product.summary, [...scope, product]);
+      return result("trả lời", details, [...scope, product]);
+    }
+    const documents = sources.filter(row => row.kind === "document");
+    if (documents.length) {
+      return result("hỏi lại", "Có tài liệu tham khảo liên quan. Bạn muốn nhân viên đối chiếu nội dung nào trong tài liệu đã dẫn?", documents);
     }
     return result("hỏi lại", "Bạn vui lòng xác nhận mã sản phẩm và thông tin cần hỏi để tôi kiểm tra thêm.");
   }
 }
 
 export function validatedDraft(adapter: AIAdapter, input: AIInput): Draft {
-  const sources = input.sources.filter(row => row.kind !== "document" && validDate(input.date) && row.effective <= input.date &&
-    (!row.until || input.date < row.until) && (row.kind === "policy" || row.sku === input.sku));
+  const sources = input.sources.filter(row => validDate(input.date) && row.effective <= input.date &&
+    (!row.until || input.date < row.until) && (row.kind === "policy" || (row.kind === "document" && row.sku === null) || row.sku === input.sku));
   const memory = input.memory ?? [];
   const allowed = [...sources, ...memory.map(row => ({ id: row.id, title: "Tin nhắn nguồn" }))];
   const draft = adapter.draft({ question: input.question, date: input.date, sku: input.sku,
-    sources: sources.map(row => ({ ...row })), memory: memory.map(row => ({ ...row })) });
+    sources: sources.map(row => row.kind === "document" ?
+      { ...row, title: "Tài liệu tham khảo", summary: "", origin: "" } : { ...row }), memory: memory.map(row => ({ ...row })) });
   if (!draft || !["trả lời", "hỏi lại", "chuyển người vận hành", "đề xuất follow-up", "từ chối"].includes(draft.action) ||
       Object.keys(draft).some(key => !["action", "text", "sourceIds", "confidence", "source", "suggestFollowUp"].includes(key)) ||
       typeof draft.suggestFollowUp !== "boolean" ||
