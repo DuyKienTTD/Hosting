@@ -1,6 +1,8 @@
-import { app, BrowserWindow, ipcMain, session } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, session } from "electron";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { join } from "node:path";
+import type { Source } from "./knowledge.js";
+import { validField } from "./customer.js";
 import { Foundation, validTarget } from "./foundation.js";
 
 const dir = fileURLToPath(new URL(".", import.meta.url));
@@ -94,6 +96,41 @@ async function start() {
     if (typeof query !== "string") throw new Error("INVALID_QUERY");
     return db.knowledge(query);
   });
+  handle("product:import-document", 2, ([filename, doc]) => {
+    if (typeof filename !== "string" || typeof doc !== "string") throw Error("INVALID_DOCUMENT");
+    return db.importKnowledge(doc, filename);
+  });
+  handle("product:add-source", 1, ([json]) => {
+    if (typeof json !== "string" || json.length > 12000) throw Error("INVALID_CATALOGUE");
+    const row: Partial<Source> | null = JSON.parse(json);
+    if (!row || typeof row !== "object" || Array.isArray(row) || row.kind === "document" ||
+        Object.keys(row).length !== 11) throw Error("INVALID_CATALOGUE");
+    return db.addCatalogueSource(row as Source);
+  });
+  handle("product:fields", 1, ([target]) => {
+    if (!validTarget(target)) throw Error("INVALID_TARGET");
+    return db.fields(target);
+  });
+  handle("product:save-field", 4, ([target, source, kind, value]) => {
+    if (!validTarget(target) || typeof source !== "string" || !validField(kind) || typeof value !== "string") {
+      throw Error("INVALID_FIELD");
+    }
+    db.saveField(target, source, kind, value);
+  });
+  handle("product:export", 1, async ([target]) => {
+    if (!validTarget(target) || !db.policy(target).retain) throw Error("EXPORT_DENIED");
+    const selection = await dialog.showSaveDialog(win, {
+      defaultPath: `${target}.json`, filters: [{ name: "JSON", extensions: ["json"] }],
+    });
+    if (selection.canceled || !selection.filePath) return false;
+    const { writeFileSync } = await import("node:fs");
+    writeFileSync(selection.filePath, JSON.stringify(db.exportCustomer(target), null, 2), { mode: 0o600 });
+    return true;
+  });
+  handle("product:delete", 1, ([target]) => {
+    if (!validTarget(target)) throw Error("INVALID_TARGET");
+    db.deleteCustomer(target);
+  });
   handle("mvp:activity", 0, () => db.activity());
   await win.loadURL(index);
   if (smoke) {
@@ -119,6 +156,15 @@ async function start() {
       await window.ttd.importDoc("SKU: MAU-01\\nTên: Mẫu A\\nThông tin: Thép mạ kẽm");
       const inbound = await window.ttd.receive("customer-a", "Hỏi SKU MAU-01");
       expect(inbound.canDraft, "fake inbound");
+      await window.ttd.saveField("customer-a", inbound.id, "follow-up", "Kiểm tra mẫu");
+      expect((await window.ttd.fields("customer-a")).length === 1, "follow-up attached to inbound");
+      expect((await window.ttd.status()).connection.channel === "fake", "fake connection status");
+      const note = await window.ttd.importDocument("notes.md", "# Kiểm tra <img src=x onerror=throw(1)>");
+      expect((await window.ttd.knowledge("kiểm tra")).some(row => row.id === note), "Markdown is indexed as data");
+      let wrongKind = false;
+      try { await window.ttd.saveField("customer-a", inbound.id, "execute", "Kiểm tra"); }
+      catch { wrongKind = true; }
+      expect(wrongKind, "invalid field rejected");
       const draft = await window.ttd.draft("customer-a", inbound.id);
       expect(draft.source.id === "MAU-01", "draft source");
       const grant = await window.ttd.approve("customer-a", draft.text, inbound.id);
