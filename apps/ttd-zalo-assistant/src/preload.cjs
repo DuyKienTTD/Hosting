@@ -13,6 +13,12 @@ contextBridge.exposeInMainWorld("ttd", {
   draft: (target, origin) => ipcRenderer.invoke("mvp:draft", target, origin),
   importDoc: (doc) => ipcRenderer.invoke("mvp:import", doc),
   knowledge: (query) => ipcRenderer.invoke("mvp:knowledge", query),
+  importDocument: (name, text) => ipcRenderer.invoke("product:import-document", name, text),
+  addSource: (json) => ipcRenderer.invoke("product:add-source", json),
+  fields: (target) => ipcRenderer.invoke("product:fields", target),
+  saveField: (target, source, kind, value) => ipcRenderer.invoke("product:save-field", target, source, kind, value),
+  exportCustomer: (target) => ipcRenderer.invoke("product:export", target),
+  deleteCustomer: (target) => ipcRenderer.invoke("product:delete", target),
   activity: () => ipcRenderer.invoke("mvp:activity"),
   send: (id, target, content) => ipcRenderer.invoke("m0:send", id, target, content),
 });

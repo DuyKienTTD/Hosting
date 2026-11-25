@@ -1,6 +1,10 @@
 import { DatabaseSync } from "node:sqlite";
 import { createHash, randomUUID } from "node:crypto";
 
+import { Knowledge, localDate, migrateKnowledge, type Source } from "./knowledge.js";
+import { FakeProvider, asksReference, extractSkus, questionDate, validatedDraft, type AIAdapter, type MemoryEvidence } from "./ai.js";
+import { messageIdentity, migrateCustomer, validField, type FieldKind } from "./customer.js";
+
 export const accountId = "synthetic-ttd";
 export const customers = [
   { id: "customer-a", thread: "dm-a", name: "Nguyễn Minh" },
@@ -10,7 +14,7 @@ export type Target = (typeof customers)[number]["id"];
 export type Consent = { retain: boolean; respond: boolean; send: boolean };
 export type Policy = Consent & { revision: number; expires: number; takeover: boolean };
 type Row = { revision: number; expires: number; retain: number; respond: number; send: number; takeover: number };
-type Approval = { intent?: string; id: string; target: Target; digest: string; revision: number; epoch: number; expires: number };
+type Approval = { intent?: string; id: string; target: Target; digest: string; revision: number; epoch: number; expires: number; generation: number };
 
 type DraftOrigin = { target: Target; question: string; revision: number; epoch: number };
 
@@ -28,17 +32,22 @@ function contentDigest(target: Target, content: string) {
 
 export class Foundation {
   private readonly db: DatabaseSync;
+  private readonly catalogue: Knowledge;
+  private readonly revisions = new Map<Target, number>();
   private readonly approvals = new Map<string, Approval>();
 
+  private readonly refused = new Set<string>();
   private readonly origins = new Map<string, DraftOrigin>();
 
-  constructor(path: string) {
+  constructor(path: string, private readonly ai: AIAdapter = new FakeProvider(),
+    private readonly today = localDate) {
     this.db = new DatabaseSync(path);
-    this.db.exec("PRAGMA busy_timeout=3000; PRAGMA foreign_keys=ON; PRAGMA synchronous=FULL");
+    this.db.exec("PRAGMA busy_timeout=3000; PRAGMA foreign_keys=ON; PRAGMA synchronous=FULL; PRAGMA secure_delete=ON");
+    this.catalogue = new Knowledge(this.db);
     try {
       this.transaction(() => {
         const version = Number(this.db.prepare("PRAGMA user_version").get()?.user_version);
-        if (![0, 1, 2].includes(version)) throw new Error("UNSUPPORTED_SCHEMA");
+        if (![0, 1, 2, 3].includes(version)) throw new Error("UNSUPPORTED_SCHEMA");
         if (version === 0) this.db.exec(`
           CREATE TABLE state(id INTEGER PRIMARY KEY CHECK(id=1), stopped INTEGER NOT NULL, epoch INTEGER NOT NULL);
           INSERT INTO state VALUES(1,1,0);
@@ -57,6 +66,11 @@ export class Foundation {
           CREATE UNIQUE INDEX attempt_intent ON attempt(intent) WHERE intent IS NOT NULL;
           PRAGMA user_version=2;
         `);
+        if (version < 3) {
+          migrateKnowledge(this.db);
+          migrateCustomer(this.db);
+          this.db.exec("PRAGMA user_version=3");
+        }
       });
     } catch (error) {
       this.db.close();
@@ -76,7 +90,7 @@ export class Foundation {
     }
   }
 
-  close() { this.approvals.clear(); this.origins.clear(); this.db.close(); }
+  close() { this.approvals.clear(); this.origins.clear(); this.refused.clear(); this.db.close(); }
 
   private state() {
     return this.db.prepare("SELECT stopped,epoch FROM state WHERE id=1").get() as { stopped: number; epoch: number };
@@ -100,6 +114,7 @@ export class Foundation {
   status() {
     return {
       stopped: this.state().stopped === 1,
+      connection: { channel: "fake" as const, state: "offline-ready" as const },
       fakeSends: Number(this.db.prepare("SELECT count(*) AS n FROM receipt").get()?.n),
       customers: customers.map((customer) => {
         const row = this.row(customer.id);
@@ -115,6 +130,7 @@ export class Foundation {
     this.db.prepare("UPDATE state SET stopped=?, epoch=epoch+1 WHERE id=1").run(Number(stopped));
     this.approvals.clear();
     this.origins.clear();
+    this.refused.clear();
     this.audit(stopped ? "stop" : "resume");
   }
 
@@ -125,7 +141,7 @@ export class Foundation {
       ON CONFLICT(target) DO UPDATE SET revision=revision+1, expires=excluded.expires,
       retain=excluded.retain, respond=excluded.respond, send=excluded.send, takeover=excluded.takeover`)
       .run(target, expires, Number(consent.retain), Number(consent.respond), Number(consent.send), Number(takeover));
-    for (const [id, origin] of this.origins) if (origin.target === target) this.origins.delete(id);
+    for (const [id, origin] of this.origins) if (origin.target === target) { this.origins.delete(id); this.refused.delete(id); }
     this.audit(takeover ? "takeover" : "consent", target);
   }
 
@@ -143,22 +159,24 @@ export class Foundation {
         return { state: "denied", id, canDraft: false };
       }
       const key = target + ":" + id;
+      const scope = this.identity(target);
+      const identity = messageIdentity(scope.account, scope.user, scope.thread, key);
       const result = this.db.prepare("INSERT OR IGNORE INTO inbound VALUES(?,?,?,?)")
         .run(key, target, policy.retain ? content : null, Date.now());
-      if (!result.changes) return { state: "duplicate", id: key, canDraft: false };
+      if (!result.changes) return { state: "duplicate", id: key, identity, canDraft: false };
       this.invalidateApprovals(target);
       if (policy.respond) {
-        for (const [k, origin] of this.origins) if (origin.target === target) this.origins.delete(k);
+        for (const [k, origin] of this.origins) if (origin.target === target) { this.origins.delete(k); this.refused.delete(k); }
         this.origins.set(key, { target, question: content, revision: policy.revision, epoch: this.state().epoch });
       }
       this.audit(policy.retain ? "inbound-retained" : "inbound-ephemeral", target);
-      return { state: policy.retain ? "retained" : "ephemeral", id: key, canDraft: policy.respond };
+      return { state: policy.retain ? "retained" : "ephemeral", id: key, identity, canDraft: policy.respond };
     });
   }
 
   conversation(target: Target) {
     if (!this.policy(target).retain) return [];
-    return this.db.prepare("SELECT id,content,received FROM inbound WHERE target=? AND content IS NOT NULL ORDER BY received DESC LIMIT 100")
+    return this.db.prepare("SELECT id,content,received FROM inbound WHERE target=? AND content IS NOT NULL ORDER BY received DESC,rowid DESC LIMIT 100")
       .all(target) as { id: string; content: string; received: number }[];
   }
 
@@ -180,21 +198,79 @@ export class Foundation {
       .all(target) as { source: string; fact: string }[];
   }
 
-  importKnowledge(document: string) {
-    if (typeof document !== "string" || document.length > 3000) throw new Error("INVALID_DOCUMENT");
-    const fields = /^SKU: ([A-Z0-9_-]{1,40})\r?\nTên: ([^\r\n]{1,120})\r?\nThông tin: ([^\r\n]{1,2000})\r?\n?$/u.exec(document);
-    if (!fields) throw new Error("INVALID_DOCUMENT");
-    const [, id, title, summary] = fields;
-    this.db.prepare("INSERT INTO knowledge VALUES(?,?,?)").run(id, title, summary);
-    this.approvals.clear();
-    this.audit("knowledge-imported");
+  saveField(target: Target, source: string, kind: FieldKind, value: string) {
+    contentDigest(target, value);
+    if (!validField(kind) || typeof source !== "string" || value.length > 250) throw Error("INVALID_FIELD");
+    this.transaction(() => {
+      const row = this.db.prepare("SELECT content FROM inbound WHERE id=? AND target=?").get(source, target);
+      if (!this.policy(target).retain || typeof row?.content !== "string") throw Error("MEMORY_DENIED");
+      this.db.prepare("INSERT OR IGNORE INTO customer_field(target,source,kind,value,created) VALUES(?,?,?,?,?)")
+        .run(target, source, kind, value.trim(), Date.now());
+    });
+  }
+
+  private customerFields(target: Target, limited: boolean) {
+    const limit = limited ? 100 : -1;
+    return this.db.prepare(`SELECT id,source,kind,value,created FROM customer_field
+      WHERE target=? ORDER BY id DESC LIMIT ?`).all(target, limit) as
+      { id: number; source: string; kind: FieldKind; value: string; created: number }[];
+  }
+
+  fields(target: Target) {
+    return this.policy(target).retain ? this.customerFields(target, true) : [];
+  }
+
+  private identity(target: Target) {
+    if (!validTarget(target)) throw Error("INVALID_TARGET");
+    const { thread } = customers.find(row => row.id === target)!;
+    return { account: accountId, user: target, thread };
+  }
+
+  exportCustomer(target: Target) {
+    return this.transaction(() => {
+      if (!this.policy(target).retain) throw Error("EXPORT_DENIED");
+      const identity = this.identity(target);
+      const timeline = this.db.prepare(`SELECT id,content,received FROM inbound
+        WHERE target=? AND content IS NOT NULL ORDER BY received,id`).all(target).map(row => ({
+        ...row, identity: messageIdentity(identity.account, identity.user, identity.thread, String(row.id)),
+      }));
+      const memory = this.db.prepare("SELECT source,fact FROM memory WHERE target=? ORDER BY id").all(target);
+      return { identity, timeline, memory, fields: this.customerFields(target, false) };
+    });
+  }
+
+  deleteCustomer(target: Target) {
+    this.identity(target);
+    this.transaction(() => {
+      this.db.prepare("DELETE FROM customer_field WHERE target=?").run(target);
+      this.db.prepare("DELETE FROM memory WHERE target=?").run(target);
+      // Keep only IDs for replay suppression. No customer text survives.
+      this.db.prepare("UPDATE inbound SET content=NULL,received=0 WHERE target=?").run(target);
+      this.setConsent(target, { retain: false, respond: false, send: false }, 0, false);
+      this.invalidateApprovals(target);
+      this.audit("customer-deleted", target);
+    });
+  }
+
+  importKnowledge(document: string, filename?: string) {
+    const id = this.catalogue.import(document, filename);
+    this.knowledgeChanged();
     return id;
   }
 
-  knowledge(query = "") {
-    if (typeof query !== "string" || query.length > 100) throw new Error("INVALID_QUERY");
-    return this.db.prepare("SELECT * FROM knowledge WHERE instr(lower(id || ' ' || title),lower(?)) > 0 OR ?='' ORDER BY id LIMIT 100")
-      .all(query, query) as { id: string; title: string; summary: string }[];
+  addCatalogueSource(source: Source) {
+    const id = this.catalogue.add(source);
+    this.knowledgeChanged();
+    return id;
+  }
+
+  private knowledgeChanged() {
+    for (const customer of customers) this.invalidateApprovals(customer.id);
+    this.audit("knowledge-imported");
+  }
+
+  knowledge(query = "", sku?: string) {
+    return this.catalogue.search(query, sku);
   }
 
   private requireOrigin(target: Target, intent: string) {
@@ -207,13 +283,43 @@ export class Foundation {
 
   draft(target: Target, intent: string) {
     const { question } = this.requireOrigin(target, intent);
-    const sku = /(?:^|\s)SKU[ :]+([A-Z0-9_-]{1,40})(?![A-Z0-9_-])/i.exec(question)?.[1]?.toUpperCase();
-    const source = sku ? this.knowledge(sku).find((row) => row.id === sku) : undefined;
-    const asksPrice = /giá|price|bao nhiêu/iu.test(question);
-    if (!source || (asksPrice && !/giá\s*[:=]/iu.test(source.summary))) {
-      return { text: "Bạn vui lòng xác nhận mã sản phẩm và thông tin cần hỏi để tôi kiểm tra thêm.", source: null };
+    const explicit = extractSkus(question);
+    const canRead = this.policy(target).retain;
+    const memory: MemoryEvidence[] = [];
+    const stored = canRead ? this.profile(target) : [];
+    if (asksReference(question)) {
+      for (const row of stored) {
+        const reference = row.fact.match(/\bREF-[A-Z0-9-]{1,60}\b/i)?.[0];
+        if (reference) { memory.push({ id: row.source, type: "reference", value: reference }); break; }
+      }
     }
-    return { text: source.title + ": " + source.summary, source: { id: source.id, title: source.title } };
+    let sku = explicit.length === 1 ? explicit[0] : undefined;
+    if (!explicit.length && /mẫu đó|mẫu kia|^vâng/iu.test(question)) {
+      const recent = this.conversation(target).filter(row => row.id !== intent)
+        .map(row => ({ id: row.id, codes: extractSkus(row.content) })).find(row => row.codes.length);
+      if (recent?.codes.length === 1) {
+        sku = recent.codes[0];
+        if (stored.some(row => row.source === recent.id && extractSkus(row.fact).includes(sku!))) {
+          memory.push({ id: recent.id, type: "sku", value: sku });
+        }
+      }
+      if (!recent && !/mẫu kia/iu.test(question)) {
+        for (const row of stored) {
+          const codes = extractSkus(row.fact);
+          if (codes.length === 1) { sku = codes[0]; memory.push({ id: row.source, type: "sku", value: sku }); break; }
+        }
+      }
+    }
+    const result = validatedDraft(this.ai, {
+      question, sku, date: questionDate(question, this.today()), memory,
+      sources: [...(sku ? this.catalogue.bySku(sku) : []), ...this.catalogue.policies()],
+    });
+    this.requireOrigin(target, intent);
+    if (result.action === "từ chối") {
+      this.refused.add(intent);
+      this.invalidateApprovals(target);
+    }
+    return result;
   }
 
   activity() {
@@ -227,6 +333,7 @@ export class Foundation {
 
   invalidateApprovals(target: Target) {
     if (!validTarget(target)) throw new Error("INVALID_TARGET");
+    this.revisions.set(target, (this.revisions.get(target) ?? 0) + 1);
     for (const [id, approval] of this.approvals) if (approval.target === target) this.approvals.delete(id);
   }
 
@@ -236,10 +343,13 @@ export class Foundation {
       const now = Date.now();
       const policy = this.policy(target, now);
       if (!policy.send) throw new Error("SEND_DENIED");
-      if (intent) this.requireOrigin(target, intent);
+      if (intent) {
+        this.requireOrigin(target, intent);
+        if (this.refused.has(intent)) throw Error("DRAFT_DENIED");
+      }
 
       return { id: randomUUID(), target, digest, intent, revision: policy.revision, epoch: this.state().epoch,
-        expires: Math.min(policy.expires, now + 60_000) };
+        generation: this.revisions.get(target) ?? 0, expires: Math.min(policy.expires, now + 60_000) };
     });
     for (const [id, previous] of this.approvals) {
       if (previous.target === target || previous.expires <= Date.now()) this.approvals.delete(id);
@@ -262,7 +372,7 @@ export class Foundation {
         const now = Date.now();
         const policy = this.policy(target, now);
         if (!policy.send || (approval.intent && !policy.respond) || policy.revision !== approval.revision ||
-            this.state().epoch !== approval.epoch || approval.expires <= now) throw new Error("SEND_REVOKED");
+            this.state().epoch !== approval.epoch || (this.revisions.get(target) ?? 0) !== approval.generation || approval.expires <= now) throw new Error("SEND_REVOKED");
         // The fake transport initiates synchronously under the same SQLite writer lock.
         // A future adapter may not defer its initiation beyond this boundary.
         this.db.prepare("INSERT INTO receipt VALUES(?)").run(id);
