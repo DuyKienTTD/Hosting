@@ -1,0 +1,11 @@
+**
+!apps/
+!apps/ttd-zalo-agent-server/
+!apps/ttd-zalo-agent-server/package.json
+!apps/ttd-zalo-agent-server/package-lock.json
+!apps/ttd-zalo-agent-server/tsconfig.json
+!apps/ttd-zalo-agent-server/src/
+!apps/ttd-zalo-agent-server/src/**
+!apps/ttd-zalo-assistant/
+!apps/ttd-zalo-assistant/src/
+!apps/ttd-zalo-assistant/src/**
