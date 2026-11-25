@@ -22,6 +22,8 @@ Nguồn chính thức kiểm tra ngày **26/11/2026**. Giá API Standard bằng 
 
 **Đối chiếu Sonnet:** Giá Claude Sonnet 5 công bố hiện tại khớp nhận định A0 ở PR #51. Bản cập nhật Anthropic ngày 10/08/2026 giữ mức $2/$10 lâu dài và hủy mức tăng dự kiến $3/$15. [Appraisal A0](https://github.com/DuyKienTTD/Hosting/pull/51#issuecomment-7151224347) · [Thông báo Anthropic](https://www.anthropic.com/news/claude-sonnet-5)
 
+Anthropic hiện đánh dấu Sonnet 5 là Legacy và hướng dẫn chuyển sang Sonnet 5.5, cùng mức $2/$10. Bảng giữ Sonnet 5 để đối chiếu appraisal và kế hoạch. A0 xác nhận phiên bản Anthropic sẽ benchmark trước khi cấp quyền chạy. [Trạng thái model](https://platform.claude.com/docs/en/models/sonnet-5/overview)
+
 ## Mô phỏng chi phí tháng
 
 `USD/tháng = tổng token input tính phí × giá input / 1.000.000 + tổng token output tính phí × giá output / 1.000.000 + phí phát sinh`.
