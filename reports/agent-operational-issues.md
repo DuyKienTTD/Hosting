@@ -15,6 +15,8 @@ sensitivity: public-redacted
 
 [Đặc tả ZALO-RESUME-01-GOV](https://github.com/DuyKienTTD/Hosting/blob/951ae78b85ae5a4ff474fe6d2b35f51e6d5ead81/tasks/zalo-resume-01-gov.md)
 
+[Quyết định ZALO-PRODUCT-DIRECTION-02](../decisions/ZALO-PRODUCT-DIRECTION-02.md)
+
 ## Sự kiện
 
 | Incident ID | Thời điểm | Agent / Session | TASK_ID | Phiên bản | Expected | Observed | Evidence | Impact | Recovery | Root cause |
