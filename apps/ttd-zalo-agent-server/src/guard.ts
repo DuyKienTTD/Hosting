@@ -1,6 +1,7 @@
 import type { Agent, Config } from "./config.js";
 import { day, vietnam } from "./config.js";
 import type { ChannelAdapter, Request, Result } from "./channel.js";
+import { Budget } from "./budget.js";
 import { Store } from "./store.js";
 
 export type Kind = "reply" | "advertising" | "invite" | "group_post" | "group_create" | "group_moderate";
@@ -9,7 +10,8 @@ export type Proposal = {
   revision: number; epoch: number; groupApproved?: boolean; origin?: string;
 };
 export class Guard {
-  constructor(private store: Store, private channel: ChannelAdapter, private config: Config, private clock: () => number) {}
+  constructor(private store: Store, private channel: ChannelAdapter, private config: Config,
+    private clock: () => number, private budget = new Budget(store, config.budget, clock)) {}
 
   failure(now = this.clock()) {
     this.store.atomic(() => {
@@ -88,7 +90,7 @@ export class Guard {
     let pending: Promise<Result> | undefined;
     const decision = this.store.atomic(() => {
       const now = this.clock();
-      const denial = this.deny(p, target, friend, now);
+      const denial = this.budget.blocked(now) ? "budget_held" : this.deny(p, target, friend, now);
       if (denial) {
         db.prepare("DELETE FROM outbound WHERE id=? AND state='reserved'").run(key);
         return denial;

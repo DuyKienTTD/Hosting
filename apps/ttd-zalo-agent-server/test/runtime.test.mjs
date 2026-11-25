@@ -330,3 +330,117 @@ test("STOP then resume while Claude is pending invalidates authorization before 
   assert.equal(f.channel.sent.size, 0);
   assert.equal(f.store.db.prepare("SELECT count(*) n FROM ledger").get().n, 1);
 });
+
+function seedSpend(f, budget, amount, id = "spend-fixture") {
+  const { date, cycle } = budget.cycle();
+  f.store.db.prepare("INSERT INTO ledger(id,cycle,date,model,amount,state) VALUES(?,?,?,?,?,'settled')")
+    .run(id, cycle, date, light, amount);
+}
+
+for (const offset of [-1, 0, 1]) {
+  for (const percent of [70, 90, 100]) {
+    test(`budget boundary ${percent}% with offset ${offset} nanodollar`, t => {
+      const f = fixture(t);
+      const budget = new Budget(f.store, f.config.budget, f.clock);
+      seedSpend(f, budget, 195e9 * percent / 100 + offset);
+      f.advance(27 * day); // Leave room for either model under the daily limit.
+      assert.equal(budget.blocked(), percent === 100 && offset >= 0);
+      const background = budget.reserve("background", "router", false, true);
+      assert.equal(background?.model, percent === 70 ? (offset < 0 ? strong : light)
+        : percent === 90 && offset < 0 ? light : undefined);
+      f.store.db.prepare("DELETE FROM ledger WHERE id=?").run("background");
+      const reply = budget.reserve("reply", "router", true, false);
+      assert.equal(reply?.model, percent === 100 ? undefined : percent === 70 && offset < 0 ? strong : light);
+      // One nanodollar below the hard cap, the transport cutoff has not tripped,
+      // but even the cheapest new inference cannot fit in the available funds.
+    });
+  }
+}
+
+test("queued scheduled offer at 06:30 stays held at $195 at 08:30", async t => {
+  const f = fixture(t);
+  f.advance(-90 * minute);
+  f.create("a");
+  const runtime = new Runtime(f.store, f.channel, new FakeProvider(), f.config, f.clock,
+    [{ key: "queued-offer", agent: "campaign", kind: "advertising", target: "a", at: f.clock(), text: "Ưu đãi thử nghiệm" }]);
+  const job = () => f.store.db.prepare("SELECT status,body FROM jobs WHERE id='schedule:queued-offer'").get();
+  await runtime.tick();
+  assert.equal(job().status, "scheduled");
+  assert.equal(job().body, "offer");
+  assert.equal(f.channel.sent.size, 0);
+  f.advance(120 * minute);
+  seedSpend(f, runtime.budget, 195e9 - Number(f.store.db.prepare("SELECT sum(amount) n FROM ledger").get().n));
+  await runtime.tick();
+  assert.equal(job().status, "scheduled");
+  assert.equal(f.channel.sent.size, 0);
+  assert.ok(f.store.db.prepare("SELECT 1 FROM notices WHERE key LIKE 'budget:%'").get());
+});
+
+test("queued sales-ready offer and every transport kind respect the budget cap", async t => {
+  const f = fixture(t);
+  f.create("a");
+  f.store.db.prepare("UPDATE contact SET accepted=1 WHERE target=?").run(f.store.hash("a"));
+  const runtime = new Runtime(f.store, f.channel, new FakeProvider(), f.config, f.clock);
+  const id = f.store.eventKey("a", "dm", "synthetic");
+  f.store.db.prepare("INSERT INTO inbound VALUES(?,?,?)").run(id, f.store.hash("a"), f.clock());
+  f.store.db.prepare("INSERT INTO jobs VALUES(?,?,?,'queued',?,?,?,'sales-ready')")
+    .run(id, "accepted", f.store.hash("a"), f.clock(), 1, f.store.setting("epoch"));
+  seedSpend(f, runtime.budget, 195e9);
+  f.channel.events.push({ id: "synthetic", contact: "a", thread: "dm", kind: "accepted", at: f.clock() });
+  await runtime.tick();
+  assert.equal(f.store.db.prepare("SELECT body FROM jobs WHERE id=?").get(id).body, "sales-ready");
+  for (const [kind, agent] of [
+    ["advertising", "sales"], ["reply", "support"], ["invite", "sales"],
+    ["group_post", "community"], ["group_create", "community"], ["group_moderate", "community"],
+  ]) {
+    const proposal = { ...f.draft("at-cap-" + kind, "a", kind, agent), groupApproved: true, origin: id };
+    assert.equal(await runtime.guard.dispatch(proposal), "budget_held");
+  }
+  assert.equal(f.channel.sent.size, 0);
+  assert.equal(f.store.db.prepare("SELECT count(*) n FROM outbound").get().n, 0);
+});
+
+for (const reason of ["ledger cap during transport admission", "budgetStop during AI"]) {
+  test(`reply remains queued and gets a fresh decision after ${reason}`, async t => {
+    const f = fixture(t);
+    f.create("a");
+    f.store.stop("report", true);
+    let reads = 0;
+    let aiCalls = 0;
+    let hold = true;
+    const lookup = f.channel.getContact.bind(f.channel);
+    f.channel.getContact = async req => {
+      if (++reads === 2 && reason.startsWith("ledger")) {
+        seedSpend(f, runtime.budget, 195e9 - Number(f.store.db.prepare("SELECT sum(amount) n FROM ledger").get().n));
+      }
+      return lookup(req);
+    };
+    const provider = new FakeProvider(task => {
+      aiCalls++;
+      if (task.choices.includes("support")) return "support";
+      if (hold && reason.startsWith("budgetStop")) f.store.set("budgetStop", 1);
+      return hold ? "answer" : "none";
+    });
+    const runtime = new Runtime(f.store, f.channel, provider, f.config, f.clock);
+    f.channel.events.push({ id: "q", contact: "a", thread: "dm", kind: "dm", text: "Giá MAU-01?", at: f.clock() });
+    await runtime.tick();
+    const id = f.store.eventKey("a", "dm", "q");
+    const job = () => f.store.db.prepare("SELECT status,body FROM jobs WHERE id=?").get(id);
+    assert.equal(job().status, "queued");
+    assert.match(job().body, /^retry:/);
+    assert.equal(aiCalls, 2);
+    assert.equal(f.channel.sent.size, 0);
+    assert.ok(f.store.db.prepare("SELECT 1 FROM notices WHERE key LIKE 'budget:%'").get());
+    await runtime.tick();
+    assert.equal(aiCalls, 2);
+    hold = false;
+    f.store.set("budgetStop", 0);
+    f.store.db.prepare("DELETE FROM ledger WHERE id='spend-fixture'").run();
+    // Reconstruct the runtime from persisted job metadata and a replayed inbound event.
+    const resumed = new Runtime(f.store, f.channel, provider, f.config, f.clock);
+    await resumed.tick();
+    assert.equal(aiCalls, 4);
+    assert.equal(job().status, "processed");
+    assert.equal(f.channel.sent.size, 0);
+  });
+}

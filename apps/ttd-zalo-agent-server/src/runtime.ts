@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { extractSkus, FakeProvider as GroundedDraft, questionDate, validatedDraft } from "../../ttd-zalo-assistant/src/ai.js";
 import { validField } from "../../ttd-zalo-assistant/src/customer.js";
 import { Budget } from "./budget.js";
@@ -12,6 +13,7 @@ const choices = {
   community: ["none", "apply"], listen: ["none", "product-interest"], sales: ["none", "invite", "offer"],
   report: ["none", "highlight-activity", "highlight-blocks"],
 } as const;
+const deferredSend = ["hours", "ad_limit", "budget_held"];
 type ScheduleKind = "advertising" | "group_post" | "group_create" | "group_moderate";
 export type Schedule = { key: string; agent: "campaign" | "community"; kind: ScheduleKind; at: number;
   target: string; text?: string; message?: string; campaign?: "offer" | "check-in" | "new-product" };
@@ -28,12 +30,12 @@ export class Runtime {
   private reading = false;
   constructor(readonly store: Store, private channel: ChannelAdapter, private provider: Provider,
     private config: Config, private clock = Date.now, private schedule: readonly Schedule[] = []) {
-    this.guard = new Guard(store, channel, config, clock);
     this.budget = new Budget(store, config.budget, clock);
+    this.guard = new Guard(store, channel, config, clock, this.budget);
   }
 
   private async decide(id: string, agent: Agent | "router", data: object, options: readonly string[], inbound = false) {
-    if (this.store.stopped(agent) || this.store.setting("budgetStop")) return;
+    if (this.store.stopped(agent)) return;
     const reservation = this.budget.reserve(id, agent, inbound, false);
     if (!reservation) return;
     try {
@@ -121,22 +123,40 @@ export class Runtime {
     const inbound = event.kind === "dm";
     const question = event.kind === "dm" || event.kind === "group" ? sanitized(event.text).slice(0, this.config.scheduling.maxText) : "";
     const permitted = allowed.filter(agent => valid(agent) && (agent !== "crm" || !!contact?.retain));
+    const stored = store.db.prepare("SELECT body FROM jobs WHERE id=?").get(id)?.body;
+    let attempt = id;
+    let routed: string | undefined;
+    if (typeof stored === "string") {
+      if (stored.startsWith("retry:")) {
+        const [retry, route] = stored.split("|", 2);
+        attempt = id + "-" + retry;
+        routed = route;
+      } else routed = stored;
+    }
+    const holdReply = () => {
+      // Leave the ledger and transport key intact. Only invalidate the AI decision.
+      if (inbound && routed) {
+        store.db.prepare("UPDATE jobs SET body=? WHERE id=?").run("retry:" + randomUUID(), id);
+      }
+      return false;
+    };
+    if (this.budget.blocked()) return holdReply();
     if (inbound) {
       const profile = await this.channel.getContact({ key: id, target: event.contact }).catch(() => undefined);
+      if (this.budget.blocked()) return holdReply();
       if (!profile?.ok) { this.guard.failure(); return true; }
       if (!profile.value.friend || profile.value.id !== event.contact) return true;
     }
-    let routed = store.db.prepare("SELECT body FROM jobs WHERE id=?").get(id)?.body;
     if (typeof routed !== "string") {
       if (!permitted.some(valid)) return true;
-      routed = await this.decide(id + "-route", "router", { event: event.kind, question }, [...permitted, "none"], inbound);
+      routed = await this.decide(attempt + "-route", "router", { event: event.kind, question }, [...permitted, "none"], inbound);
       if (!routed) return false;
-      store.db.prepare("UPDATE jobs SET body=? WHERE id=?").run(routed, id);
+      store.db.prepare("UPDATE jobs SET body=? WHERE id=?").run(attempt === id ? routed : attempt.slice(id.length + 1) + "|" + routed, id);
     }
     if (routed === "sales-ready" && valid("sales")) {
       const outcome = await send("sales", "advertising",
         "Cảm ơn bạn đã kết bạn với TTD METAL. Bạn muốn xem bộ sưu tập lan can sắt mỹ thuật hay nhận báo giá theo mẫu?");
-      return !["hours", "ad_limit"].includes(outcome);
+      return !deferredSend.includes(outcome);
     }
     if (typeof routed !== "string" || !isAgent(routed) || !permitted.includes(routed) || !valid(routed)) return true;
     if (routed === "listen") {
@@ -160,19 +180,21 @@ export class Runtime {
       ...(sku ? store.knowledge.bySku(sku) : []), ...store.knowledge.policies(), ...store.knowledge.findDocuments(question, date, sku),
     ] : [];
     const draft = routed === "support" ? validatedDraft(new GroundedDraft(), { question, sku, date, sources }) : undefined;
-    const decision = await this.decide(id + "-" + routed, routed,
+    const decision = await this.decide(attempt + "-" + routed, routed,
       { event: event.kind, question, sourceIds: draft?.sourceIds, draftAction: draft?.action }, choices[routed], inbound && routed === "support");
     if (decision === undefined) return false;
-    if (!valid(routed) || store.setting("budgetStop")) return true;
+    if (!valid(routed)) return true;
+    if (inbound && this.budget.blocked()) return holdReply();
     if (routed === "support" && decision === "answer" && draft && ["trả lời", "hỏi lại"].includes(draft.action)) {
-      await send("support", "reply", draft.text + (draft.sourceIds.length ? "\nNguồn: " + draft.sourceIds.join(", ") : ""));
+      const outcome = await send("support", "reply", draft.text + (draft.sourceIds.length ? "\nNguồn: " + draft.sourceIds.join(", ") : ""));
+      if (outcome === "budget_held") return holdReply();
     } else if (routed === "crm" && validField(decision) && store.policy(target, "crm", this.clock()).retain && sku) {
       store.db.prepare("INSERT OR IGNORE INTO customer_field(target,source,kind,value,created) VALUES(?,?,?,?,?)")
         .run(target, id, decision, sku, now);
     } else if (routed === "sales" && decision === "offer") {
       const outcome = await send("sales", "advertising",
         "Cảm ơn bạn đã kết bạn với TTD METAL. Bạn muốn xem bộ sưu tập lan can sắt mỹ thuật hay nhận báo giá theo mẫu?");
-      if (["hours", "ad_limit"].includes(outcome)) {
+      if (deferredSend.includes(outcome)) {
         store.db.prepare("UPDATE jobs SET body='sales-ready' WHERE id=?").run(id);
         return false;
       }
@@ -182,7 +204,7 @@ export class Runtime {
 
   private batchId(id: string, agent: "listen" | "report") { return this.store.hash(agent + ":" + id).slice(0, 60); }
   private async batch(id: string, agent: "listen" | "report", data: object) {
-    if (this.store.stopped(agent) || this.store.setting("budgetStop")) return;
+    if (this.store.stopped(agent)) return;
     const key = this.batchId(id, agent);
     const reservation = this.budget.reserve(key, agent, false, true);
     if (!reservation) return;
@@ -225,7 +247,7 @@ export class Runtime {
       if (decision !== expected || snapshot?.status !== "scheduled" || snapshot.revision !== revision ||
         snapshot.epoch !== epoch) continue;
       const outcome = await this.guard.dispatch({ ...task, id, revision, epoch, groupApproved: task.agent === "community" });
-      if (!["hours", "ad_limit"].includes(outcome)) db.prepare("UPDATE jobs SET status=? WHERE id=?").run(outcome, id);
+      if (!deferredSend.includes(outcome)) db.prepare("UPDATE jobs SET status=? WHERE id=?").run(outcome, id);
     }
   }
   async readChannel() {

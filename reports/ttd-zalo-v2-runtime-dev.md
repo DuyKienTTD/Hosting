@@ -33,3 +33,16 @@ Base [242dbfe](https://github.com/DuyKienTTD/Hosting/commit/242dbfe7ec9013739709
 | `python3 program/kng/validate.py --json`, `python3 scripts/validate-catalog-partitions.py` | 0 | PASS, 18 bản ghi đúng |
 
 INCIDENT: Sandbox thiếu Docker/Compose và PowerShell. Các lệnh container/VPS và `scripts/validate-repository.ps1` chưa chạy. Đã kiểm tra ứng dụng Node và backup SQLite trực tiếp, chạy bộ kiểm tra Python tương ứng workflow Data integrity. Kiểm thử phát hiện lỗi bootstrap migrate, lời mời tính chính reservation hiện tại và định dạng Content-Type của form STOP. Đã sửa và chạy lại.
+
+## V2-02-RUNTIME-FIX1 · 26/11/2026
+
+Theo [biên nhận A0 trên PR #71](https://github.com/DuyKienTTD/Hosting/pull/71#issuecomment-7174651830), tại đúng 70% trần an toàn runtime chọn Haiku, tại đúng 90% ngừng giữ chỗ cho tác vụ nền, tại $195 hoặc khi có `budgetStop` chặn mọi thao tác ghi kênh. Kiểm tra dùng cùng số dư SQLite như khi giữ chỗ cho AI và chạy trong transaction ngay trước khi bắt đầu gửi. Lượt ưu đãi đã xếp hàng và lượt bán hàng đang chờ giữ trạng thái khi bị chặn. Tin khách còn hiệu lực giữ trong hàng chờ. Nếu đã có quyết định AI, runtime yêu cầu quyết định mới sau khi gỡ chặn, kể cả khi khôi phục hàng chờ qua replay. Cảnh báo hiển thị qua trang vận hành và CLI.
+
+| Chạy lại trên Linux, Node 24 | Exit | Kết quả |
+|---|---:|---|
+| Cả hai app `npm ci --no-audit --no-fund` (desktop với `ELECTRON_SKIP_BINARY_DOWNLOAD=1`), `npm run typecheck`, `npm run build`, `npm test` | 0 | Desktop 20/20, runtime 31/31 |
+| Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |
+| Runtime `node --test --test-name-pattern="seven-day end to end" test/runtime.test.mjs` | 0 | 1/1 |
+| Runtime `node --test --test-name-pattern="month budget under sustained demand" test/runtime.test.mjs` | 0 | 1/1 |
+
+13 ca mới gồm chín phép thử sát biên dưới/đúng/trên của 70%, 90% và $195, ưu đãi được xếp lúc 06:30 ICT rồi gặp trần lúc 08:30 ICT, lượt `sales-ready` và sáu loại thao tác ghi kênh, cùng hai ca tin khách bị giữ do ledger chạm trần khi chuẩn bị gửi hoặc do `budgetStop` trong lúc AI đang xử lý. Các ca chạm trần quan sát 0 lượt gửi.

@@ -16,29 +16,49 @@ export class Budget {
     const left = (Date.UTC(year, month + offset, start) - Date.parse(date)) / day;
     return { cycle, date, left };
   }
+  private balance(at: number) {
+    const { cycle, date, left } = this.cycle(at);
+    const usage = this.store.db.prepare(`SELECT coalesce(sum(CASE WHEN cycle<>? OR date<? THEN amount ELSE 0 END),0) prior,
+      coalesce(sum(CASE WHEN cycle=? AND date=? THEN amount ELSE 0 END),0) today FROM ledger
+      WHERE cycle=? OR (cycle<? AND (settled_cycle=? OR state IN ('reserved','batch')))`).get(cycle, date, cycle, date, cycle, cycle, cycle)!;
+    return { cycle, date, left, prior: Number(usage.prior), today: Number(usage.today), cap: this.cfg.stopUsd * usd };
+  }
+
+  private notifyHold(cycle: string, at: number) {
+    this.store.notice(`budget:${cycle}`, at, this.cfg.holdNotice);
+  }
+
+  private isBlocked(balance: ReturnType<Budget["balance"]>) {
+    return Boolean(this.store.setting("budgetStop")) || balance.prior + balance.today >= balance.cap;
+  }
+
+  // The guard calls this inside its transport admission transaction.
+  blocked(at = this.clock()) {
+    const balance = this.balance(at);
+    if (!this.isBlocked(balance)) return false;
+    this.notifyHold(balance.cycle, at);
+    return true;
+  }
+
   reserve(id: string, agent: keyof Config["budget"]["byAgent"], inbound: boolean, batch: boolean): { id: string; model: Model; batch: boolean } | undefined {
     return this.store.atomic(() => {
       const { db } = this.store;
-      const { cycle, date, left } = this.cycle();
-      if (this.store.setting("budgetStop") || db.prepare("SELECT 1 FROM ledger WHERE id=?").get(id)) return;
-      const usage = db.prepare(`SELECT coalesce(sum(CASE WHEN cycle<>? OR date<? THEN amount ELSE 0 END),0) prior,
-        coalesce(sum(CASE WHEN cycle=? AND date=? THEN amount ELSE 0 END),0) today FROM ledger
-        WHERE cycle=? OR (cycle<? AND (settled_cycle=? OR state IN ('reserved','batch')))`).get(cycle, date, cycle, date, cycle, cycle, cycle)!;
-      const prior = Number(usage.prior);
-      const today = Number(usage.today);
-      const cap = this.cfg.stopUsd * usd;
-      const fraction = (prior + today) / cap;
-      if (fraction >= 1) {
-        this.store.notice(`budget:${cycle}`, this.clock(), "Đã chạm giới hạn an toàn của ngân sách AI.");
+      const now = this.clock();
+      const balance = this.balance(now);
+      const { cycle, date, left, prior, today, cap } = balance;
+      if (this.isBlocked(balance)) {
+        this.notifyHold(cycle, now);
         return;
       }
-      if (fraction > this.cfg.inboundOnly && !inbound) return;
-      const model: Model = fraction > this.cfg.downgrade ? light : this.cfg.byAgent[agent] as Model;
+      if (db.prepare("SELECT 1 FROM ledger WHERE id=?").get(id)) return;
+      const fraction = (prior + today) / cap;
+      if (fraction >= this.cfg.inboundOnly && !inbound) return;
+      const model: Model = fraction >= this.cfg.downgrade ? light : this.cfg.byAgent[agent] as Model;
       const rate = this.cfg.models[model];
       // Use on-demand rates for reservation even for batch. Unknown billing remains reserved.
       const amount = rate.context * Math.max(rate.input, rate.creation, rate.read) + this.cfg.maxOutputTokens * rate.output;
       if (today + amount > Math.floor((cap - prior) / left)) {
-        if (prior + today + amount > cap) this.store.notice(`budget:${cycle}`, this.clock(), "Đã chạm giới hạn an toàn của ngân sách AI.");
+        if (prior + today + amount > cap) this.notifyHold(cycle, now);
         return;
       }
       db.prepare("INSERT INTO ledger(id,cycle,date,model,amount,state) VALUES(?,?,?,?,?,'reserved')")

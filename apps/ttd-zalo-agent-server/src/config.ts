@@ -11,6 +11,9 @@ export const defaults = {
   scheduling: { pollMs: 15_000, maxInboundAgeMs: day, maxQueued: 500, maxJobsPerTick: 10, maxText: 1500 },
   budget: {
     creditUsd: 200, stopUsd: 195, downgrade: 0.7, inboundOnly: 0.9, cycleStartDay: 1,
+    // Inclusive percentages of stopUsd. At the cap or budgetStop, every new
+    // channel write is held. Customer replies stay queued for a fresh AI decision.
+    holdNotice: "Ngân sách AI đang bị chặn. Lượt gửi tạm dừng và tin khách chưa trả lời vẫn ở hàng chờ.",
     batchMultiplier: 0.5, maxOutputTokens: 256, maxPayloadBytes: 16_384,
     source: "https://platform.claude.com/docs/en/about-claude/pricing", checked: "2026-11-26",
     // Nanodollars per token. Reserve against the entire model context, including tool overhead.
