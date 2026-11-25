@@ -12,6 +12,8 @@ sensitivity: public
 
 [Kế hoạch](README.md) · [Đối chiếu điều khoản](CLAUSE-MAP.md) · [PR #63](https://github.com/DuyKienTTD/Hosting/pull/63).
 
+Base của PR #63 là [`main` tại `ec3a3dc`](https://github.com/DuyKienTTD/Hosting/commit/ec3a3dc55739981117411f372ea236d240f76025), sau khi hợp nhất [PR #62](https://github.com/DuyKienTTD/Hosting/pull/62). Cả 25 blob của cột `c0720d7` trùng blob trên base này. POST-04 trên main giữ nguyên các số đo. Hai mốc so sánh pin và 56 kết quả bên dưới tiếp tục dùng cùng nguồn đo.
+
 ## Ca đạt giảm ít nhất 30%
 
 | So với | Đơn vị | C0 | C1 | C2 | C3 | C4 | C5 | C6 | Tổng |
@@ -25,7 +27,7 @@ sensitivity: public
 
 Đọc blob UTF-8 thô qua `git cat-file blob`, kiểm SHA từng blob. PR #63 dùng blob đã stage của chính delta triển khai (SHA từng nguồn ở bảng cuối). Đếm code point Unicode và byte UTF-8, tính cả newline, khoảng trắng, Markdown và metadata. Mỗi path/range tính một lần trong mỗi ca. Đạt ngưỡng khi `10 × PR #63 ≤ 7 × ref so sánh` trên số nguyên. Phần trăm hiển thị hai chữ số, giữ dấu âm cho lượng đọc tăng. Hai snapshot tái lập đúng số liệu POST-04 cho mọi ô và cả hai đơn vị.
 
-Nguồn pin [trước MKOE](https://github.com/DuyKienTTD/Hosting/blob/097c080cc6d7fb3ca36b1849d9c10375d5cbd67f/rules/AGENT_WORKFLOW.md), [MKOE](https://github.com/DuyKienTTD/Hosting/blob/c0720d7d81d6956f2c7bcf7a65cc3a2d218a9bcb/rules/AGENT_WORKFLOW.md), [đặc tả chung](https://github.com/DuyKienTTD/Hosting/blob/cbb60147caed49467d76c71b84139e00b4fd3e61/tasks/hosting-post-61.md), [POST-04](https://github.com/DuyKienTTD/Hosting/blob/9d7758b4139e3ce3a2dd26ad7e06413c8c548b6e/reports/2026-11-25-hosting-post-61.md#post-04--đo-read_set).
+Nguồn pin [trước MKOE](https://github.com/DuyKienTTD/Hosting/blob/097c080cc6d7fb3ca36b1849d9c10375d5cbd67f/rules/AGENT_WORKFLOW.md), [MKOE](https://github.com/DuyKienTTD/Hosting/blob/c0720d7d81d6956f2c7bcf7a65cc3a2d218a9bcb/rules/AGENT_WORKFLOW.md), [đặc tả chung](https://github.com/DuyKienTTD/Hosting/blob/cbb60147caed49467d76c71b84139e00b4fd3e61/tasks/hosting-post-61.md), [POST-04](https://github.com/DuyKienTTD/Hosting/blob/ec3a3dc55739981117411f372ea236d240f76025/reports/2026-11-25-hosting-post-61.md#post-04--đo-read_set).
 
 - Mọi ô gồm `AGENTS.md`, hồ sơ vai trò riêng và đặc tả pin chung. Baseline dùng `agents/chatgpt.md` cho A2, Điều phối, Work. Tám hồ sơ theo thứ tự bảng là `a0-assistant`, `a1`, `a2`, `codex`, `coordinator`, `hermes`, `hostinger`, `work` trong `agents/`.
 - C1–C6 đọc toàn Workflow nguyên khối tại baseline, index và các module trong bảng tại hai snapshot sau. MKOE 1–8 là authority, coordination, dispatch, execution, evidence, integrity, handoff, lifecycle. PR #63 dùng các tệp `rules/workflow-<module>.md` và index. Các tệp chuyển tiếp cũ chỉ dùng tra cứu.
