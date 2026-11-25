@@ -4,7 +4,7 @@ type: rule
 status: draft
 owner: Chat Dieu phoi
 parent: rules/AGENT_WORKFLOW.md
-updated_at: 2026-11-25
+updated_at: 2026-11-26
 sensitivity: public
 ---
 # HOSTING — Modular Knowledge & Outcome-Driven Execution Standard
@@ -22,12 +22,12 @@ PLAN = strategy, objective, organization and scope; ROADMAP = milestones/order/d
 Short startup profile and full CV linked from agent index: identity, role/environment, demonstrated strengths, weaknesses, fit/nonfit, plugins connected/available/unknown, skills verified/available-to-install/conditional, tools/runtime, cost, capacity, evidence/date and freshness. VERIFIED, REPORTED, AVAILABLE_UNTESTED, BLOCKED, UNKNOWN distinguish actual evidence from advertising; historical proof not current session permission. No new installation or activation for inventory.
 
 ## Canonical controls
-B1/B4: [Execution](execution.md); B2/B3: [Dispatch](dispatch.md); B6: [Handoff](handoff.md); B5: this standard (below); evidence and QA: [Evidence](evidence.md); lifecycle/metadata/retention: existing Lifecycle protocol; MSC: Core. Candidate replaces corresponding old clauses only after full review, not parallel authority.
+B1/B4: [Common](workflow-common.md); B2: [Receipts](workflow-receipts.md); B3: [Dispatch](workflow-dispatch.md); B6: [Handoff](workflow-handoff.md); B5: this standard (below); evidence and QA: [Review](workflow-review.md); lifecycle/metadata/retention: existing Lifecycle protocol; MSC: Core. Candidate replaces corresponding old clauses only after full review, not parallel authority.
 
 B5 — A large file has a short Summary stating purpose, effectiveness, sections relevant to task, rights boundary and links. Summary is a navigation aid, never substitute for mandatory clauses. For immutable large Gate B source, external index with section anchors and pinned version serves this function without rewriting it.
 
 ## Work size and dispatch
-See [canonical outcome sizing, ownership and specification](dispatch.md) and [canonical report/handoff format](handoff.md). Use [planning templates](../templates/outcome-plan/README.md).
+See [canonical outcome sizing, ownership and specification](workflow-dispatch.md) and [canonical report/handoff format](workflow-handoff.md). Use [planning templates](../templates/outcome-plan/README.md).
 
 ## Verification
 Preserve security, reserved rights, independent QA, KNG snapshot/release semantics, history and validators. No task/report/evidence in CATALOG. Compare identical representative task read sets in characters/bytes, target >=30% reduction without quality loss. Independent A/B T1 versioned appraisal, T2 ACK attribution, T3 partial blocker; same model/task/data/tools/rights, separate sessions, log correctness, reminders, reading and time. Missing telemetry or independent execution = NOT_RUN/PARTIAL. No author simulation as independent evidence. One draft PR, no merge without owner approval.

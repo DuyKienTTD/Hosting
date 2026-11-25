@@ -2,34 +2,27 @@
 id: multi-agent-handoff
 type: rule
 status: draft
-updated_at: 2026-11-24
+updated_at: 2026-11-26
 sensitivity: public
 ---
 
 # Quy tắc vận hành Agent
 
-Bản tinh gọn theo chỉ thị A0 ngày 24/11/2026; chỉ là candidate cho đến khi được tích hợp hợp lệ. Không tự cấp quyền. [Lịch sử và bằng chứng](../references/history/README.md).
+Candidate theo A0 24/11/2026. Không cấp quyền. Hiệu lực sau QA độc lập, A0 duyệt merge, xác minh main/CI. [MKOE](HOSTING-MKOE-01.md) · [Lịch sử](../references/history/README.md) · [Gate B](GATE-B-INDEX.md).
 
-## Subject index
-- [1. authority](authority.md)
-- [2. coordination](coordination.md)
-- [3. dispatch](dispatch.md)
-- [4. execution](execution.md)
-- [5. evidence](evidence.md)
-- [6. integrity](integrity.md)
-- [7. handoff](handoff.md)
-- [8. lifecycle](lifecycle.md)
+Khi Core kích hoạt Workflow, đọc Core, vai trò, task và [chung](workflow-common.md). Đọc đủ **mọi** dòng khớp. Review Git + ACK cộng review, Git và biên nhận. Review cả nội dung đặc tả thì cộng dispatch.
 
-Read modules in full; requirements are cumulative, not alternatives. Always read Core, role, task and module 1.
-
-| Operation | Additional mandatory modules |
+| Thao tác hoặc đối tượng review | Nguồn thêm bắt buộc |
 |---|---|
-| Coordination/dispatch | 2–5, 7 |
-| Review/appraisal | 2, 4, 5, 7; add 6 for Git changes/diff, 3 for dispatch/ACK |
-| Any Git write/shared write | 2, 4–6; add 3, 7 for task/handoff |
-| Paid/production/VPS/destructive/release/merge | 2–7, exact authority, preflight and rollback |
-| Governance data lifecycle | 6, 8 and [protocol](DATA_LIFECYCLE_CONTEXT.md) |
+| Review, nghiệm thu, xác minh bằng chứng | [review](workflow-review.md) |
+| Đặc tả, ownership, phân/giao việc | [dispatch](workflow-dispatch.md) |
+| Chuẩn bị/gửi/nhận handoff hoặc kiểm ACK | [biên nhận](workflow-receipts.md) |
+| Chuẩn bị/gửi/nhận/kiểm bàn giao, báo cáo, B6 | [handoff](workflow-handoff.md) |
+| Git, diff hoặc review tính toàn vẹn | [Git review](workflow-git-review.md); Git thêm [Security](REPOSITORY_SECURITY.md), [CONTRIBUTING](../CONTRIBUTING.md) |
+| Ghi Git/ghi dùng chung | Hàng Git, [review](workflow-review.md), [Git write](workflow-git-write.md) |
+| Định tuyến/quyền ngoài KNG, ghi trạng thái tổng hợp | [routing](workflow-routing.md), [STATE](../STATE.md) |
+| Định tuyến/release KNG | [KNG](workflow-kng.md), [STATE](../STATE.md), snapshot và release gate |
+| Lưu/chuyển/tái sử dụng/dọn dữ liệu quản trị | [lifecycle](workflow-lifecycle.md), [protocol](DATA_LIFECYCLE_CONTEXT.md), [Git review](workflow-git-review.md) |
+| Đổi quyền/duyệt chi phí, ngoại lệ Codex/Hermes, paid/render/publish, production/VPS, destructive/release/merge | [hạn chế](workflow-restricted-operations.md), [review](workflow-review.md), exact authority, preflight và rollback |
 
-Git operations also require [Security](REPOSITORY_SECURITY.md) and [CONTRIBUTING](../CONTRIBUTING.md); routing/STOP/release requires [STATE](../STATE.md) and applicable live authority/KNG gates per Core. If uncertain, read all eight and all triggered safety sources. [MKOE](HOSTING-MKOE-01.md). Historical section numbers map to modules above. No change to reserved authority.
-
-[Gate B historical navigation](GATE-B-INDEX.md).
+Routing/STOP/release cần STATE và nguồn live theo Core. Khi chưa rõ, đọc mọi module và nguồn an toàn có thể áp dụng. STOP phần phụ thuộc nếu nguồn thiếu hoặc mâu thuẫn.

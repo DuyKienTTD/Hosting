@@ -19,7 +19,7 @@ A0 yêu cầu tinh gọn trên nhánh riêng, giữ CATALOG nguyên bản. Chỉ
 
 KNG validator hiện kiểm result_blob lịch sử với working tree; thay đổi hai file sẽ gây INTEGRATED_BLOB_MISMATCH. Không sửa pin hoặc bỏ kiểm tra để báo PASS. Trước tích hợp cần coordinator/reviewer xác minh lịch sử tại commit gốc và thiết kế validator phiên bản hiện hành, đồng bộ must_read trong typed source và hồ sơ Agent liên quan. Không tự nghiệm thu. Runtime tests NOT_RUN.
 
-A0 bổ sung yêu cầu chống phình tri thức: xem [vòng đời tài liệu và đóng thử nghiệm](../../rules/AGENT_WORKFLOW.md#8-vòng-đời-tri-thức--chống-phình-kho-chỉ-thị-a0-24112026). Đây là chính sách candidate; chưa dọn backlog hay xóa báo cáo trong PR này.
+A0 bổ sung yêu cầu chống phình tri thức: xem [vòng đời tài liệu và đóng thử nghiệm](https://github.com/DuyKienTTD/Hosting/blob/097c080cc6d7fb3ca36b1849d9c10375d5cbd67f/rules/AGENT_WORKFLOW.md#8-vòng-đời-tri-thức--chống-phình-kho-chỉ-thị-a0-24112026). Đây là chính sách candidate; chưa dọn backlog hay xóa báo cáo trong PR này.
 
 ## Tách tài liệu vận hành khỏi CATALOG (candidate)
 
