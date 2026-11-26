@@ -33,3 +33,9 @@ Giữ bản cấu hình quản trị root 0600 riêng. Worker chạy dưới use
 ```
 
 Giữ tệp Compose `.env` để Compose đọc qua `--env-file`. Tránh source tệp này vào shell tương tác vì biến shell đã export được ưu tiên hơn giá trị trong `--env-file`.
+
+## Làm mới token trong container
+
+Worker và các job backup sao chép cấu hình nguồn chỉ đọc vào tmpfs riêng, quyền 0600 và thuộc UID của tiến trình. rclone lưu token vừa làm mới trong vòng đời container. Cấu hình trên host giữ nguyên. Khi đổi token trên host, cập nhật bản worker rồi recreate worker bằng `compose up -d --force-recreate worker` theo lệnh Compose của dự án. Job backup mới đọc bản cấu hình admin hiện tại mỗi lần chạy. Bind mount một tệp có thể giữ inode cũ sau khi host thay tệp.
+
+`RCLONE_MARKER_TIMEOUT_SECONDS` mặc định 30 giây và nhận số nguyên từ 1 đến 120. Lệnh đọc marker thử ở cấp lệnh một lần và giới hạn thử cấp kết nối ở hai lần. Khi chạy restore thủ công và ghi đè entrypoint backup, gọi `sh /deploy/with-rclone-config.sh sh /ops/restore.sh <DUMP_NAME> <STAGING_DATABASE>` để chuẩn bị bản ghi được trước khi dùng rclone.

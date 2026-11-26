@@ -17,7 +17,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
       - run: |
-          shellcheck deploy/test-backup-retention.sh deploy/setup-rclone-gdrive.sh deploy/host-job.sh apps/ttd-zalo-agent-server/ops/backup.sh
+          shellcheck deploy/with-rclone-config.sh deploy/test-backup-retention.sh deploy/setup-rclone-gdrive.sh deploy/host-job.sh apps/ttd-zalo-agent-server/ops/backup.sh
           bash -n deploy/host-job.sh
           systemd-analyze calendar '*-*-* 01:00:00 UTC'
           sh deploy/setup-rclone-gdrive.sh --dry-run
