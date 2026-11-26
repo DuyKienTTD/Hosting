@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 umask 077
-: "${BACKUP_REMOTE:?}" "${AGE_IDENTITY_FILE:?}"
+: "${BACKUP_REMOTE:?}" "${AGE_IDENTITY_FILE:?}" "${DATA_TOMBSTONE_KEY:?}"
 [ "$#" -eq 2 ] || exit 2
 name=$1
 db=$2
@@ -21,5 +21,12 @@ age -d -i "$AGE_IDENTITY_FILE" -o "$tmp/dump" "$tmp/dump.age"
 createdb -T template0 "$db"
 psql -v ON_ERROR_STOP=1 -d "$db" -c 'REVOKE CONNECT ON DATABASE '"$db"' FROM PUBLIC'
 pg_restore --exit-on-error --single-transaction -d "$db" "$tmp/dump"
-python3 "$(dirname "$0")/restore-tombstones.py" "$tmp/tombstones" > "$tmp/replay.sql"
+script_dir=$(dirname "$0")
+migrations="$script_dir/../postgres"
+[ -f "$migrations/003-purge.sql" ] || migrations=/migrations
+if [ "$(psql -X -A -t -v ON_ERROR_STOP=1 -d "$db" -c "SELECT to_regnamespace('purge_private') IS NULL")" = t ]; then
+  psql -X -v ON_ERROR_STOP=1 -d "$db" -f "$migrations/003-purge.sql"
+fi
+psql -X -v ON_ERROR_STOP=1 -d "$db" -f "$migrations/purge-key.sql"
+python3 "$script_dir/restore-tombstones.py" "$tmp/tombstones" > "$tmp/replay.sql"
 psql -v ON_ERROR_STOP=1 -d "$db" -f "$tmp/replay.sql"

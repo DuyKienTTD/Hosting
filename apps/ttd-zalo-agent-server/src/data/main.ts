@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
 import { Pool } from "pg";
 import { authenticate, PostgresRepository, transaction, uuid } from "./repository.js";
-import { remoteArchive, requestDeletion, runRetention } from "./deletion.js";
+import { requestDeletion, runRetention } from "./deletion.js";
 
 const command = process.argv[2] ?? "serve";
 const worker = command !== "serve";
@@ -20,7 +20,7 @@ const env = {
   ...(worker ? {} : { DATA_TOKEN_RETENTION: undefined }),
 };
 const runOnce = async () => {
-  await runRetention(pool, remoteArchive(process.env.BACKUP_REMOTE ?? ""));
+  await runRetention(pool, process.env.BACKUP_REMOTE ?? "");
   // This stage acknowledges intake only. OA and AI processing are subsequent steps.
   await transaction(pool, async db => {
     await db.query(`WITH due AS (

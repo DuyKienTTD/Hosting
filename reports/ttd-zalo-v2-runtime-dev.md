@@ -150,3 +150,9 @@ Bổ sung trên PR #75, từ HEAD `32d080b`. Runtime triển khai dùng Postgres
 | `docker compose --profile maintenance config --quiet` và cùng lệnh với `-f compose.data.yaml` | Exit 0 |
 
 CI chạy toàn bộ suite runtime với Postgres service container. Ca tích hợp dùng role triển khai `data_runtime` và đi từ MockChannel qua FakeProvider, Guard đến `send_log`. Ca kiểm tra nhìn thấy giữ chỗ đã commit từ kết nối độc lập, thay đổi cờ quảng cáo, trạng thái và consent sau xác minh đích, và chặn gửi lại khi kênh trả `unknown_delivery`.
+
+## Z4-S1-FIX1 · Biên nhận tombstone trước purge
+
+Migration 003 bỏ `authorize_purge`. Chỉ `data_worker` được gọi entrypoint purge từ các vai trò dịch vụ. Worker giữ transaction mở, ghi và đọc lại tombstone ở kho độc lập, rồi ký biên nhận gắn với đúng bản ghi và phiên bản. PostgreSQL xác thực biên nhận trước khi ghi audit và xóa. Trigger chặn DELETE và TRUNCATE trực tiếp thiếu biên nhận.
+
+Hồi quy Postgres tái tạo backup → cách ly → hết hạn → gọi trực tiếp theo từng vai trò → restore. Bản ghi vẫn còn khi purge bị từ chối. Khi SQL lỗi sau khi xóa, dữ liệu và audit nội bộ rollback, tombstone đã ghi ngoài DB vẫn bền. Lần chạy lại tái sử dụng tombstone, purge thành công, và restore backup cũ không làm bản ghi sống lại. `DEPLOY.md` ghi cách cấp khóa và áp migration trước khi chạy worker.

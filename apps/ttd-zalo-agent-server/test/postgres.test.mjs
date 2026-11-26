@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { Pool } from "pg";
 import { authenticate, PostgresRepository } from "../dist/ttd-zalo-agent-server/src/data/repository.js";
-import { remoteArchive, requestDeletion, runRetention } from "../dist/ttd-zalo-agent-server/src/data/deletion.js";
+import { requestDeletion, runRetention } from "../dist/ttd-zalo-agent-server/src/data/deletion.js";
 
 const config = process.env;
 test("Postgres grants, deletion, encrypted backup and restore", { skip: config.RUN_POSTGRES_TESTS !== "1" }, async t => {
@@ -87,14 +87,56 @@ test("Postgres grants, deletion, encrypted backup and restore", { skip: config.R
     assert.equal(await requestDeletion(worker, retention, request), true);
     assert.equal(await requestDeletion(worker, retention, request), false);
     assert.deepEqual(await repository.readMessages(support, conversation), []);
-    await runRetention(worker, async () => assert.fail("quarantine not elapsed"));
+    await runRetention(worker, join(root, "unavailable"));
     await admin.query("UPDATE messages SET purge_after=now()-interval '1 second' WHERE id=$1", [record]);
     await admin.query("INSERT INTO legal_holds(message_id,reason) VALUES($1,'fixture')", [record]);
-    await runRetention(worker, async () => assert.fail("held record"));
+    await runRetention(worker, join(root, "unavailable"));
     await admin.query("UPDATE legal_holds SET released_at=now() WHERE message_id=$1", [record]);
-    await assert.rejects(runRetention(worker, async () => { throw Error("archive failed"); }), /archive failed/);
+    const runtimeRole = new Pool({ user: "data_runtime", password: config.DATA_RUNTIME_PASSWORD });
+    try {
+      for (const role of [worker, app, runtimeRole, admin]) {
+        await assert.rejects(role.query("SELECT authorize_purge($1,1,1)", [record]), /does not exist/);
+        await assert.rejects(role.query("DELETE FROM messages WHERE id=$1", [record]),
+          /permission denied|purge_receipt_required/);
+        await assert.rejects(role.query("SELECT purge_message($1,1,1,$2)", [record, "0".repeat(64)]),
+          /permission denied|purge_receipt_required/);
+      }
+      for (const role of [worker, app, runtimeRole]) {
+        await assert.rejects(role.query("SELECT * FROM purge_private.signing_key"), /permission denied/);
+        await assert.rejects(role.query("SELECT purge_private.replay_tombstone($1,$2,$3,1,1,$4)",
+          [record, conversation, "0".repeat(64), "0".repeat(64)]), /permission denied/);
+      }
+      assert.equal((await worker.query("SELECT purge_message($1,1,1,NULL) AS eligible", [record])).rows[0].eligible, true);
+      assert.equal((await admin.query("SELECT id FROM messages WHERE id=$1", [record])).rowCount, 1);
+      await assert.rejects(admin.query("TRUNCATE messages CASCADE"), /purge_receipt_required/);
+    } finally { await runtimeRole.end(); }
+
+    await assert.rejects(runRetention(worker, join(root, "unavailable")), /tombstone_archive_unavailable/);
     assert.equal((await admin.query("SELECT id FROM messages WHERE id=$1", [record])).rowCount, 1);
-    await runRetention(worker, remoteArchive(root));
+    assert.deepEqual(readdirSync(join(root, "tombstones")), ["_format"]);
+    const beforeArchive = restore + "_denied";
+    try {
+      execFileSync("sh", ["ops/restore.sh", dump, beforeArchive], { env });
+      const restored = new Pool({ database: beforeArchive });
+      try {
+        assert.equal((await restored.query("SELECT id FROM messages WHERE id=$1", [record])).rowCount, 1);
+      } finally { await restored.end(); }
+    } finally { await admin.query(`DROP DATABASE IF EXISTS ${beforeArchive}`); }
+
+    await admin.query(`CREATE FUNCTION fixture_purge_failure() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN RAISE EXCEPTION 'fixture_purge_failed'; END $$;
+      CREATE TRIGGER fixture_purge_failure AFTER DELETE ON messages
+        FOR EACH ROW EXECUTE FUNCTION fixture_purge_failure()`);
+    try {
+      await assert.rejects(runRetention(worker, root), /fixture_purge_failed/);
+    } finally {
+      await admin.query("DROP TRIGGER fixture_purge_failure ON messages; DROP FUNCTION fixture_purge_failure()");
+    }
+    assert.equal((await admin.query("SELECT id FROM messages WHERE id=$1", [record])).rowCount, 1);
+    assert.equal((await admin.query("SELECT record_id FROM restore_tombstones WHERE record_id=$1", [record])).rowCount, 0);
+    assert.equal((await admin.query("SELECT record_id FROM deletion_log WHERE record_id=$1 AND action='purge'", [record])).rowCount, 0);
+    assert.ok(readdirSync(join(root, "tombstones")).includes(record + ".json"));
+    await runRetention(worker, root);
     assert.equal((await admin.query("SELECT id FROM messages WHERE id=$1", [record])).rowCount, 0);
     assert.equal(await repository.ingest(channel, conversation, "fixture-event", "replay after purge"), false);
     await assert.rejects(admin.query("DELETE FROM deletion_log"), /append_only/);

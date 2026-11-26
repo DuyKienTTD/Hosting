@@ -24,6 +24,7 @@ services:
       DATA_APP_PASSWORD: ${DATA_APP_PASSWORD:?set app password}
       DATA_RUNTIME_PASSWORD: ${DATA_RUNTIME_PASSWORD:?set runtime password}
       DATA_WORKER_PASSWORD: ${DATA_WORKER_PASSWORD:?set worker password}
+      DATA_TOMBSTONE_KEY: ${DATA_TOMBSTONE_KEY:?set tombstone signing key}
     volumes:
       - postgres:/var/lib/postgresql/data
     networks: [private]
@@ -72,6 +73,7 @@ services:
       PGHOST: postgres
       PGDATABASE: zalo
       DATA_WORKER_PASSWORD: ${DATA_WORKER_PASSWORD:?set worker password}
+      DATA_TOMBSTONE_KEY: ${DATA_TOMBSTONE_KEY:?set tombstone signing key}
       DATA_TOKEN_RETENTION: ${DATA_TOKEN_RETENTION:-}
       BACKUP_REMOTE: ${BACKUP_REMOTE:?set offsite remote and prefix}
       RCLONE_CONFIG: /run/rclone.conf

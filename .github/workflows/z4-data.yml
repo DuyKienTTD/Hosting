@@ -48,10 +48,12 @@ jobs:
         run: |
           export DATA_APP_PASSWORD=$(openssl rand -hex 24)
           export DATA_WORKER_PASSWORD=$(openssl rand -hex 24)
+          export DATA_TOMBSTONE_KEY=$(openssl rand -hex 32)
           export DATA_RUNTIME_PASSWORD=$(openssl rand -hex 24)
           {
             echo "DATA_APP_PASSWORD=$DATA_APP_PASSWORD"
             echo "DATA_WORKER_PASSWORD=$DATA_WORKER_PASSWORD"
+            echo "DATA_TOMBSTONE_KEY=$DATA_TOMBSTONE_KEY"
             echo "DATA_RUNTIME_PASSWORD=$DATA_RUNTIME_PASSWORD"
           } >> "$GITHUB_ENV"
           sed 's@/migrations/@postgres/@g' postgres/init.sh | POSTGRES_USER=postgres POSTGRES_DB=zalo sh

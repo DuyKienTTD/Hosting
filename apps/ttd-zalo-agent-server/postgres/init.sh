@@ -15,6 +15,6 @@ GRANT INSERT(created_by,title), UPDATE(state) ON tasks TO data_app;
 GRANT INSERT ON audit_log TO data_app,data_worker;
 GRANT SELECT ON queue_jobs,visible_messages TO data_worker;
 GRANT UPDATE(processed_at) ON queue_jobs TO data_worker;
-GRANT EXECUTE ON FUNCTION delete_eligible(uuid,integer,integer,text),purge_candidates(text),
-  authorize_purge(uuid,integer,integer) TO data_worker;
+GRANT EXECUTE ON FUNCTION delete_eligible(uuid,integer,integer,text),purge_candidates(text) TO data_worker;
 SQL
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -f /migrations/003-purge.sql -f /migrations/purge-key.sql

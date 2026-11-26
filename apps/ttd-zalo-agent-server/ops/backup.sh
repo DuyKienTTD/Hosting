@@ -8,7 +8,7 @@ case "$retention" in ''|*[!0-9]*) exit 2 ;; esac
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 name=$(date -u +%Y%m%dT%H%M%SZ).dump.age
-pg_dump --format=custom --file "$tmp/dump"
+pg_dump --exclude-table-data=purge_private.signing_key --format=custom --file "$tmp/dump"
 age -r "$AGE_RECIPIENT" -o "$tmp/$name" "$tmp/dump"
 rclone copyto "$tmp/$name" "$BACKUP_REMOTE/dumps/$name" --immutable
 rclone delete "$BACKUP_REMOTE/dumps" --include '*.dump.age' --min-age "${retention}d"
