@@ -1,0 +1,26 @@
+name: Z5 backup and monitoring
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'deploy/**'
+      - 'apps/ttd-zalo-agent-server/ops/backup.sh'
+      - '.github/workflows/z5-ops.yml'
+permissions:
+  contents: read
+jobs:
+  dry-run:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - run: |
+          shellcheck deploy/test-backup-retention.sh deploy/setup-rclone-gdrive.sh deploy/host-job.sh apps/ttd-zalo-agent-server/ops/backup.sh
+          bash -n deploy/host-job.sh
+          systemd-analyze calendar '*-*-* 01:00:00 UTC'
+          sh deploy/setup-rclone-gdrive.sh --dry-run
+          for job in backup drill monitor; do bash deploy/host-job.sh "$job" --dry-run; done
+      - name: Verify count retention with stubbed tools
+        run: bash deploy/test-backup-retention.sh

@@ -1,0 +1,9 @@
+[Unit]
+Description=TTD CSKH backup timer
+
+[Timer]
+# Set OnCalendar in a private timer drop-in before enabling.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

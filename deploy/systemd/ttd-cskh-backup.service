@@ -1,0 +1,10 @@
+[Unit]
+Description=TTD CSKH backup
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+UMask=0077
+# Supply EnvironmentFile in a private systemd drop-in.
+ExecStart=/bin/bash -c 'exec "$$CSKH_ROOT/deploy/host-job.sh" backup'
