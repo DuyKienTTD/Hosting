@@ -165,3 +165,41 @@ Kiểm tra bản ghi và audit trong staging. Đối soát mọi purge chưa rõ
 
 - Dừng nhận callback bằng cách gỡ symlink site riêng của CSKH, kiểm tra `nginx -t` rồi reload. Giữ bản cấu hình site và TLS để phục hồi. Dùng `cskh stop` khi cần dừng project.
 - Khôi phục hai digest và checkout của release trước. Nếu schema còn tương thích, chạy `cskh up -d --wait`, kiểm tra health rồi mới mở lại site. Giữ volume. Khi migration không tương thích, khôi phục vào staging và đối soát purge trước khi đổi đích kết nối. Giữ STOP khi xác minh.
+
+## Phát hành theo digest
+
+Nhánh phát hành chạy workflow `Z6 release pipeline`. Sau khi CI đạt trên nhánh, workflow đẩy hai image theo commit, ký chứng thực cho manifest và hai digest, rồi lưu artifact `release-<COMMIT>`. Lưu bản manifest đã sử dụng vào kho phát hành nội bộ nếu cần tra cứu sau khi artifact hết hạn.
+
+Máy triển khai cần Docker Compose, Bash, Python 3, Git, curl, flock và GitHub CLI hỗ trợ `gh attestation verify`. Dùng checkout Hosting đã xác minh và tài khoản có quyền pull GHCR, đọc artifact, thao tác Docker và sửa/reload site Nginx riêng. Đăng nhập GHCR và GitHub bằng cơ chế quản lý credential bên ngoài repo. Site TLS phải được cấu hình và đang phục vụ từ trước. Khai báo đường dẫn tuyệt đối trong cấu hình môi trường ngoài repo, kể cả các file rclone trong Compose.
+
+```sh
+export RELEASE_ENV_FILE='<ENV_FILE>'
+export RELEASE_STATE_DIR='<PRIVATE_RELEASE_STATE_DIR>'
+export RELEASE_NGINX_SITE='<ENABLED_SITE_FILE>'
+export RELEASE_SMOKE_ORIGIN='https://<PUBLIC_HOST>'
+# Tùy chọn: Compose đang chạy ở lần chuyển đổi đầu tiên.
+export RELEASE_BOOTSTRAP_COMPOSE='<ACTIVE_COMPOSE_FILE>'
+# Tùy chọn: chương trình render riêng, nhận template qua argv và in cấu hình ra stdout.
+export RELEASE_NGINX_RENDERER='<RENDERER_EXECUTABLE>'
+```
+
+Chỉ đặt các biến tùy chọn nếu dùng. Script mặc định thao tác project Compose `ttd-cskh`. Nếu template có giá trị khác với site thực tế, dùng renderer riêng để giữ các thiết lập của site và kiểm tra bản render trước giờ bảo trì. Lưu thư mục state ở nơi bền, riêng tư. Dump trước migration nằm trong `<PRIVATE_RELEASE_STATE_DIR>/backups` và cần được bảo vệ như dữ liệu DB.
+
+Với DB hiện có chưa có ledger, đối chiếu hồ sơ triển khai, checksum migration và quyền đã áp với đúng checkout. Kiểm tra cả grant bootstrap và cấu hình khóa purge. Khai báo **đúng** migration cuối đã xác minh, theo một dải liên tục. Script dùng khai báo này để ghi ledger lần đầu.
+
+```sh
+deploy/release.sh --adopt-through '<LAST_VERIFIED_MIGRATION.sql>' '<MANIFEST_FILE>'
+deploy/release.sh '<40_CHARACTER_COMMIT>'
+# Hoặc truyền manifest đã tải về.
+deploy/release.sh '<MANIFEST_FILE>'
+```
+
+Khi có migration mới, script tạm dừng bốn dịch vụ ứng dụng, tạo và kiểm tra dump, rồi áp mọi migration còn thiếu theo số thứ tự trong một transaction cùng ledger. Script xác thực chữ ký trước khi pull image theo digest. Sau đó nó cập nhật hai dòng image trong `.env`, kiểm cấu hình Nginx nếu đổi, chạy Compose và kiểm bốn đường HTTP. Trạng thái chế độ và STOP giữ theo cấu hình và DB đang có. Chọn cửa sổ bảo trì vì có thể gián đoạn trong lúc cập nhật.
+
+```sh
+deploy/release.sh --rollback
+# Hoặc dùng manifest trước đã lưu.
+deploy/release.sh --rollback '<PREVIOUS_MANIFEST_FILE>'
+```
+
+Rollback trực tiếp yêu cầu schema đang áp khớp manifest đích. Khi deploy lỗi, script khôi phục file môi trường và Nginx. Nếu có thể migration đã commit, script giữ các dịch vụ ứng dụng dừng và in đường dẫn dump để đối soát hoặc restore sang staging theo mục khôi phục. Quyết định phục hồi DB cần phê duyệt của owner.

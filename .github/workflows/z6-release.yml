@@ -1,0 +1,89 @@
+name: Z6 release pipeline
+on:
+  push:
+    branches: [dev/ttd-zalo-mvp01]
+  pull_request:
+    branches: [dev/ttd-zalo-mvp01]
+    paths:
+      - 'deploy/release*'
+      - 'deploy/test-release*'
+      - '.github/workflows/z6-release.yml'
+      - 'apps/ttd-zalo-agent-server/postgres/**'
+permissions:
+  contents: read
+
+jobs:
+  release-test:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17-bookworm
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 2s --health-timeout 2s --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGUSER: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: shellcheck deploy/release.sh
+      - run: python3 deploy/test-release.py
+        env:
+          RELEASE_TEST_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+
+  publish:
+    if: github.event_name == 'push'
+    needs: release-test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Build and push both production images
+        id: images
+        env:
+          GHCR_TOKEN: ${{ github.token }}
+        run: |
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          build() {
+            local kind=$1 file=$2 context=$3
+            local image="ghcr.io/duykienttd/ttd-cskh-$kind"
+            docker buildx build --platform linux/amd64 --push --tag "$image:$GITHUB_SHA" \
+              --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+              --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+              --metadata-file "$RUNNER_TEMP/$kind.json" -f "$file" "$context" >&2
+            jq -er '."containerimage.digest" | select(test("^sha256:[0-9a-f]{64}$"))' "$RUNNER_TEMP/$kind.json"
+          }
+          runtime=$(build runtime apps/ttd-zalo-agent-server/Dockerfile.data .)
+          postgres=$(build postgres apps/ttd-zalo-agent-server/postgres/Dockerfile apps/ttd-zalo-agent-server/postgres)
+          printf 'runtime=%s\npostgres=%s\n' "$runtime" "$postgres" >> "$GITHUB_OUTPUT"
+          python3 deploy/release-manifest.py build "$GITHUB_SHA" "$runtime" "$postgres" > release-manifest.json
+      - uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-name: ghcr.io/duykienttd/ttd-cskh-runtime
+          subject-digest: ${{ steps.images.outputs.runtime }}
+          push-to-registry: true
+      - uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-name: ghcr.io/duykienttd/ttd-cskh-postgres
+          subject-digest: ${{ steps.images.outputs.postgres }}
+          push-to-registry: true
+      - uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-path: release-manifest.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-${{ github.sha }}
+          path: release-manifest.json
+          if-no-files-found: error
+          retention-days: 90
