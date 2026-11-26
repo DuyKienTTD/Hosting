@@ -89,6 +89,7 @@ root = Path(sys.argv[1])
 pending_files = {path.name: path for path in (root / "pending").glob("*.json")}
 confirmed_files = {path.name: path for path in (root / "confirmed").glob("*.json")}
 print("BEGIN;")
+source_holds = {}
 for path in sorted(root.glob("*.json")):
     # Old flat artifacts have no evidence of commit and no purge UUID.
     record = uuid(path.stem)
@@ -108,14 +109,18 @@ for name in sorted(pending_files.keys() | confirmed_files.keys()):
     if not evidence and verify(item, "confirmed", confirmed.get("proof")):
         evidence = "confirmed", confirmed["proof"]
     attempt, record, thread, _, revision, policy = item
+    if (record, thread) not in source_holds:
+        held = source(f"SELECT public.purge_restore_held('{record}','{thread}')") == "t"
+        source_holds[(record, thread)] = held
+        if held:
+            print(f"INSERT INTO legal_holds(message_id,reason) SELECT '{record}','restore_source_hold'"
+                  f" WHERE NOT EXISTS (SELECT 1 FROM legal_holds WHERE message_id='{record}' AND released_at IS NULL);")
     if not evidence:
         print(f"SELECT purge_private.quarantine_restore('{attempt}','{record}',{revision},{policy});")
     elif evidence[0] == "rolled_back":
         print("INSERT INTO audit_log(actor,action,record_id)"
               f" VALUES('restore','pending_rollback_verified','{record}');")
-    elif source(f"SELECT public.purge_restore_held('{record}','{thread}')") == "t":
-        print(f"INSERT INTO legal_holds(message_id,reason) SELECT '{record}','restore_source_hold'"
-              f" WHERE NOT EXISTS (SELECT 1 FROM legal_holds WHERE message_id='{record}' AND released_at IS NULL);")
+    elif source_holds[(record, thread)]:
         print("INSERT INTO audit_log(actor,action,record_id)"
               f" VALUES('restore','purge_blocked','{record}');")
         print("DO $$ BEGIN RAISE WARNING 'restore_tombstone_blocked_by_source_hold'; END $$;")

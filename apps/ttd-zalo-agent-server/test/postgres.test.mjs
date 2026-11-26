@@ -215,7 +215,11 @@ test("Postgres grants, deletion, encrypted backup and restore", { skip: config.R
     assert.equal((await worker.query("SELECT * FROM committed_purges()")).rowCount, 1);
     rmSync(confirmed);
     await probeRestore(dump, "_source", null, 0, { PURGE_RECEIPT_REMOTE: join(root, "unavailable") });
-    await probeRestore(dump, "_ledger", null, 0, { RESTORE_SOURCE_DATABASE: "missing_fixture_source" });
+    const ledgerCopy = join(root, "receipts-offsite");
+    execFileSync("sh", ["ops/backup-purge-receipts.sh"], { env: { ...env, PURGE_RECEIPT_BACKUP_REMOTE: ledgerCopy } });
+    await probeRestore(dump, "_ledger", null, 0, {
+      RESTORE_SOURCE_DATABASE: "missing_fixture_source", PURGE_RECEIPT_REMOTE: ledgerCopy,
+    });
     await probeRestore(dump, "_unknown", "purge_unverified", 1, {
       RESTORE_SOURCE_DATABASE: "missing_fixture_source", PURGE_RECEIPT_REMOTE: join(root, "unavailable"),
     }, async (snapshot, database) => {
