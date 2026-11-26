@@ -1,0 +1,148 @@
+name: ttd-cskh
+x-node: &node
+  image: ${DATA_APP_IMAGE:?set runtime image digest}
+  restart: unless-stopped
+  init: true
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  depends_on:
+    postgres: {condition: service_healthy}
+x-runtime-db: &runtime-db
+  PGHOST: postgres
+  PGDATABASE: zalo
+  DATA_RUNTIME_PASSWORD: ${DATA_RUNTIME_PASSWORD:?set runtime DB password}
+  IDENTITY_KEY: ${IDENTITY_KEY:?set persistent identity key}
+services:
+  postgres:
+    image: ${DATA_POSTGRES_IMAGE:?set Postgres image digest}
+    restart: unless-stopped
+    cpus: 0.45
+    mem_limit: 1024m
+    shm_size: 128m
+    environment:
+      POSTGRES_DB: zalo
+      POSTGRES_USER: zalo_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set administrator DB password}
+      DATA_APP_PASSWORD: ${DATA_APP_PASSWORD:?set data API DB password}
+      DATA_RUNTIME_PASSWORD: ${DATA_RUNTIME_PASSWORD:?set runtime DB password}
+      DATA_WORKER_PASSWORD: ${DATA_WORKER_PASSWORD:?set worker DB password}
+      DATA_TOMBSTONE_KEY: ${DATA_TOMBSTONE_KEY:?set tombstone key}
+    volumes: [postgres:/var/lib/postgresql/data]
+    networks: [database]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -h 127.0.0.1 -U zalo_admin -d zalo"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+  runtime:
+    <<: *node
+    entrypoint: [node, dist/ttd-zalo-agent-server/src/main.js]
+    command: [serve]
+    cpus: 0.25
+    mem_limit: 512m
+    ports: ["127.0.0.1:18080:8080"]
+    networks: [database, outbound]
+    environment:
+      <<: *runtime-db
+      HTTP_BIND: container
+      CHANNEL_MODE: mock
+      ADS_ENABLED: "false"
+      AI_PROVIDER: anthropic-compatible
+      CLAUDE_ENABLED: ${CLAUDE_ENABLED:-0}
+      CLAUDE_CREDIT_CONFIRMED: ${CLAUDE_CREDIT_CONFIRMED:-0}
+      AI_ROUTER_CREDIT_CONFIRMED: ${AI_ROUTER_CREDIT_CONFIRMED:-0}
+      AI_ROUTER_BASE_URL: ${AI_ROUTER_BASE_URL:?set AI Router HTTPS base URL}
+      AI_ROUTER_API_KEY: ${AI_ROUTER_API_KEY:?set AI Router key}
+      AI_ROUTER_DAILY_USD: ${AI_ROUTER_DAILY_USD:?set verified daily cap}
+      AI_ROUTER_RATE_MULTIPLIER: ${AI_ROUTER_RATE_MULTIPLIER:?set verified rate multiplier}
+      MODEL_ROUTER: ${MODEL_ROUTER:-claude-sonnet-5-5}
+      MODEL_SUPPORT: ${MODEL_SUPPORT:-claude-haiku-5-5}
+      MODEL_CRM: ${MODEL_CRM:-claude-haiku-5-5}
+      MODEL_CAMPAIGN: ${MODEL_CAMPAIGN:-claude-haiku-5-5}
+      MODEL_COMMUNITY: ${MODEL_COMMUNITY:-claude-haiku-5-5}
+      MODEL_LISTEN: ${MODEL_LISTEN:-claude-haiku-5-5}
+      MODEL_SALES: ${MODEL_SALES:-claude-sonnet-5-5}
+      MODEL_REPORT: ${MODEL_REPORT:-claude-haiku-5-5}
+    healthcheck: &http-health
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:8080/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+  oa-ingress:
+    <<: *node
+    entrypoint: [node, /app/oa-ingress.mjs]
+    command: [serve]
+    cpus: 0.20
+    mem_limit: 256m
+    ports: ["127.0.0.1:18081:8080"]
+    networks: [database, outbound]
+    volumes: ["./oa-ingress.mjs:/app/oa-ingress.mjs:ro"]
+    environment:
+      <<: *runtime-db
+      ZALO_APP_ID: ${ZALO_APP_ID:?set Zalo App ID}
+      ZALO_APP_SECRET: ${ZALO_APP_SECRET:?set Zalo App Secret}
+      ZALO_OA_ID: ${ZALO_OA_ID:?set OA ID}
+      ZALO_WEBHOOK_SECRET: ${ZALO_WEBHOOK_SECRET:?set webhook signing secret}
+      ZALO_OA_ENCRYPTION_KEY: ${ZALO_OA_ENCRYPTION_KEY:?set OA encryption key}
+    healthcheck: *http-health
+  data-api:
+    <<: *node
+    command: [serve]
+    cpus: 0.15
+    mem_limit: 256m
+    networks: [database]
+    environment:
+      PGHOST: postgres
+      PGDATABASE: zalo
+      DATA_APP_PASSWORD: ${DATA_APP_PASSWORD:?set data API DB password}
+    healthcheck: *http-health
+  worker:
+    <<: *node
+    command: [worker]
+    cpus: 0.20
+    mem_limit: 384m
+    networks: [database, outbound]
+    volumes: ["${WORKER_RCLONE_FILE:?set worker rclone config}:/run/rclone.conf:ro"]
+    environment:
+      PGHOST: postgres
+      PGDATABASE: zalo
+      DATA_WORKER_PASSWORD: ${DATA_WORKER_PASSWORD:?set worker DB password}
+      DATA_TOMBSTONE_KEY: ${DATA_TOMBSTONE_KEY:?set tombstone key}
+      BACKUP_REMOTE: ${BACKUP_REMOTE:?set offsite dump and tombstone prefix}
+      PURGE_RECEIPT_REMOTE: ${PURGE_RECEIPT_REMOTE:?set independent ledger prefix}
+      RCLONE_CONFIG: /run/rclone.conf
+    healthcheck:
+      <<: *http-health
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:8081/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+  backup:
+    image: ${DATA_POSTGRES_IMAGE:?set Postgres image digest}
+    profiles: [maintenance]
+    restart: "no"
+    cpus: 0.20
+    mem_limit: 512m
+    networks: [database, outbound]
+    depends_on:
+      postgres: {condition: service_healthy}
+    entrypoint: [sh, /deploy/backup-job.sh]
+    command: [postgres]
+    volumes:
+      - ../apps/ttd-zalo-agent-server/ops:/ops:ro
+      - ./backup-job.sh:/deploy/backup-job.sh:ro
+      - "${BACKUP_RCLONE_FILE:?set backup rclone config}:/run/rclone.conf:ro"
+    environment:
+      PGHOST: postgres
+      PGDATABASE: zalo
+      PGUSER: zalo_admin
+      PGPASSWORD: ${POSTGRES_PASSWORD:?set administrator DB password}
+      BACKUP_REMOTE: ${BACKUP_REMOTE:?set offsite dump and tombstone prefix}
+      AGE_RECIPIENT: ${AGE_RECIPIENT:?set public age recipient}
+      PURGE_RECEIPT_REMOTE: ${PURGE_RECEIPT_REMOTE:?set independent ledger prefix}
+      PURGE_RECEIPT_BACKUP_REMOTE: ${PURGE_RECEIPT_BACKUP_REMOTE:?set offsite ledger backup prefix}
+      RCLONE_CONFIG: /run/rclone.conf
+networks:
+  database: {internal: true}
+  outbound: {}
+volumes:
+  postgres: {}

@@ -1,0 +1,99 @@
+name: Z4 deployment configuration
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'deploy/**'
+      - '.github/workflows/z4-deploy-prep.yml'
+permissions:
+  contents: read
+jobs:
+  configuration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Validate production Compose configuration
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+
+          placeholders = {
+              "DATA_APP_IMAGE": "fixture/runtime:test",
+              "DATA_POSTGRES_IMAGE": "fixture/postgres:test",
+              "WORKER_RCLONE_FILE": "/tmp/fixture-worker.conf",
+              "BACKUP_RCLONE_FILE": "/tmp/fixture-backup.conf",
+              "AI_ROUTER_BASE_URL": "https://router.example.invalid",
+              "AI_ROUTER_DAILY_USD": "1",
+              "AI_ROUTER_RATE_MULTIPLIER": "1",
+          }
+          entries = []
+          for line in Path("deploy/.env.example").read_text().splitlines():
+              if not line or line.startswith("#"):
+                  continue
+              key, value = line.split("=", 1)
+              entries.append(f"{key}={value or placeholders.get(key, 'ci-placeholder')}")
+          Path(os.environ["RUNNER_TEMP"], "z4-ci.env").write_text("\n".join(entries) + "\n")
+          PY
+          compose() { docker compose --env-file "$RUNNER_TEMP/z4-ci.env" -f deploy/compose.prod.yml --profile maintenance "$@"; }
+          compose config --quiet
+          compose config --format json > "$RUNNER_TEMP/z4-compose.json"
+          python3 - <<'PY'
+          import json
+          from decimal import Decimal
+          from pathlib import Path
+          import os
+
+          cfg = json.loads(Path(os.environ["RUNNER_TEMP"], "z4-compose.json").read_text())
+          services = cfg["services"]
+          assert cfg["name"] == "ttd-cskh"
+          assert sum(Decimal(str(s["cpus"])) for s in services.values()) <= Decimal("1.5")
+          assert sum(int(s["mem_limit"]) for s in services.values()) <= 3 * 1024**3
+          assert all(port["host_ip"] == "127.0.0.1" for s in services.values() for port in s.get("ports", []))
+          assert {name for name, service in services.items() if service.get("ports")} == {"runtime", "oa-ingress"}
+          assert all(service.get("healthcheck", {}).get("test", ["NONE"])[0] != "NONE"
+                     and not service.get("healthcheck", {}).get("disable")
+                     for service in services.values() if service.get("restart") != "no")
+          assert services["backup"]["restart"] == "no"
+          assert services["postgres"]["healthcheck"] and services["postgres"]["restart"] == "unless-stopped"
+          assert services["runtime"]["environment"]["ADS_ENABLED"] == "false"
+          PY
+      - name: Validate Nginx in an isolated container
+        run: |
+          docker run --rm --network none \
+            --mount "type=bind,source=$PWD/deploy/nginx/cskh.conf,target=/etc/nginx/conf.d/default.conf,readonly" \
+            nginx:1.28-alpine nginx -t
+      - name: Validate HTTPS template with a temporary certificate
+        run: |
+          certs="$RUNNER_TEMP/cskh-cert"
+          mkdir -p "$certs"
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
+            -subj /CN=cskh.thuanthanhdat.com.vn \
+            -keyout "$certs/privkey.pem" -out "$certs/fullchain.pem"
+          docker run --rm --network none \
+            --mount "type=bind,source=$PWD/deploy/nginx/cskh-https.conf,target=/etc/nginx/conf.d/default.conf,readonly" \
+            --mount "type=bind,source=$certs,target=/etc/letsencrypt/live/cskh.thuanthanhdat.com.vn,readonly" \
+            nginx:1.28-alpine nginx -t
+      - name: Check backup job status logging and failure
+        run: |
+          fixture="$RUNNER_TEMP/backup-fixture"
+          mkdir -p "$fixture"
+          printf 'exit 0\n' > "$fixture/backup.sh"
+          printf 'exit 17\n' > "$fixture/backup-purge-receipts.sh"
+          job() {
+            docker run --rm --network none \
+              --mount "type=bind,source=$PWD/deploy/backup-job.sh,target=/deploy/backup-job.sh,readonly" \
+              --mount "type=bind,source=$fixture,target=/ops,readonly" \
+              --entrypoint sh nginx:1.28-alpine /deploy/backup-job.sh "$1"
+          }
+          job postgres | grep -E '^backup_success job=postgres at=[0-9-]+T[0-9:]+Z$'
+          status=0
+          job receipts > "$RUNNER_TEMP/backup-failure.log" || status=$?
+          test "$status" -eq 17
+          ! grep -q 'backup_success' "$RUNNER_TEMP/backup-failure.log"
+      - name: Check OA packaging entry point syntax
+        run: node --check deploy/oa-ingress.mjs
