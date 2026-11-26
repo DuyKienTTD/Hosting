@@ -1,0 +1,10 @@
+# Pilot Zalo Bot Platform
+
+Đối chiếu 26/11/2026. Tạo bot trong Zalo Bot Manager, mở **Tạo bot**, đặt tên bắt đầu bằng **Bot**. Bot Token được gửi qua tin nhắn Zalo cho chủ bot. [Tạo Bot](https://docs.zaloplatforms.com/docs/BOT/create_bot)
+
+1. Cấu hình runtime bằng secret store. Đặt `BOT_MODE=live`, `ZALO_BOT_TOKEN`, `ZALO_BOT_ID`, `ZALO_BOT_WEBHOOK_SECRET` (chuỗi ngẫu nhiên, 8–256 ký tự), `CHANNEL_SMOKE_ONLY=1` và `BOT_SMOKE_ALLOWLIST` (ID chat thử, phân cách bằng dấu phẩy). Mặc định Bot ở chế độ mock. Live từ chối khởi động nếu thiếu thông tin xác thực.
+2. Sau khi triển khai Nginx và runtime, dùng API chính thức `setWebhook` với URL HTTPS công khai kết thúc bằng `/webhooks/zalo-bot` và `secret_token` trùng giá trị runtime. Kiểm tra `verification` trong phản hồi và thẻ **Kênh Zalo → Zalo Bot**. Webhook gửi POST cùng header `X-Bot-Api-Secret-Token`; ứng dụng giới hạn 16 KiB. [setWebhook](https://docs.zaloplatforms.com/docs/BOT/apis/setWebhook) · [Webhook](https://docs.zaloplatforms.com/docs/BOT/webhook)
+3. Nếu cần xác định ID chat thử, dùng `getUpdates` trong giai đoạn local trước khi bật webhook. Polling và webhook loại trừ nhau. Timeout polling mặc định 30 giây. [getUpdates](https://docs.zaloplatforms.com/docs/BOT/apis/getUpdates)
+4. Pilot nhận tin văn bản 1:1, khử trùng lặp theo bot, chat và message ID, và lưu nội dung vào kho hội thoại chung (`channel=bot`) khi có quyền lưu giữ. Dùng lệnh runtime `bot-reply` với JSON `{"peer":"<TEST_CHAT_ID>","text":"<TEXT>"}` trên stdin. Guard yêu cầu tương tác đến còn hạn và quyền trả lời/gửi. Chỉ chat trong allowlist được gửi khi smoke-only bật. `stop bot` dừng riêng kênh. `sendMessage` nhận `chat_id` và văn bản 1–2.000 ký tự. Khi giao nhận không xác định, cùng sự kiện đến không tự tạo lượt gửi lại. [sendMessage](https://docs.zaloplatforms.com/docs/BOT/apis/sendMessage)
+
+Thẻ kênh cho biết trạng thái mock/live, STOP và lần webhook xác thực gần nhất. Pilot chỉ dùng API HTTPS chính thức với `fetch`. Không cấu hình polling song song hay gửi tự động.

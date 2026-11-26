@@ -20,7 +20,7 @@ const clean = (value: unknown, length: number) =>
   typeof value === "string" && value.trim().length <= length && value.trim() || undefined;
 
 export function webApi(store: Store, config: Config, origin: string,
-  oa?: { account: OaAccount; channel: OaRuntimeChannel }, usdVnd?: number, nick?: { stop(): void; connected(): boolean; issue?(): { code: string; expiresAt: number }; revoke?(): void }, onboarding?: OaOAuth, inbox?: OaWebInbox, drafts?: OaAiDrafts) {
+  oa?: { account: OaAccount; channel: OaRuntimeChannel }, usdVnd?: number, nick?: { stop(): void; connected(): boolean; issue?(): { code: string; expiresAt: number }; revoke?(): void }, onboarding?: OaOAuth, inbox?: OaWebInbox, drafts?: OaAiDrafts, botStatus?: () => { state: string; detail: string }) {
   const db = store.db;
   const session = operatorSessions(store, origin);
   const oauth = onboarding && oaOAuth(origin, session, onboarding);
@@ -74,7 +74,7 @@ export function webApi(store: Store, config: Config, origin: string,
     const connected = nick?.connected() ?? false;
     return [{ id: "oa", label: "Zalo OA", state: oa ? "online" : "offline", detail: oa ? "OA OpenAPI" : "Chưa cấu hình OA" },
       { id: "nick", label: "Nick Zalo phụ", state: stopped ? "stopped" : connected ? "online" : "offline", detail: stopped ? "Đã ghi STOP" : connected ? "Worker đã kết nối" : "Chưa kết nối worker" },
-      { id: "bot", label: "Zalo Bot", state: "offline", detail: "Chưa nối kênh vào Web UI" }];
+      { id: "bot", label: "Zalo Bot", ...(botStatus?.() ?? { state: "offline", detail: "Đang ở chế độ mock" }) }];
   }
   const conversationSelect = `SELECT d.id,c.customer_id AS "customerId",c.channel,
       coalesce(m.body,'') AS message,coalesce(to_char(m.received_at AT TIME ZONE 'Asia/Ho_Chi_Minh','HH24:MI'),'') AS time,
@@ -111,8 +111,18 @@ export function webApi(store: Store, config: Config, origin: string,
         CASE WHEN s.state IN ('sent','unknown_delivery','failed') THEN s.state END AS delivery
         FROM web_quotes q LEFT JOIN send_log s ON s.id=q.send_key ORDER BY q.created_at DESC LIMIT 100`).all()
         .map(({ delivery, ...row }) => delivery ? { ...row, delivery } : row),
-      conversations: db.prepare(conversationSelect + " ORDER BY d.id LIMIT 100").all()
-        .map(row => showMessageBody ? row : { ...row, message: "", draft: "" }),
+      conversations: [
+        ...db.prepare(conversationSelect + " ORDER BY d.id LIMIT 100").all()
+          .map(row => showMessageBody ? row : { ...row, message: "", draft: "" }),
+        ...(botStatus && showMessageBody ? db.prepare(`SELECT c.id,c.customer_id AS "customerId",
+          c.channel,m.body AS message,to_char(m.received_at AT TIME ZONE 'Asia/Ho_Chi_Minh','HH24:MI') AS time,
+          'Hội thoại Zalo Bot' AS subject,'' AS draft,0 AS version,'blocked' AS delivery,
+          'Pilot Bot gửi qua lệnh đã qua Guard.' AS reason
+          FROM conversations c JOIN LATERAL (SELECT body,received_at FROM visible_messages WHERE conversation_id=c.id
+            ORDER BY received_at DESC,id DESC LIMIT 1) m ON true
+          WHERE c.channel='bot' AND NOT EXISTS (SELECT 1 FROM web_reply_drafts d WHERE d.conversation_id=c.id)
+          ORDER BY m.received_at DESC LIMIT 100`).all() : []),
+      ],
       workItems: db.prepare(`SELECT t.id,t.title,a.agent,CASE t.state WHEN 'in_progress' THEN 'active' ELSE t.state END AS status
         FROM tasks t JOIN web_task_agents a ON a.task_id=t.id ORDER BY t.created_at DESC LIMIT 100`).all(),
       roomMessages: db.prepare(`SELECT m.id,o.label AS author,m.body AS text FROM web_room_messages m
