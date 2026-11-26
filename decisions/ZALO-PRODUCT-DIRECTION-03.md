@@ -17,7 +17,7 @@ Chủ dự án chốt ngày 26/11/2026. Quyết định thay phương án kênh 
 - Hủy Subiz. Nick Zalo phụ dùng thí nghiệm mức 3. Worker điều khiển chuột và bàn phím trên Zalo Web, tự gửi với giới hạn nhịp tương đương người dùng và qua guard. Chủ dự án chấp nhận rủi ro tài khoản. Phạm vi chỉ gồm những thao tác VNG không cấm tuyệt đối.
 - OA **Công ty cổ phần nội thất Thuận Thành Đạt** đã xác thực, gói Cơ bản và liên kết zBusiness. Tích hợp qua API chính thức của Zalo OA. Hiện chưa có app được cấp quyền. Chủ dự án sẽ tạo app tại developers.zalo.me. OA phổ thông **Nẹp nội thất TTD** mở rộng sau.
 - Một ứng dụng gồm các mô-đun nick, OA, zBusiness và nhóm/cộng đồng, có chỗ mở rộng Mini App và Ads.
-- VPS `srv1722328` là bộ não và nơi lưu dữ liệu. Triển khai Docker project mới, độc lập với `hermes-agent-l7fe`, `n8n-nbqy`, `ttd-hermes-gate-a` và `ttd-p0-level1`. Worker chạy trên máy tính chủ dự án qua Chrome thật và kết nối ra VPS. Chủ dự án chấp nhận máy và Chrome phải mở. API OA chạy 24/7 trên VPS.
+- VPS Hostinger của dự án là bộ não và nơi lưu dữ liệu. Triển khai một Docker project mới, tách biệt với bốn Docker project hiện có và giữ nguyên cấu hình của chúng. Worker chạy trên máy tính chủ dự án qua Chrome thật và kết nối ra VPS. Chủ dự án chấp nhận máy và Chrome phải mở. API OA chạy 24/7 trên VPS.
 
 ## Agent và phòng chat điều phối
 
@@ -27,12 +27,12 @@ Chủ dự án chốt ngày 26/11/2026. Quyết định thay phương án kênh 
 
 ## Dữ liệu và vòng đời
 
-- Agent xem, thêm, sửa và xóa qua Git theo quyền trong repo riêng tư [TTD-Data](https://github.com/DuyKienTTD/TTD-Data). Trên VPS, agent chỉ xem. Mọi bản sửa cần quyền và vẫn đi qua Git. Chủ dự án giữ quyền xóa trực tiếp. Tin khách đến từ Zalo đi thẳng VPS. Dữ liệu khách tuyệt đối không vào Hosting công khai.
-- Khi đồng bộ, lưu mã commit và mã bản ghi VPS, xác nhận đã nhận, đổi liên kết tài liệu sang mã bản ghi VPS, sau đó xóa tệp Git đã nhận. AI đồng bộ mặc định hằng ngày hoặc theo yêu cầu. Cơ chế VPS tự quét hoặc webhook để điều tra sau.
+- Agent chỉ tác động qua Git và chỉ được đề xuất xóa. Quyền đọc, thêm và sửa theo `PERMISSIONS` trong repo riêng tư [TTD-Data](https://github.com/DuyKienTTD/TTD-Data). Trên VPS, agent chỉ xem. Mọi bản sửa cần quyền và đi qua Git. Quyền thực hiện xóa cứng trên VPS thuộc chủ dự án. Khi khách yêu cầu xóa theo Luật 91/2025/QH15, việc xóa cứng phải được chủ dự án duyệt trước. Tin khách đến từ Zalo đi thẳng VPS. Dữ liệu khách tuyệt đối không vào Hosting công khai.
+- Sau khi xác nhận bản ghi đã nằm trên VPS, tiến trình đồng bộ đổi các liên kết tài liệu sang mã bản ghi VPS và dọn tệp tương ứng khỏi Git. Commit dọn tệp ghi rõ nguồn, mã commit nguồn và mã bản ghi VPS. AI đồng bộ mặc định hằng ngày hoặc theo yêu cầu. Cơ chế VPS tự quét hoặc webhook để điều tra sau.
 - Header mỗi tài liệu có `id`, `lop`, `trang_thai`, `chu_so_huu`, `nguon`, `lien_ket`, `thay_the_boi`, `het_han`.
 - `QUAN_TRONG` gồm hồ sơ khách, sản phẩm, quyết định và tri thức đã duyệt. Chỉ đồng bộ lên VPS khi `trang_thai=hieu_luc`.
-- `TAM_THOI` gồm nháp, ghi chú phiên và kết quả trung gian. Không đưa lên VPS. Sau 14 ngày mặc định, tự khai tử khỏi Git nếu chưa được nâng lớp.
-- `LOI_THOI` phải có `thay_the_boi`. Chuyển liên kết cũ sang bản thay thế. Giữ 30 ngày trước khi khai tử khỏi Git theo danh sách đề xuất được chủ dự án hoặc A0 duyệt. VPS chỉ đánh dấu lưu trữ. Xóa cứng do chủ dự án thực hiện hoặc theo yêu cầu xóa của khách theo Luật 91/2025/QH15.
+- `TAM_THOI` gồm nháp, ghi chú phiên và kết quả trung gian. Không đưa lên VPS. Mặc định hết hạn sau 14 ngày. Tiến trình định kỳ tự dọn tệp đã hết hạn khỏi Git nếu chưa được nâng lớp và ghi nhật ký thao tác.
+- `LOI_THOI` phải có `thay_the_boi`. Chuyển liên kết cũ sang bản thay thế. Giữ 30 ngày. Sau thời hạn này, tiến trình dọn tệp khỏi Git theo danh sách đã được chủ dự án hoặc A0 duyệt. Trên VPS, tiến trình chỉ đánh dấu lưu trữ.
 
 ## Các giới hạn giữ nguyên và thứ tự xây dựng
 
