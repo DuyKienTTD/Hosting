@@ -127,11 +127,15 @@ services:
     healthcheck: *http-health
   worker:
     <<: *node
+    entrypoint: [sh, /deploy/with-rclone-config.sh, node, dist/ttd-zalo-agent-server/src/data/main.js]
     command: [worker]
+    tmpfs: [/tmp, "/run/rclone-live:uid=1000,gid=1000,mode=0700"]
     cpus: 0.20
     mem_limit: 384m
     networks: [database, outbound]
-    volumes: ["${WORKER_RCLONE_FILE:?set worker rclone config}:/run/rclone.conf:ro"]
+    volumes:
+      - "${WORKER_RCLONE_FILE:?set worker rclone config}:/run/rclone-source.conf:ro"
+      - ./with-rclone-config.sh:/deploy/with-rclone-config.sh:ro
     environment:
       PGHOST: postgres
       PGDATABASE: zalo
@@ -139,7 +143,8 @@ services:
       DATA_TOMBSTONE_KEY: ${DATA_TOMBSTONE_KEY:?set tombstone key}
       BACKUP_REMOTE: ${BACKUP_REMOTE:?set offsite dump and tombstone prefix}
       PURGE_RECEIPT_REMOTE: ${PURGE_RECEIPT_REMOTE:?set independent ledger prefix}
-      RCLONE_CONFIG: /run/rclone.conf
+      RCLONE_MARKER_TIMEOUT_SECONDS: ${RCLONE_MARKER_TIMEOUT_SECONDS:-30}
+      RCLONE_CONFIG: /run/rclone-live/rclone.conf
     healthcheck:
       <<: *http-health
       test: [CMD, node, -e, "fetch('http://127.0.0.1:8081/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
@@ -152,12 +157,14 @@ services:
     networks: [database, outbound]
     depends_on:
       postgres: {condition: service_healthy}
-    entrypoint: [sh, /deploy/backup-job.sh]
+    entrypoint: [sh, /deploy/with-rclone-config.sh, sh, /deploy/backup-job.sh]
+    tmpfs: ["/run/rclone-live:mode=0700"]
     command: [postgres]
     volumes:
       - ../apps/ttd-zalo-agent-server/ops:/ops:ro
       - ./backup-job.sh:/deploy/backup-job.sh:ro
-      - "${BACKUP_RCLONE_FILE:?set backup rclone config}:/run/rclone.conf:ro"
+      - "${BACKUP_RCLONE_FILE:?set backup rclone config}:/run/rclone-source.conf:ro"
+      - ./with-rclone-config.sh:/deploy/with-rclone-config.sh:ro
     environment:
       PGHOST: postgres
       PGDATABASE: zalo
@@ -167,7 +174,7 @@ services:
       AGE_RECIPIENT: ${AGE_RECIPIENT:?set public age recipient}
       PURGE_RECEIPT_REMOTE: ${PURGE_RECEIPT_REMOTE:?set independent ledger prefix}
       PURGE_RECEIPT_BACKUP_REMOTE: ${PURGE_RECEIPT_BACKUP_REMOTE:?set offsite ledger backup prefix}
-      RCLONE_CONFIG: /run/rclone.conf
+      RCLONE_CONFIG: /run/rclone-live/rclone.conf
 networks:
   database: {internal: true}
   outbound: {}

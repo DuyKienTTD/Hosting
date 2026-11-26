@@ -40,6 +40,28 @@ jobs:
           app=apps/ttd-zalo-agent-server
           docker build -t z4-smoke-app:local -f "$app/Dockerfile.data" .
           docker build -t z4-smoke-postgres:local "$app/postgres"
+      - name: Refresh an expired fixture token into a private tmpfs
+        run: |
+          fixture=$(mktemp -d)
+          trap 'rm -rf "$fixture"' EXIT
+          cat > "$fixture/source.conf" <<'CONFIG'
+          [fixture]
+          type = drive
+          client_id = fixture
+          client_secret = fixture
+          scope = drive.file
+          token = {"access_token":"fixture-expired","refresh_token":"fixture-refresh","expiry":"2000-01-01T00:00:00Z"}
+          CONFIG
+          chmod 0444 "$fixture/source.conf"
+          for uid in 0 1000; do
+            docker run --rm --read-only --network none --cap-drop ALL --user "$uid:$uid" \
+              --tmpfs "/run/rclone-live:uid=$uid,gid=$uid,mode=0700" \
+              --mount "type=bind,source=$fixture/source.conf,target=/run/rclone-source.conf,readonly" \
+              --mount "type=bind,source=$PWD/deploy/with-rclone-config.sh,target=/deploy/with-rclone-config.sh,readonly" \
+              --mount "type=bind,source=$PWD/deploy/test-rclone-refresh.mjs,target=/deploy/test-rclone-refresh.mjs,readonly" \
+              --entrypoint sh z4-smoke-app:local /deploy/with-rclone-config.sh sh -ec \
+              'test "$(stat -f -c %T "$RCLONE_CONFIG")" = tmpfs; node /deploy/test-rclone-refresh.mjs'
+          done
       - name: Start production entrypoints and require HTTP 200
         run: |
           fixture=$(mktemp -d)

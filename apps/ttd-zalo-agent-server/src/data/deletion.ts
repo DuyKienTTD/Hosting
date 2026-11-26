@@ -49,8 +49,13 @@ function receiptLedger(archiveTarget: string) {
 function remoteArchive(target: string) {
   if (!target || /[\r\n]/.test(target)) throw Error("invalid_tombstone_archive");
   const prefix = target.replace(/\/$/, "") + "/tombstones/";
+  const markerTimeout = process.env.RCLONE_MARKER_TIMEOUT_SECONDS ?? "30";
+  if (!/^[1-9][0-9]{0,2}$/.test(markerTimeout) || Number(markerTimeout) > 120) {
+    throw Error("invalid_rclone_marker_timeout");
+  }
   const format = async () => {
-    const result = await exec("rclone", ["cat", prefix + "_format"], { timeout: 10000 })
+    const result = await exec("rclone", ["cat", prefix + "_format",
+      "--retries", "1", "--low-level-retries", "2"], { timeout: Number(markerTimeout) * 1000 })
       .catch(() => { throw Error("tombstone_archive_unavailable"); });
     if (result.stdout.trim() !== "z4-tombstones-v1") throw Error("invalid_tombstone_format");
   };

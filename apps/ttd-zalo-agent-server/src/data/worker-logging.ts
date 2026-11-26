@@ -4,6 +4,7 @@ const safeCodes = new Set([
   "tombstone_archive_mismatch",
   "invalid_tombstone_archive",
   "invalid_tombstone_key",
+  "invalid_rclone_marker_timeout",
   "invalid_purge_receipt_remote",
   "invalid_pending_identity",
   "purge_rejected",

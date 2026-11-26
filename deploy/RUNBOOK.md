@@ -154,7 +154,7 @@ Dump Postgres được mã hóa bằng age. Sổ biên nhận có đích ghi ch�
 cskh --profile maintenance run --rm \
   -e DATA_TOMBSTONE_KEY -e AGE_IDENTITY_FILE=/run/age-identity \
   -e RESTORE_SOURCE_DATABASE=zalo -v "$AGE_IDENTITY_HOST_FILE:/run/age-identity:ro" \
-  --entrypoint sh backup /ops/restore.sh "$DUMP_NAME" restore_cskh_drill
+  --entrypoint sh backup /deploy/with-rclone-config.sh sh /ops/restore.sh "$DUMP_NAME" restore_cskh_drill
 cskh --profile maintenance run --rm --entrypoint sh backup \
   /ops/restore-control.sh restore_cskh_drill list
 ```

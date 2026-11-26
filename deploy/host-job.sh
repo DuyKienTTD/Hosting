@@ -52,7 +52,7 @@ case "$job" in
     export DATA_TOMBSTONE_KEY
     maintenance -e DATA_TOMBSTONE_KEY -e AGE_IDENTITY_FILE=/run/age-identity \
       -e RESTORE_SOURCE_DATABASE="$database" -v "$AGE_IDENTITY_HOST_FILE:/run/age-identity:ro" \
-      --entrypoint sh backup /ops/restore.sh "$dump" "$stage"
+      --entrypoint sh backup /deploy/with-rclone-config.sh sh /ops/restore.sh "$dump" "$stage"
     [[ $(sql -d "$stage" -c "SELECT reconciled AND NOT EXISTS (SELECT 1 FROM purge_private.restore_unknown)
       AND NOT has_database_privilege('data_runtime',current_database(),'CONNECT')
       FROM purge_private.restore_gate WHERE slot") == t ]]
