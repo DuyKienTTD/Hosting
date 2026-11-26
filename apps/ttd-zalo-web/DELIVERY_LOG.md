@@ -37,3 +37,9 @@ sensitivity: public
 
 - Mounted every operator API endpoint in the runtime entrypoint. Login uses revocable PostgreSQL sessions and server-assigned roles. Migration 009 adds operator authentication, approved catalogue prices, quote history and the supporting web records.
 - OA quote submission resolves customer identity and price from PostgreSQL before dispatch. Guard remains the sole source of quota reservation. The production bundle was tested in Chromium through the actual runtime process and PostgreSQL, with a local OA transport fixture.
+
+## Z5-INBOX-LIVE · 2026-11-26
+
+- Áp migration 011 sau 010 cho database đang chạy. Fresh image tự áp theo init. Runtime Web UI với OA live sẽ chiếu sự kiện còn hiệu lực trong `oa_inbox` vào khách và hội thoại theo mã nội bộ. Projection không thay đổi cursor hoặc queue của AI.
+- Khách mới không tự được cấp consent. Nội dung chưa được cấp quyền lưu dài hạn vẫn nằm trong inbound mã hóa và chỉ đọc tới thời hạn ingress tối đa 24 giờ. Khi có consent retain, tin đi vào bảng messages theo vòng đời hiện hành. Theo dõi/bỏ theo dõi và cửa sổ tương tác dùng trạng thái OA đã xác thực từ webhook.
+- Chủ dự án và CSKH xem nội dung/gửi qua Guard. Sales/A0 chỉ xem metadata hộp thư. Smoke-only chặn gửi giao diện trong OA live. Fixture loopback dùng OA giả lập. `InboxDraftReader` là interface tích hợp của Work ROOM, mặc định chưa có bản nháp.

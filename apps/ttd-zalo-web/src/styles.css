@@ -659,3 +659,10 @@ progress {
   font-size: 0.86rem;
   margin-top: 4px;
 }
+
+.message-history {
+  list-style: none;
+  padding: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}

@@ -25,6 +25,23 @@ export type Conversation = {
   delivery: Delivery;
   reason?: string;
 };
+export type OaThread = {
+  id: string;
+  customerId: string;
+  lastInteractionAt: string;
+  following: boolean | null;
+};
+export type OaThreadDetail = OaThread & {
+  messages: {
+    id: string;
+    at: string;
+    direction: "incoming" | "outgoing";
+    text: string | null;
+    delivery?: string;
+  }[];
+  sendBlock: { code: string; message: string } | null;
+  aiDraft: { id: string; revision: number; text: string } | null;
+};
 export type Customer = {
   id: string;
   label: string;
@@ -152,13 +169,23 @@ async function request<T>(
 }
 
 export const api = {
-  connectOa: () => request<{ authorizationUrl: string }>("/oa/oauth/start", "POST"),
+  connectOa: () =>
+    request<{ authorizationUrl: string }>("/oa/oauth/start", "POST"),
   session: () => request<Operator>("/session"),
   login: (
     credentials: { account: string; passphrase: string } | { demoRole: Role },
   ) => request<Operator>("/session", "POST", credentials),
   logout: () => request<void>("/session", "DELETE"),
   workspace: () => request<Workspace>("/workspace"),
+  inbox: () => request<OaThread[]>("/inbox"),
+  oaThread: (id: string) =>
+    request<OaThreadDetail>("/inbox/" + encodeURIComponent(id)),
+  replyOa: (id: string, text: string) =>
+    request<{ delivery: "sent" }>(
+      "/inbox/" + encodeURIComponent(id) + "/replies",
+      "POST",
+      { text },
+    ),
   approve: (id: string, version: number, text: string) =>
     request<Conversation>(
       "/conversations/" + encodeURIComponent(id) + "/approve",

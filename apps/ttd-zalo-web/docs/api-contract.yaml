@@ -580,6 +580,91 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /inbox:
+    get:
+      operationId: listOaInbox
+      description: Hội thoại OA theo mã nội bộ. Không trả mã UID OA.
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OaThread'
+        '401': &id004
+          description: Yêu cầu bị từ chối
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /inbox/{id}:
+    parameters:
+    - &id005
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    get:
+      operationId: readOaThread
+      description: Chủ dự án và CSKH xem nội dung. Sales/A0 nhận metadata và nội dung null.
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OaThreadDetail'
+        '401': *id004
+        '404': *id004
+        '503': *id004
+  /inbox/{id}/replies:
+    parameters:
+    - *id005
+    post:
+      operationId: replyToOaThread
+      x-roles:
+      - owner
+      - support
+      description: Gửi qua Guard với đích và timestamp do server xác định. Có thể từ chối do STOP, smoke-only, hết
+        hạn, quota hoặc consent. Không tự gửi lại khi chưa rõ kết quả.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 1500
+              required:
+              - text
+      responses:
+        '201':
+          description: OA xác nhận tiếp nhận
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  delivery:
+                    type: string
+                    enum:
+                    - sent
+                required:
+                - delivery
+        '400': *id004
+        '401': *id004
+        '403': *id004
+        '404': *id004
+        '409': *id004
+        '502': *id004
+        '503': *id004
 components:
   securitySchemes:
     operatorSession:
@@ -763,13 +848,13 @@ components:
       - unit
       - quantity
       properties:
-        customerId: &id004
+        customerId: &id006
           type: string
-        productId: &id005
+        productId: &id007
           type: string
-        unit: &id006
+        unit: &id008
           $ref: '#/components/schemas/Unit'
-        quantity: &id007
+        quantity: &id009
           type: number
           minimum: 0.001
           maximum: 10000
@@ -788,10 +873,10 @@ components:
       properties:
         id:
           type: string
-        customerId: *id004
-        productId: *id005
-        unit: *id006
-        quantity: *id007
+        customerId: *id006
+        productId: *id007
+        unit: *id008
+        quantity: *id009
         totalMillimetres:
           type: integer
           minimum: 1
@@ -1084,6 +1169,91 @@ components:
           enum:
           - sent
       additionalProperties: false
+    OaThread:
+      type: object
+      properties:
+        id: &id010
+          type: string
+          format: uuid
+        customerId: &id011
+          type: string
+          format: uuid
+        lastInteractionAt: &id012
+          type: string
+          format: date-time
+        following: &id013
+          type: boolean
+          nullable: true
+      required:
+      - id
+      - customerId
+      - lastInteractionAt
+      - following
+    OaThreadDetail:
+      type: object
+      properties:
+        id: *id010
+        customerId: *id011
+        lastInteractionAt: *id012
+        following: *id013
+        messages:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              at:
+                type: string
+                format: date-time
+              direction:
+                type: string
+                enum:
+                - incoming
+                - outgoing
+              text:
+                type: string
+                nullable: true
+              delivery:
+                type: string
+            required:
+            - id
+            - at
+            - direction
+            - text
+        sendBlock:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+          required:
+          - code
+          - message
+          nullable: true
+        aiDraft:
+          type: object
+          properties:
+            id:
+              type: string
+            revision:
+              type: integer
+            text:
+              type: string
+          required:
+          - id
+          - revision
+          - text
+          nullable: true
+      required:
+      - id
+      - customerId
+      - lastInteractionAt
+      - following
+      - messages
+      - sendBlock
+      - aiDraft
 x-operator-permissions:
   sharedScreens:
   - overview

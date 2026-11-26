@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { randomBytes, randomUUID, scryptSync } from "node:crypto";
+import { createHash, randomBytes, randomUUID, scryptSync } from "node:crypto";
 import { once } from "node:events";
 import { readFile } from "node:fs/promises";
 import { createServer, request } from "node:http";
@@ -23,7 +23,7 @@ async function listen(handler) {
 const address = server => `http://127.0.0.1:${server.address().port}`;
 const close = async server => { server.closeAllConnections(); await new Promise(done => server.close(done)); };
 
-test("production Web UI process sends approved OA quote through the mounted API", {
+test("production Web UI receives and replies to OA and sends an approved quote", {
   skip: process.env.RUN_POSTGRES_TESTS !== "1" || !process.env.WEB_UI_TEST_DIST,
   timeout: 120_000,
 }, async t => {
@@ -36,7 +36,7 @@ test("production Web UI process sends approved OA quote through the mounted API"
     try { await admin.query("DROP DATABASE " + database + " WITH (FORCE)"); }
     finally { await admin.end(); }
   });
-  for (const name of ["001.sql", "002-runtime.sql", "runtime-grants.sql", "006-oa.sql", "007-oa-quota.sql", "009-web-operator.sql", "010-web-accounts.sql"]) {
+  for (const name of ["001.sql", "002-runtime.sql", "runtime-grants.sql", "006-oa.sql", "007-oa-quota.sql", "009-web-operator.sql", "010-web-accounts.sql", "011-web-oa-inbox.sql"]) {
     let sql = await readFile(new URL("../postgres/" + name, import.meta.url), "utf8");
     if (name === "runtime-grants.sql") sql = sql.split("\n").filter(line => line.startsWith("GRANT ")).join("\n");
     await pg.query(sql);
@@ -215,6 +215,65 @@ test("production Web UI process sends approved OA quote through the mounted API"
     [{ state: "sent", quota_bucket: "free_window", quota_month: null }]);
   assert.equal((await post("conversations/" + draft.id + "/approve", { version: 1, text: "Duyệt fixture" }, support)).status, 200);
   assert.equal(calls.length, 2);
+  const uid = "fixture_live_inbox";
+  const rawTarget = oaTarget(account, uid);
+  const targetHash = runtime.hash(rawTarget);
+  const text = "Khách gửi tin fixture qua webhook";
+  async function webhook(name, extra) {
+    const timestamp = String(Date.now());
+    const body = JSON.stringify({ app_id: account.appId, timestamp, event_name: name, ...extra });
+    const signature = createHash("sha256").update(account.appId + body + timestamp + account.webhookSecret).digest("hex");
+    const response = await fetch(host + "/webhooks/zalo-oa", { method: "POST",
+      headers: { "Content-Type": "application/json", "x-zevent-signature": "mac=" + signature }, body });
+    assert.equal(response.status, 200);
+  }
+  const event = { sender: { id: uid }, recipient: { id: account.oaId }, message: { msg_id: "fixture-live-event", text } };
+  await webhook("user_send_text", event);
+  await webhook("user_send_text", event);
+  await webhook("follow", { oa_id: account.oaId, follower: { id: uid }, event_id: "fixture-follow" });
+  await ownerPage.getByRole("link", { name: "Hộp thư khách", exact: true }).click();
+  await ownerPage.getByText(text, { exact: true }).waitFor({ timeout: 25_000 });
+  await ownerPage.getByText("Đang quan tâm OA", { exact: true }).waitFor();
+  const [row] = (await pg.query("SELECT conversation_id,origin_id,retained FROM web_oa_projection WHERE target=$1", [targetHash])).rows;
+  assert.ok(row.conversation_id);
+  assert.equal(row.retained, false);
+  assert.equal((await pg.query("SELECT count(*)::int AS n FROM web_oa_projection WHERE target=$1", [targetHash])).rows[0].n, 1);
+  assert.equal((await pg.query("SELECT count(*)::int AS n FROM messages WHERE event_id=$1", [row.origin_id])).rows[0].n, 0);
+  const forSales = await (await read("inbox/" + row.conversation_id, sales)).json();
+  assert.equal(forSales.messages[0].text, null);
+  assert.equal((await post("inbox/" + row.conversation_id + "/replies", { text: "Denied" }, sales)).status, 403);
+  assert.equal((await post("inbox/" + row.conversation_id + "/replies", { text: "No consent" }, support)).status, 409);
+
+  runtime.consent(targetHash, Date.now() + hour, true, true, true, false,
+    { displayedText: "Fixture", policyVersion: "fixture", evidence: { source: "fixture" } });
+  runtime.stop("support", true);
+  const blocked = await (await read("inbox/" + row.conversation_id, owner)).json();
+  assert.equal(blocked.sendBlock.code, "stopped");
+  runtime.stop("support", false);
+  await ownerPage.getByRole("button", { name: /Làm mới/ }).click();
+  const reply = "Trả lời OA fixture qua giao diện";
+  await ownerPage.getByLabel("Nội dung trả lời").fill(reply);
+  const manual = ownerPage.waitForResponse(res => res.url().endsWith("/replies") && res.request().method() === "POST");
+  await ownerPage.getByRole("button", { name: "Gửi trả lời OA" }).click();
+  assert.equal((await manual).status(), 201);
+  await ownerPage.getByText(reply, { exact: true }).waitFor();
+  assert.equal(calls.length, 3);
+  assert.equal(calls[2].recipient.user_id, uid);
+  assert.equal(calls[2].message.text, reply);
+  assert.equal((await post("inbox/" + row.conversation_id + "/replies", { text: reply }, support)).status, 409);
+  assert.equal(calls.length, 3);
+  const threadPath = "inbox/" + row.conversation_id;
+  for (const [age, code] of [[49, "quota_exhausted"], [168, "oa_window_expired"]]) {
+    await pg.query("UPDATE oa_contacts SET interaction_at=$1 WHERE scope=$2 AND target=$3",
+      [Date.now() - age * hour, accountScope(account), targetHash]);
+    assert.equal((await (await read(threadPath, owner)).json()).sendBlock.code, code);
+    assert.equal((await post(threadPath + "/replies", { text: "Guard fixture" }, support)).status, 409);
+  }
+  assert.equal(calls.length, 3);
+  await webhook("unfollow", { oa_id: account.oaId, follower: { id: uid }, event_id: "fixture-unfollow" });
+  const following = await (await read("inbox/" + row.conversation_id, owner)).json();
+  assert.equal(following.following, false);
+
   assert.equal((await fetch(origin + "/api/v1/session", { method: "DELETE", headers: { Origin: origin, cookie: owner } })).status, 204);
   assert.equal((await read("session", owner)).status, 401);
 });
