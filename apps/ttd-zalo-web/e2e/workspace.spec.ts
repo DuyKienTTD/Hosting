@@ -248,7 +248,7 @@ test("cả hai nút báo giá khóa theo từng điều kiện và gửi OA sau 
   await expect(send).toBeEnabled();
   await send.click();
   await expect(page.getByRole("status")).toHaveText(
-    "Đã duyệt và xếp hàng gửi qua OA.",
+    "Đã xử lý báo giá qua OA. Xem trạng thái ở danh sách báo giá.",
   );
   await expect(page.getByText(/Chờ gửi OA/)).toBeVisible();
   await locks("Tích xác nhận báo giá.");

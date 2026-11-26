@@ -53,7 +53,7 @@ export type ConfirmedQuote = QuoteInput & {
   priceList: string;
 };
 export type Quote = QuoteInput & {
-  delivery?: "queued";
+  delivery?: "queued" | "sent";
   id: string;
   totalMillimetres: number;
   totalVnd: number;

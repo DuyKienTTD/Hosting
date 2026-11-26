@@ -26,3 +26,9 @@ sensitivity: public
 - Kiểm tra thời điểm tương tác OA bằng dữ liệu và đồng hồ của handler. Cửa sổ dưới 48 giờ miễn quota. Từ 48 giờ đến dưới 7 ngày tính vào quota tháng. Từ đúng 7 ngày bị chặn.
 - UI đọc lý do từ workspace và cập nhật khi POST trả 409. MSW giữ chỗ quota lúc xếp hàng. Interface `OaQuoteGuard` là điểm nối với Guard của PR #78, nơi backend thực thi quota bền và kiểm tra lại sát lúc gửi.
 - Hồi quy qua HTTP giả lập cho owner và sales, các mốc giờ/ngày, hết quota, opt-out và vai trò. Component test kiểm tra hai thông báo khóa và giữ quyền lưu báo giá.
+
+## Z4-S4-REBASE · 2026-11-26
+
+- Rebase lên `e56ebcc` sau #75, #77 và #78. Không có xung đột hoặc migration mới.
+- Handler production `oaQuotes` gọi `SendGuard.dispatch` trên PostgreSQL. Workspace dùng projection `block(target)` từ adapter OA. Admission trong Guard ghi quota đúng một lần vào `send_log`. API production trả `delivery=sent` khi OA xác nhận tiếp nhận. MSW vẫn chạy demo độc lập.
+- Host cần mount `handle`, cấp resolver phiên nhận diện owner/sales và nối lookup báo giá từ catalog đã duyệt, consent và OA identity. Route factory từ chối database ngoài PostgreSQL. Bộ test mount route HTTP trong fixture và dùng OA transport giả lập với Guard, quota và send_log thật.

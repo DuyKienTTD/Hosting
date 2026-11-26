@@ -502,7 +502,7 @@ export function Quotes({ data, user, run, busy, refresh }: Props) {
           quotes: [quote, ...current.quotes],
         });
       },
-      send ? "Đã duyệt và xếp hàng gửi qua OA." : "Đã lưu báo giá.",
+      send ? "Đã xử lý báo giá qua OA. Xem trạng thái ở danh sách báo giá." : "Đã lưu báo giá.",
     );
   }
   return (
@@ -661,6 +661,7 @@ export function Quotes({ data, user, run, busy, refresh }: Props) {
                 <small>
                   {item.productId} ·{" "}
                   {item.delivery === "queued" && "Chờ gửi OA · "}
+                  {item.delivery === "sent" && "OA đã tiếp nhận · "}
                   {number(item.quantity)} {unitLabels[item.unit].toLowerCase()}{" "}
                   · {number(item.totalMillimetres / 1000)} m
                 </small>
