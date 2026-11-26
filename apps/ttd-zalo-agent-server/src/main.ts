@@ -1,4 +1,5 @@
 import { oaWebInbox } from "./web/oa-inbox.js";
+import { BotPilot, botWebhookPath, readBot } from "./channels/bot/pilot.js";
 import { latestSmokeUid, modeError, sendOaSmoke } from "./channels/oa/smoke-cli.js";
 import type { Result as OaResult, Results as OaResults } from "./adapters/contract.js";
 import { nickPairing } from "./adapters/nick-pairing.js";
@@ -39,6 +40,7 @@ if (command === "oa-smoke-send") {
     process.exit(1);
   }
 }
+const botSettings = readBot(process.env, smokeOnly);
 const { PGHOST, PGDATABASE, DATA_RUNTIME_PASSWORD } = process.env;
 if (!PGHOST || !PGDATABASE || !DATA_RUNTIME_PASSWORD) throw Error("POSTGRES_CONFIGURATION_REQUIRED");
 const key = process.env.IDENTITY_KEY ?? "";
@@ -51,6 +53,7 @@ config.budget.cycleStartDay = anchor;
 const wiring = readLiveWiring(process.env, config, smokeOnly, mode);
 const postgres = { host: PGHOST, database: PGDATABASE, user: "data_runtime", password: DATA_RUNTIME_PASSWORD };
 const store = new Store(new PostgresRuntimeDatabase(postgres), key, Number(process.env.DATA_RETENTION_DAYS ?? "30"));
+const bot = botSettings && new BotPilot(botSettings, store, config);
 let smokeReceipt: OaResult<OaResults["sendMessage"]> | undefined;
 const liveOa = wiring.oa && createLiveOa(wiring.oa, store, postgres,
   command === "oa-smoke-send" ? receipt => { smokeReceipt = receipt; } : undefined);
@@ -60,6 +63,12 @@ const onboarding = command === "serve" && process.env.WEB_ORIGIN && process.env.
 if (command === "serve" && (process.env.ADS_ENABLED === "false" || ((liveOa || mode === "oa") && process.env.WEB_ORIGIN))) store.set("ADS_ENABLED", 0);
 const input = () => JSON.parse(readFileSync(0, "utf8"));
 const commands: Record<string, () => unknown> = {
+  "bot-reply": async () => {
+    const { peer, text } = input();
+    const result = bot ? await bot.reply(peer, text) : "bot_live_required";
+    console.log(JSON.stringify({ result }));
+    if (result !== "sent") process.exitCode = 1;
+  },
   smoke: async () => {
     if (mode !== "subiz" || !smokeOnly || process.env.CLAUDE_ENABLED === "1") {
       console.log(JSON.stringify({ status: "FAIL", step: "smoke_mode_required" }));
@@ -117,12 +126,12 @@ const commands: Record<string, () => unknown> = {
   },
   stop: () => {
     const agent = process.argv[3] ?? "global";
-    if (agent !== "global" && !isAgent(agent)) throw Error("INVALID_AGENT");
+    if (agent !== "global" && agent !== "bot" && !isAgent(agent)) throw Error("INVALID_AGENT");
     store.stop(agent, true);
   },
   resume: () => {
     const agent = process.argv[3] ?? "global";
-    if (agent !== "global" && !isAgent(agent)) throw Error("INVALID_AGENT");
+    if (agent !== "global" && agent !== "bot" && !isAgent(agent)) throw Error("INVALID_AGENT");
     store.stop(agent, false);
   },
   consent: () => {
@@ -184,7 +193,7 @@ if (command !== "serve") {
     new Set(schedule.map(task => task.key)).size !== schedule.length) throw Error("INVALID_SCHEDULE");
   const drafts = oa ? new OaAiDrafts(store, config, provider, wiring.aiMode === "live") : undefined;
   const runtime = new Runtime(store, channel, provider, config, Date.now, schedule, !!(webOrigin && oa), drafts);
-  const hooks = active && webhookHandler(active.subiz, active.bot, smokeOnly ? undefined : event => {
+  const hooks = active && webhookHandler(active.subiz, bot ? undefined : active.bot, smokeOnly ? undefined : event => {
     // The signed inbound event is already durable. Apply opt-out without waiting for the next poll.
     runtime.ingest(event);
   });
@@ -217,7 +226,7 @@ if (command !== "serve") {
     issue: () => pairing!.issue(),
     revoke: () => { pairing!.revoke(); closeNickAudit?.stop(); closeNickAudit?.disconnect(); },
     connected: () => closeNickAudit?.connected() ?? false,
-  }, onboarding, inbox, drafts) : undefined;
+  }, onboarding, inbox, drafts, bot ? () => bot.status() : undefined) : undefined;
   const server = createServer((req, res) => {
     void handle(req, res).catch(() => { if (!res.headersSent) res.writeHead(503); res.end(); });
   });
@@ -235,6 +244,7 @@ if (command !== "serve") {
     }
     if (web && await web(req, res)) return;
     if (web && process.env.WEB_DIST && await serveWebAssets(req, res, process.env.WEB_DIST)) return;
+    if (bot && req.url === botWebhookPath) return bot.webhook(req, res);
     if (hooks && await hooks(req, res)) return;
     if (req.url !== "/health" || (req.method !== "GET" && req.method !== "HEAD")) {
       void operatorHandler(req, res).catch(() => { if (!res.headersSent) res.writeHead(500); res.end(); });
