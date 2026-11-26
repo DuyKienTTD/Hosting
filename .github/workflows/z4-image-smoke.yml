@@ -95,6 +95,11 @@ jobs:
           }
           trap cleanup EXIT
           compose up -d --wait --wait-timeout 150 postgres runtime oa-ingress data-api worker
+          TRUSTED_PROXY=$(docker inspect --format '{{range .NetworkSettings.Networks}}{{println .Gateway}}{{end}}' "$(compose ps -q runtime)" | awk 'NF' | paste -sd, -)
+          test -n "$TRUSTED_PROXY"
+          export TRUSTED_PROXY
+          compose up -d --wait --wait-timeout 80 runtime
+          compose exec -T postgres sh -s < deploy/smoke-web-migrations.sh
           for service in runtime oa-ingress data-api worker; do
             port=8080
             if [ "$service" = worker ]; then port=8081; fi
@@ -108,15 +113,32 @@ jobs:
             ' "$port" "$service"
           done
 
+          empty=$(compose exec -T postgres sh -c 'psql -X -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atc "SELECT count(*)=0 FROM web_operators"')
+          if [ "$empty" != t ]; then echo 'FAIL 02 an operator was already present after initialization'; exit 1; fi
           umask 077
           openssl rand -hex 24 > "$fixture/owner-passphrase"
-          compose exec -T runtime node dist/ttd-zalo-agent-server/src/main.js \
-            web-bootstrap-owner fixture-owner 'Fixture owner' < "$fixture/owner-passphrase"
-          if compose exec -T runtime node dist/ttd-zalo-agent-server/src/main.js \
-            web-bootstrap-owner second-owner 'Second owner' < "$fixture/owner-passphrase"; then
-            echo "Unexpected second owner bootstrap"
+          if ! compose exec -T runtime node dist/ttd-zalo-agent-server/src/main.js \
+            web-bootstrap-owner fixture-owner 'Fixture owner' < "$fixture/owner-passphrase" > "$fixture/bootstrap.log" 2>&1; then
+            echo 'FAIL 01 bootstrapped owner through stdin'
             exit 1
           fi
+          if compose exec -T runtime node dist/ttd-zalo-agent-server/src/main.js \
+            web-bootstrap-owner second-owner 'Second owner' < "$fixture/owner-passphrase" >> "$fixture/bootstrap.log" 2>&1; then
+            echo 'FAIL 01 repeated bootstrap was accepted'
+            exit 1
+          fi
+          if grep -Fq -f "$fixture/owner-passphrase" "$fixture/bootstrap.log"; then
+            echo 'FAIL 01 passphrase appeared in CLI output'
+            exit 1
+          fi
+          echo 'PASS 01 owner bootstrap via stdin; password absent from output; second bootstrap refused'
+          state=$(compose exec -T postgres sh -c 'psql -X -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -At' <<'SQL'
+          SELECT count(*)=1 AND bool_and(role='owner' AND verifier ~ '^[a-f0-9]{32}:[a-f0-9]{128}$') FROM web_operators;
+          SQL
+          )
+          if [ "$state" != t ]; then echo 'FAIL 02 owner account/verifier'; exit 1; fi
+          if ! grep -q 'promisify(scrypt)' apps/ttd-zalo-agent-server/src/web/accounts.ts; then echo 'FAIL 02 scrypt implementation'; exit 1; fi
+          echo 'PASS 02 no preseeded account; exactly one bootstrapped owner with salted scrypt verifier'
           mkdir "$fixture/certs"
           openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
             -subj /CN=cskh.thuanthanhdat.com.vn \
@@ -130,3 +152,4 @@ jobs:
             --resolve cskh.thuanthanhdat.com.vn:443:127.0.0.1 --cacert "$fixture/certs/fullchain.pem" \
             https://cskh.thuanthanhdat.com.vn/health >/dev/null
           python3 deploy/smoke-web.py "$fixture/certs/fullchain.pem" "$fixture/owner-passphrase"
+          compose exec -T data-api node --input-type=module < deploy/smoke-web-peer.mjs

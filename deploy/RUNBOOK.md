@@ -81,7 +81,14 @@ Tạo tài khoản đầu tiên bằng Bash trên VPS. Dùng tên đăng nhập 
 )
 ```
 
-Bootstrap chỉ chạy khi bảng tài khoản trống. Đăng nhập tại HTTPS, vào **Cài đặt → Tạo tài khoản vận hành** để cấp tài khoản riêng cho Bán hàng và CSKH. Truyền mật khẩu ban đầu qua kênh riêng đã được phê duyệt. Phiên HTTPS dùng cookie Secure, HttpOnly, SameSite=Strict. Runtime giới hạn tối đa 30 yêu cầu đăng nhập hợp lệ về định dạng mỗi phút, gồm cả lần thất bại.
+Bootstrap chỉ chạy khi bảng tài khoản trống. Đăng nhập tại HTTPS, vào **Cài đặt → Tạo tài khoản vận hành** để cấp tài khoản riêng cho Bán hàng và CSKH. Truyền mật khẩu ban đầu qua kênh riêng đã được phê duyệt. Phiên HTTPS dùng cookie Secure, HttpOnly, SameSite=Strict. Phiên bản này giới hạn 10 lần đăng nhập sai cho mỗi IP và 5 lần cho mỗi tên tài khoản (bỏ khoảng trắng đầu/cuối và không phân biệt hoa thường khi tính giới hạn) trong 15 phút. Khi chạm ngưỡng, lần thử tiếp theo phải chờ 30 giây. Mỗi lần sai tiếp theo kéo dài thời gian chờ đến tối đa 5 phút và hết hạn theo cửa sổ 15 phút. Bộ nhớ tạm có giới hạn 10.000 khóa mỗi loại, tổng tối đa 600 lượt xác minh/phút và 16 lượt đồng thời. Bộ đếm bắt đầu lại khi runtime khởi động lại.
+
+Nginx ghi đè `X-Forwarded-For` bằng địa chỉ client. Runtime chỉ dùng header khi peer socket là loopback hoặc IP khai báo chính xác trong `TRUSTED_PROXY`. Nếu Docker chuyển kết nối từ Nginx qua địa chỉ gateway thay vì loopback, chạy lệnh sau sau khi runtime đã lên, đối chiếu với các bridge của riêng project CSKH, rồi điền IP gateway thực tế vào `deploy/.env` và tạo lại runtime. Chỉ liệt kê IP proxy cần thiết, phân cách bằng dấu phẩy. Khi peer chưa được tin cậy, bộ đếm dùng IP socket.
+
+```sh
+docker inspect --format '{{range .NetworkSettings.Networks}}{{println .Gateway}}{{end}}' "$(cskh ps -q runtime)"
+cskh up -d --wait runtime
+```
 
 ## 3. Smoke có kiểm soát
 
