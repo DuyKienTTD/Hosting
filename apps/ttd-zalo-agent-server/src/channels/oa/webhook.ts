@@ -71,12 +71,20 @@ export class OaInbox {
       const message: Event = { id: event.key, contact, thread: contact, at: event.at, channel: "oa", kind: "dm", text: event.text };
       sealed = this.box.seal(JSON.stringify(message), inboxContext(this.scope, event.key));
     }
-    try {
-      signal.throwIfAborted();
-      await this.pool.query("SELECT oa_accept_event($1,$2,$3,$4,$5,$6,$7)",
-        [this.scope, event.key, target, event.at, event.kind, new Date(expiry), sealed]);
-      return 200;
-    } catch { return 503; }
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (signal.aborted) return 503;
+      try {
+        await this.pool.query("SELECT oa_accept_event($1,$2,$3,$4,$5,$6,$7)",
+          [this.scope, event.key, target, event.at, event.kind, new Date(expiry), sealed]);
+        return 200;
+      } catch (error) {
+        const code = (error as { code?: string })?.code;
+        // Only retry failures Postgres confirms rolled back. The HTTP deadline
+        // still governs both attempts. Zalo can replay the idempotent event.
+        if (attempt !== 0 || (code !== "40001" && code !== "40P01")) return 503;
+      }
+    }
+    return 503;
   }
 }
 

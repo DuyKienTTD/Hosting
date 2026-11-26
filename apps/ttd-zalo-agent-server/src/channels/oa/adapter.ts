@@ -25,7 +25,7 @@ export class OaAdapter extends BaseAdapter {
 
   constructor(private readonly store: Store, private readonly box: Envelope, private readonly tokens: OaTokens,
     private readonly account: OaAccount, private readonly appSecret: string,
-    private readonly options: { endpoint?: string; allowAfter48h?: boolean; monthlyQuota?: number; allowPaidOverflow?: boolean; clock?: () => number } = {}) {
+    private readonly options: { endpoint?: string; allowAfter48h?: boolean; monthlyQuota?: number; allowPaidOverflow?: boolean; allowedUids?: ReadonlySet<string>; clock?: () => number } = {}) {
     super();
     this.scope = accountScope(account);
     if (!store.db.backend || this.scope !== tokens.scope || !id(account.appId) || !id(account.oaId) || !appSecret) {
@@ -35,6 +35,11 @@ export class OaAdapter extends BaseAdapter {
     if (!Number.isSafeInteger(this.monthlyQuota) || this.monthlyQuota < 0) throw Error("OA_INVALID_MONTHLY_QUOTA");
     this.accountId = "oa:" + this.scope;
     this.journal = new ChannelJournal(store, () => this.now());
+  }
+
+  private recipient(target: string) {
+    const uid = oaUid(this.account, target);
+    return uid && (this.options.allowedUids?.has(uid) ?? true) ? uid : undefined;
   }
 
   private now() { return this.options.clock?.() ?? Date.now(); }
@@ -69,7 +74,7 @@ export class OaAdapter extends BaseAdapter {
   }
 
   admitSend(req: Request, kind: string, now: number): SendAdmission {
-    const window = kind === "reply" && oaUid(this.account, req.target) && this.sendWindow(req.target, now);
+    const window = kind === "reply" && this.recipient(req.target) && this.sendWindow(req.target, now);
     if (!window) return { denial: "policy_denied" };
 
     const quotaMonth = window === "48h_to_7d" ? vietnam(now).date.slice(0, 7) : null;
@@ -88,7 +93,7 @@ export class OaAdapter extends BaseAdapter {
   }
 
   override localContact(accountId: string, target: string): Result<Results["getContact"]> {
-    return accountId === this.accountId && oaUid(this.account, target) && this.sendWindow(target, this.now())
+    return accountId === this.accountId && this.recipient(target) && this.sendWindow(target, this.now())
       ? ok({ contactId: target, friendship: "accepted" }) : fail("policy_denied");
   }
 
@@ -128,12 +133,12 @@ export class OaAdapter extends BaseAdapter {
         type: "messageReceived", payload: { messageId: eventId, senderId: event.contact, text: event.text,
           thread: { kind: "direct", conversationId: event.thread } } };
     });
-    return ok({ items, nextCursor: String(rows.at(-1)?.seq ?? cursor) });
+    return ok({ items: items.filter(event => this.recipient(event.payload.senderId)), nextCursor: String(rows.at(-1)?.seq ?? cursor) });
   }
 
   override sendMessage(c: Command<"sendMessage">): Promise<Result<Results["sendMessage"]>> {
     const { conversationId: target, text } = c.payload;
-    const uid = oaUid(this.account, target);
+    const uid = this.recipient(target);
     if (!uid || c.accountId !== this.accountId || typeof text !== "string" || !text.trim() || [...text].length > 2000) {
       return Promise.resolve(fail("invalid_input"));
     }

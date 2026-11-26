@@ -3,6 +3,9 @@ import type { Store } from "./store.js";
 
 export type Usage = { input: number; output: number; creation: number; read: number };
 export type Model = keyof Config["budget"]["models"];
+// Upper bound across supported live configurations, including unsettled requests
+// started before a worker restarted with a lower configured output limit.
+export const liveOutputCeiling = 256;
 const usd = 1_000_000_000;
 const legacyRates: Record<string, Config["budget"]["models"][Model]> = {
   "claude-haiku-4-5-20251001": { input: 1000, output: 5000, creation: 1250, read: 100 },
@@ -57,8 +60,9 @@ export class Budget {
       if (db.prepare("SELECT 1 FROM ledger WHERE id=?").get(id)) return;
       const fraction = (prior + today) / cap;
       if (fraction >= this.cfg.inboundOnly && !inbound) return;
-      const model: Model = fraction >= this.cfg.downgrade ? light : this.cfg.byAgent[agent] as Model;
+      const model: Model = fraction >= this.cfg.downgrade && (this.cfg.allowedModels?.includes(light) ?? true) ? light : this.cfg.byAgent[agent] as Model;
       if (!Number.isSafeInteger(inputTokens) || inputTokens < 1 || inputTokens > this.cfg.maxEstimatedInputTokens) return;
+      if (this.cfg.allowedModels && !this.cfg.allowedModels.includes(model)) return;
       const rate = this.cfg.models[model];
       const { provider, compatibleRateMultiplier, compatibleDailyUsd } = this.cfg;
       const multiplier = provider === "anthropic-compatible" ? compatibleRateMultiplier : 1;
@@ -72,6 +76,23 @@ export class Budget {
       }
       if (provider === "anthropic-compatible") {
         if (batch) return;
+        const { dailyTokens, monthlyTokens } = this.cfg;
+        if (dailyTokens || monthlyTokens) {
+          const totals = db.prepare(`SELECT
+            coalesce(sum(CASE WHEN date=? OR state IN ('reserved','batch') THEN tokens ELSE 0 END),0) AS daily,
+            coalesce(sum(tokens),0) AS monthly FROM (
+              SELECT date,state,CASE WHEN state IN ('reserved','batch')
+                THEN coalesce(input_bound,100000)+?
+                ELSE coalesce(input,0)+coalesce(output,0)+coalesce(cache_write,0)+coalesce(cache_read,0) END AS tokens
+              FROM ledger WHERE provider=? AND (cycle=? OR settled_cycle=? OR state IN ('reserved','batch'))
+            ) requests`).get(date, liveOutputCeiling, provider, cycle, cycle)!;
+          const bound = inputTokens + liveOutputCeiling;
+          if ((dailyTokens && Number(totals.daily) + bound > dailyTokens) ||
+              (monthlyTokens && Number(totals.monthly) + bound > monthlyTokens)) {
+            this.store.notice(`router-tokens:${date}`, now, "Đã chạm hạn mức token của AI Router.");
+            return;
+          }
+        }
         const used = Number(db.prepare("SELECT coalesce(sum(amount),0) n FROM ledger WHERE date=? AND provider=?").get(date, provider)?.n);
         if (!Number.isFinite(compatibleDailyUsd) || compatibleDailyUsd <= 0 || used + amount > Math.floor(compatibleDailyUsd * usd)) {
           this.store.notice(`router-budget:${date}`, now, "Đã chạm hạn mức ngày của AI Router.");
