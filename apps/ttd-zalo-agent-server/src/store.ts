@@ -1,3 +1,4 @@
+import type { SendClassification } from "./channel.js";
 import type { RuntimeDatabase } from "./sql.js";
 import { createHmac } from "node:crypto";
 import { effectivePolicy, type PolicyRow } from "../../ttd-zalo-assistant/src/policy-core.js";
@@ -155,7 +156,14 @@ export class Store {
       ON CONFLICT(conversation_id,event_id) DO NOTHING`)
       .run(conversation,id,text,at,at+this.retentionDays*86_400_000,conversation,id);
   }
-  reserveSend(id: string, target: string, agent: string, kind: string, now: number) {
+  reserveSend(id: string, target: string, agent: string, kind: string, now: number, classification?: SendClassification) {
+    if (classification) {
+      const { messageType, window, quotaAccount, quotaMonth, quotaBucket } = classification;
+      return this.db.prepare(`INSERT INTO send_log(id,target,agent,kind,at,state,customer_id,
+          message_type,send_window,quota_account,quota_month,quota_bucket) VALUES(?,?,?,?,?,'reserved',
+          (SELECT customer_id FROM runtime_customer WHERE target=?),?,?,?,?,?) ON CONFLICT DO NOTHING`)
+        .run(id, target, agent, kind, now, target, messageType, window, quotaAccount, quotaMonth, quotaBucket).changes === 1;
+    }
     return this.db.prepare(this.db.backend
       ? `INSERT INTO send_log(id,target,agent,kind,at,state,customer_id) VALUES(?,?,?,?,?,'reserved',
           (SELECT customer_id FROM runtime_customer WHERE target=?)) ON CONFLICT DO NOTHING`

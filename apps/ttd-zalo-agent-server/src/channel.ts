@@ -2,10 +2,20 @@ export type { ChannelErrorCode as ChannelError } from "./adapters/contract.js";
 import type { ChannelErrorCode as ChannelError } from "./adapters/contract.js";
 export type Result<T = void> = { ok: true; value: T } | { ok: false; error: ChannelError };
 export type Request = { key: string; target: string; text?: string; message?: string; thread?: string; memberIds?: string[] };
+export type SendClassification = {
+  messageType: "oa_consultation";
+  window: "within_48h" | "48h_to_7d";
+  quotaAccount: string;
+  quotaMonth: string | null;
+  quotaBucket: "free_window" | "monthly" | "paid_overflow";
+};
+export type SendAdmission = { classification: SendClassification } | { denial: "policy_denied" | "quota_exhausted" };
 export type Contact = { id: string; friend: boolean };
 export type Event = { id: string; contact: string; thread: string; at: number; channel?: "oa" | "nick" | "bot" } & (
   { kind: "dm" | "group"; text: string } | { kind: "accepted" | "spam" });
 export interface ChannelAdapter {
+  // Synchronous and called inside the same admission transaction as reserveSend.
+  admitSend?(req: Request, kind: string, now: number): SendAdmission;
   acknowledge?(stream: "message" | "friend"): void;
   receiveMessage(req: Request): Promise<Result<Event[]>>;
   sendMessage(req: Request): Promise<Result>;
