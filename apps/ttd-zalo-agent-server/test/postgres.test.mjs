@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { randomBytes, randomUUID } from "node:crypto";
+import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -105,6 +105,20 @@ test("Postgres grants, deletion, encrypted backup and restore", { skip: config.R
         await assert.rejects(role.query("SELECT * FROM purge_private.signing_key"), /permission denied/);
         await assert.rejects(role.query("SELECT purge_private.replay_tombstone($1,$2,$3,1,1,$4)",
           [record, conversation, "0".repeat(64), "0".repeat(64)]), /permission denied/);
+      }
+      const session = await worker.connect();
+      try {
+        const decoyKey = randomBytes(32);
+        await session.query("CREATE TEMP TABLE signing_key(slot boolean,secret bytea)");
+        await session.query("INSERT INTO signing_key VALUES(true,$1)", [decoyKey]);
+        const eventKey = (await admin.query("SELECT event_id FROM messages WHERE id=$1", [record])).rows[0].event_id;
+        const decoySignature = createHmac("sha256", decoyKey)
+          .update(["z4-tombstone-v1", record, conversation, eventKey, 1, 1].join("|")).digest("hex");
+        await assert.rejects(session.query("SELECT purge_message($1,1,1,$2)", [record, decoySignature]),
+          /purge_receipt_required/);
+      } finally {
+        await session.query("DROP TABLE IF EXISTS pg_temp.signing_key");
+        session.release();
       }
       assert.equal((await worker.query("SELECT purge_message($1,1,1,NULL) AS eligible", [record])).rows[0].eligible, true);
       assert.equal((await admin.query("SELECT id FROM messages WHERE id=$1", [record])).rowCount, 1);

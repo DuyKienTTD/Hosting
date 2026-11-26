@@ -10,21 +10,24 @@ CREATE TABLE purge_private.receipts (
   transaction_id xid8 NOT NULL
 );
 DROP FUNCTION public.authorize_purge(uuid,integer,integer);
+ALTER FUNCTION public.delete_eligible(uuid,integer,integer,text) SET search_path=pg_catalog,public,pg_temp;
+ALTER FUNCTION public.purge_candidates(text) SET search_path=pg_catalog,public,pg_temp;
+ALTER FUNCTION public.deletion_unheld(public.messages) SET search_path=pg_catalog,public,pg_temp;
 
 CREATE FUNCTION purge_private.verify(record_id uuid, conversation_id uuid, event_id text,
   row_version integer, policy_version integer, signature text)
-RETURNS boolean LANGUAGE sql STABLE SET search_path=pg_catalog,purge_private AS $$
+RETURNS boolean LANGUAGE sql STABLE SET search_path=pg_catalog,purge_private,pg_temp AS $$
   SELECT coalesce(signature ~ '^[a-f0-9]{64}$' AND
     encode(hmac(convert_to(concat_ws('|','z4-tombstone-v1',record_id,conversation_id,event_id,
       row_version,policy_version),'UTF8'),secret,'sha256'),'hex')=signature,false)
-  FROM signing_key WHERE slot;
+  FROM purge_private.signing_key WHERE slot;
 $$;
 
 CREATE FUNCTION purge_private.require_receipt() RETURNS trigger
-LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,purge_private AS $$
+LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,purge_private,pg_temp AS $$
 BEGIN
   IF TG_OP='TRUNCATE' THEN RAISE EXCEPTION 'purge_receipt_required'; END IF;
-  IF NOT EXISTS (SELECT 1 FROM receipts WHERE record_id=OLD.id AND transaction_id=pg_current_xact_id()) THEN
+  IF NOT EXISTS (SELECT 1 FROM purge_private.receipts WHERE record_id=OLD.id AND transaction_id=pg_current_xact_id()) THEN
     RAISE EXCEPTION 'purge_receipt_required';
   END IF;
   RETURN OLD;
@@ -35,7 +38,7 @@ CREATE TRIGGER messages_forbid_truncate BEFORE TRUNCATE ON public.messages
   FOR EACH STATEMENT EXECUTE FUNCTION purge_private.require_receipt();
 
 CREATE FUNCTION public.purge_message(target_id uuid, expected_version integer, policy_version integer, signature text)
-RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,public AS $$
+RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,public,pg_temp AS $$
 DECLARE item messages;
 BEGIN
   LOCK TABLE legal_holds IN SHARE MODE;
@@ -65,7 +68,7 @@ REVOKE ALL ON FUNCTION public.deletion_unheld(public.messages) FROM PUBLIC;
 -- read from the independent archive while all serving roles are disconnected.
 CREATE FUNCTION purge_private.replay_tombstone(target_id uuid, thread_id uuid, event_key text,
   row_version integer, policy_version integer, signature text)
-RETURNS void LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$
+RETURNS void LANGUAGE plpgsql SET search_path=pg_catalog,public,pg_temp AS $$
 BEGIN
   IF purge_private.verify(target_id,thread_id,event_key,row_version,policy_version,signature)
     IS DISTINCT FROM true THEN RAISE EXCEPTION 'purge_receipt_required'; END IF;
