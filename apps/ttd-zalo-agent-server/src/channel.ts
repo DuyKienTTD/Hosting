@@ -1,7 +1,7 @@
 export type { ChannelErrorCode as ChannelError } from "./adapters/contract.js";
 import type { ChannelErrorCode as ChannelError } from "./adapters/contract.js";
 export type Result<T = void> = { ok: true; value: T } | { ok: false; error: ChannelError };
-export type Request = { purpose?: "oa_quote"; key: string; target: string; text?: string; message?: string; thread?: string; memberIds?: string[] };
+export type Request = { purpose?: "oa_quote" | "oa_smoke"; key: string; target: string; text?: string; message?: string; thread?: string; memberIds?: string[] };
 export type SendClassification = {
   messageType: "oa_consultation";
   window: "within_48h" | "48h_to_7d";

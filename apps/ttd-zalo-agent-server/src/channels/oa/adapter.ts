@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 import { BaseAdapter, ChannelJournal, fail, id, ok } from "../../adapters/common.js";
-import type { ChannelEvent, Command, Result, Results } from "../../adapters/contract.js";
+import type { ChannelErrorCode, ChannelEvent, Command, Result, Results } from "../../adapters/contract.js";
 import { command } from "../../adapters/router.js";
 import { UnsupportedChannel, type ChannelAdapter, type Event, type Request, type SendAdmission, type SendClassification, type Result as RuntimeResult } from "../../channel.js";
 import { vietnam } from "../../config.js";
@@ -86,7 +86,7 @@ export class OaAdapter extends BaseAdapter {
       const used = Number(this.store.db.prepare(`SELECT count(*) AS used FROM send_log
         WHERE quota_account=? AND quota_month=? AND quota_bucket='monthly'
         AND state IN ('reserved','sent','unknown_delivery')`).get(quotaAccount, quotaMonth)?.used);
-      if (used >= this.monthlyQuota && (req.purpose === "oa_quote" || this.options.allowPaidOverflow !== true)) return { denial: "quota_exhausted" };
+      if (used >= this.monthlyQuota && (req.purpose || this.options.allowPaidOverflow !== true)) return { denial: "quota_exhausted" };
       quotaBucket = used >= this.monthlyQuota ? "paid_overflow" : "monthly";
     }
     return { classification: { messageType: "oa_consultation", window, quotaAccount, quotaMonth, quotaBucket } };
@@ -113,6 +113,17 @@ export class OaAdapter extends BaseAdapter {
       this.prepared.set(c.idempotencyKey, { target, token });
       return local;
     } catch { return fail("auth"); }
+  }
+
+  latestInbound(target?: string) {
+    const row = this.store.db.prepare(`SELECT event_id,encode(sealed,'base64') AS body FROM oa_inbox
+      WHERE scope=? AND sealed IS NOT NULL AND expires_at>clock_timestamp()
+      AND (? IS NULL OR target=?) ORDER BY seq DESC LIMIT 1`)
+      .get(this.scope, target ? this.store.hash(target) : null, target ? this.store.hash(target) : null);
+    if (!row) return;
+    const event = JSON.parse(this.box.open(Buffer.from(String(row.body), "base64"),
+      inboxContext(this.scope, String(row.event_id)))) as Dm;
+    if (event.kind === "dm" && (!target || event.contact === target)) return event;
   }
 
   override async receiveMessage(c: Command<"receiveMessage">): Promise<Result<Results["receiveMessage"]>> {
@@ -169,21 +180,24 @@ export class OaAdapter extends BaseAdapter {
           "content-type": "application/json" },
         body: JSON.stringify({ recipient: { user_id: uid }, message: { text } }) });
       if (response.status >= 500) return fail("unknown_delivery");
+      const output = await response.json().catch(() => undefined);
+      const reject = (code: ChannelErrorCode): Result<Results["sendMessage"]> =>
+        Number.isSafeInteger(output?.error) && output.error !== 0
+          ? { ok: false, error: { code, providerCode: output.error } } : fail(code);
       if (response.status === 401) {
         await this.tokens.invalidate(token.generation);
-        return fail("auth");
+        return reject("auth");
       }
-      if (response.status === 429) return fail("rate_limited");
-      const output = await response.json();
+      if (response.status === 429) return reject("rate_limited");
       if (output?.error === -216 || output?.error === -220) {
         await this.tokens.invalidate(token.generation);
-        return fail("auth");
+        return reject("auth");
       }
-      if (output?.error === -242 || output?.error === -223) return fail("auth");
-      if (output?.error === -211) return fail("rate_limited");
-      if ([-200, -201, -210, -213, -244, -248].includes(output?.error)) return fail("policy_denied");
+      if (output?.error === -242 || output?.error === -223) return reject("auth");
+      if (output?.error === -211) return reject("rate_limited");
+      if ([-200, -201, -210, -213, -244, -248].includes(output?.error)) return reject("policy_denied");
       if (!response.ok || output?.error !== 0 || !id(output.data?.message_id) || output.data?.user_id !== uid) {
-        return fail("unknown_delivery");
+        return reject("unknown_delivery");
       }
       return ok({ providerMessageId: output.data.message_id, state: "accepted" });
     } catch { return fail("unknown_delivery"); }
@@ -198,7 +212,10 @@ function runtimeResult<T, U>(result: Result<T>, map: (value: T) => U): RuntimeRe
 export class OaRuntimeChannel implements ChannelAdapter {
   private cursor: string | undefined;
   private next: string | undefined;
-  constructor(private readonly adapter: OaAdapter) {}
+  constructor(private readonly adapter: OaAdapter,
+    private readonly onSend?: (result: Result<Results["sendMessage"]>) => void) {}
+
+  latestInbound(target?: string) { return this.adapter.latestInbound(target); }
   private readonly unsupported = new UnsupportedChannel();
   listGroups = this.unsupported.listGroups;
   readGroupMessages = this.unsupported.readGroupMessages;
@@ -237,5 +254,8 @@ export class OaRuntimeChannel implements ChannelAdapter {
   sendMessage = (request: Request) => this.adapter.sendMessage(
     command(this.adapter.accountId, request.key, "sendMessage", {
       conversationId: request.target, text: request.text ?? "",
-    })).then(result => runtimeResult(result, () => undefined));
+    })).then(result => {
+      this.onSend?.(result);
+      return runtimeResult(result, () => undefined);
+    });
 }

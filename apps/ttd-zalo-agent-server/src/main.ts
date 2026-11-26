@@ -1,3 +1,5 @@
+import { latestSmokeUid, modeError, sendOaSmoke } from "./channels/oa/smoke-cli.js";
+import type { Result as OaResult, Results as OaResults } from "./adapters/contract.js";
 import { createOperator } from "./web/accounts.js";
 import { serveWebAssets } from "./web/static.js";
 import { Pool } from "pg";
@@ -24,6 +26,15 @@ process.umask(0o077);
 const command = process.argv[2] ?? "serve";
 const mode = process.env.CHANNEL_MODE ?? "mock";
 const smokeOnly = process.env.CHANNEL_SMOKE_ONLY === "1";
+if (command === "oa-smoke-send") {
+  const error = modeError({ oaMode: process.env.OA_MODE ?? "mock", smokeOnly,
+    smokeAllowlist: new Set((process.env.SMOKE_ALLOWLIST ?? "").split(",").map(uid => uid.trim()).filter(Boolean)),
+  }, process.argv[3] ?? "");
+  if (error) {
+    console.log(JSON.stringify({ ok: false, error }));
+    process.exit(1);
+  }
+}
 const { PGHOST, PGDATABASE, DATA_RUNTIME_PASSWORD } = process.env;
 if (!PGHOST || !PGDATABASE || !DATA_RUNTIME_PASSWORD) throw Error("POSTGRES_CONFIGURATION_REQUIRED");
 const key = process.env.IDENTITY_KEY ?? "";
@@ -36,7 +47,9 @@ config.budget.cycleStartDay = anchor;
 const wiring = readLiveWiring(process.env, config, smokeOnly, mode);
 const postgres = { host: PGHOST, database: PGDATABASE, user: "data_runtime", password: DATA_RUNTIME_PASSWORD };
 const store = new Store(new PostgresRuntimeDatabase(postgres), key, Number(process.env.DATA_RETENTION_DAYS ?? "30"));
-const liveOa = wiring.oa && createLiveOa(wiring.oa, store, postgres);
+let smokeReceipt: OaResult<OaResults["sendMessage"]> | undefined;
+const liveOa = wiring.oa && createLiveOa(wiring.oa, store, postgres,
+  command === "oa-smoke-send" ? receipt => { smokeReceipt = receipt; } : undefined);
 const onboarding = command === "serve" && process.env.WEB_ORIGIN && process.env.OA_ONBOARD_ENABLED === "1"
   ? liveOa || createLiveOa(readOa({ ...process.env, OA_WEBHOOK_INGRESS: "external" }), store, postgres)
   : undefined;
@@ -65,6 +78,30 @@ const commands: Record<string, () => unknown> = {
     });
     if (result.status !== 201) { console.error(result.message); process.exitCode = 1; }
     else console.log("Đã tạo tài khoản Chủ dự án.");
+  },
+  "oa-smoke-send": async () => {
+    const uid = process.argv[3] ?? "";
+    const option = process.argv[4];
+    const error = modeError(wiring, uid);
+    const result = error || !liveOa ? { ok: false, error: error ?? "oa_live_required" }
+      : option !== undefined && option !== "--approve-consent" || process.argv.length > 5
+        ? { ok: false, error: "invalid_arguments" }
+        : await sendOaSmoke(store, config, liveOa, wiring, uid, readFileSync(0, "utf8"),
+            option === "--approve-consent", () => smokeReceipt);
+    console.log(JSON.stringify(result));
+    if (!result.ok) process.exitCode = 1;
+  },
+  "oa-smoke-latest-uid": () => {
+    // This is an operator discovery command and never sends.
+    if (!process.env.WEB_ORIGIN || process.env.OA_ONBOARD_ENABLED !== "1") throw Error("OA_ONBOARD_REQUIRED");
+    const oa = liveOa || createLiveOa(readOa({ ...process.env, OA_WEBHOOK_INGRESS: "external" }), store, postgres);
+    return (async () => {
+      try {
+        const uid = latestSmokeUid(oa);
+        if (!uid) throw Error("OA_SMOKE_INBOX_EMPTY");
+        console.log(uid);
+      } finally { if (oa !== liveOa) await oa.close(); }
+    })();
   },
   "oa-install": async () => {
     if (!liveOa) throw Error("OA_LIVE_REQUIRED");
