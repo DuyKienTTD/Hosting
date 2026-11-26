@@ -44,7 +44,7 @@ async function fixture(t) {
     finally { await root.end(); }
   });
   await root.query("CREATE SCHEMA " + schema);
-  for (const path of ["postgres/001.sql", "postgres/002-runtime.sql", "src/channels/oa/schema.sql", "src/channels/oa/quota.sql"]) {
+  for (const path of ["postgres/001.sql", "postgres/002-runtime.sql", "postgres/006-oa.sql", "postgres/007-oa-quota.sql"]) {
     await admin.query(await readFile(new URL("../" + path, import.meta.url), "utf8"));
   }
   const runtimeGrants = await readFile(new URL("../postgres/runtime-grants.sql", import.meta.url), "utf8");

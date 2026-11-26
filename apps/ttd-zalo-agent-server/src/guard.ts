@@ -1,6 +1,6 @@
 import type { Agent, Config } from "./config.js";
 import { day, vietnam } from "./config.js";
-import type { ChannelAdapter, Request, Result } from "./channel.js";
+import type { ChannelAdapter, ChannelError, Request, Result } from "./channel.js";
 import { Budget } from "./budget.js";
 import { Store } from "./store.js";
 
@@ -9,7 +9,18 @@ export type Proposal = {
   agent: Agent; kind: Kind; id: string; target: string; text?: string; message?: string;
   revision: number; epoch: number; groupApproved?: boolean; origin?: string; thread?: string; memberIds?: string[];
 };
-export class Guard {
+export type SendGuardOutcome =
+  | "sent" | "failed" | "unknown" | "stopped" | "duplicate" | "budget_held"
+  | "group_denied" | "consent" | "invite_denied" | "not_friend" | "reply_denied"
+  | "advertising_consent" | "hours" | "ad_limit" | "invite_limit" | "anomaly"
+  | "ads_disabled" | "channel_error" | "quota_exhausted" | ChannelError;
+
+/** Server-side send admission and dispatch for approved proposals. */
+export interface SendGuard {
+  dispatch(proposal: Proposal): Promise<SendGuardOutcome>;
+}
+
+export class Guard implements SendGuard {
   constructor(private store: Store, private channel: ChannelAdapter, private config: Config,
     private clock: () => number, private budget = new Budget(store, config.budget, clock)) {}
 
@@ -27,7 +38,7 @@ export class Guard {
     this.store.set("epoch", this.store.setting("epoch") + 1);
     this.store.notice("channel-paused", now, "Kênh đã tự tạm dừng.");
   }
-  private deny(p: Proposal, target: string, friend: boolean | undefined, now: number): string | undefined {
+  private deny(p: Proposal, target: string, friend: boolean | undefined, now: number): SendGuardOutcome | undefined {
     const { db } = this.store;
     const policy = this.store.policy(target, p.agent, now);
     const contact = this.store.contact(target, now);
@@ -77,7 +88,7 @@ export class Guard {
     return true;
   }
 
-  async dispatch(p: Proposal) {
+  async dispatch(p: Proposal): Promise<SendGuardOutcome> {
 
     const target = this.store.hash(p.target);
     const { db } = this.store;
