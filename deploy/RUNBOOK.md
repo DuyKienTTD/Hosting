@@ -90,6 +90,20 @@ docker inspect --format '{{range .NetworkSettings.Networks}}{{println .Gateway}}
 cskh up -d --wait runtime
 ```
 
+### Đặt tệp xác thực domain Zalo
+
+Lưu nguyên nội dung và tên tệp Zalo cấp dạng `zalo_verifier<TOKEN>.html` vào `/var/www/cskh-verify/`. Đặt tệp thường do root sở hữu, mode 0644, trong thư mục mode 0755. Không đưa tệp hoặc token vào Git. Template HTTPS phục vụ cùng tệp tại cả URL gốc và URL dưới `/webhooks/zalo-oa/`. Kiểm tra cả hai bằng `curl -fsSI`, rồi dùng GET để đối chiếu nội dung với tệp Zalo cấp trước khi xác thực.
+
+```sh
+sudo install -d -m 0755 /var/www/cskh-verify
+sudo install -o root -g root -m 0644 "$ZALO_VERIFIER_FILE" /var/www/cskh-verify/
+file=$(basename -- "$ZALO_VERIFIER_FILE")
+curl -fsSI "https://cskh.thuanthanhdat.com.vn/$file"
+curl -fsSI "https://cskh.thuanthanhdat.com.vn/webhooks/zalo-oa/$file"
+```
+
+Cài template bằng `nginx -t` rồi reload nếu site còn dùng cấu hình cũ. Thêm hoặc thay tệp cùng tên không cần reload. Hai URL xác thực chỉ nhận GET/HEAD. POST đúng đường dẫn `/webhooks/zalo-oa` tiếp tục tới OA ingress.
+
 ## 3. Smoke có kiểm soát
 
 1. Kiểm tra `https://cskh.thuanthanhdat.com.vn/health` trả 200, `stopped=true` và `channel=mock`. `/internal`, `/internal/nick-worker` và `/operator` phải trả 404 qua Nginx. Kiểm tra không có cổng DB hoặc cổng ứng dụng bind ra ngoài loopback.
