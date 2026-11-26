@@ -5,6 +5,7 @@ on:
     paths:
       - 'apps/ttd-zalo-agent-server/**'
       - 'apps/ttd-zalo-assistant/**'
+      - 'apps/ttd-zalo-web/**'
       - 'deploy/**'
       - '.github/workflows/z4-image-smoke.yml'
 permissions:
@@ -89,10 +90,16 @@ jobs:
               compose ps -a || true
               compose logs --no-color postgres runtime oa-ingress data-api worker || true
             fi
+            docker rm -f z4-image-smoke-nginx >/dev/null 2>&1 || true
             compose down -v --remove-orphans || true
           }
           trap cleanup EXIT
           compose up -d --wait --wait-timeout 150 postgres runtime oa-ingress data-api worker
+          TRUSTED_PROXY=$(docker inspect --format '{{range .NetworkSettings.Networks}}{{println .Gateway}}{{end}}' "$(compose ps -q runtime)" | awk 'NF' | paste -sd, -)
+          test -n "$TRUSTED_PROXY"
+          export TRUSTED_PROXY
+          compose up -d --wait --wait-timeout 80 runtime
+          compose exec -T postgres sh -s < deploy/smoke-web-migrations.sh
           for service in runtime oa-ingress data-api worker; do
             port=8080
             if [ "$service" = worker ]; then port=8081; fi
@@ -105,3 +112,44 @@ jobs:
                 .catch(error => { console.error(error.message); process.exitCode = 1; });
             ' "$port" "$service"
           done
+
+          empty=$(compose exec -T postgres sh -c 'psql -X -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atc "SELECT count(*)=0 FROM web_operators"')
+          if [ "$empty" != t ]; then echo 'FAIL 02 an operator was already present after initialization'; exit 1; fi
+          umask 077
+          openssl rand -hex 24 > "$fixture/owner-passphrase"
+          if ! compose exec -T runtime node dist/ttd-zalo-agent-server/src/main.js \
+            web-bootstrap-owner fixture-owner 'Fixture owner' < "$fixture/owner-passphrase" > "$fixture/bootstrap.log" 2>&1; then
+            echo 'FAIL 01 bootstrapped owner through stdin'
+            exit 1
+          fi
+          if compose exec -T runtime node dist/ttd-zalo-agent-server/src/main.js \
+            web-bootstrap-owner second-owner 'Second owner' < "$fixture/owner-passphrase" >> "$fixture/bootstrap.log" 2>&1; then
+            echo 'FAIL 01 repeated bootstrap was accepted'
+            exit 1
+          fi
+          if grep -Fq -f "$fixture/owner-passphrase" "$fixture/bootstrap.log"; then
+            echo 'FAIL 01 passphrase appeared in CLI output'
+            exit 1
+          fi
+          echo 'PASS 01 owner bootstrap via stdin; password absent from output; second bootstrap refused'
+          state=$(compose exec -T postgres sh -c 'psql -X -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -At' <<'SQL'
+          SELECT count(*)=1 AND bool_and(role='owner' AND verifier ~ '^[a-f0-9]{32}:[a-f0-9]{128}$') FROM web_operators;
+          SQL
+          )
+          if [ "$state" != t ]; then echo 'FAIL 02 owner account/verifier'; exit 1; fi
+          if ! grep -q 'promisify(scrypt)' apps/ttd-zalo-agent-server/src/web/accounts.ts; then echo 'FAIL 02 scrypt implementation'; exit 1; fi
+          echo 'PASS 02 no preseeded account; exactly one bootstrapped owner with salted scrypt verifier'
+          mkdir "$fixture/certs"
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
+            -subj /CN=cskh.thuanthanhdat.com.vn \
+            -addext subjectAltName=DNS:cskh.thuanthanhdat.com.vn \
+            -keyout "$fixture/certs/privkey.pem" -out "$fixture/certs/fullchain.pem"
+          docker run -d --name z4-image-smoke-nginx --network host \
+            --mount "type=bind,source=$PWD/deploy/nginx/cskh-https.conf,target=/etc/nginx/conf.d/default.conf,readonly" \
+            --mount "type=bind,source=$fixture/certs,target=/etc/letsencrypt/live/cskh.thuanthanhdat.com.vn,readonly" \
+            nginx:1.28-alpine
+          curl --silent --show-error --fail --noproxy '*' --retry 5 --retry-connrefused \
+            --resolve cskh.thuanthanhdat.com.vn:443:127.0.0.1 --cacert "$fixture/certs/fullchain.pem" \
+            https://cskh.thuanthanhdat.com.vn/health >/dev/null
+          python3 deploy/smoke-web.py "$fixture/certs/fullchain.pem" "$fixture/owner-passphrase"
+          compose exec -T data-api node --input-type=module < deploy/smoke-web-peer.mjs

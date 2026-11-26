@@ -169,6 +169,12 @@ export const api = {
     request<Quote>("/quotes/oa-send", "POST", input),
   router: () => request<Router>("/agent-router"),
   settings: () => request<Settings>("/settings"),
+  createOperator: (input: {
+    account: string;
+    label: string;
+    passphrase: string;
+    role: "sales" | "support";
+  }) => request<Operator>("/operators", "POST", input),
   task: (title: string, agent: string) =>
     request<WorkItem>("/work-items", "POST", { title, agent }),
   postRoomMessage: (text: string) =>

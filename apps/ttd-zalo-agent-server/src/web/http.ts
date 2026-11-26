@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { createHash, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
+import { loginClientAddress, loginLimits } from "./login-limits.js";
 import type { Store } from "../store.js";
 
 const derive = promisify(scrypt);
@@ -38,9 +39,8 @@ export function operatorSessions(store: Store, configuredOrigin: string) {
   const cookie = (value: string, age: number) => `${sessionName}=${value}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${age}${loopback ? "" : "; Secure"}`;
   const token = (req: IncomingMessage) => new RegExp(`(?:^|;\\s*)${sessionName}=([0-9a-f]{64})(?:;|$)`).exec(req.headers.cookie ?? "")?.[1];
   const db = store.db;
-  // Bound expensive password verification, independent of client-provided account names.
-  let attempts = 0;
-  let minute = 0;
+  const admit = loginLimits();
+  const clientAddress = loginClientAddress(process.env.TRUSTED_PROXY);
   const fakeVerifier = randomBytes(16).toString("hex") + ":" + randomBytes(64).toString("hex");
   const authenticate = async (req: IncomingMessage): Promise<Operator | undefined> => {
     const value = token(req);
@@ -67,13 +67,18 @@ export function operatorSessions(store: Store, configuredOrigin: string) {
       const input = await readJson(req);
       if (typeof input?.account !== "string" || typeof input.passphrase !== "string" ||
           input.account.length > 120 || input.passphrase.length > 256) return json(res, 400, { message: "Dữ liệu đăng nhập không hợp lệ." });
-      const currentMinute = Math.floor(Date.now() / 60000);
-      if (currentMinute !== minute) { minute = currentMinute; attempts = 0; }
-      if (++attempts > 30) return json(res, 429, { message: "Quá nhiều lần đăng nhập. Thử lại sau." });
-      const row = db.prepare("SELECT id,label,role,verifier FROM web_operators WHERE account=? AND enabled").get(input.account);
-      const [salt, expected] = String(row?.verifier ?? fakeVerifier).split(":");
-      const actual = await derive(input.passphrase, Buffer.from(salt, "hex"), 64) as Buffer;
-      if (!timingSafeEqual(actual, Buffer.from(expected, "hex")) || !row) return json(res, 401, { message: "Thông tin đăng nhập không hợp lệ." });
+      const account = input.account.trim();
+      const finish = admit(clientAddress(req.socket.remoteAddress, req.headers["x-forwarded-for"]), account);
+      if (!finish) return json(res, 429, { message: "Quá nhiều lần đăng nhập. Thử lại sau." });
+      let authenticated = false;
+      let row;
+      try {
+        row = db.prepare("SELECT id,label,role,verifier FROM web_operators WHERE account=? AND enabled").get(account);
+        const [salt, expected] = String(row?.verifier ?? fakeVerifier).split(":");
+        const actual = await derive(input.passphrase, Buffer.from(salt, "hex"), 64) as Buffer;
+        authenticated = timingSafeEqual(actual, Buffer.from(expected, "hex")) && !!row;
+      } finally { finish(!authenticated); }
+      if (!authenticated || !row) return json(res, 401, { message: "Thông tin đăng nhập không hợp lệ." });
       const value = randomBytes(32).toString("hex");
       const prior = token(req);
       store.atomic(() => {

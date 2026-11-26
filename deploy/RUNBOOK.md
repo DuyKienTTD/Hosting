@@ -8,7 +8,7 @@ sensitivity: public
 
 # Chuẩn bị triển khai CSKH
 
-Gói này dùng runtime đã merge tại `c4ee17c` và bổ sung tiến trình nhận callback OA riêng. OA ingress lưu sự kiện đã xác thực vào Postgres. Runtime trong gói này chạy kênh mock. Giao diện #79 đã merge. Đóng gói giao diện, OAuth callback đổi authorization code, xử lý hàng đợi OA qua Runtime và gửi OA thật cần được nối và nghiệm thu trước khi mở phục vụ khách. Giữ STOP toàn hệ thống và `ADS_ENABLED=false` trong smoke test.
+Gói này dùng runtime đã merge tại `c4ee17c` và bổ sung tiến trình nhận callback OA riêng. OA ingress lưu sự kiện đã xác thực vào Postgres. Runtime trong gói này chạy kênh mock. Image runtime chứa giao diện production của #79 và phục vụ giao diện cùng API trên HTTPS. Runtime mặc định mock. Nghiệm thu OAuth callback, luồng OA qua Runtime và gửi OA thật trước khi mở phục vụ khách. Giữ STOP toàn hệ thống và `ADS_ENABLED=false` trong smoke test.
 
 ## 1. Chuẩn bị sau khi có phê duyệt triển khai
 
@@ -34,7 +34,7 @@ curl -fsS http://127.0.0.1:18080/health
 curl -fsS http://127.0.0.1:18081/health
 ```
 
-Postgres dùng volume `ttd-cskh_postgres`. Init chạy migration 001–009 cho volume mới. Với volume đã có dữ liệu, đối chiếu migration đã áp và sao lưu trước khi chạy migration còn thiếu theo thứ tự. Giới hạn tổng gồm service bảo trì là **1,45 vCPU và 2.944 MiB**. Chỉ runtime và OA ingress publish cổng loopback.
+Postgres dùng volume `ttd-cskh_postgres`. Init chạy migration 001–010 cho volume mới. Với volume đã có dữ liệu, đối chiếu migration đã áp và sao lưu trước khi chạy migration còn thiếu theo thứ tự. Giới hạn tổng gồm service bảo trì là **1,45 vCPU và 2.944 MiB**. Chỉ runtime và OA ingress publish cổng loopback.
 
 Khi health đạt và host chưa có site trùng tên, cài riêng server block.
 
@@ -52,7 +52,43 @@ curl -sI http://cskh.thuanthanhdat.com.vn/health
 curl -sI https://cskh.thuanthanhdat.com.vn/health
 ```
 
-Kỳ vọng HTTP trả 308 với Location HTTPS, còn đường ACME vẫn phục vụ HTTP-01. HTTPS phải có `Strict-Transport-Security: max-age=31536000`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` và `Content-Security-Policy: frame-ancestors 'none'`. HSTS chỉ áp cho hostname CSKH. Nếu kiểm tra cấu hình thất bại, khôi phục bản bootstrap rồi kiểm tra lại. Sau khi đã phát HSTS, duy trì TLS trong các lần rollback vì trình duyệt có thể đã lưu chính sách. Cấu hình Certbot reload Nginx sau khi gia hạn thành công. Timeout đọc proxy là 2 giây cho callback và handler OA trả tối đa sau 1.750 ms khi quá hạn. Kiểm tra từ bên ngoài qua TLS thay vì suy ra thời gian từ timeout cấu hình.
+Kỳ vọng HTTP trả 308 với Location HTTPS, còn đường ACME vẫn phục vụ HTTP-01. HTTPS phải có `Strict-Transport-Security: max-age=31536000`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` và CSP giới hạn script, CSS, font và kết nối trong cùng origin, cùng `frame-ancestors 'none'`. HSTS chỉ áp cho hostname CSKH. Nếu kiểm tra cấu hình thất bại, khôi phục bản bootstrap rồi kiểm tra lại. Sau khi đã phát HSTS, duy trì TLS trong các lần rollback vì trình duyệt có thể đã lưu chính sách. Cấu hình Certbot reload Nginx sau khi gia hạn thành công. Timeout đọc proxy là 2 giây cho callback và handler OA trả tối đa sau 1.750 ms khi quá hạn. Kiểm tra từ bên ngoài qua TLS thay vì suy ra thời gian từ timeout cấu hình.
+
+### Cập nhật máy chủ đang chạy và tạo Chủ dự án
+
+Sau khi đối chiếu và sao lưu DB, với volume đã có migration 009 nhưng chưa có 010, áp migration 010 một lần qua kết nối quản trị trong container. Xác minh migration đã áp bằng `SELECT to_regprocedure('public.web_create_operator(uuid,text,text,text,text)');`. Kết quả rỗng nghĩa là còn thiếu.
+
+```sh
+cskh exec -T postgres psql -v ON_ERROR_STOP=1 -U zalo_admin -d zalo < apps/ttd-zalo-agent-server/postgres/010-web-accounts.sql
+cskh up -d --wait
+sudo install -m 0644 deploy/nginx/cskh-https.conf /etc/nginx/sites-available/ttd-cskh
+sudo nginx -t && sudo systemctl reload nginx
+curl -fsSI https://cskh.thuanthanhdat.com.vn/health
+curl -fsS https://cskh.thuanthanhdat.com.vn/ >/dev/null
+```
+
+Các lệnh trên giả định digest đã được cập nhật trong cấu hình và image đã được pull. UI dùng cùng runtime và cổng loopback 18080, vì vậy ngân sách Compose không tăng. Template bootstrap HTTP chưa phục vụ UI hoặc API đăng nhập.
+
+Tạo tài khoản đầu tiên bằng Bash trên VPS. Dùng tên đăng nhập do Chủ dự án chọn và nhập mật khẩu qua stdin dạng ẩn. Giữ mật khẩu ít nhất 16 ký tự.
+
+```bash
+(
+  set +x
+  IFS= read -r -s -p 'Mật khẩu tài khoản Chủ dự án: ' owner_pass
+  printf '\n' >&2
+  printf '%s' "$owner_pass" | cskh exec -T runtime node dist/ttd-zalo-agent-server/src/main.js \
+    web-bootstrap-owner ten-chu-du-an 'Chủ dự án'
+)
+```
+
+Bootstrap chỉ chạy khi bảng tài khoản trống. Đăng nhập tại HTTPS, vào **Cài đặt → Tạo tài khoản vận hành** để cấp tài khoản riêng cho Bán hàng và CSKH. Truyền mật khẩu ban đầu qua kênh riêng đã được phê duyệt. Phiên HTTPS dùng cookie Secure, HttpOnly, SameSite=Strict. Phiên bản này giới hạn 10 lần đăng nhập sai cho mỗi IP và 5 lần cho mỗi tên tài khoản (bỏ khoảng trắng đầu/cuối và không phân biệt hoa thường khi tính giới hạn) trong 15 phút. Khi chạm ngưỡng, lần thử tiếp theo phải chờ 30 giây. Mỗi lần sai tiếp theo kéo dài thời gian chờ đến tối đa 5 phút và hết hạn theo cửa sổ 15 phút. Bộ nhớ tạm có giới hạn 10.000 khóa mỗi loại, tổng tối đa 600 lượt xác minh/phút và 16 lượt đồng thời. Bộ đếm bắt đầu lại khi runtime khởi động lại.
+
+Nginx ghi đè `X-Forwarded-For` bằng địa chỉ client. Runtime chỉ dùng header khi peer socket là loopback hoặc IP khai báo chính xác trong `TRUSTED_PROXY`. Nếu Docker chuyển kết nối từ Nginx qua địa chỉ gateway thay vì loopback, chạy lệnh sau sau khi runtime đã lên, đối chiếu với các bridge của riêng project CSKH, rồi điền IP gateway thực tế vào `deploy/.env` và tạo lại runtime. Chỉ liệt kê IP proxy cần thiết, phân cách bằng dấu phẩy. Khi peer chưa được tin cậy, bộ đếm dùng IP socket.
+
+```sh
+docker inspect --format '{{range .NetworkSettings.Networks}}{{println .Gateway}}{{end}}' "$(cskh ps -q runtime)"
+cskh up -d --wait runtime
+```
 
 ## 3. Smoke có kiểm soát
 

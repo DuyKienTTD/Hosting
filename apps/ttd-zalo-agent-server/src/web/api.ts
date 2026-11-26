@@ -1,3 +1,4 @@
+import { createOperator } from "./accounts.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
 import type { Store } from "../store.js";
@@ -165,6 +166,13 @@ export function webApi(store: Store, config: Config, origin: string,
       }
     }
     if (request.method === "POST") {
+      if (path === "/api/v1/operators") {
+        if (role !== "owner") return deny();
+        const input = await readJson(request);
+        if (!input) return json(response, 400, { message: "Dữ liệu tài khoản không hợp lệ." });
+        const result = await createOperator(store, principal.id, input);
+        return result.status === 201 ? json(response, 201, result.operator) : json(response, result.status, { message: result.message });
+      }
       if (path === "/api/v1/quotes/oa-send" || path === "/api/v1/quotes") {
         if (role !== "owner" && role !== "sales") return deny();
         if (path.endsWith("/oa-send")) return quotes ? quotes.handle(request, response) : json(response, 503, { message: "Chưa cấu hình kênh OA." });

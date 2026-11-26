@@ -48,6 +48,9 @@ services:
       <<: *runtime-db
       HTTP_BIND: container
       CHANNEL_MODE: mock
+      WEB_ORIGIN: https://cskh.thuanthanhdat.com.vn
+      WEB_DIST: /app/web-dist
+      TRUSTED_PROXY: ${TRUSTED_PROXY:-}
       ADS_ENABLED: "false"
       AI_PROVIDER: anthropic-compatible
       CLAUDE_ENABLED: ${CLAUDE_ENABLED:-0}

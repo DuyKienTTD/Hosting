@@ -1,3 +1,11 @@
+FROM node:24-bookworm-slim AS web
+WORKDIR /workspace/ttd-zalo-web
+COPY apps/ttd-zalo-web/package*.json ./
+RUN npm ci --no-audit --no-fund
+COPY apps/ttd-zalo-web/index.html apps/ttd-zalo-web/tsconfig.json apps/ttd-zalo-web/vite.config.ts apps/ttd-zalo-web/playwright.config.ts ./
+COPY apps/ttd-zalo-web/src ./src
+RUN npm exec -- vite build
+
 FROM node:24-bookworm-slim AS build
 WORKDIR /workspace/ttd-zalo-agent-server
 COPY apps/ttd-zalo-agent-server/package*.json ./
@@ -14,5 +22,6 @@ WORKDIR /app
 COPY apps/ttd-zalo-agent-server/package*.json ./
 RUN npm ci --omit=dev --no-audit --no-fund
 COPY --from=build /workspace/ttd-zalo-agent-server/dist ./dist
+COPY --from=web /workspace/ttd-zalo-web/dist ./web-dist
 USER node
 ENTRYPOINT ["node","dist/ttd-zalo-agent-server/src/data/main.js"]

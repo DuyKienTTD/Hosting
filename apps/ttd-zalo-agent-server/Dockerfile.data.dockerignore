@@ -4,3 +4,9 @@
 !apps/ttd-zalo-agent-server/src/**
 !apps/ttd-zalo-assistant/package.json
 !apps/ttd-zalo-assistant/src/**
+!apps/ttd-zalo-web/package*.json
+!apps/ttd-zalo-web/index.html
+!apps/ttd-zalo-web/tsconfig.json
+!apps/ttd-zalo-web/vite.config.ts
+!apps/ttd-zalo-web/playwright.config.ts
+!apps/ttd-zalo-web/src/**
