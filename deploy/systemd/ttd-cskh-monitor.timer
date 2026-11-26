@@ -1,0 +1,9 @@
+[Unit]
+Description=TTD CSKH monitor timer
+
+[Timer]
+# Set OnCalendar in a private timer drop-in before enabling.
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target
