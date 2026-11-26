@@ -1,4 +1,4 @@
-import { classifyOptOut } from "./opt-out.js";
+import { classifyOptOut, hasNegatedStop } from "./opt-out.js";
 import { randomUUID } from "node:crypto";
 import { extractSkus, FakeProvider as GroundedDraft, questionDate, validatedDraft } from "../../ttd-zalo-assistant/src/ai.js";
 import { validField } from "../../ttd-zalo-assistant/src/customer.js";
@@ -159,7 +159,11 @@ export class Runtime {
     }
     if (typeof routed !== "string") {
       if (!permitted.some(valid)) return true;
-      const options = inbound ? [...permitted, "none", "opt-out", "review-opt-out"] : [...permitted, "none"];
+      const options: string[] = [...permitted, "none"];
+      if (inbound) {
+        options.push("review-opt-out");
+        if (!hasNegatedStop(event.text)) options.push("opt-out");
+      }
       routed = await this.decide(attempt + "-route", "router", { event: event.kind, question }, options, inbound);
       if (!routed) return false;
       if (inbound && (routed === "opt-out" || routed === "review-opt-out")) {

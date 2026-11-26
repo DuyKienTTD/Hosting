@@ -17,6 +17,7 @@ const smokeOnly = process.env.CHANNEL_SMOKE_ONLY === "1";
 const path = process.env.DB_PATH ?? "./runtime.sqlite";
 const key = process.env.IDENTITY_KEY || (mode === "mock" && !process.env.ANTHROPIC_API_KEY ? "offline-fixture" : "");
 const config = structuredClone(defaults);
+config.advertising.enabled = process.env.ADS_ENABLED === "true";
 const providerMode = process.env.AI_PROVIDER ?? "anthropic";
 if (providerMode !== "anthropic" && providerMode !== "anthropic-compatible") throw Error("INVALID_AI_PROVIDER");
 config.budget.provider = providerMode;

@@ -108,3 +108,5 @@ Nguồn giao thức xem [Subiz webhook](https://subiz.com.vn/developers/webhooks
 - `active` vẫn yêu cầu consent quảng cáo hợp lệ. `ads_paused_review` giữ consent hiện có và tạm chặn quảng cáo riêng cho khách. `opted_out` thu hồi quảng cáo. Guard kiểm tra cả hai trạng thái chặn trước khi gửi. Luồng trả lời CSKH 1:1 vẫn áp dụng policy riêng.
 - Trong `/operator`, mục **Quảng cáo tạm dừng chờ xem** có nút xác nhận bỏ tạm dừng hoặc xác nhận ngừng quảng cáo. Đối chiếu tin trong kênh vận hành trước khi xác nhận. Phiếu cũ hết hiệu lực nếu tin mới thay thế phiếu. AI có thể chuyển sang `opted_out` hoặc giữ tạm dừng và gắn cờ. Quyền bỏ tạm dừng thuộc người vận hành.
 - Tiêu chí kiểm định gồm không gửi quảng cáo cho bất kỳ yêu cầu xin ngừng nào, không chuyển ca âm sang `opted_out`, và báo riêng tỷ lệ ca âm bị tạm dừng.
+
+`ADS_ENABLED` mặc định là `false`. Guard trả `ads_disabled` trước kiểm consent, ngân sách hoặc liên hệ đối với mọi đề xuất quảng cáo. Luồng CSKH 1:1 tiếp tục áp dụng các điều kiện riêng. Chỉ đặt `ADS_ENABLED=true` khi lớp AI một chiều đã được đo trên tin nhắn thật và chủ dự án duyệt bật quảng cáo.

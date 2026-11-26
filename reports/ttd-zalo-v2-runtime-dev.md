@@ -106,3 +106,11 @@ Bộ lọc tất định chỉ dừng hoặc tạm dừng quảng cáo khi cùng
 [Tập FIX4](../apps/ttd-zalo-agent-server/test/fixtures/opt-out-fix4-validation.json) đi qua Runtime và Guard. Kết quả **0/30 quảng cáo lọt**, **0/20 ca âm khó bị opted_out**, **0/30 tin thường bị opted_out**, **0/30 tin thường bị paused**. Hai tập cũ giữ nguyên dữ liệu và được chấm để thấy ảnh hưởng của chính sách mới. Mức chặn tất định lần lượt là **26/30 và 17/30**, vì câu chỉ có dấu hiệu tin/gửi/nhắn hoặc hai dấu hiệu ở hai câu riêng cần lớp AI. Các ca âm cũ vẫn 0 opted_out nhầm. Chưa đo lớp AI trên pilot.
 
 Node 24.22.3. Typecheck, build và test đều exit 0. Server **55/55** gồm Playwright fixture, desktop **20/20**, corpus **48/48**.
+
+## V2-02C-FIX5 · 26/11/2026
+
+Ads tắt mặc định. Guard trả và ghi `ads_disabled` trước các điều kiện khác, trước tra liên hệ và trước gửi; luồng CSKH 1:1 vẫn áp dụng policy riêng. Chỉ bật `ADS_ENABLED=true` sau khi đo lớp AI một chiều trên tin thật và được chủ dự án duyệt.
+
+Phủ định trong cùng mệnh đề có thể chi phối động từ dừng qua các từ trung gian. Bộ lọc tất định không thu hồi consent trong mệnh đề như vậy. Router cũng bỏ lựa chọn thu hồi khi phát hiện phạm vi phủ định. Sáu câu phủ định và ca AI trả lựa chọn ngoài danh sách đều đạt hồi quy. Tập FIX4 giữ kết quả 0/30 quảng cáo lọt, 0/20 opted_out nhầm ở ca âm khó và 0/30 tin thường tạm dừng.
+
+Node 24.22.3. Typecheck, build và test exit 0. Server 58/58, desktop 20/20, Playwright chạy riêng 1/1, corpus 48/48. Chưa đo AI trên tin thật.

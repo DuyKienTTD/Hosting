@@ -18,6 +18,7 @@ function fixture(t, path = ":memory:") {
   const clock = () => now;
   const advance = ms => { now += ms; };
   const config = structuredClone(defaults);
+  config.advertising.enabled = true;
   const store = new Store(path, "fixture-key");
   t.after(() => store.db.close());
   const channel = new MockChannel();
@@ -734,4 +735,60 @@ test("FIX4 independent corpus and nine A0 regressions", async t => {
   assert.ok(paused <= 3);
   assert.equal(f.channel.sent.size, 0);
   t.diagnostic(`ads sent=${leaks}/30; false opted_out=${hard}/50; ordinary paused=${paused}/30`);
+});
+
+test("ads are disabled by default before STOP, contact checks and transport; support replies still work", async t => {
+  const f = fixture(t);
+  assert.equal(defaults.advertising.enabled, false);
+  f.config.advertising.enabled = defaults.advertising.enabled;
+  f.create("a");
+  const runtime = new Runtime(f.store, f.channel, new FakeProvider(), f.config, f.clock);
+  runtime.ingest({ kind: "dm", id: "msg", at: f.clock(), contact: "a", thread: "a", text: "Giá mẫu A01?" });
+  let lookups = 0;
+  const getContact = f.channel.getContact.bind(f.channel);
+  f.channel.getContact = async (...args) => { lookups++; return getContact(...args); };
+  f.store.stop("global", true);
+  assert.equal(await f.guard.dispatch(f.draft("blocked")), "ads_disabled");
+  f.store.stop("global", false);
+  assert.equal(await f.guard.dispatch(f.draft("blocked-allowed-contact")), "ads_disabled");
+  assert.equal(lookups, 0);
+  assert.equal(f.channel.sent.size, 0);
+  assert.ok(f.store.db.prepare("SELECT 1 FROM notices WHERE key='ads_disabled'").get());
+  const origin = f.store.eventKey("a", "a", "msg");
+  assert.equal(await f.guard.dispatch({ ...f.draft("reply", "a", "reply", "support"), origin }), "sent");
+  assert.equal(f.channel.sent.size, 1);
+});
+
+test("stop signals inside negation scope cannot permanently opt out", () => {
+  const texts = [
+    "Tôi không bảo shop dừng gửi ưu đãi đâu",
+    "Tôi chẳng nhờ cửa hàng ngừng bản tin đâu",
+    "Đừng bảo bên bán dừng gửi chương trình ưu đãi",
+    "Mình chưa đề nghị cửa hàng hủy bản tin",
+    "Không phải tôi muốn shop xóa tên khỏi danh sách nhận tin",
+    "Em không có ý đề nghị bên anh ngừng tiếp thị",
+  ];
+  for (const text of texts) assert.notEqual(classifyOptOut(text, defaults.advertising), "stop", text);
+  assert.equal(classifyOptOut("Tôi không nhận ưu đãi nữa", defaults.advertising), "stop");
+});
+
+test("AI cannot turn a negated stop into opted_out", async t => {
+  const f = fixture(t);
+  f.create("a");
+  const provider = new FakeProvider(task => {
+    if (task.data.event === "dm") {
+      assert.ok(task.choices.includes("review-opt-out"));
+      assert.ok(!task.choices.includes("opt-out"));
+      return "opt-out"; // Simulate a model returning a disallowed choice.
+    }
+    return "none";
+  });
+  const runtime = new Runtime(f.store, f.channel, provider, f.config, f.clock);
+  runtime.ingest({ kind: "dm", id: "msg", at: f.clock(), contact: "a", thread: "a",
+    text: "Tôi không bảo shop dừng gửi ưu đãi đâu" });
+  await runtime.tick();
+  const row = f.store.contact(f.store.hash("a"));
+  assert.equal(row.opted_out, 0);
+  assert.equal(row.ads, 1);
+  assert.ok(row.ads_paused_review);
 });

@@ -6,7 +6,7 @@ export const strong = "claude-sonnet-5-5";
 export type ProviderMode = "anthropic" | "anthropic-compatible";
 
 export const defaults = {
-  advertising: { startHour: 7, endHour: 22, perContactMs: 7 * day, daily: 8, spacingMs: 112 * minute,
+  advertising: { enabled: false, startHour: 7, endHour: 22, perContactMs: 7 * day, daily: 8, spacingMs: 112 * minute,
     footer: "Nhắn DỪNG NHẬN TIN để không nhận ưu đãi",
     optOutWords: ["stop", "huy", "dung", "unsubscribe"],
     optOutMaxGapWords: 8 },

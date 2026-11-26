@@ -23,12 +23,22 @@ const clearObject = /\b(?:tin(?: nhan)?|quang cao|khuyen mai|uu dai|ban tin|spam
 const removal = /\b(?:go|xoa|bo|rut|loai)\b/gu;
 const list = /\bkhoi danh sach\b/gu;
 
+const clauseBoundary = /\b(?:roi|vi|nhung|tuy nhien|sau do|ma)\b/u;
+const negator = /\b(?:khong|chang|chua|dung)\b/u;
+
+function negatedClause(clause: string) {
+  return continuation.test(clause) || [...clause.matchAll(clearVerb), ...clause.matchAll(removal)]
+    .some(verb => negator.test(clause.slice(0, verb.index!)));
+}
+
+export function hasNegatedStop(text: string) {
+  return text.split(/[,.!?;\n…]+/u).some(part => normalize(part).split(clauseBoundary).some(negatedClause));
+}
+
 function follows(clause: string, verbs: RegExp, objects: RegExp, maxGap: number) {
   const targets = [...clause.matchAll(objects)];
   return [...clause.matchAll(verbs)].some(verb => {
-    const start = verb.index!;
-    if (/\b(?:khong|chua|chang|dung nhu) $/u.test(clause.slice(0, start))) return false;
-    const end = start + verb[0].length;
+    const end = verb.index! + verb[0].length;
     return targets.some(object => object.index! >= end &&
       (clause.slice(end, object.index!).match(/\S+/gu)?.length ?? 0) <= maxGap);
   });
@@ -44,9 +54,9 @@ export function classifyOptOut(text: string, config: Config["advertising"]): Int
     review ||= refusal.test(text);
     if (sentence.includes("?") || question.test(text)) continue;
     for (const part of sentence.split(/,/u)) {
-      for (const clause of normalize(part).split(/\b(?:roi|vi|nhung|tuy nhien|sau do|ma)\b/u)) {
+      for (const clause of normalize(part).split(clauseBoundary)) {
         const candidate = clause.trim();
-        if (!marketing.test(candidate) || specific.test(candidate) || /\b(?:duoc|phai|hay) khong$/u.test(candidate)) continue;
+        if (!marketing.test(candidate) || negatedClause(candidate) || specific.test(candidate) || /\b(?:duoc|phai|hay) khong$/u.test(candidate)) continue;
         if (follows(candidate, clearVerb, clearObject, config.optOutMaxGapWords) ||
           follows(candidate, removal, list, config.optOutMaxGapWords)) return "stop";
       }

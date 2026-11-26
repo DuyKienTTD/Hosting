@@ -69,7 +69,14 @@ export class Guard {
       return "anomaly";
     }
   }
+  private adsDisabled(p: Proposal) {
+    if (p.kind !== "advertising" || this.config.advertising.enabled) return false;
+    this.store.notice("ads_disabled", this.clock(), "ads_disabled");
+    return true;
+  }
+
   async dispatch(p: Proposal) {
+    if (this.adsDisabled(p)) return "ads_disabled";
     const target = this.store.hash(p.target);
     const { db } = this.store;
     const key = this.store.hash(p.id);
@@ -100,7 +107,8 @@ export class Guard {
     let pending: Promise<Result> | undefined;
     const decision = this.store.atomic(() => {
       const now = this.clock();
-      const denial = this.budget.blocked(now) ? "budget_held" : this.deny(p, target, friend, now);
+      const denial = this.adsDisabled(p) ? "ads_disabled"
+        : this.budget.blocked(now) ? "budget_held" : this.deny(p, target, friend, now);
       if (denial) {
         db.prepare("DELETE FROM outbound WHERE id=? AND state='reserved'").run(key);
         return denial;
