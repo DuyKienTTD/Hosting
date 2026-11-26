@@ -7,6 +7,7 @@ import type { ChannelAdapter, Event } from "./channel.js";
 import { day, vietnam, type Agent, type Config } from "./config.js";
 import { Guard, type Kind } from "./guard.js";
 import { isAgent, requestInputEstimate, type Provider } from "./provider.js";
+import type { OaAiDrafts } from "./web/ai-drafts.js";
 import { Store } from "./store.js";
 
 const choices = {
@@ -30,7 +31,8 @@ export class Runtime {
   private busy = false;
   private reading = false;
   constructor(readonly store: Store, private channel: ChannelAdapter, private provider: Provider,
-    private config: Config, private clock = Date.now, private schedule: readonly Schedule[] = [], private reviewOaReplies = false) {
+    private config: Config, private clock = Date.now, private schedule: readonly Schedule[] = [], private reviewOaReplies = false,
+    private drafts?: OaAiDrafts) {
     this.budget = new Budget(store, config.budget, clock);
     this.guard = new Guard(store, channel, config, clock, this.budget);
   }
@@ -100,6 +102,7 @@ export class Runtime {
       const policy = store.policy(target, agent, now);
       if (event.kind === "dm" && policy.retain) {
         store.retainMessage(target, event.thread, event.channel ?? "oa", id, event.text, event.at);
+        if (event.channel === "oa") this.drafts?.enqueue(id, policy.respond);
       }
       if (!policy.respond) return;
       const epoch = store.setting("epoch");
@@ -131,7 +134,12 @@ export class Runtime {
     };
     const send = (agent: Agent, kind: Kind, text?: string) =>
       this.guard.dispatch({ id, agent, kind, text, target: event.contact, revision, epoch, origin: id, thread: event.kind === "dm" ? event.thread : undefined });
-    if (event.at < now - this.config.scheduling.maxInboundAgeMs || !allowed.some(valid)) return true;
+    if (event.at < now - this.config.scheduling.maxInboundAgeMs) return true;
+    if (this.drafts && event.kind === "dm" && event.channel === "oa") {
+      await this.drafts.process(id, valid("support"));
+      return true;
+    }
+    if (!allowed.some(valid)) return true;
     const contact = store.contact(target, now);
     const inbound = event.kind === "dm";
     const question = event.kind === "dm" || event.kind === "group" ? sanitized(event.text).slice(0, this.config.scheduling.maxText) : "";
