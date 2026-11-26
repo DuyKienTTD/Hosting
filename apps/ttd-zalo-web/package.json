@@ -1,0 +1,32 @@
+{
+  "name": "ttd-zalo-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "test": "vitest run",
+    "smoke": "playwright test",
+    "contract": "node --input-type=module -e \"import parser from '@apidevtools/swagger-parser'; await parser.validate('docs/api-contract.yaml');\""
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.2.8",
+    "lucide-react": "^0.468.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-parser": "13.1.0",
+    "@playwright/test": "1.60.0",
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^5.1.0",
+    "jsdom": "^26.1.0",
+    "msw": "^2.11.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.0",
+    "vitest": "^3.2.0"
+  }
+}

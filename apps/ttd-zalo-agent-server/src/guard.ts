@@ -2,11 +2,13 @@ import type { Agent, Config } from "./config.js";
 import { day, vietnam } from "./config.js";
 import type { ChannelAdapter, ChannelError, Request, Result } from "./channel.js";
 import { Budget } from "./budget.js";
+import { consultationWindow } from "./channels/oa/webhook.js";
 import { Store } from "./store.js";
 
 export type Kind = "reply" | "advertising" | "invite" | "group_post" | "group_create" | "group_moderate";
 export type Proposal = {
   agent: Agent; kind: Kind; id: string; target: string; text?: string; message?: string;
+  purpose?: "oa_quote";
   revision: number; epoch: number; groupApproved?: boolean; origin?: string; thread?: string; memberIds?: string[];
 };
 export type SendGuardOutcome =
@@ -46,13 +48,14 @@ export class Guard implements SendGuard {
     if (p.kind.startsWith("group_")) {
       if (p.agent !== "community" || !p.groupApproved) return "group_denied";
     } else {
+      if (p.purpose === "oa_quote" && (contact?.opted_out || contact?.ads_paused_review)) return "consent";
       if (p.revision !== policy.revision || !policy.send) return "consent";
       if (p.kind === "invite") {
         if (p.agent !== "sales" || friend || !contact?.interest || now - contact.interest > this.config.invitations.interestMs ||
           contact.opted_out || db.prepare("SELECT 1 FROM send_log WHERE target=? AND kind='invite' AND state IN ('reserved','sent','unknown_delivery','failed','committed_before_revoke')").get(target)) return "invite_denied";
       } else if (friend === false) return "not_friend";
       if (p.kind === "reply" && (p.agent !== "support" || !policy.respond ||
-        !db.prepare("SELECT 1 FROM inbound WHERE id=? AND target=? AND received>=?").get(p.origin ?? "", target, now - this.config.scheduling.maxInboundAgeMs))) return "reply_denied";
+        !db.prepare("SELECT 1 FROM inbound WHERE id=? AND target=? AND received>=?").get(p.origin ?? "", target, now - (p.purpose === "oa_quote" ? consultationWindow : this.config.scheduling.maxInboundAgeMs)))) return "reply_denied";
       if (p.kind === "advertising" && (!["sales","campaign"].includes(p.agent) || !contact?.ads || contact.opted_out || contact.ads_paused_review ||
         (this.store.db.backend && contact.ad_state !== "active") || (p.agent === "sales" && !contact.accepted))) return "advertising_consent";
     }
@@ -94,7 +97,7 @@ export class Guard implements SendGuard {
     const { db } = this.store;
     const key = this.store.hash(p.id);
     const group = p.kind.startsWith("group_");
-    const lookup = { key, target: p.target, thread: p.thread };
+    const lookup = { key, target: p.target, thread: p.thread, purpose: p.purpose };
     const local = group ? undefined : this.channel.localContact?.(lookup);
     const preflight = this.store.atomic(() => {
       const now = this.clock();

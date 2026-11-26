@@ -19,3 +19,4 @@ GRANT EXECUTE ON FUNCTION delete_eligible(uuid,integer,integer,text),purge_candi
 SQL
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -f /migrations/003-purge.sql -f /migrations/004-purge-confirmation.sql -f /migrations/005-purge-recovery.sql -f /migrations/purge-key.sql
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -f /migrations/006-oa.sql -f /migrations/007-oa-quota.sql -f /migrations/008-nick-audit.sql
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -f /migrations/009-web-operator.sql

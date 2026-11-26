@@ -113,6 +113,15 @@ services:
       CLAUDE_ENABLED: ${CLAUDE_ENABLED:-0}
       CLAUDE_CREDIT_CONFIRMED: ${CLAUDE_CREDIT_CONFIRMED:-0}
       OPERATOR_PASSWORD: ${OPERATOR_PASSWORD:-}
+      CHANNEL_MODE: ${CHANNEL_MODE:-mock}
+      WEB_ORIGIN: ${WEB_ORIGIN:-}
+      WEB_USD_VND: ${WEB_USD_VND:-}
+      OA_APP_ID: ${OA_APP_ID:-}
+      OA_ID: ${OA_ID:-}
+      OA_APP_SECRET: ${OA_APP_SECRET:-}
+      OA_WEBHOOK_SECRET: ${OA_WEBHOOK_SECRET:-}
+      OA_ENVELOPE_KEY: ${OA_ENVELOPE_KEY:-}
+      OA_MONTHLY_QUOTA: ${OA_MONTHLY_QUOTA:-500}
       NICK_WORKER_AUTH: ${NICK_WORKER_AUTH:-}
     healthcheck:
       test: ["CMD","node","-e","fetch('http://127.0.0.1:8080/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]

@@ -6,7 +6,7 @@ import type { RuntimeDatabase } from "../sql.js";
 const code = "committed_before_revoke";
 const identifier = /^[A-Za-z0-9_-]{1,100}$/;
 
-export function attachNickAudit(server: Server, db: RuntimeDatabase, credential: string) {
+export function attachNickAudit(server: Server, db: RuntimeDatabase, credential: string, stopped?: () => boolean) {
   if (Buffer.byteLength(credential) < 32) throw Error("INVALID_NICK_WORKER_AUTH");
   const expected = Buffer.from("Bearer " + credential);
   const sockets = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
@@ -21,6 +21,7 @@ export function attachNickAudit(server: Server, db: RuntimeDatabase, credential:
     ON CONFLICT (key) DO NOTHING
   ) SELECT id FROM changed`);
   let active: WebSocket | undefined;
+  const stop = () => { if (active?.readyState === WebSocket.OPEN) active.send(JSON.stringify({ type: "stop" })); };
   server.on("upgrade", (req, socket, head) => {
     const received = Buffer.from(req.headers.authorization ?? "");
     if (req.url !== "/internal/nick-worker" || received.length !== expected.length ||
@@ -31,6 +32,7 @@ export function attachNickAudit(server: Server, db: RuntimeDatabase, credential:
     sockets.handleUpgrade(req, socket, head, worker => {
       active?.terminate();
       active = worker;
+      if (stopped?.()) stop();
       worker.on("error", () => worker.terminate());
       worker.on("message", (raw, binary) => {
         if (active !== worker || binary) return;
@@ -51,8 +53,8 @@ export function attachNickAudit(server: Server, db: RuntimeDatabase, credential:
       });
     });
   });
-  return () => {
+  return Object.assign(() => {
     active?.terminate();
     sockets.close();
-  };
+  }, { stop, connected: () => active?.readyState === WebSocket.OPEN });
 }

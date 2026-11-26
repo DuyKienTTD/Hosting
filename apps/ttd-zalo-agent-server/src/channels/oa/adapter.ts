@@ -40,14 +40,32 @@ export class OaAdapter extends BaseAdapter {
   private now() { return this.options.clock?.() ?? Date.now(); }
 
   // https://docs.zaloplatforms.com/docs/OA/tin-nhan/tin-tu-van/dieu-kien-gui-tin-tu-van
-  private sendWindow(target: string, now: number): SendClassification["window"] | undefined {
+  private consultationWindowFor(target: string, now: number): SendClassification["window"] | "oa_window_expired" | "oa_interaction_missing" | "oa_policy_denied" {
     const row = this.store.db.prepare("SELECT interaction_at,withdrawn FROM oa_contacts WHERE scope=? AND target=?")
       .get(this.scope, this.store.hash(target));
     const interaction = Number(row?.interaction_at ?? 0);
     const age = now - interaction;
-    if (!row || row.withdrawn || !interaction || age < 0 || age >= consultationWindow) return;
+    if (row?.withdrawn) return "oa_policy_denied";
+    if (!row || !interaction || age < 0) return "oa_interaction_missing";
+    if (age >= consultationWindow) return "oa_window_expired";
     if (age < freeWindow) return "within_48h";
-    if (this.options.allowAfter48h === true) return "48h_to_7d";
+    return this.options.allowAfter48h === true ? "48h_to_7d" : "oa_policy_denied";
+  }
+
+  private sendWindow(target: string, now: number): SendClassification["window"] | undefined {
+    const window = this.consultationWindowFor(target, now);
+    return window === "within_48h" || window === "48h_to_7d" ? window : undefined;
+  }
+
+  quoteBlock(target: string, now: number) {
+    const contact = this.store.contact(this.store.hash(target), now);
+    if (!oaUid(this.account, target) || contact?.opted_out || contact?.ads_paused_review) return "oa_policy_denied";
+    const window = this.consultationWindowFor(target, now);
+    if (window !== "within_48h" && window !== "48h_to_7d") return window;
+    const admission = this.admitSend({ key: "", target, purpose: "oa_quote" }, "reply", now);
+    if ("denial" in admission) return admission.denial === "quota_exhausted" ? admission.denial : "oa_policy_denied";
+    const policy = this.store.policy(this.store.hash(target), "support", now);
+    return policy.send && policy.respond ? null : "oa_policy_denied";
   }
 
   admitSend(req: Request, kind: string, now: number): SendAdmission {
@@ -63,7 +81,7 @@ export class OaAdapter extends BaseAdapter {
       const used = Number(this.store.db.prepare(`SELECT count(*) AS used FROM send_log
         WHERE quota_account=? AND quota_month=? AND quota_bucket='monthly'
         AND state IN ('reserved','sent','unknown_delivery')`).get(quotaAccount, quotaMonth)?.used);
-      if (used >= this.monthlyQuota && this.options.allowPaidOverflow !== true) return { denial: "quota_exhausted" };
+      if (used >= this.monthlyQuota && (req.purpose === "oa_quote" || this.options.allowPaidOverflow !== true)) return { denial: "quota_exhausted" };
       quotaBucket = used >= this.monthlyQuota ? "paid_overflow" : "monthly";
     }
     return { classification: { messageType: "oa_consultation", window, quotaAccount, quotaMonth, quotaBucket } };
@@ -198,6 +216,8 @@ export class OaRuntimeChannel implements ChannelAdapter {
   onFriendAccepted = async (): Promise<RuntimeResult<Event[]>> => ({ ok: true, value: [] });
 
   admitSend(request: Request, kind: string, now: number) { return this.adapter.admitSend(request, kind, now); }
+
+  quoteBlock(target: string, now: number) { return this.adapter.quoteBlock(target, now); }
 
   localContact(request: Request) {
     if (request.thread && request.thread !== request.target) return { ok: false as const, error: "policy_denied" as const };

@@ -1,3 +1,9 @@
+import { Pool } from "pg";
+import { Envelope } from "./channels/oa/crypto.js";
+import { OaAdapter, OaRuntimeChannel } from "./channels/oa/adapter.js";
+import { OaTokens } from "./channels/oa/tokens.js";
+import { accountScope, OaInbox, oaWebhook } from "./channels/oa/webhook.js";
+import { webApi } from "./web/api.js";
 import { attachNickAudit } from "./adapters/nick-audit.js";
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
@@ -29,7 +35,7 @@ if (providerMode === "anthropic-compatible") {
 }
 const anchor = Number(process.env.CREDIT_CYCLE_START_DAY ?? config.budget.cycleStartDay);
 if (!Number.isInteger(anchor) || anchor < 1 || anchor > 28 || Buffer.byteLength(key) < 32 ||
-  !["mock", "subiz"].includes(mode)) throw Error("INVALID_CONFIGURATION");
+  !["mock", "subiz", "oa"].includes(mode)) throw Error("INVALID_CONFIGURATION");
 config.budget.cycleStartDay = anchor;
 for (const agent of Object.keys(config.budget.byAgent) as (keyof typeof config.budget.byAgent)[]) {
   const model = process.env["MODEL_" + agent.toUpperCase()];
@@ -37,10 +43,9 @@ for (const agent of Object.keys(config.budget.byAgent) as (keyof typeof config.b
   if (!Object.hasOwn(config.budget.models, model)) throw Error("MODEL_UNPRICED");
   config.budget.byAgent[agent] = model;
 }
-const store = new Store(new PostgresRuntimeDatabase({
-  host: PGHOST, database: PGDATABASE, user: "data_runtime", password: DATA_RUNTIME_PASSWORD,
-}), key, Number(process.env.DATA_RETENTION_DAYS ?? "30"));
-if (command === "serve" && process.env.ADS_ENABLED === "false") store.set("ADS_ENABLED", 0);
+const database = { host: PGHOST, database: PGDATABASE, user: "data_runtime", password: DATA_RUNTIME_PASSWORD };
+const store = new Store(new PostgresRuntimeDatabase(database), key, Number(process.env.DATA_RETENTION_DAYS ?? "30"));
+if (command === "serve" && (process.env.ADS_ENABLED === "false" || (mode === "oa" && process.env.WEB_ORIGIN))) store.set("ADS_ENABLED", 0);
 const input = () => JSON.parse(readFileSync(0, "utf8"));
 const commands: Record<string, () => unknown> = {
   smoke: async () => {
@@ -88,7 +93,31 @@ if (command !== "serve") {
 } else {
   const active = mode === "subiz" ? await setupChannels(store, readRoutes(), smokeOnly) : undefined;
   if (active && !smokeOnly && !(await active.subiz.authenticate()).ok) throw Error("SUBIZ_AUTH_FAILED");
-  const channel = active?.channel ?? new MockChannel();
+  const webOrigin = process.env.WEB_ORIGIN;
+  const oa = mode === "oa" ? (() => {
+    const { OA_APP_ID, OA_ID, OA_APP_SECRET, OA_WEBHOOK_SECRET, OA_ENVELOPE_KEY, OA_FIXTURE_ENDPOINT } = process.env;
+    if (!OA_APP_ID || !OA_ID || !OA_APP_SECRET || !OA_WEBHOOK_SECRET || !/^[a-f0-9]{64}$/i.test(OA_ENVELOPE_KEY ?? "")) {
+      throw Error("OA_CONFIGURATION_REQUIRED");
+    }
+    let endpoint: string | undefined;
+    if (OA_FIXTURE_ENDPOINT) {
+      const url = new URL(OA_FIXTURE_ENDPOINT);
+      if (!smokeOnly || url.protocol !== "http:" || url.hostname !== "127.0.0.1" || url.origin !== OA_FIXTURE_ENDPOINT) {
+        throw Error("OA_INVALID_FIXTURE_ENDPOINT");
+      }
+      endpoint = url.origin + "/v3.0/oa/message/cs";
+    } else if (smokeOnly) throw Error("OA_FIXTURE_ENDPOINT_REQUIRED");
+    const account = { appId: OA_APP_ID, oaId: OA_ID, webhookSecret: OA_WEBHOOK_SECRET };
+    const box = new Envelope(Buffer.from(OA_ENVELOPE_KEY!, "hex"));
+    const pool = new Pool(database);
+    const tokens = new OaTokens(pool, box, accountScope(account), account.appId, OA_APP_SECRET,
+      endpoint ? OA_FIXTURE_ENDPOINT + "/v4/oa/access_token" : undefined);
+    const monthlyQuota = Number(process.env.OA_MONTHLY_QUOTA || "500");
+    const channel = new OaRuntimeChannel(new OaAdapter(store, box, tokens, account, OA_APP_SECRET,
+      { endpoint, allowAfter48h: true, monthlyQuota }));
+    return { channel, account, pool, webhook: oaWebhook(new OaInbox(pool, store, box, account)) };
+  })() : undefined;
+  const channel = oa?.channel ?? active?.channel ?? new MockChannel();
   const compatible = providerMode === "anthropic-compatible";
   const claudeKey = compatible ? process.env.AI_ROUTER_API_KEY : process.env.ANTHROPIC_API_KEY;
   const base = compatible ? process.env.AI_ROUTER_BASE_URL : undefined;
@@ -113,7 +142,7 @@ if (command !== "serve") {
     (task.kind === "group_moderate" ? typeof task.message !== "string" :
       typeof task.text !== "string" || !task.text.trim() || task.text.length > config.scheduling.maxText)) ||
     new Set(schedule.map(task => task.key)).size !== schedule.length) throw Error("INVALID_SCHEDULE");
-  const runtime = new Runtime(store, channel, provider, config, Date.now, schedule);
+  const runtime = new Runtime(store, channel, provider, config, Date.now, schedule, !!(webOrigin && oa));
   const hooks = active && webhookHandler(active.subiz, active.bot, smokeOnly ? undefined : event => {
     // The signed inbound event is already durable. Apply opt-out without waiting for the next poll.
     runtime.ingest(event);
@@ -128,10 +157,18 @@ if (command !== "serve") {
   const operatorPassword = process.env.OPERATOR_PASSWORD;
   if (operatorPassword && (operatorPassword.length < 24 || operatorPassword.includes(":"))) throw Error("INVALID_OPERATOR_PASSWORD");
   const operatorHandler = operator(store, operatorPassword);
+  const rate = Number(process.env.WEB_USD_VND || "0");
+  if (!Number.isFinite(rate) || rate < 0 || rate > 1000000) throw Error("INVALID_WEB_USD_VND");
+  const web = webOrigin ? webApi(store, config, webOrigin, oa, rate, {
+    stop: () => closeNickAudit?.stop(),
+    connected: () => closeNickAudit?.connected() ?? false,
+  }) : undefined;
   const server = createServer((req, res) => {
     void handle(req, res).catch(() => { if (!res.headersSent) res.writeHead(503); res.end(); });
   });
   const handle = async (req: import("node:http").IncomingMessage, res: import("node:http").ServerResponse) => {
+    if (oa && req.url === "/webhooks/zalo-oa") { oa.webhook(req, res); return; }
+    if (web && await web(req, res)) return;
     if (hooks && await hooks(req, res)) return;
     if (req.url !== "/health" || req.method !== "GET") {
       void operatorHandler(req, res).catch(() => { if (!res.headersSent) res.writeHead(500); res.end(); });
@@ -143,12 +180,14 @@ if (command !== "serve") {
     }));
   };
   const closeNickAudit = process.env.NICK_WORKER_AUTH && !smokeOnly
-    ? attachNickAudit(server, store.db, process.env.NICK_WORKER_AUTH) : undefined;
-  server.listen(8080, process.env.HTTP_BIND === "container" ? "0.0.0.0" : "127.0.0.1");
+    ? attachNickAudit(server, store.db, process.env.NICK_WORKER_AUTH, webOrigin ? () => store.stopped("nick") : undefined) : undefined;
+  const port = Number(process.env.HTTP_PORT || "8080");
+  if (!Number.isInteger(port) || port < 1 || port > 65535) throw Error("INVALID_HTTP_PORT");
+  server.listen(port, process.env.HTTP_BIND === "container" ? "0.0.0.0" : "127.0.0.1");
   process.once("SIGTERM", () => {
     closeNickAudit?.();
     clearInterval(interval);
     clearInterval(pruneSmoke);
-    server.close(() => { store.db.close(); process.exit(0); });
+    server.close(() => { store.db.close(); void (oa?.pool.end() ?? Promise.resolve()).finally(() => process.exit(0)); });
   });
 }

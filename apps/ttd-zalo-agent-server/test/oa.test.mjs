@@ -13,6 +13,7 @@ import { Pool } from "pg";
 import { PostgresRuntimeDatabase } from "../dist/ttd-zalo-agent-server/src/data/runtime-database.js";
 import { Store } from "../dist/ttd-zalo-agent-server/src/store.js";
 import { Guard } from "../dist/ttd-zalo-agent-server/src/guard.js";
+import { oaQuotes } from "../dist/ttd-zalo-agent-server/src/web/oa-quotes.js";
 import { Runtime } from "../dist/ttd-zalo-agent-server/src/runtime.js";
 import { FakeProvider } from "../dist/ttd-zalo-agent-server/src/provider.js";
 import { defaults } from "../dist/ttd-zalo-agent-server/src/config.js";
@@ -369,4 +370,98 @@ test("OA commits the last monthly slot before transport and blocks a competing P
   } finally { releaseTransport.resolve(); }
   assert.equal(await first, "sent");
   assert.equal((await f.log("first")).state, "sent");
+});
+
+async function quoteEndpoint(t, f, store = f.store) {
+  const approved = { customerId: "fixture-customer", productId: "fixture-product", priceList: "fixture-price" };
+  const route = oaQuotes({
+    store, config: defaults, channel: f.makeChannel({ allowAfter48h: true, monthlyQuota: 1 }, store), clock: f.clock,
+    authenticate: async req => {
+      const role = new Map([["fixture-owner", "owner"], ["fixture-sales", "sales"], ["fixture-support", "support"], ["fixture-a0", "a0"]])
+        .get(req.headers.authorization);
+      return role ? { id: role, label: role, role } : undefined;
+    },
+    resolve: async selection => {
+      assert.equal("lastInteractionAt" in selection, false);
+      if (!Object.entries(approved).every(([key, value]) => selection[key] === value)) return;
+      return { target: f.target, origin: f.proposal("preview").origin,
+        totalMillimetres: selection.quantity * 2500, totalVnd: selection.quantity * 300000 };
+    },
+  });
+  const url = await server(t, (req, res) => {
+    void route.handle(req, res).then(handled => { if (!handled) res.writeHead(404).end(); },
+      () => res.writeHead(500).end());
+  });
+  return {
+    block: () => route.block(f.target),
+    send: (quantity, role = "owner") => fetch(url + "/api/v1/quotes/oa-send", {
+      method: "POST", headers: { authorization: "fixture-" + role, "content-type": "application/json" },
+      body: JSON.stringify({ ...approved, confirmed: true, unit: "bar", quantity, lastInteractionAt: f.clock() }),
+    }),
+  };
+}
+
+test("quote HTTP sends through Postgres Guard at 47h and 49h, expires at 168h", { skip: !postgres }, async t => {
+  const f = await consultationFixture(t);
+  const api = await quoteEndpoint(t, f);
+  f.advance(47 * hour);
+  const reply = await api.send(1);
+  assert.equal(reply.status, 201);
+  const result = await reply.json();
+  assert.equal(result.delivery, "sent");
+  assert.equal((await f.log(result.id)).quota_bucket, "free_window");
+  assert.equal((await f.log(result.id)).quota_month, null);
+
+  f.advance(2 * hour);
+  const monthly = await api.send(2, "sales");
+  assert.equal(monthly.status, 201);
+  assert.equal((await f.log((await monthly.json()).id)).quota_bucket, "monthly");
+  assert.equal(api.block(), "quota_exhausted");
+  const exhausted = await api.send(3);
+  assert.equal(exhausted.status, 409);
+  assert.equal((await exhausted.json()).code, "quota_exhausted");
+
+  f.advance(119 * hour);
+  for (const role of ["owner", "sales"]) {
+    const expired = await api.send(4, role);
+    assert.equal(expired.status, 409);
+    assert.equal((await expired.json()).code, "oa_window_expired");
+  }
+  assert.equal(api.block(), "oa_window_expired");
+  assert.equal(f.calls.send.length, 2);
+});
+
+test("quote HTTP at 6d 23h, roles and opt-out use the live Guard", { skip: !postgres }, async t => {
+  const f = await consultationFixture(t);
+  const api = await quoteEndpoint(t, f);
+  f.advance(167 * hour);
+  for (const role of ["support", "a0"]) assert.equal((await api.send(1, role)).status, 403);
+  const response = await api.send(1);
+  assert.equal(response.status, 201);
+  assert.equal((await f.log((await response.json()).id)).send_window, "48h_to_7d");
+  f.store.optOut(f.hashed);
+  const denied = await api.send(2, "sales");
+  assert.equal(denied.status, 409);
+  assert.equal((await denied.json()).code, "oa_policy_denied");
+  assert.equal(f.calls.send.length, 1);
+});
+
+test("two quote HTTP sessions contend for one Postgres quota slot", { skip: !postgres }, async t => {
+  const f = await consultationFixture(t);
+  f.advance(49 * hour);
+  const primary = await quoteEndpoint(t, f);
+  const other = await quoteEndpoint(t, f, f.secondStore());
+  const started = Promise.withResolvers();
+  const release = Promise.withResolvers();
+  f.upstream.beforeSend = () => { started.resolve(); return release.promise; };
+  const first = primary.send(1);
+  try {
+    await Promise.race([started.promise, first.then(res => assert.fail("Transport not started: " + res.status))]);
+    const denied = await other.send(2, "sales");
+    assert.equal(denied.status, 409);
+    assert.equal((await denied.json()).code, "quota_exhausted");
+    assert.equal((await f.pool.query("SELECT 1 FROM send_log WHERE quota_bucket='monthly'")).rowCount, 1);
+    assert.equal(f.calls.send.length, 1);
+  } finally { release.resolve(); }
+  assert.equal((await first).status, 201);
 });
