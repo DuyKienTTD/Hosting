@@ -1,3 +1,4 @@
+import type { OaWebInbox } from "./oa-inbox.js";
 import { oaOAuth, type OaOAuth } from "./oa-oauth.js";
 import { createOperator } from "./accounts.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
@@ -18,7 +19,7 @@ const clean = (value: unknown, length: number) =>
   typeof value === "string" && value.trim().length <= length && value.trim() || undefined;
 
 export function webApi(store: Store, config: Config, origin: string,
-  oa?: { account: OaAccount; channel: OaRuntimeChannel }, usdVnd?: number, nick?: { stop(): void; connected(): boolean }, onboarding?: OaOAuth) {
+  oa?: { account: OaAccount; channel: OaRuntimeChannel }, usdVnd?: number, nick?: { stop(): void; connected(): boolean }, onboarding?: OaOAuth, inbox?: OaWebInbox) {
   const db = store.db;
   const session = operatorSessions(store, origin);
   const oauth = onboarding && oaOAuth(origin, session, onboarding);
@@ -80,7 +81,7 @@ export function webApi(store: Store, config: Config, origin: string,
       FROM web_reply_drafts d JOIN conversations c ON c.id=d.conversation_id
       LEFT JOIN LATERAL (SELECT body,received_at FROM visible_messages WHERE conversation_id=c.id
         ORDER BY received_at DESC LIMIT 1) m ON true`;
-  function workspace() {
+  function workspace(showMessageBody: boolean) {
     const now = Date.now();
     const today = date();
     return {
@@ -108,7 +109,8 @@ export function webApi(store: Store, config: Config, origin: string,
         CASE WHEN s.state IN ('sent','unknown_delivery','failed') THEN s.state END AS delivery
         FROM web_quotes q LEFT JOIN send_log s ON s.id=q.send_key ORDER BY q.created_at DESC LIMIT 100`).all()
         .map(({ delivery, ...row }) => delivery ? { ...row, delivery } : row),
-      conversations: db.prepare(conversationSelect + " ORDER BY d.id LIMIT 100").all(),
+      conversations: db.prepare(conversationSelect + " ORDER BY d.id LIMIT 100").all()
+        .map(row => showMessageBody ? row : { ...row, message: "", draft: "" }),
       workItems: db.prepare(`SELECT t.id,t.title,a.agent,CASE t.state WHEN 'in_progress' THEN 'active' ELSE t.state END AS status
         FROM tasks t JOIN web_task_agents a ON a.task_id=t.id ORDER BY t.created_at DESC LIMIT 100`).all(),
       roomMessages: db.prepare(`SELECT m.id,o.label AS author,m.body AS text FROM web_room_messages m
@@ -155,9 +157,14 @@ export function webApi(store: Store, config: Config, origin: string,
     const principal = await session.authenticate(request);
     if (!principal) return json(response, 401, { message: "Cần đăng nhập." });
     const { role } = principal;
+    if (path === "/api/v1/inbox" || path.startsWith("/api/v1/inbox/")) {
+      if (inbox) return inbox.handle(principal, request, response);
+      return path === "/api/v1/inbox" && request.method === "GET" ? json(response, 200, [])
+        : json(response, 503, { code: "oa_unavailable", message: "Kênh OA chưa sẵn sàng." });
+    }
     const deny = () => json(response, 403, { message: "Vai trò hiện tại không có quyền thao tác." });
     if (request.method === "GET") {
-      if (path === "/api/v1/workspace") return json(response, 200, workspace());
+      if (path === "/api/v1/workspace") return json(response, 200, workspace(role === "owner" || role === "support"));
       if (path === "/api/v1/agent-router" || path === "/api/v1/settings") {
         if (role !== "owner" && role !== "a0") return deny();
         if (path.endsWith("/settings")) return json(response, 200, { adsEnabled: store.setting("ADS_ENABLED") === 1 });

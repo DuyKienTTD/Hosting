@@ -1,3 +1,4 @@
+import { oaWebInbox } from "./web/oa-inbox.js";
 import { latestSmokeUid, modeError, sendOaSmoke } from "./channels/oa/smoke-cli.js";
 import type { Result as OaResult, Results as OaResults } from "./adapters/contract.js";
 import { createOperator } from "./web/accounts.js";
@@ -163,7 +164,7 @@ if (command !== "serve") {
     const monthlyQuota = Number(process.env.OA_MONTHLY_QUOTA || "500");
     const channel = new OaRuntimeChannel(new OaAdapter(store, box, tokens, account, OA_APP_SECRET,
       { endpoint, allowAfter48h: true, monthlyQuota, allowedUids: wiring.smokeAllowlist }));
-    return { channel, account, close: () => pool.end(), webhook: oaWebhook(new OaInbox(pool, store, box, account)) };
+    return { channel, account, envelope: box, close: () => pool.end(), webhook: oaWebhook(new OaInbox(pool, store, box, account)) };
   })() : undefined);
   const channel = oa?.channel ?? active?.channel ?? new MockChannel();
   const provider = liveProvider(wiring, config);
@@ -195,10 +196,21 @@ if (command !== "serve") {
   const operatorHandler = operator(store, operatorPassword);
   const rate = Number(process.env.WEB_USD_VND || "0");
   if (!Number.isFinite(rate) || rate < 0 || rate > 1000000) throw Error("INVALID_WEB_USD_VND");
+  const inboxSource = wiring.oa ?? (oa && "envelope" in oa ? oa : undefined) ??
+    (onboarding ? readOa({ ...process.env, OA_WEBHOOK_INGRESS: "external" }) : undefined);
+  const inboxChannel = oa?.channel ?? onboarding?.channel;
+  const loopbackFixture = !liveOa && mode === "oa";
+  const inboxMode = smokeOnly && !loopbackFixture ? "smoke_only" : oa ? "active" : "oa_unavailable";
+  const inbox = webOrigin && inboxSource && inboxChannel ? oaWebInbox(store, config,
+    { account: inboxSource.account, envelope: inboxSource.envelope }, inboxChannel, inboxMode) : undefined;
+  const inboxTimer = inbox && setInterval(() => {
+    try { inbox.project(); }
+    catch { console.warn("OA inbox projection failed"); }
+  }, 3000);
   const web = webOrigin ? webApi(store, config, webOrigin, oa, rate, {
     stop: () => closeNickAudit?.stop(),
     connected: () => closeNickAudit?.connected() ?? false,
-  }, onboarding) : undefined;
+  }, onboarding, inbox) : undefined;
   const server = createServer((req, res) => {
     void handle(req, res).catch(() => { if (!res.headersSent) res.writeHead(503); res.end(); });
   });
@@ -225,6 +237,7 @@ if (command !== "serve") {
     closeNickAudit?.();
     clearInterval(interval);
     clearInterval(pruneSmoke);
+    clearInterval(inboxTimer);
     server.close(() => { store.db.close(); void Promise.all([oa?.close(), onboarding !== liveOa ? onboarding?.close() : undefined]).finally(() => process.exit(0)); });
   });
 }

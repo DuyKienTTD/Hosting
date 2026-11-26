@@ -8,7 +8,7 @@ import { Store } from "./store.js";
 export type Kind = "reply" | "advertising" | "invite" | "group_post" | "group_create" | "group_moderate";
 export type Proposal = {
   agent: Agent; kind: Kind; id: string; target: string; text?: string; message?: string;
-  purpose?: Request["purpose"];
+  purpose?: Request["purpose"] | "oa_inbox_reply";
   revision: number; epoch: number; groupApproved?: boolean; origin?: string; thread?: string; memberIds?: string[];
 };
 export type SendGuardOutcome =
@@ -54,8 +54,15 @@ export class Guard implements SendGuard {
         if (p.agent !== "sales" || friend || !contact?.interest || now - contact.interest > this.config.invitations.interestMs ||
           contact.opted_out || db.prepare("SELECT 1 FROM send_log WHERE target=? AND kind='invite' AND state IN ('reserved','sent','unknown_delivery','failed','committed_before_revoke')").get(target)) return "invite_denied";
       } else if (friend === false) return "not_friend";
-      if (p.kind === "reply" && (p.agent !== "support" || !policy.respond ||
-        !db.prepare("SELECT 1 FROM inbound WHERE id=? AND target=? AND received>=?").get(p.origin ?? "", target, now - (p.purpose ? consultationWindow : this.config.scheduling.maxInboundAgeMs)))) return "reply_denied";
+      if (p.kind === "reply") {
+        if (p.agent !== "support" || !policy.respond) return "reply_denied";
+        const earliest = now - (p.purpose ? consultationWindow : this.config.scheduling.maxInboundAgeMs);
+        const source = p.purpose === "oa_inbox_reply"
+          ? db.prepare("SELECT 1 FROM web_oa_projection WHERE origin_id=? AND target=? AND conversation_id IS NOT NULL AND received_ms>=?")
+            .get(p.origin ?? "", target, earliest)
+          : db.prepare("SELECT 1 FROM inbound WHERE id=? AND target=? AND received>=?").get(p.origin ?? "", target, earliest);
+        if (!source) return "reply_denied";
+      }
       if (p.kind === "advertising" && (!["sales","campaign"].includes(p.agent) || !contact?.ads || contact.opted_out || contact.ads_paused_review ||
         (this.store.db.backend && contact.ad_state !== "active") || (p.agent === "sales" && !contact.accepted))) return "advertising_consent";
     }
@@ -97,7 +104,9 @@ export class Guard implements SendGuard {
     const { db } = this.store;
     const key = this.store.hash(p.id);
     const group = p.kind.startsWith("group_");
-    const lookup = { key, target: p.target, thread: p.thread, purpose: p.purpose };
+    // Manual OA replies share the no-paid-overflow policy of approved quotations.
+    const purpose = p.purpose === "oa_inbox_reply" ? "oa_quote" : p.purpose;
+    const lookup = { key, target: p.target, thread: p.thread, purpose };
     const local = group ? undefined : this.channel.localContact?.(lookup);
     const preflight = this.store.atomic(() => {
       const now = this.clock();

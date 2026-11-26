@@ -1,3 +1,4 @@
+import { LiveInbox } from "./live-inbox";
 import { oaQuoteBlockLabels, type OaQuoteBlock } from "./oa-quote-policy";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import {
@@ -339,6 +340,8 @@ function Draft({
 }
 
 export function Inbox({ selected, ...props }: Props & { selected: string }) {
+  if (!demoMode)
+    return <LiveInbox selected={selected} refresh={props.refresh} />;
   const { data } = props;
   const item =
     data.conversations.find(({ id }) => id === selected) ??
@@ -994,11 +997,13 @@ export function Channels({ data, user, run, busy }: Props) {
           {channel.id === "oa" && user.role === "owner" && !demoMode && (
             <button
               disabled={busy}
-              onClick={() => void run(async () => {
-                const { authorizationUrl } = await api.connectOa();
-                window.location.assign(authorizationUrl);
-                return (current) => current;
-              }, "Đang mở trang cấp quyền Zalo.")}
+              onClick={() =>
+                void run(async () => {
+                  const { authorizationUrl } = await api.connectOa();
+                  window.location.assign(authorizationUrl);
+                  return (current) => current;
+                }, "Đang mở trang cấp quyền Zalo.")
+              }
             >
               Kết nối OA
             </button>
