@@ -80,8 +80,10 @@ export type WorkItem = {
   title: string;
   agent: string;
   status: "new" | "active" | "review" | "done";
+  result?: string | null;
+  reviewDecision?: "accept" | "dismiss" | null;
 };
-export type RoomMessage = { id: string; author: string; text: string };
+export type RoomMessage = { id: string; author: string; text: string; task?: WorkItem };
 export type Channel = {
   id: Conversation["channel"];
   label: string;
@@ -112,6 +114,9 @@ export type Router = {
   budgetVnd: number | null;
   usedVnd: number | null;
   model: string;
+  unassignedUsd?: number;
+  agents?: { id: string; model: string; permission: "read" | "propose"; enabled: boolean; blocked: boolean;
+    usedUsd: number; usedVnd: number | null }[];
 };
 export type Settings = { adsEnabled: false };
 
@@ -196,6 +201,10 @@ export const api = {
   sendQuote: (input: ConfirmedQuote) =>
     request<Quote>("/quotes/oa-send", "POST", input),
   router: () => request<Router>("/agent-router"),
+  toggleAgent: (id: string, enabled: boolean) =>
+    request<{ enabled: boolean }>("/agent-router/" + encodeURIComponent(id) + "/enabled", "POST", { enabled }),
+  reviewAgent: (id: string, decision: "accept" | "dismiss") =>
+    request<{ status: "done" }>("/work-items/" + encodeURIComponent(id) + "/review", "POST", { decision }),
   settings: () => request<Settings>("/settings"),
   createOperator: (input: {
     account: string;

@@ -1,6 +1,7 @@
 import type { OaWebInbox } from "./oa-inbox.js";
 import { oaOAuth, type OaOAuth } from "./oa-oauth.js";
 import type { OaAiDrafts } from "./ai-drafts.js";
+import type { WebRoomAgents } from "./room-agents.js";
 import { createOperator } from "./accounts.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
@@ -20,7 +21,7 @@ const clean = (value: unknown, length: number) =>
   typeof value === "string" && value.trim().length <= length && value.trim() || undefined;
 
 export function webApi(store: Store, config: Config, origin: string,
-  oa?: { account: OaAccount; channel: OaRuntimeChannel }, usdVnd?: number, nick?: { stop(): void; connected(): boolean; issue?(): { code: string; expiresAt: number }; revoke?(): void }, onboarding?: OaOAuth, inbox?: OaWebInbox, drafts?: OaAiDrafts, botStatus?: () => { state: string; detail: string }) {
+  oa?: { account: OaAccount; channel: OaRuntimeChannel }, usdVnd?: number, nick?: { stop(): void; connected(): boolean; issue?(): { code: string; expiresAt: number }; revoke?(): void }, onboarding?: OaOAuth, inbox?: OaWebInbox, drafts?: OaAiDrafts, botStatus?: () => { state: string; detail: string }, room?: WebRoomAgents) {
   const db = store.db;
   const session = operatorSessions(store, origin);
   const oauth = onboarding && oaOAuth(origin, session, onboarding);
@@ -124,13 +125,15 @@ export function webApi(store: Store, config: Config, origin: string,
           ORDER BY m.received_at DESC LIMIT 100`).all() : []),
       ],
       workItems: db.prepare(`SELECT t.id,t.title,a.agent,CASE t.state WHEN 'in_progress' THEN 'active' ELSE t.state END AS status
-        FROM tasks t JOIN web_task_agents a ON a.task_id=t.id ORDER BY t.created_at DESC LIMIT 100`).all(),
+        ${room ? ",r.result,r.review_decision AS \"reviewDecision\"" : ""}
+        FROM tasks t JOIN web_task_agents a ON a.task_id=t.id
+        ${room ? "LEFT JOIN web_agent_runs r ON r.task_id=t.id" : ""} ORDER BY t.created_at DESC LIMIT 100`).all(),
       roomMessages: db.prepare(`SELECT m.id,o.label AS author,m.body AS text FROM web_room_messages m
         JOIN web_operators o ON o.id=m.operator_id ORDER BY m.created_at DESC LIMIT 100`).all(),
       deletionRequests: db.prepare(`SELECT id,customer_id AS "customerId",reason,'requested' AS status
         FROM web_deletion_requests ORDER BY created_at DESC LIMIT 100`).all(),
       channels: channels(),
-      agents: agents.map(label => ({ label, role: label === "Claude" ? "Điều phối" : "Thực thi", status: "Có thể giao việc" })),
+      agents: room?.roster() ?? agents.map(label => ({ label, role: label === "Claude" ? "Điều phối" : "Thực thi", status: "Có thể giao việc" })),
       activity: [],
     };
   }
@@ -206,6 +209,7 @@ export function webApi(store: Store, config: Config, origin: string,
         const cap = budget.provider === "anthropic-compatible" ? budget.compatibleDailyUsd : budget.stopUsd;
         const used = Number(db.prepare("SELECT coalesce(sum(amount),0) AS total FROM ledger WHERE date=? AND provider=?").get(date(), budget.provider)?.total);
         return json(response, 200, { provider: budget.provider, model: budget.byAgent.router,
+          ...room?.ownerView(principal, usdVnd ?? 0),
           budgetVnd: usdVnd ? Math.round(cap * usdVnd) : null, usedVnd: usdVnd ? Math.round(used * usdVnd / 1e9) : null });
       }
     }
@@ -219,6 +223,23 @@ export function webApi(store: Store, config: Config, origin: string,
           return json(response, 200, { revoked: true });
         }
         return json(response, 503, { message: "Chưa cấu hình ghép cặp nick phụ." });
+      }
+      const toggle = /^\/api\/v1\/agent-router\/([^/]+)\/enabled$/.exec(path);
+      const review = /^\/api\/v1\/work-items\/([^/]+)\/review$/.exec(path);
+      if (room && (toggle || review)) {
+        if (role !== "owner") return deny();
+        const input = await readJson(request);
+        if (input && Object.keys(input).length === 1) {
+          if (toggle && typeof input.enabled === "boolean" && room.toggle(principal, toggle[1], input.enabled)) {
+            return json(response, 200, { enabled: input.enabled });
+          }
+          if (review && uuid(review[1]) && (input.decision === "accept" || input.decision === "dismiss")) {
+            return room.review(principal, review[1], input.decision)
+              ? json(response, 200, { status: "done" })
+              : json(response, 409, { message: "Phiếu không còn chờ duyệt." });
+          }
+        }
+        return json(response, 400, { message: "Dữ liệu không hợp lệ." });
       }
       if (path === "/api/v1/operators") {
         if (role !== "owner") return deny();
@@ -248,6 +269,11 @@ export function webApi(store: Store, config: Config, origin: string,
         const text = clean(input?.text, 1000);
         const title = clean(input?.title, 250);
         const reason = clean(input?.reason, 500);
+        if (room && path.endsWith("/room-messages") && text) return json(response, 201, room.post(principal, text));
+        if (room && path.endsWith("/work-items") && title && typeof input?.agent === "string") {
+          const item = room.assign(principal, title, input.agent);
+          return item ? json(response, 201, item) : json(response, 400, { message: "Agent không hợp lệ." });
+        }
         if (path.endsWith("/room-messages") && text) {
           const row = db.prepare("INSERT INTO web_room_messages(operator_id,body) VALUES(?,?) RETURNING id").get(principal.id, text);
           return json(response, 201, { id: row?.id, author: principal.label, text });

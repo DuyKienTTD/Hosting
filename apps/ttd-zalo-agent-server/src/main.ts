@@ -12,6 +12,7 @@ import { OaAdapter, OaRuntimeChannel } from "./channels/oa/adapter.js";
 import { OaTokens } from "./channels/oa/tokens.js";
 import { accountScope, OaInbox, oaWebhook } from "./channels/oa/webhook.js";
 import { OaAiDrafts } from "./web/ai-drafts.js";
+import { WebRoomAgents } from "./web/room-agents.js";
 import { webApi } from "./web/api.js";
 import { attachNickAudit } from "./adapters/nick-audit.js";
 import { createServer } from "node:http";
@@ -180,6 +181,10 @@ if (command !== "serve") {
   })() : undefined);
   const channel = oa?.channel ?? active?.channel ?? new MockChannel();
   const provider = liveProvider(wiring, config);
+  const room = webOrigin ? new WebRoomAgents(store, config, provider, wiring.aiMode === "live") : undefined;
+  const roomInterval = room && setInterval(() => {
+    void room.tick().catch(() => console.warn("Room agent cycle failed"));
+  }, 2000);
   const schedule: Schedule[] = process.env.SCHEDULE_PATH ? JSON.parse(readFileSync(process.env.SCHEDULE_PATH, "utf8")) : [];
   if (!Array.isArray(schedule) || schedule.some(task => !task || !task.key || !task.target ||
     typeof task.key !== "string" || !/^[a-zA-Z0-9_-]{1,80}$/.test(task.key) ||
@@ -226,7 +231,7 @@ if (command !== "serve") {
     issue: () => pairing!.issue(),
     revoke: () => { pairing!.revoke(); closeNickAudit?.stop(); closeNickAudit?.disconnect(); },
     connected: () => closeNickAudit?.connected() ?? false,
-  }, onboarding, inbox, drafts, bot ? () => bot.status() : undefined) : undefined;
+  }, onboarding, inbox, drafts, bot ? () => bot.status() : undefined, room) : undefined;
   const server = createServer((req, res) => {
     void handle(req, res).catch(() => { if (!res.headersSent) res.writeHead(503); res.end(); });
   });
@@ -265,6 +270,7 @@ if (command !== "serve") {
   process.once("SIGTERM", () => {
     closeNickAudit?.();
     clearInterval(interval);
+    clearInterval(roomInterval);
     clearInterval(pruneSmoke);
     clearInterval(inboxTimer);
     server.close(() => { store.db.close(); void Promise.all([oa?.close(), onboarding !== liveOa ? onboarding?.close() : undefined]).finally(() => process.exit(0)); });
