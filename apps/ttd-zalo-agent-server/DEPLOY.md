@@ -120,3 +120,17 @@ Guard đọc `settings.ADS_ENABLED`, consent theo mục đích và `ad_status` t
 Đặt `PURGE_RECEIPT_REMOTE` vào bucket hoặc đích rclone riêng, ngoài VPS và ngoài prefix backup DB. Sổ có một object bất biến theo mỗi `purge_id`. Cấp worker quyền thêm và đọc object, khóa ghi đè/xóa bằng chính sách của backend. Worker ghi sổ sau khi biết kết quả commit, đối soát lại ở lần chạy kế tiếp khi lỗi mạng. Tuổi lưu của sổ phải ít nhất bằng thời hạn của backup lâu nhất còn được phép restore.
 
 Chạy `ops/backup-purge-receipts.sh` riêng hằng ngày bằng credential chỉ đọc sổ chính và chỉ thêm vào `PURGE_RECEIPT_BACKUP_REMOTE` trên một đích offsite khác. Bản sao này có chính sách lưu riêng với dump DB. Khi cần khôi phục sổ, trỏ `PURGE_RECEIPT_REMOTE` của tiến trình restore tới bản sao đã xác minh. Nếu cả DB nguồn và sổ đều thiếu bằng chứng, staging giữ dữ liệu cách ly tới khi owner quyết định.
+
+## Audit worker nick Zalo
+
+Với DB hiện hữu, áp migration [008-nick-audit.sql](postgres/008-nick-audit.sql) bằng quy trình migration trước khi bật endpoint. Cấp cùng một `NICK_WORKER_AUTH` ngẫu nhiên (tối thiểu 32 byte) cho runtime và một worker. Reverse proxy TLS chuyển WebSocket Upgrade của `/internal/nick-worker` đến `ttd-zalo-runtime:8080` và giữ header Authorization. Cảnh báo bền xuất hiện ở mục Báo cáo và cảnh báo trên trang quản trị owner. Endpoint tiếp nhận audit cho lượt reply đã được đăng ký trước trong `send_log` với `agent='nick-worker'`.
+
+### Web operator API and OA
+
+Apply `postgres/009-web-operator.sql` once as database administrator on existing databases, after migrations `007` and `008` where present. The SQL provisions no default account or price. To create or rotate an operator, run `node ops/web-provision-operator.mjs` with administrator PostgreSQL connection settings and pass `account`, `label`, `role` and `passphrase` as JSON on standard input through a secure local process. Rotation revokes prior sessions. Set `web_operators.enabled=false` to disable access.
+
+Build the web SPA with `npm run build`, serve `apps/ttd-zalo-web/dist` over HTTPS, and proxy `/api/v1/` to the runtime service on the same origin. Set `WEB_ORIGIN` to that exact HTTPS origin without a trailing slash. For OA, set `CHANNEL_MODE=oa` and configure `OA_APP_ID`, `OA_ID`, `OA_APP_SECRET`, `OA_WEBHOOK_SECRET`, and a persistent 32-byte hex `OA_ENVELOPE_KEY`. Provision the OA token pair through the OA authorization bootstrap and route `/webhooks/zalo-oa` to the runtime. Monthly quota defaults to 500. No paid overflow is used for operator quotes. Optional `WEB_USD_VND` exposes the configured budget conversion in the UI.
+
+Use the authoritative catalogue and customer records in PostgreSQL. The administrator enables an approved price by inserting a versioned `web_approved_prices` row referencing `catalogue.id`; retire a version by setting `revoked_at`. An OA recipient must have a verified `channel_identities` entry for the configured OA ID, linked to the same customer as the hashed `runtime_customer` mapping. Current proof-backed `respond` and `send` consent and a retained inbound admission record are required by Guard.
+
+Web deletion creates a review request. Web work items and room messages are persisted for operators. Nick STOP is persisted in runtime settings. Each deployment still needs its approved channel accounts and worker configuration.

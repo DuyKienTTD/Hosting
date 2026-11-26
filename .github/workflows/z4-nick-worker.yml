@@ -1,0 +1,30 @@
+name: Z4 Nick worker
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'apps/ttd-zalo-nick-worker/**'
+      - 'docs/nick-worker-protocol.md'
+      - '.github/workflows/z4-nick-worker.yml'
+permissions:
+  contents: read
+jobs:
+  fixture:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: apps/ttd-zalo-nick-worker
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npx playwright install chromium
+      - run: npm test
+        env:
+          TEST_HEADED: '0'

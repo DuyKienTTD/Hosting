@@ -5,6 +5,7 @@ on:
     paths:
       - 'apps/ttd-zalo-agent-server/**'
       - 'apps/ttd-zalo-assistant/**'
+      - 'apps/ttd-zalo-web/**'
       - '.github/workflows/z4-data.yml'
 permissions:
   contents: read
@@ -68,10 +69,16 @@ jobs:
           npm run typecheck
           npm run build
           npm test
+      - name: Build the production Web UI for browser integration
+        working-directory: apps/ttd-zalo-web
+        run: |
+          npm ci
+          npm run build
       - name: Typecheck, build and test runtime and Postgres
         working-directory: apps/ttd-zalo-agent-server
         env:
           RUN_POSTGRES_TESTS: '1'
+          WEB_UI_TEST_DIST: ${{ github.workspace }}/apps/ttd-zalo-web/dist
         run: |
           npm ci
           npx playwright install --with-deps chromium

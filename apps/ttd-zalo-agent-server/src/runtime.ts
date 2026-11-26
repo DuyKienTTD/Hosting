@@ -30,7 +30,7 @@ export class Runtime {
   private busy = false;
   private reading = false;
   constructor(readonly store: Store, private channel: ChannelAdapter, private provider: Provider,
-    private config: Config, private clock = Date.now, private schedule: readonly Schedule[] = []) {
+    private config: Config, private clock = Date.now, private schedule: readonly Schedule[] = [], private reviewOaReplies = false) {
     this.budget = new Budget(store, config.budget, clock);
     this.guard = new Guard(store, channel, config, clock, this.budget);
   }
@@ -218,7 +218,14 @@ export class Runtime {
     if (!valid(routed)) return true;
     if (inbound && this.budget.blocked()) return holdReply();
     if (routed === "support" && decision === "answer" && draft && ["trả lời", "hỏi lại"].includes(draft.action)) {
-      const outcome = await send("support", "reply", draft.text + (draft.sourceIds.length ? "\nNguồn: " + draft.sourceIds.join(", ") : ""));
+      const text = draft.text + (draft.sourceIds.length ? "\nNguồn: " + draft.sourceIds.join(", ") : "");
+      if (this.reviewOaReplies && event.channel === "oa") {
+        store.db.prepare(`INSERT INTO web_reply_drafts(conversation_id,inbound_id,body)
+          SELECT conversation_id,?,? FROM messages WHERE event_id=?
+          ON CONFLICT(conversation_id,inbound_id) DO NOTHING`).run(id,text,id);
+        return true;
+      }
+      const outcome = await send("support", "reply", text);
       if (outcome === "budget_held") return holdReply();
     } else if (routed === "crm" && validField(decision) && store.policy(target, "crm", this.clock()).retain && sku) {
       store.db.prepare("INSERT OR IGNORE INTO customer_field(target,source,kind,value,created) VALUES(?,?,?,?,?)")

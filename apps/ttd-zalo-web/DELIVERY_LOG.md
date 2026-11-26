@@ -32,3 +32,8 @@ sensitivity: public
 - Rebase lên `e56ebcc` sau #75, #77 và #78. Không có xung đột hoặc migration mới.
 - Handler production `oaQuotes` gọi `SendGuard.dispatch` trên PostgreSQL. Workspace dùng projection `block(target)` từ adapter OA. Admission trong Guard ghi quota đúng một lần vào `send_log`. API production trả `delivery=sent` khi OA xác nhận tiếp nhận. MSW vẫn chạy demo độc lập.
 - Host cần mount `handle`, cấp resolver phiên nhận diện owner/sales và nối lookup báo giá từ catalog đã duyệt, consent và OA identity. Route factory từ chối database ngoài PostgreSQL. Bộ test mount route HTTP trong fixture và dùng OA transport giả lập với Guard, quota và send_log thật.
+
+## Z4-S4-FIX3 · 2026-11-26
+
+- Mounted every operator API endpoint in the runtime entrypoint. Login uses revocable PostgreSQL sessions and server-assigned roles. Migration 009 adds operator authentication, approved catalogue prices, quote history and the supporting web records.
+- OA quote submission resolves customer identity and price from PostgreSQL before dispatch. Guard remains the sole source of quota reservation. The production bundle was tested in Chromium through the actual runtime process and PostgreSQL, with a local OA transport fixture.

@@ -52,7 +52,7 @@ export class Guard implements SendGuard {
       if (p.revision !== policy.revision || !policy.send) return "consent";
       if (p.kind === "invite") {
         if (p.agent !== "sales" || friend || !contact?.interest || now - contact.interest > this.config.invitations.interestMs ||
-          contact.opted_out || db.prepare("SELECT 1 FROM send_log WHERE target=? AND kind='invite' AND state IN ('reserved','sent','unknown_delivery','failed')").get(target)) return "invite_denied";
+          contact.opted_out || db.prepare("SELECT 1 FROM send_log WHERE target=? AND kind='invite' AND state IN ('reserved','sent','unknown_delivery','failed','committed_before_revoke')").get(target)) return "invite_denied";
       } else if (friend === false) return "not_friend";
       if (p.kind === "reply" && (p.agent !== "support" || !policy.respond ||
         !db.prepare("SELECT 1 FROM inbound WHERE id=? AND target=? AND received>=?").get(p.origin ?? "", target, now - (p.purpose === "oa_quote" ? consultationWindow : this.config.scheduling.maxInboundAgeMs)))) return "reply_denied";
@@ -61,7 +61,7 @@ export class Guard implements SendGuard {
     }
 
     const recent = (kind: Kind, since: number, who?: string) => Number(db.prepare(
-      "SELECT count(*) n FROM send_log WHERE kind=? AND at>=? AND state IN ('reserved','sent','unknown_delivery','failed') AND (? IS NULL OR target=?)")
+      "SELECT count(*) n FROM send_log WHERE kind=? AND at>=? AND state IN ('reserved','sent','unknown_delivery','failed','committed_before_revoke') AND (? IS NULL OR target=?)")
       .get(kind, since, who ?? null, who ?? null)?.n);
     const local = vietnam(now);
     if (p.kind === "advertising") {
@@ -76,7 +76,7 @@ export class Guard implements SendGuard {
       const week = Math.min(limits.weeklyDailyLimits.length - 1, Math.floor(Math.max(0, now - start) / (7 * day)));
       if (recent(p.kind, local.midnight) >= limits.weeklyDailyLimits[week] || recent(p.kind, now - limits.spacingMs + 1)) return "invite_limit";
     }
-    const count = Number(db.prepare("SELECT count(*) n FROM send_log WHERE at>=? AND state IN ('reserved','sent','unknown_delivery','failed')")
+    const count = Number(db.prepare("SELECT count(*) n FROM send_log WHERE at>=? AND state IN ('reserved','sent','unknown_delivery','failed','committed_before_revoke')")
       .get(now - this.config.anomaly.windowMs)?.n);
     if (count >= this.config.anomaly.starts) {
       this.pause(now);

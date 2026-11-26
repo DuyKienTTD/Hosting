@@ -379,7 +379,7 @@ async function quoteEndpoint(t, f, store = f.store) {
     authenticate: async req => {
       const role = new Map([["fixture-owner", "owner"], ["fixture-sales", "sales"], ["fixture-support", "support"], ["fixture-a0", "a0"]])
         .get(req.headers.authorization);
-      return role ? { role } : undefined;
+      return role ? { id: role, label: role, role } : undefined;
     },
     resolve: async selection => {
       assert.equal("lastInteractionAt" in selection, false);

@@ -662,6 +662,8 @@ export function Quotes({ data, user, run, busy, refresh }: Props) {
                   {item.productId} ·{" "}
                   {item.delivery === "queued" && "Chờ gửi OA · "}
                   {item.delivery === "sent" && "OA đã tiếp nhận · "}
+                  {item.delivery === "unknown_delivery" && "Chưa rõ đã giao · "}
+                  {item.delivery === "failed" && "Gửi không thành công · "}
                   {number(item.quantity)} {unitLabels[item.unit].toLowerCase()}{" "}
                   · {number(item.totalMillimetres / 1000)} m
                 </small>
@@ -899,14 +901,14 @@ export function Agents({ data, refresh }: Props) {
               <dd>{router.model}</dd>
               <dt>Chi phí hôm nay</dt>
               <dd>
-                {money(router.usedVnd)} / {money(router.budgetVnd)}
+                {router.usedVnd === null || router.budgetVnd === null ? "Chưa cấu hình tỷ giá" : money(router.usedVnd) + " / " + money(router.budgetVnd)}
               </dd>
             </dl>
-            <progress
+            {router.usedVnd !== null && router.budgetVnd !== null && <progress
               aria-label="Mức sử dụng ngân sách"
               max={router.budgetVnd || 1}
               value={router.usedVnd}
-            />
+            />}
           </>
         ) : (
           <p role="status">Đang tải AI Router…</p>

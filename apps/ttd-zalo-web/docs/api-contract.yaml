@@ -728,6 +728,8 @@ components:
           type: string
           enum:
           - sent
+          - failed
+          - unknown_delivery
       additionalProperties: false
     WorkItem:
       type: object
@@ -818,9 +820,11 @@ components:
         budgetVnd:
           type: integer
           minimum: 0
+          nullable: true
         usedVnd:
           type: integer
           minimum: 0
+          nullable: true
         model:
           type: string
       additionalProperties: false

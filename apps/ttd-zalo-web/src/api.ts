@@ -53,7 +53,7 @@ export type ConfirmedQuote = QuoteInput & {
   priceList: string;
 };
 export type Quote = QuoteInput & {
-  delivery?: "queued" | "sent";
+  delivery?: "queued" | "sent" | "failed" | "unknown_delivery";
   id: string;
   totalMillimetres: number;
   totalVnd: number;
@@ -92,8 +92,8 @@ export type Workspace = {
 };
 export type Router = {
   provider: string;
-  budgetVnd: number;
-  usedVnd: number;
+  budgetVnd: number | null;
+  usedVnd: number | null;
   model: string;
 };
 export type Settings = { adsEnabled: false };
