@@ -1,0 +1,107 @@
+name: Z4 production image smoke
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'apps/ttd-zalo-agent-server/**'
+      - 'apps/ttd-zalo-assistant/**'
+      - 'deploy/**'
+      - '.github/workflows/z4-image-smoke.yml'
+permissions:
+  contents: read
+jobs:
+  entrypoints:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Reproduce the packaged runtime failure on a96a91c
+        if: github.event.pull_request.base.sha == 'a96a91c308436e86a07b2a3a273c784137baaed1'
+        env:
+          BROKEN_REF: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BROKEN_REF"
+          baseline=$(mktemp -d)
+          git archive "$BROKEN_REF" | tar -x -C "$baseline"
+          docker build -t z4-smoke-baseline:local -f "$baseline/apps/ttd-zalo-agent-server/Dockerfile.data" "$baseline"
+          status=0
+          docker run --rm --network none --entrypoint node z4-smoke-baseline:local \
+            dist/ttd-zalo-agent-server/src/main.js serve > "$RUNNER_TEMP/z4-baseline.log" 2>&1 || status=$?
+          cat "$RUNNER_TEMP/z4-baseline.log"
+          test "$status" -eq 1
+          grep -F "does not provide an export named 'FakeProvider'" "$RUNNER_TEMP/z4-baseline.log"
+      - name: Build production app and Postgres images
+        run: |
+          app=apps/ttd-zalo-agent-server
+          docker build -t z4-smoke-app:local -f "$app/Dockerfile.data" .
+          docker build -t z4-smoke-postgres:local "$app/postgres"
+      - name: Start production entrypoints and require HTTP 200
+        run: |
+          fixture=$(mktemp -d)
+          touch "$fixture/rclone.conf"
+          mkdir -p "$fixture/storage/dump/tombstones"
+          printf 'z4-tombstones-v1\n' > "$fixture/storage/dump/tombstones/_format"
+          cat > "$fixture/storage.yml" <<YAML
+          services:
+            worker:
+              volumes:
+                - "$fixture/storage:/run/z4-smoke-storage:ro"
+          YAML
+          env_file="$fixture/fixture.env"
+          export env_file fixture
+          python3 - <<'PY'
+          import os
+          import secrets
+          from pathlib import Path
+
+          fixture = Path(os.environ["fixture"])
+          values = {
+              "DATA_APP_IMAGE": "z4-smoke-app:local",
+              "DATA_POSTGRES_IMAGE": "z4-smoke-postgres:local",
+              "AI_ROUTER_BASE_URL": "https://router.example.invalid",
+              "AI_ROUTER_DAILY_USD": "1",
+              "AI_ROUTER_RATE_MULTIPLIER": "1",
+              "ZALO_APP_ID": "fixture_app",
+              "ZALO_OA_ID": "fixture_oa",
+              "BACKUP_REMOTE": ":local:/run/z4-smoke-storage/dump",
+              "PURGE_RECEIPT_REMOTE": ":local:/run/z4-smoke-storage/receipt",
+              "PURGE_RECEIPT_BACKUP_REMOTE": ":local:/run/z4-smoke-storage/receipt-copy",
+              "AGE_RECIPIENT": "unused_fixture",
+              "WORKER_RCLONE_FILE": str(fixture / "rclone.conf"),
+              "BACKUP_RCLONE_FILE": str(fixture / "rclone.conf"),
+          }
+          entries = []
+          for line in Path("deploy/.env.example").read_text().splitlines():
+              if not line or line.startswith("#"):
+                  continue
+              key, default = line.split("=", 1)
+              entries.append(f"{key}={values.get(key, default or secrets.token_hex(32))}")
+          Path(os.environ["env_file"]).write_text("\n".join(entries) + "\n")
+          PY
+          compose() { docker compose --env-file "$env_file" -p z4-image-smoke -f deploy/compose.prod.yml -f "$fixture/storage.yml" "$@"; }
+          cleanup() {
+            status=$?
+            if [ "$status" -ne 0 ]; then
+              compose ps -a || true
+              compose logs --no-color postgres runtime oa-ingress data-api worker || true
+            fi
+            compose down -v --remove-orphans || true
+          }
+          trap cleanup EXIT
+          compose up -d --wait --wait-timeout 150 postgres runtime oa-ingress data-api worker
+          for service in runtime oa-ingress data-api worker; do
+            port=8080
+            if [ "$service" = worker ]; then port=8081; fi
+            compose exec -T "$service" node -e '
+              fetch("http://127.0.0.1:" + process.argv[1] + "/health", { signal: AbortSignal.timeout(3000) })
+                .then(response => {
+                  if (response.status !== 200) throw Error("HTTP " + response.status);
+                  console.log(process.argv[2] + " /health = 200");
+                })
+                .catch(error => { console.error(error.message); process.exitCode = 1; });
+            ' "$port" "$service"
+          done
