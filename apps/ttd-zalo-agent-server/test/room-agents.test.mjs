@@ -53,6 +53,7 @@ test("room mentions, role-scoped Router, review, owner-only costs and STOP",
     const owner = session("owner");
     const support = session("support");
     const a0 = session("a0");
+    const sales = session("sales");
     const get = (path, headers) => fetch(endpoint + path, { headers });
     const post = (path, data, headers = owner.headers) =>
       fetch(endpoint + path, { method: "POST", headers, body: JSON.stringify(data) });
@@ -73,7 +74,13 @@ test("room mentions, role-scoped Router, review, owner-only costs and STOP",
     assert.deepEqual(calls[0].data.aggregate, { conversations: 1, messages: 1 });
     assert.doesNotMatch(JSON.stringify(calls[0]), /Customer-only injection/);
     const workspace = await (await get("/workspace", owner.headers)).json();
-    assert.match(workspace.workItems.find(task => task.id === report.id).result, /1 hội thoại/);
+    const reportItem = workspace.workItems.find(task => task.id === report.id);
+    assert.match(reportItem.result, /1 hội thoại/);
+    assert.deepEqual(Object.keys(reportItem).sort(), ["agent", "id", "result", "reviewDecision", "status", "title"]);
+    for (const { headers } of [support, sales, a0]) {
+      const view = await (await get("/workspace", headers)).json();
+      assert.deepEqual(view.workItems.find(task => task.id === report.id), reportItem);
+    }
     assert.equal((await post("/work-items/" + report.id + "/review", { decision: "accept" }, support.headers)).status, 403);
     assert.equal((await post("/work-items/" + report.id + "/review", { decision: "accept" })).status, 200);
     assert.equal((await post("/work-items/" + report.id + "/review", { decision: "accept" })).status, 409);

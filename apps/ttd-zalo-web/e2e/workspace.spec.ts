@@ -169,6 +169,11 @@ for (const role of ["owner", "support", "sales", "a0"]) {
         ),
       ).toBe(permitted ? 200 : 403);
     }
+    if (role === "a0") {
+      await page.goto("/#agents");
+      await expect(page.getByText("AI Router có thể sử dụng", { exact: true })).toBeVisible();
+      await expect(page.getByText("Chi phí hôm nay", { exact: true })).toHaveCount(0);
+    }
     const workspace = await page.evaluate(async () =>
       (await fetch("/api/v1/workspace")).json(),
     );

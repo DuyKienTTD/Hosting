@@ -31,6 +31,19 @@ export type OaThread = {
   lastInteractionAt: string;
   following: boolean | null;
 };
+export type InboxDraft = {
+  id: string;
+  version: number;
+  text: string;
+  state: "pending" | "generating" | "ready" | "needs_human" | "approved";
+  intent: "price" | "technical" | "complaint" | "other" | null;
+  reason: "mock" | "budget" | "consent" | "unavailable" | "no_knowledge" | null;
+  sourceIds: string[];
+  delivery: Delivery;
+};
+export type ApprovedInboxDraft = Pick<InboxDraft, "id" | "version" | "text"> & {
+  conversationId: string;
+};
 export type OaThreadDetail = OaThread & {
   messages: {
     id: string;
@@ -40,7 +53,8 @@ export type OaThreadDetail = OaThread & {
     delivery?: string;
   }[];
   sendBlock: { code: string; message: string } | null;
-  aiDraft: { id: string; revision: number; text: string } | null;
+  aiDraft: InboxDraft | null;
+  estimatedAiUsdToday?: number;
 };
 export type Customer = {
   id: string;
@@ -109,7 +123,7 @@ export type Workspace = {
   agents: { label: string; role: string; status: string }[];
   activity: { day: string; received: number; answered: number }[];
 };
-export type Router = {
+export type Router = { status: "available" | "capped" } | {
   provider: string;
   budgetVnd: number | null;
   usedVnd: number | null;
@@ -185,6 +199,18 @@ export const api = {
   inbox: () => request<OaThread[]>("/inbox"),
   oaThread: (id: string) =>
     request<OaThreadDetail>("/inbox/" + encodeURIComponent(id)),
+  regenerateDraft: (id: string, version: number) =>
+    request<InboxDraft>(
+      "/drafts/" + encodeURIComponent(id) + "/regenerate",
+      "POST",
+      { version },
+    ),
+  approveDraft: (id: string, version: number, text?: string) =>
+    request<ApprovedInboxDraft>(
+      "/drafts/" + encodeURIComponent(id) + "/approve",
+      "POST",
+      { version, text },
+    ),
   replyOa: (id: string, text: string) =>
     request<{ delivery: "sent" }>(
       "/inbox/" + encodeURIComponent(id) + "/replies",

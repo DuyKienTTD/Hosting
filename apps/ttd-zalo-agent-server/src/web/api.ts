@@ -1,3 +1,4 @@
+import { ownerAiCosts } from "./ai-costs.js";
 import type { OaWebInbox } from "./oa-inbox.js";
 import { oaOAuth, type OaOAuth } from "./oa-oauth.js";
 import type { OaAiDrafts } from "./ai-drafts.js";
@@ -11,7 +12,7 @@ import { vietnam } from "../config.js";
 import { Guard } from "../guard.js";
 import type { OaRuntimeChannel } from "../channels/oa/adapter.js";
 import { oaTarget, type OaAccount } from "../channels/oa/webhook.js";
-import { json, operatorSessions, readJson } from "./http.js";
+import { json, operatorSessions, readJson, type Operator } from "./http.js";
 import { oaQuotes, selection, type Selection } from "./oa-quotes.js";
 
 const agents = ["Claude", "A1", "A2"];
@@ -138,12 +139,12 @@ export function webApi(store: Store, config: Config, origin: string,
     };
   }
 
-  async function approve(id: string, request: IncomingMessage, response: ServerResponse) {
+  async function approve(id: string, principal: Operator, request: IncomingMessage, response: ServerResponse) {
     if (!guard) return json(response, 503, { message: "Chưa cấu hình kênh OA." });
     const input = await readJson(request);
     const text = clean(input?.text, config.scheduling.maxText);
     if (!text || !Number.isInteger(input?.version)) return json(response, 400, { message: "Bản nháp không hợp lệ." });
-    const draft = db.prepare(`SELECT c.customer_id,c.channel,d.inbound_id,d.revision,d.delivery${drafts ? ",d.ai_state,d.ai_message_id,d.body" : ""}
+    const draft = db.prepare(`SELECT c.customer_id,c.channel,d.conversation_id,d.inbound_id,d.revision,d.delivery${drafts ? ",d.ai_state,d.ai_message_id,d.body" : ""}
       FROM web_reply_drafts d JOIN conversations c ON c.id=d.conversation_id WHERE d.id=?`).get(id);
     if (!draft) return json(response, 404, { message: "Không tìm thấy bản nháp." });
     const target = draft.channel === "oa" && byCustomer(String(draft.customer_id));
@@ -154,14 +155,27 @@ export function webApi(store: Store, config: Config, origin: string,
     if (!target || draft.delivery !== "draft" || draft.revision !== input?.version) {
       return json(response, 409, { message: "Bản nháp đã thay đổi hoặc kênh chưa sẵn sàng." });
     }
+    if (draft.ai_state) {
+      const denied = inbox?.blockConversation(principal, String(draft.conversation_id));
+      if (!inbox || denied) return json(response, 409, denied ?? { message: "Hộp thư OA chưa sẵn sàng." });
+    }
     const now = Date.now();
-    const outcome = await guard.dispatch({ agent: "support", kind: "reply", id: "web-reply:" + id,
+    const outcome = await guard.dispatch({ agent: "support", kind: "reply", id: "web-reply:" + id, purpose: draft.ai_state ? "oa_quote" : undefined,
       target, thread: target, text, origin: String(draft.inbound_id), epoch: store.setting("epoch"),
       revision: store.policy(store.hash(target), "support", now).revision });
     if (outcome === "duplicate") return json(response, 409, { message: "Bản nháp đã được xử lý. Kiểm tra send_log." });
     if (outcome === "sent" || outcome === "unknown" || outcome === "failed") {
       const delivery = outcome === "sent" ? "sent" : outcome === "unknown" ? "unknown_delivery" : "blocked";
-      db.prepare("UPDATE web_reply_drafts SET revision=revision+1,delivery=?,body=? WHERE id=? AND revision=?").run(delivery, text, id, Number(draft.revision));
+      store.atomic(() => {
+        db.prepare("UPDATE web_reply_drafts SET revision=revision+1,delivery=?,body=? WHERE id=? AND revision=?").run(delivery, text, id, Number(draft.revision));
+        if (!draft.ai_state) return;
+        const sendId = store.hash("web-reply:" + id);
+        if (outcome === "sent" && store.contact(store.hash(target))?.retain === 1) {
+          store.retainMessage(store.hash(target), target, "oa", sendId, text, Date.now());
+        }
+        db.prepare(`INSERT INTO web_oa_replies(send_id,conversation_id)
+          SELECT id,? FROM send_log WHERE id=? ON CONFLICT DO NOTHING`).run(String(draft.conversation_id), sendId);
+      });
       return json(response, 200, db.prepare(conversationSelect + (drafts ? " AND d.id=?" : " WHERE d.id=?")).get(id));
     }
     return json(response, 409, { message: "Guard đang chặn lượt gửi." });
@@ -191,13 +205,16 @@ export function webApi(store: Store, config: Config, origin: string,
     if (drafts && request.method === "POST" && draftAction && uuid(draftAction[1])) {
       if (role !== "owner" && role !== "support") return deny();
       const input = await readJson(request);
-      if (!input || Object.keys(input).length !== 1 || !Number.isSafeInteger(input.version) || Number(input.version) < 1) {
+      if (!input || Object.keys(input).some(key => key !== "version" && (draftAction[2] !== "approve" || key !== "text")) ||
+          !Number.isSafeInteger(input.version) || Number(input.version) < 1) {
         return json(response, 400, { message: "Phiên bản nháp không hợp lệ." });
       }
       const [, id, action] = draftAction;
       if (!drafts.get(id)) return json(response, 404, { message: "Không tìm thấy bản nháp." });
       const version = Number(input.version);
-      const result = action === "approve" ? drafts.approve(id, version, principal.id) : await drafts.regenerate(id, version);
+      const text = clean(input.text, config.scheduling.maxText);
+      if (Object.hasOwn(input, "text") && !text) return json(response, 400, { message: "Nội dung sửa không hợp lệ." });
+      const result = action === "approve" ? drafts.approve(id, version, principal.id, text) : await drafts.regenerate(id, version);
       return result ? json(response, 200, result) : json(response, 409, { message: "Bản nháp đã đổi hoặc chưa sẵn sàng." });
     }
     if (request.method === "GET") {
@@ -208,9 +225,15 @@ export function webApi(store: Store, config: Config, origin: string,
         const { budget } = config;
         const cap = budget.provider === "anthropic-compatible" ? budget.compatibleDailyUsd : budget.stopUsd;
         const used = Number(db.prepare("SELECT coalesce(sum(amount),0) AS total FROM ledger WHERE date=? AND provider=?").get(date(), budget.provider)?.total);
-        return json(response, 200, { provider: budget.provider, model: budget.byAgent.router,
+        const costs = ownerAiCosts(principal, () => ({
+          provider: budget.provider, model: budget.byAgent.router,
           ...room?.ownerView(principal, usdVnd ?? 0),
-          budgetVnd: usdVnd ? Math.round(cap * usdVnd) : null, usedVnd: usdVnd ? Math.round(used * usdVnd / 1e9) : null });
+          budgetVnd: usdVnd ? Math.round(cap * usdVnd) : null,
+          usedVnd: usdVnd ? Math.round(used * usdVnd / 1e9) : null,
+        }));
+        return json(response, 200, costs ?? {
+          status: store.setting("budgetStop") || used >= cap * 1e9 ? "capped" : "available",
+        });
       }
     }
     if (request.method === "POST") {
@@ -261,7 +284,7 @@ export function webApi(store: Store, config: Config, origin: string,
       }
       const approval = /^\/api\/v1\/conversations\/([^/]+)\/approve$/.exec(path);
       if (approval && uuid(approval[1])) return role === "owner" || role === "support"
-        ? approve(approval[1], request, response) : deny();
+        ? approve(approval[1], principal, request, response) : deny();
       if (["/api/v1/channels/nick/stop", "/api/v1/room-messages", "/api/v1/work-items", "/api/v1/deletion-requests"].includes(path)) {
         if (role !== "owner") return deny();
         if (path.endsWith("/nick/stop")) { store.stop("nick", true); nick?.stop(); return json(response, 200, channels()[1]); }

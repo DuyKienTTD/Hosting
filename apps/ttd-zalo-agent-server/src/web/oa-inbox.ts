@@ -1,5 +1,6 @@
+import { ownerAiCosts } from "./ai-costs.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { Config } from "../config.js";
+import { vietnam, type Config } from "../config.js";
 import { Guard } from "../guard.js";
 import type { Store } from "../store.js";
 import type { OaRuntimeChannel } from "../channels/oa/adapter.js";
@@ -7,10 +8,13 @@ import { oaTarget } from "../channels/oa/webhook.js";
 import { json, readJson, type Operator } from "./http.js";
 import { inboxProjector, type InboxSource } from "./inbox-projector.js";
 
-type Draft = { id: string; revision: number; text: string };
+export type InboxDraft = {
+  id: string; version: number; text: string; state: string; intent: string | null;
+  reason: string | null; sourceIds: string[]; delivery: string;
+};
 // Work ROOM can provide an implementation. Drafts stay separate from manual sends.
 export interface InboxDraftReader {
-  find(conversationId: string, operator: Operator): Promise<Draft | null>;
+  find(conversationId: string, operator: Operator): Promise<InboxDraft | null>;
 }
 
 export type OaWebInbox = ReturnType<typeof oaWebInbox>;
@@ -55,6 +59,13 @@ export function oaWebInbox(store: Store, config: Config, source: InboxSource, ch
     if (store.hash(target) === hash) return target;
   }
 
+  function blockConversation(operator: Operator, id: string) {
+    const thread = db.prepare(threadQuery + " AND c.id=? AND NOT t.withdrawn").get(scope, scope, id);
+    if (!thread) return { code: "oa_interaction_missing", message: messages.oa_interaction_missing };
+    const code = block(operator, resolveTarget(String(thread.customer_id), String(thread.target)));
+    return code ? { code, message: messages[code] } : null;
+  }
+
   function summary(row: Record<string, unknown>) {
     return { id: row.id, customerId: row.customer_id, lastInteractionAt: new Date(Number(row.received_ms)).toISOString(),
       following: row.withdrawn ? false : Number(row.follow_at) === 0 ? null : row.following === true };
@@ -97,7 +108,10 @@ export function oaWebInbox(store: Store, config: Config, source: InboxSource, ch
       return json(res, 200, { ...summary(thread),
         sendBlock: denial ? { code: denial, message: messages[denial] } : null,
         messages: [...incoming, ...outgoing].sort((a, b) => a.at.localeCompare(b.at)),
-        aiDraft: canReadBody(operator) && drafts ? await drafts.find(id, operator) : null });
+        aiDraft: canReadBody(operator) && drafts ? await drafts.find(id, operator) : null,
+        ...ownerAiCosts(operator, () => ({ estimatedAiUsdToday: Number(db.prepare(
+          "SELECT coalesce(sum(amount),0) AS amount FROM ledger WHERE date=? AND id LIKE 'oa-draft:%'")
+          .get(vietnam(Date.now()).date)?.amount) / 1e9 })) });
     }
     if (req.method !== "POST" || !compose) return json(res, 405, { message: "Phương thức không hợp lệ." });
     if (!canReadBody(operator)) return json(res, 403, { code: "forbidden", message: messages.forbidden });
@@ -131,5 +145,5 @@ export function oaWebInbox(store: Store, config: Config, source: InboxSource, ch
       ? outcome : block(operator, target) ?? "oa_policy_denied";
     return json(res, 409, { code, message: messages[code] });
   }
-  return { handle, project };
+  return { handle, project, blockConversation };
 }

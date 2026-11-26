@@ -1,3 +1,4 @@
+import { ownerAiCosts } from "./ai-costs.js";
 import { Budget } from "../budget.js";
 import { agents, day, vietnam, type Config } from "../config.js";
 import { requestInputEstimate, type Provider } from "../provider.js";
@@ -35,16 +36,17 @@ export class WebRoomAgents {
   }
 
   ownerView(actor: Operator, exchange: number) {
-    if (actor.role !== "owner") return;
-    const costs = this.store.db.prepare("SELECT agent_role,sum(amount) AS amount FROM ledger WHERE date=? AND provider=? GROUP BY agent_role")
-      .all(vietnam(this.clock()).date, this.config.budget.provider);
-    const amount = (role: string | null) => Number(costs.find(row => row.agent_role === role)?.amount ?? 0);
-    return {
-      unassignedUsd: amount(null) / 1e9,
-      agents: roles.map(id => ({ id, model: this.config.budget.byAgent[id], permission: proposalRoles.includes(id) ? "propose" : "read",
-        enabled: !this.store.setting(id), blocked: this.store.stopped(id), usedUsd: amount(id) / 1e9,
-        usedVnd: exchange ? Math.round(amount(id) * exchange / 1e9) : null })),
-    };
+    return ownerAiCosts(actor, () => {
+      const costs = this.store.db.prepare("SELECT agent_role,sum(amount) AS amount FROM ledger WHERE date=? AND provider=? GROUP BY agent_role")
+        .all(vietnam(this.clock()).date, this.config.budget.provider);
+      const amount = (role: string | null) => Number(costs.find(row => row.agent_role === role)?.amount ?? 0);
+      return {
+        unassignedUsd: amount(null) / 1e9,
+        agents: roles.map(id => ({ id, model: this.config.budget.byAgent[id], permission: proposalRoles.includes(id) ? "propose" : "read",
+          enabled: !this.store.setting(id), blocked: this.store.stopped(id), usedUsd: amount(id) / 1e9,
+          usedVnd: exchange ? Math.round(amount(id) * exchange / 1e9) : null })),
+      };
+    });
   }
 
   toggle(actor: Operator, agent: string, enabled: boolean) {

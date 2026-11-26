@@ -43,3 +43,9 @@ sensitivity: public
 - Áp migration 011 sau 010 cho database đang chạy. Fresh image tự áp theo init. Runtime Web UI với OA live sẽ chiếu sự kiện còn hiệu lực trong `oa_inbox` vào khách và hội thoại theo mã nội bộ. Projection không thay đổi cursor hoặc queue của AI.
 - Khách mới không tự được cấp consent. Nội dung chưa được cấp quyền lưu dài hạn vẫn nằm trong inbound mã hóa và chỉ đọc tới thời hạn ingress tối đa 24 giờ. Khi có consent retain, tin đi vào bảng messages theo vòng đời hiện hành. Theo dõi/bỏ theo dõi và cửa sổ tương tác dùng trạng thái OA đã xác thực từ webhook.
 - Chủ dự án và CSKH xem nội dung/gửi qua Guard. Sales/A0 chỉ xem metadata hộp thư. Smoke-only chặn gửi giao diện trong OA live. Fixture loopback dùng OA giả lập. `InboxDraftReader` là interface tích hợp của Work ROOM, mặc định chưa có bản nháp.
+
+## Z6-DRAFT-UI
+
+- Nối Hộp thư production với API nháp OA của #88. Owner và CSKH xem ý định, nguồn, trạng thái cần người; có thể sửa, tạo lại và duyệt theo phiên bản.
+- Duyệt khóa nội dung vào ô trả lời. Gửi là thao tác riêng qua Guard, yêu cầu đúng phiên bản và nội dung đã duyệt. Owner thấy chi phí soạn nháp ước tính theo giờ Việt Nam.
+- Playwright dùng webhook và PostgreSQL thật với provider AI/OA giả lập, xác minh duyệt không tự gửi và thay đổi payload gửi bị chặn.
