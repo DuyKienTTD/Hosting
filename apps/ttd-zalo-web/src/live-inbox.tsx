@@ -214,16 +214,37 @@ function Thread({ id, refresh }: { id: string; refresh: number }) {
   const [text, setText] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [recordingRef, setRecordingRef] = useState("");
   const [sending, setSending] = useState(false);
   const [lockedAfterSend, setLockedAfterSend] = useState(false);
   const [reload, setReload] = useState(0);
   const inFlight = useRef(false);
   const draft = detail?.aiDraft;
+  const consentAttestation = detail?.consentAttestation;
   const approved =
     draft?.state === "approved" && draft.delivery === "draft"
       ? draft
       : undefined;
   const replyText = approved?.text ?? text;
+
+  async function attestConsent(policyVersion: string) {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setSending(true);
+    setError("");
+    setNotice("");
+    try {
+      await api.attestOaConsent(id, policyVersion, recordingRef.trim());
+      setRecordingRef("");
+      setNotice("Đã ghi nhận khách đồng ý qua điện thoại.");
+      setReload(value => value + 1);
+    } catch (err) {
+      setError(describe(err));
+    } finally {
+      inFlight.current = false;
+      setSending(false);
+    }
+  }
 
   function updateDraft(next: InboxDraft) {
     setDetail((previous) => previous && { ...previous, aiDraft: next });
@@ -352,6 +373,28 @@ function Thread({ id, refresh }: { id: string; refresh: number }) {
                 ? "Đang quan tâm OA"
                 : "Đã bỏ quan tâm OA"}
           </p>
+          {consentAttestation && (
+            <details className="callout">
+              <summary>Ghi nhận đồng ý qua điện thoại</summary>
+              <p>Đọc nội dung dưới đây cho khách và chỉ xác nhận khi khách chủ động đồng ý.</p>
+              <p style={{ whiteSpace: "pre-line" }}>{consentAttestation.displayedText}</p>
+              <label>
+                Mã UUID của bản ghi âm cuộc gọi
+                <input
+                  value={recordingRef}
+                  onChange={(event) => setRecordingRef(event.target.value)}
+                  maxLength={36}
+                />
+              </label>
+              <button
+                type="button"
+                disabled={sending || !recordingRef.trim()}
+                onClick={() => void attestConsent(consentAttestation.policyVersion)}
+              >
+                Xác nhận khách đã đồng ý
+              </button>
+            </details>
+          )}
           <ol className="message-history">
             {detail.messages.map((message) => (
               <li key={message.id} className="callout">

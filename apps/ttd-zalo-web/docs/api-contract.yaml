@@ -667,6 +667,38 @@ paths:
         '409': *id004
         '502': *id004
         '503': *id004
+  /inbox/{id}/consent:
+    parameters:
+    - *id005
+    post:
+      operationId: attestOaConsent
+      x-roles:
+      - owner
+      description: Owner ghi nhận lời đồng ý chủ động qua điện thoại cho mục đích lưu, soạn và gửi tư vấn.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [confirmed, policyVersion, recordingRef]
+              properties:
+                confirmed:
+                  type: boolean
+                  enum: [true]
+                policyVersion:
+                  type: string
+                recordingRef:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Đã ghi nhận đồng ý qua điện thoại
+        '400': *id004
+        '401': *id004
+        '403': *id004
+        '404': *id004
+        '409': *id004
   /conversations/{id}/drafts:
     parameters:
     - &id007

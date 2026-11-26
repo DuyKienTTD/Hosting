@@ -1,3 +1,4 @@
+import { consentAnswer } from "../channels/oa/consent.js";
 import type { Store } from "../store.js";
 import type { Envelope } from "../channels/oa/crypto.js";
 import { accountScope, inboxContext, oaUid, type OaAccount } from "../channels/oa/webhook.js";
@@ -65,7 +66,7 @@ export function inboxProjector(store: Store, { account, envelope }: InboxSource,
         if (optOut === "review" && !store.contact(target)?.ads_paused_review) store.pauseAdsForReview(target, origin);
         const existing = db.prepare("SELECT 1 FROM messages WHERE conversation_id=? AND event_id=?").get(String(thread.id), origin);
         const erased = db.prepare("SELECT 1 FROM restore_tombstones WHERE conversation_id=? AND event_id=?").get(String(thread.id), origin);
-        const retained = !!existing || !!erased || store.contact(target)?.retain === 1;
+        const retained = !!existing || !!erased || (!consentAnswer(message.text) && optOut !== "stop" && store.contact(target)?.retain === 1);
         if (retained && !existing && !erased) {
           store.retainMessage(target, message.contact, "oa", origin, message.text, message.at);
         }

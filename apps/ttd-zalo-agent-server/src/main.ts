@@ -1,3 +1,4 @@
+import { OaConsent, readOaConsent } from "./channels/oa/consent.js";
 import { oaWebInbox } from "./web/oa-inbox.js";
 import { BotPilot, botWebhookPath, readBot } from "./channels/bot/pilot.js";
 import { latestSmokeUid, modeError, sendOaSmoke } from "./channels/oa/smoke-cli.js";
@@ -10,7 +11,7 @@ import { Pool } from "pg";
 import { Envelope } from "./channels/oa/crypto.js";
 import { OaAdapter, OaRuntimeChannel } from "./channels/oa/adapter.js";
 import { OaTokens } from "./channels/oa/tokens.js";
-import { accountScope, OaInbox, oaWebhook } from "./channels/oa/webhook.js";
+import { accountScope, OaInbox, oaUid, oaWebhook } from "./channels/oa/webhook.js";
 import { OaAiDrafts } from "./web/ai-drafts.js";
 import { WebRoomAgents } from "./web/room-agents.js";
 import { webApi } from "./web/api.js";
@@ -53,7 +54,8 @@ if (!Number.isInteger(anchor) || anchor < 1 || anchor > 28 || Buffer.byteLength(
 config.budget.cycleStartDay = anchor;
 const wiring = readLiveWiring(process.env, config, smokeOnly, mode);
 const postgres = { host: PGHOST, database: PGDATABASE, user: "data_runtime", password: DATA_RUNTIME_PASSWORD };
-const store = new Store(new PostgresRuntimeDatabase(postgres), key, Number(process.env.DATA_RETENTION_DAYS ?? "30"));
+const retentionDays = Number(process.env.DATA_RETENTION_DAYS ?? "30");
+const store = new Store(new PostgresRuntimeDatabase(postgres), key, retentionDays);
 const bot = botSettings && new BotPilot(botSettings, store, config);
 let smokeReceipt: OaResult<OaResults["sendMessage"]> | undefined;
 const liveOa = wiring.oa && createLiveOa(wiring.oa, store, postgres,
@@ -141,6 +143,9 @@ const commands: Record<string, () => unknown> = {
       [retain, respond, send, ads].some(v => typeof v !== "boolean") ||
       typeof displayedText !== "string" || !displayedText.trim() || typeof policyVersion !== "string" || !policyVersion.trim() ||
       !evidence || typeof evidence !== "object" || Array.isArray(evidence) || !Object.keys(evidence).length) throw Error("INVALID_CONSENT");
+    if (/^\d+$/.test(target) || (liveOa && (!target.includes(":") || (target.startsWith("oa:") && !oaUid(liveOa.account, target))))) {
+      throw Error("OA_CONSENT_TARGET_REQUIRES_oa:<appId>:<oaId>:<uid>");
+    }
     store.consent(store.hash(target), expires, retain, respond, send, ads, { displayedText, policyVersion, evidence });
   },
   export: () => console.log(JSON.stringify(store.exportCustomer(String(input().target)))),
@@ -197,7 +202,9 @@ if (command !== "serve") {
       typeof task.text !== "string" || !task.text.trim() || task.text.length > config.scheduling.maxText)) ||
     new Set(schedule.map(task => task.key)).size !== schedule.length) throw Error("INVALID_SCHEDULE");
   const drafts = oa ? new OaAiDrafts(store, config, provider, wiring.aiMode === "live") : undefined;
-  const runtime = new Runtime(store, channel, provider, config, Date.now, schedule, !!(webOrigin && oa), drafts);
+  const consentPolicy = readOaConsent(process.env, retentionDays);
+  const consent = liveOa && !smokeOnly ? new OaConsent(store, liveOa.account, liveOa.channel, config, consentPolicy) : undefined;
+  const runtime = new Runtime(store, channel, provider, config, Date.now, schedule, !!(webOrigin && oa), drafts, consent);
   const hooks = active && webhookHandler(active.subiz, bot ? undefined : active.bot, smokeOnly ? undefined : event => {
     // The signed inbound event is already durable. Apply opt-out without waiting for the next poll.
     runtime.ingest(event);
@@ -220,7 +227,7 @@ if (command !== "serve") {
   const loopbackFixture = !liveOa && mode === "oa";
   const inboxMode = smokeOnly && !loopbackFixture ? "smoke_only" : oa ? "active" : "oa_unavailable";
   const inbox = webOrigin && inboxSource && inboxChannel ? oaWebInbox(store, config,
-    { account: inboxSource.account, envelope: inboxSource.envelope }, inboxChannel, inboxMode, drafts) : undefined;
+    { account: inboxSource.account, envelope: inboxSource.envelope }, inboxChannel, inboxMode, drafts, consent) : undefined;
   const inboxTimer = inbox && setInterval(() => {
     try { inbox.project(); }
     catch { console.warn("OA inbox projection failed"); }

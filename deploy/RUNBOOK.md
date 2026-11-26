@@ -203,3 +203,37 @@ deploy/release.sh --rollback '<PREVIOUS_MANIFEST_FILE>'
 ```
 
 Rollback trực tiếp yêu cầu schema đang áp khớp manifest đích. Khi deploy lỗi, script khôi phục file môi trường và Nginx. Nếu có thể migration đã commit, script giữ các dịch vụ ứng dụng dừng và in đường dẫn dump để đối soát hoặc restore sang staging theo mục khôi phục. Quyết định phục hồi DB cần phê duyệt của owner.
+
+### Xin đồng ý qua Zalo OA
+
+Áp migration `016-oa-consent.sql` trước khi đổi image. Giữ
+`OA_CONSENT_PROMPT_ENABLED=0` đến khi owner duyệt nội dung và công bố chính sách.
+Đặt `OA_CONSENT_POLICY_URL=https://example.invalid/chinh-sach` bằng URL HTTPS
+đã công bố và `OA_CONSENT_POLICY_VERSION=<phiên-bản>` bằng phiên bản tương ứng.
+Mỗi lần sửa nội dung hoặc thời hạn lưu, cập nhật phiên bản cùng lúc.
+`OA_CONSENT_PROMPT_ENABLED=1` cho phép gửi qua OA live ngoài smoke nếu Guard
+cho phép. Global STOP và STOP của support vẫn chặn gửi. Một lần giữ chỗ gửi
+chặn prompt tiếp trong bảy ngày, kể cả khi chưa rõ đã giao. Sau 48 giờ, lượt
+gửi dùng quota tháng nếu cấu hình OA cho phép.
+
+Trong Hộp thư, owner mở **Ghi nhận đồng ý qua điện thoại**, đọc nội dung hiển
+thị cho khách, nhập mã UUID tham chiếu đến bản ghi âm có thể đối chiếu, rồi
+xác nhận sau khi khách chủ động đồng ý. Lưu nội dung, phiên bản, mã tham chiếu
+và tài khoản thao tác. Hệ thống không thu âm hay tải bản ghi lên. Khi chưa có
+bản ghi âm có thể kiểm chứng, dùng trả lời có chữ ký qua OA.
+Đối chiếu [Luật 91/2025/QH15, Điều 9 và 10](https://vanban.chinhphu.vn/?docid=214590&pageid=27160)
+và [Nghị định 356/2025/NĐ-CP, Điều 6](https://vanban.chinhphu.vn/?docid=216387&pageid=27160). CLI `consent` yêu cầu target OA
+dạng `oa:<appId>:<oaId>:<uid>`, lấy UID từ `sender.id` của webhook thuộc OA này.
+
+**Bản nháp để owner duyệt** (các giá trị trong ngoặc thay bằng cấu hình):
+
+> Thuận Thành Đạt xin phép lưu nội dung trao đổi và mã tài khoản OA để hỗ trợ
+> yêu cầu của bạn, dùng AI soạn nháp cho nhân viên xem xét và gửi phản hồi tư
+> vấn qua Zalo. Tin nhắn được lưu tối đa [30] ngày. Đồng ý có hiệu lực [30]
+> ngày và không bao gồm quảng cáo.
+>
+> Bạn có thể từ chối hoặc rút lại bất cứ lúc nào. Chính sách và thông tin
+> thực hiện quyền của bạn: [URL chính sách].
+>
+> Vui lòng trả lời đúng “Đồng ý” hoặc “Không đồng ý”. Để rút lại sau khi đồng
+> ý, nhắn “Hủy”.

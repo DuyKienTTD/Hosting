@@ -8,7 +8,7 @@ import { Store } from "./store.js";
 export type Kind = "reply" | "advertising" | "invite" | "group_post" | "group_create" | "group_moderate";
 export type Proposal = {
   agent: Agent; kind: Kind; id: string; target: string; text?: string; message?: string;
-  purpose?: Request["purpose"] | "oa_inbox_reply";
+  purpose?: Request["purpose"] | "oa_inbox_reply" | "oa_consent_prompt";
   revision: number; epoch: number; groupApproved?: boolean; origin?: string; thread?: string; memberIds?: string[];
 };
 export type SendGuardOutcome =
@@ -24,7 +24,11 @@ export interface SendGuard {
 
 export class Guard implements SendGuard {
   constructor(private store: Store, private channel: ChannelAdapter, private config: Config,
-    private clock: () => number, private budget = new Budget(store, config.budget, clock)) {}
+    private clock: () => number, private budget = new Budget(store, config.budget, clock),
+    private consentPrompt?: {
+      allows(proposal: Proposal, target: string, now: number): boolean;
+      reserve(target: string, key: string, now: number): void;
+    }) {}
 
   failure(now = this.clock()) {
     this.store.atomic(() => {
@@ -45,7 +49,10 @@ export class Guard implements SendGuard {
     const policy = this.store.policy(target, p.agent, now);
     const contact = this.store.contact(target, now);
     if (this.store.stopped(p.agent) || p.epoch !== this.store.setting("epoch")) return "stopped";
-    if (p.kind.startsWith("group_")) {
+    if (p.purpose === "oa_consent_prompt") {
+      if (p.kind !== "reply" || p.agent !== "support" || friend === false || contact?.opted_out || contact?.ads_paused_review ||
+        p.revision !== policy.revision || !this.consentPrompt?.allows(p, target, now)) return "consent";
+    } else if (p.kind.startsWith("group_")) {
       if (p.agent !== "community" || !p.groupApproved) return "group_denied";
     } else {
       if (p.purpose && (contact?.opted_out || contact?.ads_paused_review)) return "consent";
@@ -105,7 +112,7 @@ export class Guard implements SendGuard {
     const key = this.store.hash(p.id);
     const group = p.kind.startsWith("group_");
     // Manual OA replies share the no-paid-overflow policy of approved quotations.
-    const purpose = p.purpose === "oa_inbox_reply" ? "oa_quote" : p.purpose;
+    const purpose = (p.purpose === "oa_inbox_reply" || p.purpose === "oa_consent_prompt") ? "oa_quote" : p.purpose;
     const lookup = { key, target: p.target, thread: p.thread, purpose };
     const local = group ? undefined : this.channel.localContact?.(lookup);
     const preflight = this.store.atomic(() => {
@@ -136,6 +143,7 @@ export class Guard implements SendGuard {
       const admission = this.channel.admitSend?.(lookup, p.kind, now);
       if (admission && "denial" in admission) return admission.denial;
       if (!this.store.reserveSend(key, target, p.agent, p.kind, now, admission?.classification)) return "duplicate";
+      if (p.purpose === "oa_consent_prompt") this.consentPrompt!.reserve(target, key, now);
       if (p.kind === "invite" && !this.store.setting("firstInvite")) this.store.set("firstInvite", now);
     }, denial => {
       if (denial) return;

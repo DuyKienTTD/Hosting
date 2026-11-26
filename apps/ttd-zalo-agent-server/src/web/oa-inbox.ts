@@ -1,3 +1,4 @@
+import type { OaConsent } from "../channels/oa/consent.js";
 import { ownerAiCosts } from "./ai-costs.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { vietnam, type Config } from "../config.js";
@@ -19,7 +20,7 @@ export interface InboxDraftReader {
 
 export type OaWebInbox = ReturnType<typeof oaWebInbox>;
 export function oaWebInbox(store: Store, config: Config, source: InboxSource, channel: OaRuntimeChannel,
-  mode: "active" | "smoke_only" | "oa_unavailable", drafts?: InboxDraftReader) {
+  mode: "active" | "smoke_only" | "oa_unavailable", drafts?: InboxDraftReader, consent?: OaConsent) {
   const { project, decode, scope } = inboxProjector(store, source, config);
   const db = store.db;
   const guard = new Guard(store, channel, config, Date.now);
@@ -77,12 +78,25 @@ export function oaWebInbox(store: Store, config: Config, source: InboxSource, ch
       return json(res, 200, db.prepare(threadQuery + " AND NOT t.withdrawn ORDER BY p.received_ms DESC,c.id LIMIT 100")
         .all(scope, scope).map(summary));
     }
-    const match = /^\/api\/v1\/inbox\/([a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})(\/replies)?$/i.exec(req.url ?? "");
+    const match = /^\/api\/v1\/inbox\/([a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})(\/(?:replies|consent))?$/i.exec(req.url ?? "");
     if (!match) return noInbox();
     const [, id, compose] = match;
     const thread = db.prepare(threadQuery + " AND c.id=? AND NOT t.withdrawn").get(scope, scope, id);
     if (!thread) return noInbox();
     const target = resolveTarget(String(thread.customer_id), String(thread.target));
+    if (compose === "/consent") {
+      if (req.method !== "POST") return json(res, 405, { message: "Phương thức không hợp lệ." });
+      if (operator.role !== "owner") return json(res, 403, { message: messages.forbidden });
+      const input = await readJson(req);
+      if (input?.confirmed !== true || typeof input.policyVersion !== "string" ||
+        typeof input.recordingRef !== "string" || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(input.recordingRef)) {
+        return json(res, 400, { message: "Cần xác nhận và nhập mã UUID của bản ghi âm cuộc gọi." });
+      }
+      if (!target || !consent?.attest(target, operator.id, input.policyVersion, input.recordingRef)) {
+        return json(res, 409, { message: "Không thể ghi nhận đồng ý với chính sách hiện tại." });
+      }
+      return json(res, 201, { recorded: true });
+    }
     const denial = block(operator, target);
 
     if (req.method === "GET" && !compose) {
@@ -107,6 +121,8 @@ export function oaWebInbox(store: Store, config: Config, source: InboxSource, ch
         .map(row => ({ id: row.id, at: new Date(Number(row.at)).toISOString(), direction: "outgoing", text: row.text, delivery: row.state }));
       return json(res, 200, { ...summary(thread),
         sendBlock: denial ? { code: denial, message: messages[denial] } : null,
+        ...(operator.role === "owner" && consent?.attestationText && target && !store.contact(String(thread.target))?.opted_out
+          ? { consentAttestation: { displayedText: consent.attestationText, policyVersion: consent.policyVersion } } : {}),
         messages: [...incoming, ...outgoing].sort((a, b) => a.at.localeCompare(b.at)),
         aiDraft: canReadBody(operator) && drafts ? await drafts.find(id, operator) : null,
         ...ownerAiCosts(operator, () => ({ estimatedAiUsdToday: Number(db.prepare(

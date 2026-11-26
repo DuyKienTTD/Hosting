@@ -1,3 +1,5 @@
+import { oaWebInbox } from "../dist/ttd-zalo-agent-server/src/web/oa-inbox.js";
+import { OaConsent, readOaConsent } from "../dist/ttd-zalo-agent-server/src/channels/oa/consent.js";
 import { latestSmokeUid, sendOaSmoke } from "../dist/ttd-zalo-agent-server/src/channels/oa/smoke-cli.js";
 import assert from "node:assert/strict";
 import { createHash, createHmac, randomBytes, randomUUID } from "node:crypto";
@@ -46,11 +48,12 @@ async function fixture(t) {
     finally { await root.end(); }
   });
   await root.query("CREATE SCHEMA " + schema);
-  for (const path of ["postgres/001.sql", "postgres/002-runtime.sql", "postgres/006-oa.sql", "postgres/007-oa-quota.sql"]) {
+  for (const path of ["postgres/001.sql", "postgres/002-runtime.sql", "postgres/006-oa.sql", "postgres/007-oa-quota.sql", "postgres/011-web-oa-inbox.sql", "postgres/016-oa-consent.sql"]) {
     await admin.query(await readFile(new URL("../" + path, import.meta.url), "utf8"));
   }
   const runtimeGrants = await readFile(new URL("../postgres/runtime-grants.sql", import.meta.url), "utf8");
   await admin.query(runtimeGrants.split("\n").filter(line => line.startsWith("GRANT ")).join("\n"));
+  await admin.query("GRANT SELECT ON channel_identities,visible_messages TO data_runtime");
   await root.query("GRANT USAGE ON SCHEMA " + schema + " TO data_runtime");
   const identity = randomUUID();
   const store = new Store(db, identity);
@@ -118,7 +121,7 @@ async function fixture(t) {
   const consent = () => store.consent(hashed, now + 10 * 24 * hour, true, true, true, true,
     { displayedText: "Fixture", policyVersion: "fixture-1", evidence: { source: "mock" } });
   const install = (issued = now) => tokens.install({ access: "mock_initial_access", refresh: "mock_initial_refresh", seconds: 90_000 }, issued);
-  return { pool, store, target, hashed, account, appSecret, channel, makeChannel, secondStore, clock, advance, calls, upstream,
+  return { pool, store, box, target, hashed, account, appSecret, channel, makeChannel, secondStore, clock, advance, calls, upstream,
     tokens, tokenManager, hook, message, follow, withdraw, consent, install, inbox, signed };
 }
 
@@ -538,4 +541,128 @@ test("OA smoke command uses signed inbox evidence, scoped consent, Guard and the
   await f.withdraw();
   assert.equal((await send(uid, modes, true)).ok, false);
   assert.equal(f.calls.send.length, 3);
+});
+
+const recordingRef = "11111111-1111-4111-8111-111111111111";
+const consentConfig = { OA_CONSENT_PROMPT_ENABLED: "1", OA_CONSENT_POLICY_URL: "https://example.invalid/privacy",
+  OA_CONSENT_POLICY_VERSION: "fixture-1" };
+
+test("OA consent policy defaults off and requires an HTTPS policy and a version when enabled", () => {
+  assert.equal(readOaConsent({}, 30), undefined);
+  assert.equal(readOaConsent({ ...consentConfig, OA_CONSENT_PROMPT_ENABLED: "0" }, 30).enabled, false);
+  assert.throws(() => readOaConsent({ OA_CONSENT_PROMPT_ENABLED: "1" }, 30), /OA_CONSENT_POLICY_REQUIRED/);
+  assert.throws(() => readOaConsent({ ...consentConfig, OA_CONSENT_POLICY_URL: "http://example.invalid" }, 30), /INVALID_OA_CONSENT_POLICY_URL/);
+});
+
+test("OA consent requires signed input, respects STOP, throttles concurrent prompts and records grant and withdrawal once", { skip: !postgres }, async t => {
+  const f = await fixture(t);
+  await f.install();
+  const policy = readOaConsent(consentConfig, 30);
+  const flow = new OaConsent(f.store, f.account, f.channel, defaults, policy, f.clock);
+  const second = f.secondStore();
+  const competing = new OaConsent(second, f.account, f.makeChannel({}, second), defaults, policy, f.clock);
+  const packet = (id, text) => {
+    const event = f.message(id);
+    event.message.text = text;
+    return event;
+  };
+  const accept = async (id, text) => {
+    assert.equal((await f.hook(packet(id, text))).status, 200);
+    return f.channel.latestInbound(f.target);
+  };
+  const phantom = await accept("oa_no_prompt", "Đồng ý");
+  assert.equal(await flow.handle(phantom), true);
+  assert.equal(f.store.policy(f.hashed, "support", f.clock()).send, false);
+  const stopped = await accept("oa_stopped", "Tư vấn thử?");
+  f.store.stop("global", true);
+  await flow.handle(stopped);
+  assert.equal(f.calls.send.length, 0);
+  f.store.stop("global", false);
+  const off = new OaConsent(f.store, f.account, f.channel, defaults, undefined, f.clock);
+  await off.handle(stopped);
+  assert.equal(f.calls.send.length, 0);
+
+  f.advance(1);
+  const inbound = await accept("oa_prompt", "Tư vấn thử?");
+  await Promise.all([flow.handle(inbound), competing.handle(inbound)]);
+  assert.equal(f.calls.send.length, 1);
+  assert.equal(f.calls.send[0].message.message.text, policy.text);
+  await flow.handle(await accept("oa_second", "Tư vấn thêm?"));
+  assert.equal(f.calls.send.length, 1);
+
+  f.advance(1);
+  assert.equal((await f.hook(packet("oa_forged", "Đồng ý"), { tamper: true })).status, 200);
+  assert.equal(f.channel.latestInbound(f.target).text, "Tư vấn thêm?");
+  const decision = await accept("oa_granted", "Đồng ý");
+  assert.equal((await f.hook(packet("oa_granted", "Đồng ý"))).status, 200);
+  await Promise.all([flow.handle(decision), competing.handle(decision)]);
+  const rows = (await f.pool.query("SELECT purpose,displayed_text,policy_version,evidence FROM consents ORDER BY purpose")).rows;
+  assert.deepEqual(rows.map(row => row.purpose), ["respond", "retain", "send"]);
+  assert.ok(rows.every(row => row.displayed_text === policy.text && row.policy_version === policy.version &&
+    row.evidence.source === "signed_oa_event" && row.evidence.receipt === decision.id));
+  f.store.stop("global", true);
+  const withdrawal = await accept("oa_withdrawn", "Hủy");
+  await flow.handle(withdrawal);
+  await competing.handle(withdrawal);
+  assert.equal(f.store.contact(f.hashed)?.opted_out, 1);
+  assert.equal((await f.pool.query("SELECT count(*)::int AS n FROM consents WHERE withdrawn")).rows[0].n, 3);
+  assert.equal(flow.attest(f.target, "fixture-owner", policy.version, recordingRef), false);
+  assert.equal(f.calls.send.length, 1);
+});
+
+test("OA owner attestation binds policy version and operator without granting advertising", { skip: !postgres }, async t => {
+  const f = await fixture(t);
+  const policy = readOaConsent({ ...consentConfig, OA_CONSENT_PROMPT_ENABLED: "0" }, 30);
+  const flow = new OaConsent(f.store, f.account, f.channel, defaults, policy, f.clock);
+  assert.equal((await f.hook(f.message())).status, 200);
+  assert.equal(flow.attest(f.target, "fixture-owner", "old", recordingRef), false);
+  assert.equal(flow.attest(f.target, "fixture-owner", policy.version, recordingRef), true);
+  const rows = (await f.pool.query("SELECT purpose,evidence FROM consents ORDER BY purpose")).rows;
+  assert.deepEqual(rows.map(row => row.purpose), ["respond", "retain", "send"]);
+  assert.ok(rows.every(row => row.evidence.source === "operator_attested" && row.evidence.operator === "fixture-owner" && row.evidence.recordingRef === recordingRef));
+  assert.equal(f.calls.send.length, 0);
+});
+
+test("OA inbox consent HTTP operation is owner-only and binds the displayed policy", { skip: !postgres }, async t => {
+  const f = await fixture(t);
+  const policy = readOaConsent({ ...consentConfig, OA_CONSENT_PROMPT_ENABLED: "0" }, 30);
+  const flow = new OaConsent(f.store, f.account, f.channel, defaults, policy);
+  assert.equal((await f.hook(f.message())).status, 200);
+  const inbox = oaWebInbox(f.store, defaults, { account: f.account, envelope: f.box }, f.channel, "active", undefined, flow);
+  inbox.project();
+  const { conversation_id: id } = (await f.pool.query("SELECT conversation_id FROM web_oa_projection")).rows[0];
+  const url = await server(t, (req, res) => inbox.handle({ id: "fixture-owner", role: req.headers["fixture-role"] }, req, res));
+  const path = url + "/api/v1/inbox/" + id;
+  const preview = role => fetch(path, { headers: { "fixture-role": role } }).then(res => res.json());
+  const attest = (role, body) => fetch(path + "/consent", { method: "POST",
+    headers: { "fixture-role": role, "content-type": "application/json" }, body: JSON.stringify(body) });
+  assert.deepEqual((await preview("owner")).consentAttestation, { displayedText: policy.text, policyVersion: policy.version });
+  for (const role of ["support", "sales", "a0"]) {
+    assert.equal((await preview(role)).consentAttestation, undefined);
+    assert.equal((await attest(role, { confirmed: true, policyVersion: policy.version, recordingRef })).status, 403);
+  }
+  assert.equal((await attest("owner", { confirmed: false, policyVersion: policy.version, recordingRef })).status, 400);
+  assert.equal((await attest("owner", { confirmed: true, policyVersion: "old", recordingRef })).status, 409);
+  assert.equal((await attest("owner", { confirmed: true, policyVersion: policy.version, recordingRef })).status, 201);
+  assert.equal(f.calls.send.length, 0);
+});
+
+test("OA unresolved delivery keeps its seven-day consent prompt reservation", { skip: !postgres }, async t => {
+  const f = await fixture(t);
+  await f.install();
+  f.upstream.disconnect = true;
+  const flow = new OaConsent(f.store, f.account, f.channel, defaults, readOaConsent(consentConfig, 30), f.clock);
+  const notify = async id => {
+    assert.equal((await f.hook(f.message(id))).status, 200);
+    await flow.handle(f.channel.latestInbound(f.target));
+  };
+  await notify("first_prompt");
+  assert.equal((await f.pool.query("SELECT state FROM send_log")).rows[0].state, "unknown_delivery");
+  f.advance(7 * 24 * hour - 1);
+  await notify("blocked_prompt");
+  assert.equal(f.calls.send.length, 1);
+  f.advance(1);
+  f.upstream.disconnect = false;
+  await notify("next_prompt");
+  assert.equal(f.calls.send.length, 2);
 });

@@ -1,3 +1,4 @@
+import type { OaConsent } from "./channels/oa/consent.js";
 import { classifyOptOut, hasNegatedStop } from "./opt-out.js";
 import { randomUUID } from "node:crypto";
 import { extractSkus, FakeProvider as GroundedDraft, questionDate, validatedDraft } from "../../ttd-zalo-assistant/src/ai.js";
@@ -32,7 +33,7 @@ export class Runtime {
   private reading = false;
   constructor(readonly store: Store, private channel: ChannelAdapter, private provider: Provider,
     private config: Config, private clock = Date.now, private schedule: readonly Schedule[] = [], private reviewOaReplies = false,
-    private drafts?: OaAiDrafts) {
+    private drafts?: OaAiDrafts, private oaConsent?: OaConsent) {
     this.budget = new Budget(store, config.budget, clock);
     this.guard = new Guard(store, channel, config, clock, this.budget);
   }
@@ -318,7 +319,9 @@ export class Runtime {
       let okay = true;
       for (const [index, read] of reads.entries()) {
         if (read.status !== "fulfilled" || !read.value.ok) { this.guard.failure(); okay = false; continue; }
-        for (const event of read.value.value) this.ingest(event);
+        for (const event of read.value.value) {
+          if (!await this.oaConsent?.handle(event)) this.ingest(event);
+        }
         this.channel.acknowledge?.(index === 0 ? "message" : "friend");
       }
       return okay;

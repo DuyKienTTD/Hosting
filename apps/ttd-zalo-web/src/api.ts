@@ -55,6 +55,7 @@ export type OaThreadDetail = OaThread & {
   sendBlock: { code: string; message: string } | null;
   aiDraft: InboxDraft | null;
   estimatedAiUsdToday?: number;
+  consentAttestation?: { displayedText: string; policyVersion: string };
 };
 export type Customer = {
   id: string;
@@ -210,6 +211,12 @@ export const api = {
       "/drafts/" + encodeURIComponent(id) + "/approve",
       "POST",
       { version, text },
+    ),
+  attestOaConsent: (id: string, policyVersion: string, recordingRef: string) =>
+    request<{ recorded: true }>(
+      "/inbox/" + encodeURIComponent(id) + "/consent",
+      "POST",
+      { confirmed: true, policyVersion, recordingRef },
     ),
   replyOa: (id: string, text: string) =>
     request<{ delivery: "sent" }>(
