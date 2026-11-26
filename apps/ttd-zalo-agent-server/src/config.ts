@@ -12,10 +12,10 @@ export const defaults = {
     optOutPhrases: [
       ...["dung", "ngung", "stop"].flatMap(verb => [
         "gui", "nhan", "nhan tin", "nhan uu dai", "gui tin", "gui quang cao", "gui uu dai", "gui khuyen mai",
-        "nhan quang cao", "nhan khuyen mai", "nhan qc", "gui qc", "nt", "gui tn",
+        "nhan quang cao", "nhan khuyen mai", "nhan qc", "gui qc", "nt", "gui tn", "gui tin nhan",
       ].map(object => verb + " " + object)),
       ...["khong", "ko", "k", "khong muon"].flatMap(verb => [
-        "nhan", "nhan tin", "nhan uu dai", "nhan quang cao", "nhan khuyen mai", "nhan qc", "nhan tn",
+        "nhan", "nhan tin", "nhan uu dai", "nhan quang cao", "nhan khuyen mai", "nhan qc", "nhan tn", "nhan tin nhan",
       ].map(object => verb + " " + object)),
       "huy dang ky", "huy dk", "huy nhan tin", "huy nhan quang cao",
     ] },

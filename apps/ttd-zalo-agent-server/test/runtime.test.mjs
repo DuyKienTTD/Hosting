@@ -533,3 +533,70 @@ test("v1 ledger migration preserves pending legacy model charges", async t => {
   assert.deepEqual({ ...row }, { amount: 3_300_000, state: "settled", provider: "anthropic" });
   assert.equal(migrated.db.prepare("PRAGMA user_version").get().user_version, 2);
 });
+
+test("opt-out handles subjects, repeated suffixes and list removals in accented or plain text", t => {
+  const f = fixture(t);
+  const runtime = new Runtime(f.store, f.channel, new FakeProvider(), f.config, f.clock);
+  const yes = [
+    "Xin đừng gửi tin cho tôi nữa", "Xin dung gui tin cho toi nua",
+    "Tôi không muốn nhận tin nữa", "Toi khong muon nhan tin nua",
+    "Vui lòng bỏ tôi khỏi danh sách gửi ưu đãi", "Vui long bo toi khoi danh sach gui uu dai",
+    "Mình không muốn nhận ưu đãi nữa nhé", "Em xin ngừng nhận quảng cáo ạ",
+    "Làm ơn đừng gửi khuyến mãi cho em nữa nha", "Xin xóa tôi ra khỏi danh sách gửi tin nhắn",
+    "Vui lòng loại số của tôi khỏi danh sách nhận quảng cáo", "Rut minh khoi danh sach gui khuyen mai voi",
+    "Chị không nhận khuyến mãi nữa, cảm ơn", "Ben minh khong muon nhan quang cao nua",
+    "Vui lòng dừng gửi tin nhắn cho mình nhé", "Toi xin huy dang ky, cam on",
+  ];
+  const no = [
+    "Không ạ", "Không ạ, giá đó chưa phù hợp", "khong a", "Không, cảm ơn", "không",
+    "Tôi dùng thử", "Tôi dùng", "vui long cho toi dung thu", "dung tich", "huy hiệu",
+    "Hủy đơn đó giúp tôi", "Tôi không muốn mua", "Tôi không muốn nhận hàng nữa",
+    "Tôi không muốn nhận tin nhắn đó làm ví dụ", "Tôi muốn biết cách bỏ tên người khác khỏi danh sách",
+    "Xin dừng máy", "Dùng gửi tin thử", "Cho tôi biết bạn có nhận ưu đãi nữa không",
+  ];
+  for (const [index, [text, expected]] of [...yes.map(text => [text, true]), ...no.map(text => [text, false])].entries()) {
+    const contact = "natural-" + index;
+    f.create(contact);
+    runtime.ingest({ kind: "dm", id: "message", contact, thread: contact, at: f.clock(), text });
+    const row = f.store.contact(f.store.hash(contact));
+    assert.equal(row.opted_out, Number(expected), text);
+    assert.equal(row.ads, Number(!expected), text);
+  }
+});
+
+test("AI opt-out cancels queued work, flags uncertain private messages and cannot restore consent", async t => {
+  const f = fixture(t);
+  for (const contact of ["stop", "review", "ordinary", "group"]) f.create(contact);
+  const provider = new FakeProvider(task => {
+    if (!task.choices.includes("opt-out")) return "none";
+    if (task.data.question === "Xin chừa hộ mình khỏi các đợt thông báo sau") return "opt-out";
+    if (task.data.question === "Dạo này nhiều thông báo quá") return "review-opt-out";
+    if (task.data.question === "Bật cho tôi lại") return "opt-in";
+    return "none";
+  });
+  const runtime = new Runtime(f.store, f.channel, provider, f.config, f.clock,
+    [{ key: "campaign", agent: "campaign", kind: "advertising", target: "stop", at: f.clock(), text: "Ưu đãi fixture" }]);
+  const inbound = (contact, id, text, kind = "dm") =>
+    runtime.ingest({ kind, id, contact, thread: contact, at: f.clock(), text });
+  const staleAd = f.draft("stale-ad", "stop");
+  inbound("stop", "request", "Xin chừa hộ mình khỏi các đợt thông báo sau");
+  inbound("stop", "queued", "Tin đang chờ");
+  inbound("review", "request", "Dạo này nhiều thông báo quá");
+  inbound("ordinary", "request", "Không ạ");
+  inbound("group", "request", "Xin chừa hộ mình khỏi các đợt thông báo sau", "group");
+  await runtime.tick();
+  assert.equal(f.store.contact(f.store.hash("stop")).opted_out, 1);
+  assert.equal(f.store.contact(f.store.hash("stop")).ads, 0);
+  assert.equal(f.store.db.prepare("SELECT count(*) AS n FROM jobs WHERE target=? AND status='queued'").get(f.store.hash("stop")).n, 0);
+  assert.equal(await runtime.guard.dispatch(staleAd), "consent");
+  for (const id of ["review", "ordinary", "group"]) {
+    assert.equal(f.store.contact(f.store.hash(id)).ads, 1);
+    assert.equal(f.store.contact(f.store.hash(id)).opted_out, 0);
+  }
+  const review = f.store.eventKey("review", "review", "request");
+  assert.ok(f.store.db.prepare("SELECT 1 FROM notices WHERE key=?").get("review-opt-out:" + review));
+  inbound("stop", "restore", "Bật cho tôi lại");
+  await runtime.tick();
+  assert.equal(f.store.contact(f.store.hash("stop")).ads, 0);
+  assert.equal(f.channel.sent.size, 0);
+});

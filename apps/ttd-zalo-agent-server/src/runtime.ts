@@ -50,16 +50,28 @@ export class Runtime {
   }
 
   private isOptOut(text: string) {
-    const raw = text.normalize("NFC").toLocaleLowerCase("vi-VN");
-    // The vowel accent distinguishes "dùng" (use) from "dừng" (stop).
-    if (/^\s*(?:(?:xin|vui lòng)\s+)?dùng(?=[^\p{L}]|$)/u.test(raw)) return false;
-    const normalized = raw.normalize("NFD").replace(/\p{M}/gu, "").replace(/đ/gu, "d")
+    const normalized = text.normalize("NFC").toLocaleLowerCase("vi-VN")
+      // Preserve the distinction between "dùng" (use) and "dừng" (stop).
+      .replace(/(?<!\p{L})dùng(?!\p{L})/gu, "su dung")
+      .normalize("NFD").replace(/\p{M}/gu, "").replace(/đ/gu, "d")
       .replace(/[^\p{L}\p{N}]+/gu, " ").trim();
     if (this.config.advertising.optOutWords.includes(normalized)) return true;
-    const phrase = normalized.replace(/^(?:xin|vui long|lam on) /u, "")
-      .replace(/ (?:nhe|a|cam on)$/u, "").replace(/ (?:nua|cho toi|cho minh)$/u, "");
-    return this.config.advertising.optOutPhrases.includes(phrase);
+    const phrase = normalized.replace(/^(?:(?:xin|vui long|lam on|toi|minh|em|anh|chi|chung toi|ben minh) )+/u, "")
+      .replace(/(?: cho (?:toi|minh|em|anh|chi)| nua| nhe| nha| a| cam on| voi)+$/u, "");
+    if (this.config.advertising.optOutPhrases.includes(phrase)) return true;
+    return /^(?:bo|xoa|rut|loai) (?:toi|minh|em|anh|chi|so cua toi|so dien thoai cua toi) (?:ra )?khoi danh sach (?:gui|nhan) (?:tin|tin nhan|uu dai|quang cao|khuyen mai)$/u.test(phrase);
   }
+
+  private disableAds(target: string) {
+    // Called inside the same transaction as inbound persistence or AI admission.
+    this.store.optOut(target);
+    this.store.db.prepare("DELETE FROM jobs WHERE target=?").run(target);
+  }
+
+  private discardPending(contact: string) {
+    for (const [key, item] of this.pending) if (item.event.contact === contact) this.pending.delete(key);
+  }
+
 
   ingest(event: Event) {
     const now = this.clock();
@@ -70,6 +82,7 @@ export class Runtime {
     const { store } = this;
     const id = store.eventKey(event.contact, event.thread, event.id);
     const target = store.hash(event.contact);
+    const optOut = event.kind === "dm" && this.isOptOut(event.text);
     const record = store.atomic(() => {
       if (!store.db.prepare("INSERT OR IGNORE INTO inbound VALUES(?,?,?)").run(id, target, event.at).changes) {
         if (this.pending.has(id) || event.at < now - this.config.scheduling.maxInboundAgeMs) return;
@@ -79,9 +92,8 @@ export class Runtime {
         }
         return;
       }
-      if (event.kind === "dm" && this.isOptOut(event.text)) {
-        store.optOut(target);
-        store.db.prepare("DELETE FROM jobs WHERE target=?").run(target);
+      if (optOut) {
+        this.disableAds(target);
         return;
       }
       if (event.kind === "spam") return { spam: true } as const;
@@ -98,9 +110,7 @@ export class Runtime {
       return { revision: policy.revision, epoch };
     });
     if (!record) {
-      if (event.kind === "dm" && this.isOptOut(event.text)) {
-        for (const [key, item] of this.pending) if (item.event.contact === event.contact) this.pending.delete(key);
-      }
+      if (optOut) this.discardPending(event.contact);
       return;
     }
     if ("spam" in record) { this.guard.spam(); return; }
@@ -155,8 +165,23 @@ export class Runtime {
     }
     if (typeof routed !== "string") {
       if (!permitted.some(valid)) return true;
-      routed = await this.decide(attempt + "-route", "router", { event: event.kind, question }, [...permitted, "none"], inbound);
+      const options = inbound ? [...permitted, "none", "opt-out", "review-opt-out"] : [...permitted, "none"];
+      routed = await this.decide(attempt + "-route", "router", { event: event.kind, question }, options, inbound);
       if (!routed) return false;
+      if (inbound && (routed === "opt-out" || routed === "review-opt-out")) {
+        const disabled = store.atomic(() => {
+          if (this.clock() - event.at > this.config.scheduling.maxInboundAgeMs || !permitted.some(valid) ||
+            !store.db.prepare("SELECT 1 FROM jobs WHERE id=? AND target=? AND status='queued'").get(id, target)) return false;
+          if (routed === "opt-out") {
+            this.disableAds(target);
+            return true;
+          }
+          store.notice("review-opt-out:" + id, this.clock(), "Cần xem lại ý định ngừng nhận ưu đãi của tin nhắn này.");
+          return false;
+        });
+        if (disabled) this.discardPending(event.contact);
+        return true;
+      }
       store.db.prepare("UPDATE jobs SET body=? WHERE id=?").run(attempt === id ? routed : attempt.slice(id.length + 1) + "|" + routed, id);
     }
     if (routed === "sales-ready" && valid("sales")) {

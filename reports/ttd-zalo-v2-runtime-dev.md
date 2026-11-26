@@ -61,3 +61,15 @@ Dùng Sonnet 5.5 ($2/$10) và Haiku 5.5 ($0,10/$0,50 trong tier tối đa 100.00
 | Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |
 
 Không gọi Claude, Hostinger, Zalo hay Subiz thật. Test Playwright dùng Chromium headless từ gói npm tạm và HTML cục bộ.
+
+## V2-02C-FIX1 · 26/11/2026
+
+Theo biên nhận độc lập trên [PR #73](https://github.com/DuyKienTTD/Hosting/pull/73), bộ nhận diện tất định xử lý chủ ngữ, chuỗi hậu tố và yêu cầu rút khỏi danh sách quảng cáo ở dạng có hoặc không dấu. Từ đơn vẫn chỉ có hiệu lực khi đứng riêng. Hai test hồi quy bao gồm 16 câu dương mới (ba câu báo lỗi, ba biến thể không dấu, mười câu tự nhiên khác), 18 câu âm mới và các ca cũ giữ nguyên.
+
+Bước phân loại con đường tin nhắn riêng hiện tại có hai lựa chọn bổ sung. Yêu cầu rõ ràng có thể thu hồi quảng cáo đúng đối tượng trong transaction và hủy việc chờ. Ý định chưa rõ chỉ tạo cờ vận hành với ID nội bộ, không đổi consent. Cổng gửi tiếp tục kiểm tra trạng thái và revision tất định. Test bằng FakeProvider xác nhận tin nhóm không có lựa chọn này, giá trị đăng ký lại nằm ngoài allowlist và lượt quảng cáo cũ bị chặn. Chưa đo phân loại bằng Claude thật.
+
+| Lệnh trên Node 24.22.3 | Exit | Kết quả |
+|---|---:|---|
+| Cả hai app `npm run typecheck`, `npm run build`, `npm test` (server với `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium`) | 0 | Server 49/49, desktop 20/20 |
+| Server `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium node --test --test-name-pattern='Playwright fixture' test/adapters.test.mjs` | 0 | 1/1 |
+| Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |
