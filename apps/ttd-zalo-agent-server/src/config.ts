@@ -9,16 +9,7 @@ export const defaults = {
   advertising: { startHour: 7, endHour: 22, perContactMs: 7 * day, daily: 8, spacingMs: 112 * minute,
     footer: "Nhắn DỪNG NHẬN TIN để không nhận ưu đãi",
     optOutWords: ["stop", "huy", "dung", "unsubscribe"],
-    optOutPhrases: [
-      ...["dung", "ngung", "stop"].flatMap(verb => [
-        "gui", "nhan", "nhan tin", "nhan uu dai", "gui tin", "gui quang cao", "gui uu dai", "gui khuyen mai",
-        "nhan quang cao", "nhan khuyen mai", "nhan qc", "gui qc", "nt", "gui tn", "gui tin nhan",
-      ].map(object => verb + " " + object)),
-      ...["khong", "ko", "k", "khong muon"].flatMap(verb => [
-        "nhan", "nhan tin", "nhan uu dai", "nhan quang cao", "nhan khuyen mai", "nhan qc", "nhan tn", "nhan tin nhan",
-      ].map(object => verb + " " + object)),
-      "huy dang ky", "huy dk", "huy nhan tin", "huy nhan quang cao",
-    ] },
+    optOutMaxGapWords: 8 },
   invitations: { weeklyDailyLimits: [1, 2, 3], spacingMs: 60 * minute, interestMs: 7 * day },
   anomaly: { windowMs: 15 * minute, starts: 5, errors: 3 },
   scheduling: { pollMs: 15_000, maxInboundAgeMs: day, maxQueued: 500, maxJobsPerTick: 10, maxText: 1500 },

@@ -73,3 +73,16 @@ Bước phân loại con đường tin nhắn riêng hiện tại có hai lựa 
 | Cả hai app `npm run typecheck`, `npm run build`, `npm test` (server với `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium`) | 0 | Server 49/49, desktop 20/20 |
 | Server `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium node --test --test-name-pattern='Playwright fixture' test/adapters.test.mjs` | 0 | 1/1 |
 | Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |
+
+## V2-02C-FIX2 · 26/11/2026
+
+Thay danh sách cụm hoàn chỉnh bằng luật kết hợp dấu hiệu dừng và đối tượng nhắn tin hoặc quảng cáo trong cùng một câu. Khoảng cách mặc định là 8 từ và có thể cấu hình qua `optOutMaxGapWords`. Câu hỏi, ngữ cảnh giao dịch rõ ràng và từ “dùng” được xử lý riêng. Từ đơn tiếp tục chỉ có hiệu lực khi đứng riêng. Tin riêng chưa đủ căn cứ được gắn cờ ngay khi nhận, kể cả khi AI đang dừng. Nhánh phân loại AI hiện hữu vẫn chỉ có thể thu hồi quảng cáo hoặc gắn cờ.
+
+Ba câu báo lỗi của A0 nằm trong tập phát triển và đều đạt. [Tập kiểm định riêng](../apps/ttd-zalo-agent-server/test/fixtures/opt-out-validation.json) được soạn sau khi hoàn thiện luật. Không chỉnh luật theo kết quả của tập này. Lần chấm đầu tiên đạt **30/30 ca xin ngừng và 20/20 ca âm**, gồm nhiều kiểu diễn đạt, tên shop, số tổng hợp, không dấu và viết tắt.
+
+| Lệnh trên Node 24.22.3 | Exit | Kết quả |
+|---|---:|---|
+| Hai app `npm run typecheck`, `npm run build`, `npm test` (server với `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium`) | 0 | Server 52/52, desktop 20/20 |
+| Server `node --test test/opt-out-validation.test.mjs` (chấm corpus riêng) | 0 | 30/30, 20/20 |
+| Server `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium node --test --test-name-pattern='Playwright fixture' test/adapters.test.mjs` | 0 | 1/1 |
+| Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |

@@ -1,3 +1,4 @@
+import { classifyOptOut } from "../dist/ttd-zalo-agent-server/src/opt-out.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile, mkdtemp, rm } from "node:fs/promises";
@@ -599,4 +600,35 @@ test("AI opt-out cancels queued work, flags uncertain private messages and canno
   await runtime.tick();
   assert.equal(f.store.contact(f.store.hash("stop")).ads, 0);
   assert.equal(f.channel.sent.size, 0);
+});
+
+test("distance, sentence boundaries and questions flag uncertain opt-outs", () => {
+  const config = { ...defaults.advertising, optOutMaxGapWords: 2 };
+  assert.equal(classifyOptOut("Dừng ngay việc gửi tin", config), "stop");
+  assert.equal(classifyOptOut("Dừng ngay toàn bộ các hoạt động gửi quảng cáo", config), "review");
+  assert.equal(classifyOptOut("Xin dừng. Tin quảng cáo đến nhiều.", config), "review");
+  assert.equal(classifyOptOut("Tôi có thể ngừng nhận quảng cáo không?", config), "review");
+});
+
+test("development probes cover the three reported misses and persist uncertain flags without AI", t => {
+  const f = fixture(t);
+  const runtime = new Runtime(f.store, f.channel, new FakeProvider(), f.config, f.clock);
+  const requests = [
+    "Tôi muốn shop ngừng nhắn tin quảng cáo cho tôi",
+    "Đừng nhắn tin quảng cáo nữa, cảm ơn",
+    "Phiền shop gỡ số của tôi khỏi danh sách nhận khuyến mãi",
+  ];
+  for (const [index, text] of requests.entries()) {
+    const contact = "regression-" + index;
+    f.create(contact);
+    runtime.ingest({ kind: "dm", id: "msg", at: f.clock(), contact, thread: contact, text });
+    assert.equal(f.store.contact(f.store.hash(contact)).opted_out, 1, text);
+  }
+  f.create("review");
+  f.store.stop("global", true);
+  runtime.ingest({ kind: "dm", id: "msg", at: f.clock(), contact: "review", thread: "review",
+    text: "Có thể ngừng nhận quảng cáo không?" });
+  const key = "review-opt-out:" + f.store.eventKey("review", "review", "msg");
+  assert.ok(f.store.db.prepare("SELECT 1 FROM notices WHERE key=?").get(key));
+  assert.equal(f.store.contact(f.store.hash("review")).ads, 1);
 });
