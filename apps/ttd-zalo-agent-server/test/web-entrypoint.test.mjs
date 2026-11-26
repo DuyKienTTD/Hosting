@@ -36,7 +36,7 @@ test("production Web UI process sends approved OA quote through the mounted API"
     try { await admin.query("DROP DATABASE " + database + " WITH (FORCE)"); }
     finally { await admin.end(); }
   });
-  for (const name of ["001.sql", "002-runtime.sql", "runtime-grants.sql", "006-oa.sql", "007-oa-quota.sql", "009-web-operator.sql"]) {
+  for (const name of ["001.sql", "002-runtime.sql", "runtime-grants.sql", "006-oa.sql", "007-oa-quota.sql", "009-web-operator.sql", "010-web-accounts.sql"]) {
     let sql = await readFile(new URL("../postgres/" + name, import.meta.url), "utf8");
     if (name === "runtime-grants.sql") sql = sql.split("\n").filter(line => line.startsWith("GRANT ")).join("\n");
     await pg.query(sql);
@@ -104,29 +104,19 @@ test("production Web UI process sends approved OA quote through the mounted API"
   await close(portProbe);
   const host = `http://127.0.0.1:${port}`;
   const dist = resolve(process.env.WEB_UI_TEST_DIST);
-  const frontend = await listen(async (req, res) => {
-    if (req.url.startsWith("/api/v1/")) {
-      const upstreamRequest = request(host + req.url, { method: req.method, headers: req.headers }, result => {
-        res.writeHead(result.statusCode, result.headers);
-        result.pipe(res);
-      });
-      upstreamRequest.on("error", () => res.writeHead(502).end());
-      return req.pipe(upstreamRequest);
-    }
-    const url = new URL(req.url, "http://localhost");
-    const path = url.pathname === "/" ? resolve(dist, "index.html") : resolve(dist, "." + url.pathname);
-    if (!path.startsWith(dist + "/")) return res.writeHead(404).end();
-    try {
-      const mime = { js: "text/javascript", css: "text/css", html: "text/html", woff2: "font/woff2" };
-      res.setHeader("Content-Type", mime[path.split(".").at(-1)] ?? "application/octet-stream");
-      res.end(await readFile(path));
-    } catch { res.writeHead(404).end(); }
+  const frontend = await listen((req, res) => {
+    const forward = request(host + req.url, { method: req.method, headers: req.headers }, result => {
+      res.writeHead(result.statusCode, result.headers);
+      result.pipe(res);
+    });
+    forward.on("error", () => res.writeHead(502).end());
+    req.pipe(forward);
   });
   t.after(() => close(frontend));
   const origin = address(frontend);
   const child = spawn(process.execPath, ["dist/ttd-zalo-agent-server/src/main.js", "serve"], {
     env: { ...process.env, PGDATABASE: database, IDENTITY_KEY: key, HTTP_PORT: String(port), HTTP_BIND: "local",
-      CHANNEL_MODE: "oa", CHANNEL_SMOKE_ONLY: "1", WEB_ORIGIN: origin, ADS_ENABLED: "false", CLAUDE_ENABLED: "0",
+      CHANNEL_MODE: "oa", CHANNEL_SMOKE_ONLY: "1", WEB_ORIGIN: origin, WEB_DIST: dist, ADS_ENABLED: "false", CLAUDE_ENABLED: "0",
       AI_PROVIDER: "anthropic", OA_APP_ID: account.appId, OA_ID: account.oaId, OA_APP_SECRET: appSecret,
       OA_WEBHOOK_SECRET: account.webhookSecret, OA_ENVELOPE_KEY: oaKey.toString("hex"),
       OA_FIXTURE_ENDPOINT: address(upstream), OA_MONTHLY_QUOTA: "0" },
@@ -148,6 +138,10 @@ test("production Web UI process sends approved OA quote through the mounted API"
     await new Promise(done => setTimeout(done, 50));
   }
   assert.ok(ready, startup);
+  const health = await fetch(origin + "/health", { method: "HEAD" });
+  assert.equal(health.status, 200);
+  assert.equal(await health.text(), "");
+  assert.equal((await fetch(origin + "/assets/unknown.js")).status, 404);
   const post = (path, data, session, requestOrigin = origin) => fetch(origin + "/api/v1/" + path, {
     method: "POST", headers: { "Content-Type": "application/json", Origin: requestOrigin, ...(session ? { cookie: session } : {}) },
     body: JSON.stringify(data),
@@ -185,6 +179,19 @@ test("production Web UI process sends approved OA quote through the mounted API"
 
   const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_TEST_EXECUTABLE, headless: true });
   t.after(() => browser.close());
+  const ownerPage = await browser.newPage();
+  await ownerPage.goto(origin);
+  await ownerPage.getByLabel("Tài khoản", { exact: true }).fill("owner");
+  await ownerPage.getByLabel("Mật khẩu", { exact: true }).fill(password);
+  await ownerPage.getByRole("button", { name: "Đăng nhập" }).click();
+  await ownerPage.getByRole("link", { name: "Cài đặt", exact: true }).click();
+  await ownerPage.getByLabel("Tên tài khoản").fill("fixture-browser-sales");
+  await ownerPage.getByLabel("Tên hiển thị").fill("Sales fixture");
+  await ownerPage.getByLabel("Vai trò").selectOption("sales");
+  await ownerPage.getByLabel("Mật khẩu mới").fill(password);
+  await ownerPage.getByRole("button", { name: "Tạo tài khoản" }).click();
+  await ownerPage.getByText("Đã tạo tài khoản vận hành.").waitFor();
+  assert.equal((await read("session", await login("fixture-browser-sales"))).status, 200);
   const page = await browser.newPage();
   await page.goto(origin);
   await page.getByLabel("Tài khoản", { exact: true }).fill("sales");

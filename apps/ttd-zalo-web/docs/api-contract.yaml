@@ -61,6 +61,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '429':
+          description: Đã vượt giới hạn đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
       requestBody:
         required: true
         content:
@@ -502,6 +508,74 @@ paths:
                 $ref: '#/components/schemas/Error'
         '403':
           description: Vai trò không được phép xem
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /operators:
+    post:
+      operationId: createOperator
+      description: Chủ dự án tạo tài khoản Bán hàng hoặc CSKH. Vai trò người tạo lấy từ phiên, kiểm tra Origin cho
+        thao tác ghi.
+      x-roles:
+      - owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - account
+              - label
+              - role
+              - passphrase
+              additionalProperties: false
+              properties:
+                account:
+                  type: string
+                  maxLength: 120
+                label:
+                  type: string
+                  minLength: 1
+                  maxLength: 120
+                role:
+                  type: string
+                  enum:
+                  - sales
+                  - support
+                passphrase:
+                  type: string
+                  format: password
+                  minLength: 16
+                  maxLength: 256
+      responses:
+        '201':
+          description: Đã tạo tài khoản
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operator'
+        '400':
+          description: Dữ liệu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Phiên chưa xác thực
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Vai trò hoặc nguồn yêu cầu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Tài khoản trùng hoặc quyền đã bị thu hồi
           content:
             application/json:
               schema:
@@ -1031,6 +1105,7 @@ x-operator-permissions:
     - postRoomMessage
     - stopNick
     - requestDeletion
+    - createOperator
   support:
     shared: read
     agentRouter: deny

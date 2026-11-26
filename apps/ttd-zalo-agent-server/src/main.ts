@@ -1,3 +1,5 @@
+import { createOperator } from "./web/accounts.js";
+import { serveWebAssets } from "./web/static.js";
 import { Pool } from "pg";
 import { Envelope } from "./channels/oa/crypto.js";
 import { OaAdapter, OaRuntimeChannel } from "./channels/oa/adapter.js";
@@ -52,6 +54,14 @@ const commands: Record<string, () => unknown> = {
     } catch { outcome = { status: "FAIL", step: "configuration_or_transport" }; }
     console.log(JSON.stringify(outcome));
     if (outcome.status !== "PASS") process.exitCode = 1;
+  },
+  "web-bootstrap-owner": async () => {
+    const result = await createOperator(store, null, {
+      account: process.argv[3], label: process.argv[4], role: "owner",
+      passphrase: readFileSync(0, "utf8").replace(/\r?\n$/, ""),
+    });
+    if (result.status !== 201) { console.error(result.message); process.exitCode = 1; }
+    else console.log("Đã tạo tài khoản Chủ dự án.");
   },
   "oa-install": async () => {
     if (!liveOa) throw Error("OA_LIVE_REQUIRED");
@@ -155,8 +165,9 @@ if (command !== "serve") {
   const handle = async (req: import("node:http").IncomingMessage, res: import("node:http").ServerResponse) => {
     if (oa?.webhook && req.url === "/webhooks/zalo-oa") return oa.webhook(req, res);
     if (web && await web(req, res)) return;
+    if (web && process.env.WEB_DIST && await serveWebAssets(req, res, process.env.WEB_DIST)) return;
     if (hooks && await hooks(req, res)) return;
-    if (req.url !== "/health" || req.method !== "GET") {
+    if (req.url !== "/health" || (req.method !== "GET" && req.method !== "HEAD")) {
       void operatorHandler(req, res).catch(() => { if (!res.headersSent) res.writeHead(500); res.end(); });
       return;
     }

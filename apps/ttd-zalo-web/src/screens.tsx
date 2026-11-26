@@ -12,6 +12,7 @@ import {
   api,
   ApiError,
   can,
+  demoMode,
   type Action,
   type Channel,
   type Conversation,
@@ -502,7 +503,9 @@ export function Quotes({ data, user, run, busy, refresh }: Props) {
           quotes: [quote, ...current.quotes],
         });
       },
-      send ? "Đã xử lý báo giá qua OA. Xem trạng thái ở danh sách báo giá." : "Đã lưu báo giá.",
+      send
+        ? "Đã xử lý báo giá qua OA. Xem trạng thái ở danh sách báo giá."
+        : "Đã lưu báo giá.",
     );
   }
   return (
@@ -851,21 +854,79 @@ function useRestrictedData<T>(load: () => Promise<T>, refresh: number) {
   return result;
 }
 
-export function Settings({ refresh }: Props) {
+export function Settings({ refresh, user, busy, run }: Props) {
   const { data, error } = useRestrictedData<SettingsData>(
     api.settings,
     refresh,
   );
   return (
-    <Card title="Chính sách vận hành">
-      {error ? (
-        <p role="alert">{error}</p>
-      ) : data ? (
-        <p>Quảng cáo đang tắt trong pilot.</p>
-      ) : (
-        <p role="status">Đang tải cài đặt…</p>
+    <div className="dashboard-grid">
+      <Card title="Chính sách vận hành">
+        {error ? (
+          <p role="alert">{error}</p>
+        ) : data ? (
+          <p>Quảng cáo đang tắt trong pilot.</p>
+        ) : (
+          <p role="status">Đang tải cài đặt…</p>
+        )}
+      </Card>
+      {data && user.role === "owner" && !demoMode && (
+        <Card title="Tạo tài khoản vận hành">
+          <form
+            className="form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              const form = event.currentTarget;
+              const values = new FormData(form);
+              const role = values.get("role") === "sales" ? "sales" : "support";
+              void run(async () => {
+                await api.createOperator({
+                  account: String(values.get("account")).trim(),
+                  label: String(values.get("label")).trim(),
+                  passphrase: String(values.get("passphrase")),
+                  role,
+                });
+                form.reset();
+                return (current) => current;
+              }, "Đã tạo tài khoản vận hành.");
+            }}
+          >
+            <label>
+              Tên tài khoản
+              <input
+                name="account"
+                required
+                maxLength={120}
+                autoComplete="off"
+              />
+            </label>
+            <label>
+              Tên hiển thị
+              <input name="label" required maxLength={120} />
+            </label>
+            <label>
+              Vai trò
+              <select name="role">
+                <option value="sales">Bán hàng</option>
+                <option value="support">CSKH</option>
+              </select>
+            </label>
+            <label>
+              Mật khẩu mới
+              <input
+                name="passphrase"
+                type="password"
+                required
+                minLength={16}
+                maxLength={256}
+                autoComplete="new-password"
+              />
+            </label>
+            <button disabled={busy}>Tạo tài khoản</button>
+          </form>
+        </Card>
       )}
-    </Card>
+    </div>
   );
 }
 
@@ -901,14 +962,18 @@ export function Agents({ data, refresh }: Props) {
               <dd>{router.model}</dd>
               <dt>Chi phí hôm nay</dt>
               <dd>
-                {router.usedVnd === null || router.budgetVnd === null ? "Chưa cấu hình tỷ giá" : money(router.usedVnd) + " / " + money(router.budgetVnd)}
+                {router.usedVnd === null || router.budgetVnd === null
+                  ? "Chưa cấu hình tỷ giá"
+                  : money(router.usedVnd) + " / " + money(router.budgetVnd)}
               </dd>
             </dl>
-            {router.usedVnd !== null && router.budgetVnd !== null && <progress
-              aria-label="Mức sử dụng ngân sách"
-              max={router.budgetVnd || 1}
-              value={router.usedVnd}
-            />}
+            {router.usedVnd !== null && router.budgetVnd !== null && (
+              <progress
+                aria-label="Mức sử dụng ngân sách"
+                max={router.budgetVnd || 1}
+                value={router.usedVnd}
+              />
+            )}
           </>
         ) : (
           <p role="status">Đang tải AI Router…</p>

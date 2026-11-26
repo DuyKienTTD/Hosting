@@ -18,7 +18,7 @@ sensitivity: public
 | Agent & AI Router | Xem | Chặn | Chặn | Xem |
 | Kênh Zalo | Xem, bật kill switch | Xem | Xem | Xem |
 | Dữ liệu & quyền riêng tư | Xem, yêu cầu xóa | Xem | Xem | Xem |
-| Cài đặt | Xem | Chặn | Chặn | Xem |
+| Cài đặt | Xem, tạo tài khoản Bán hàng và CSKH | Chặn | Chặn | Xem |
 
 Phiên không có quyền nhận 403 khi gọi API tương ứng. AI Router và Cài đặt tải từ endpoint riêng. Workspace dùng chung không trả provider, model hoặc ngân sách AI Router. Các quyền trên áp dụng cho vai trò người vận hành trong web app.
 
