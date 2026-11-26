@@ -19,8 +19,8 @@ export function readOaConsent(env: NodeJS.ProcessEnv, retentionDays: number) {
   const version = env.OA_CONSENT_POLICY_VERSION;
   if (!url && !version && enabled === "0") return;
   if (!url || url.length > 300 || !version || !/^[\w.-]{1,64}$/.test(version)) throw Error("OA_CONSENT_POLICY_REQUIRED");
-  const policy = new URL(url);
-  if (policy.protocol !== "https:" || policy.username || policy.password) throw Error("INVALID_OA_CONSENT_POLICY_URL");
+  const policy = URL.parse(url);
+  if (!policy || policy.protocol !== "https:" || policy.username || policy.password) throw Error("INVALID_OA_CONSENT_POLICY_URL");
   const text = `Thuận Thành Đạt xin phép lưu nội dung trao đổi và mã tài khoản OA để hỗ trợ yêu cầu của bạn, dùng AI soạn nháp cho nhân viên xem xét và gửi phản hồi tư vấn qua Zalo. Tin nhắn được lưu tối đa ${retentionDays} ngày. Đồng ý có hiệu lực ${retentionDays} ngày và không bao gồm quảng cáo.
 
 Bạn có thể từ chối hoặc rút lại bất cứ lúc nào. Chính sách và thông tin thực hiện quyền của bạn: ${policy.href}

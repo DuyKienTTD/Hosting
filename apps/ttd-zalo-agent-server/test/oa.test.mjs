@@ -549,6 +549,8 @@ const consentConfig = { OA_CONSENT_PROMPT_ENABLED: "1", OA_CONSENT_POLICY_URL: "
 
 test("OA consent policy defaults off and requires an HTTPS policy and a version when enabled", () => {
   assert.equal(readOaConsent({}, 30), undefined);
+  assert.equal(readOaConsent({ OA_CONSENT_POLICY_URL: "", OA_CONSENT_POLICY_VERSION: "" }, 30), undefined);
+  assert.throws(() => readOaConsent({ ...consentConfig, OA_CONSENT_POLICY_URL: "fixture-garbage" }, 30), /INVALID_OA_CONSENT_POLICY_URL/);
   assert.equal(readOaConsent({ ...consentConfig, OA_CONSENT_PROMPT_ENABLED: "0" }, 30).enabled, false);
   assert.throws(() => readOaConsent({ OA_CONSENT_PROMPT_ENABLED: "1" }, 30), /OA_CONSENT_POLICY_REQUIRED/);
   assert.throws(() => readOaConsent({ ...consentConfig, OA_CONSENT_POLICY_URL: "http://example.invalid" }, 30), /INVALID_OA_CONSENT_POLICY_URL/);
