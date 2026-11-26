@@ -76,3 +76,26 @@ describe("Kiểm soát thao tác", () => {
     expect(screen.queryByRole("button", { name: "Yêu cầu xóa" })).toBeNull();
   });
 });
+
+it.each([
+  ["oa_window_expired", "Ngoài cửa sổ 7 ngày"],
+  ["quota_exhausted", "Hết quota tháng"],
+] as const)("khóa gửi OA và hiển thị %s", (code, label) => {
+  const fixture = props("sales");
+  fixture.data.customers[0].oaQuoteBlock = code;
+  render(<Quotes {...fixture} />);
+  fireEvent.change(screen.getByRole("combobox", { name: /Khách hàng/ }), {
+    target: { value: "KH-001" },
+  });
+  fireEvent.click(screen.getByRole("checkbox"));
+  expect(
+    screen.getByRole<HTMLButtonElement>("button", { name: "Lưu báo giá" })
+      .disabled,
+  ).toBe(false);
+  expect(
+    screen.getByRole<HTMLButtonElement>("button", {
+      name: "Duyệt & gửi qua OA",
+    }).disabled,
+  ).toBe(true);
+  expect(screen.getByText(label)).toBeTruthy();
+});

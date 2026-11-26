@@ -1,3 +1,4 @@
+import { oaQuoteBlockLabels, type OaQuoteBlock } from "./oa-quote-policy";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import {
   ArrowRight,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 import {
   api,
+  ApiError,
   can,
   type Action,
   type Channel,
@@ -419,7 +421,7 @@ function fields(event: FormEvent<HTMLFormElement>) {
   return new FormData(event.currentTarget);
 }
 
-export function Quotes({ data, user, run, busy }: Props) {
+export function Quotes({ data, user, run, busy, refresh }: Props) {
   const [productId, setProductId] = useState(data.products[0]?.id ?? "");
   const [unit, setUnit] = useState<Unit>("bar");
   const [quantity, setQuantity] = useState("2");
@@ -443,14 +445,17 @@ export function Quotes({ data, user, run, busy }: Props) {
     !priceList && "Giá chưa có trong bảng giá đã duyệt.",
     !confirmed && "Tích xác nhận báo giá.",
   ].filter(Boolean);
-  const sendBlocked =
-    !!customer &&
-    (customer.optOut !== "none" ||
-      customer.consent.quote !== "granted" ||
-      !data.conversations.some(
-        (item) => item.customerId === customerId && item.channel === "oa",
-      ) ||
-      data.channels.find((item) => item.id === "oa")?.state !== "online");
+  const [sendDenial, setSendDenial] = useState<{
+    customerId: string;
+    refresh: number;
+    code: OaQuoteBlock;
+  }>();
+  const block =
+    sendDenial?.customerId === customerId && sendDenial.refresh === refresh
+      ? sendDenial.code
+      : customer?.oaQuoteBlock;
+  const sendBlocked = !!customer && block !== null;
+  const blockLabel = oaQuoteBlockLabels[block ?? "oa_interaction_missing"];
 
   function submit(send: boolean) {
     if (
@@ -471,10 +476,29 @@ export function Quotes({ data, user, run, busy }: Props) {
           quantity: Number(quantity),
           priceList,
           confirmed: true,
+        }).catch((error) => {
+          if (
+            send &&
+            error instanceof ApiError &&
+            error.code &&
+            Object.hasOwn(oaQuoteBlockLabels, error.code)
+          ) {
+            setSendDenial({
+              customerId,
+              refresh,
+              code: error.code as OaQuoteBlock,
+            });
+          }
+          throw error;
         });
         setConfirmation("");
+        // A failed refresh must not turn a successful queue admission into a send error.
+        const latest = send
+          ? await api.workspace().catch(() => undefined)
+          : undefined;
         return (current) => ({
           ...current,
+          customers: latest?.customers ?? current.customers,
           quotes: [quote, ...current.quotes],
         });
       },
@@ -596,8 +620,7 @@ export function Quotes({ data, user, run, busy }: Props) {
             )}
             {sendBlocked && (
               <p id="oa-lock" className="muted">
-                Chưa đủ điều kiện gửi qua OA. Kiểm tra consent báo giá, yêu cầu
-                dừng liên hệ và trạng thái kênh.
+                {blockLabel}
               </p>
             )}
             <div className="pair">

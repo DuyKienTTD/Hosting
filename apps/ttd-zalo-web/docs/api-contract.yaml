@@ -407,7 +407,9 @@ paths:
       description: Kiểm tra toàn bộ điều kiện tạo báo giá. Trong cùng giao dịch ghi nhận phê duyệt, lưu báo giá
         và xếp hàng OA theo định danh khách đã xác minh. Kiểm tra consent báo giá, opt-out, cửa sổ OA và Guard.
         Worker kiểm tra lại ngay trước khi gửi, giữ ADS_ENABLED=false và không gửi lại unknown_delivery. Trả delivery=queued
-        sau khi ghi bền.
+        sau khi ghi bền. Dùng lần tương tác cuối từ dữ liệu server và đồng hồ server. Dưới 48h không dùng quota,
+        từ 48h đến dưới 7 ngày phải giữ chỗ quota tháng theo giờ Việt Nam trong giao dịch, từ đúng 7 ngày trả 409
+        oa_window_expired. Hết quota trả 409 quota_exhausted. Thời điểm thiếu hoặc không hợp lệ trả 409 oa_interaction_missing.
       responses:
         '201':
           description: Đã lưu và đưa vào hàng đợi OA
@@ -438,7 +440,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/OaQuoteConflict'
       x-roles:
       - owner
       - sales
@@ -513,6 +515,8 @@ components:
       - message
       properties:
         message:
+          type: string
+        code:
           type: string
       additionalProperties: false
     Operator:
@@ -596,6 +600,7 @@ components:
       - followUp
       - optOut
       - consent
+      - oaQuoteBlock
       properties:
         id:
           type: string
@@ -625,6 +630,16 @@ components:
             marketing:
               $ref: '#/components/schemas/Consent'
           additionalProperties: false
+        oaQuoteBlock:
+          type: string
+          nullable: true
+          enum:
+          - oa_policy_denied
+          - oa_interaction_missing
+          - oa_window_expired
+          - quota_exhausted
+          - null
+          description: Kết quả đánh giá từ server khi đọc workspace. null là đủ điều kiện tại thời điểm đọc.
       additionalProperties: false
     Consent:
       type: string
@@ -970,6 +985,22 @@ components:
           enum:
           - false
       additionalProperties: false
+    OaQuoteConflict:
+      type: object
+      required:
+      - message
+      additionalProperties: false
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          enum:
+          - oa_policy_denied
+          - oa_interaction_missing
+          - oa_window_expired
+          - quota_exhausted
+          description: Bắt buộc khi Guard OA từ chối.
 x-operator-permissions:
   sharedScreens:
   - overview

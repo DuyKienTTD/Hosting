@@ -1,3 +1,5 @@
+import type { OaQuoteBlock } from "./oa-quote-policy";
+
 export type Role = "owner" | "support" | "sales" | "a0";
 export type Operator = { id: string; label: string; role: Role };
 export type Purpose = "support" | "quote" | "marketing";
@@ -29,6 +31,7 @@ export type Customer = {
   segment: string;
   followUp: string;
   optOut: OptOut;
+  oaQuoteBlock: OaQuoteBlock | null;
   consent: Record<Purpose, Consent>;
 };
 export type Product = {
@@ -120,6 +123,7 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    public code?: string,
   ) {
     super(message);
   }
@@ -141,6 +145,7 @@ async function request<T>(
     throw new ApiError(
       response.status,
       error?.message ?? "Không thể kết nối dịch vụ.",
+      error?.code,
     );
   }
   return response.status === 204 ? (undefined as T) : response.json();

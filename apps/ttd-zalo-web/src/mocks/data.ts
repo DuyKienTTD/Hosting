@@ -8,6 +8,7 @@ export const initialWorkspace: Workspace = {
       label: "Khách A",
       segment: "Nhà thầu",
       followUp: "Xác nhận chiều dài nẹp cho công trình mẫu",
+      oaQuoteBlock: null,
       optOut: "none",
       consent: { support: "granted", quote: "granted", marketing: "unknown" },
     },
@@ -16,6 +17,7 @@ export const initialWorkspace: Workspace = {
       label: "Khách B",
       segment: "Đại lý",
       followUp: "Chờ xác minh yêu cầu ngừng nhận tin",
+      oaQuoteBlock: null,
       optOut: "review",
       consent: { support: "granted", quote: "unknown", marketing: "unknown" },
     },
@@ -24,6 +26,7 @@ export const initialWorkspace: Workspace = {
       label: "Khách C",
       segment: "Chủ nhà",
       followUp: "Dừng liên hệ",
+      oaQuoteBlock: null,
       optOut: "stop",
       consent: {
         support: "withdrawn",

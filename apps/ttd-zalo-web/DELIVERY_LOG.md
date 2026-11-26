@@ -20,3 +20,9 @@ sensitivity: public
 - Sửa hai điểm nghiệm thu tại `ddccb10`. Báo giá theo bảng giá đã duyệt có thể lưu hoặc duyệt và xếp hàng OA sau khi đủ dữ liệu và xác nhận. API giả lập kiểm tra lại vai trò, phiên bản giá và điều kiện gửi.
 - Chặn truy cập trực tiếp Agent & AI Router và Cài đặt cho CSKH/Bán hàng. Tách API bảo vệ bằng 403 khỏi dữ liệu workspace và áp dụng quyền chỉ xem cho A0. Xem [ma trận quyền](docs/operator-permissions.md) và [OpenAPI](docs/api-contract.yaml).
 - Thêm Playwright cho từng vai trò trên tất cả các màn hình, các điều kiện khóa của cả hai nút báo giá, 403 và xếp hàng OA giả lập. CI trên PR #79 là bằng chứng kiểm tra theo commit.
+
+## Z4-S4-FIX2 · 2026-11-26
+
+- Kiểm tra thời điểm tương tác OA bằng dữ liệu và đồng hồ của handler. Cửa sổ dưới 48 giờ miễn quota. Từ 48 giờ đến dưới 7 ngày tính vào quota tháng. Từ đúng 7 ngày bị chặn.
+- UI đọc lý do từ workspace và cập nhật khi POST trả 409. MSW giữ chỗ quota lúc xếp hàng. Interface `OaQuoteGuard` là điểm nối với Guard của PR #78, nơi backend thực thi quota bền và kiểm tra lại sát lúc gửi.
+- Hồi quy qua HTTP giả lập cho owner và sales, các mốc giờ/ngày, hết quota, opt-out và vai trò. Component test kiểm tra hai thông báo khóa và giữ quyền lưu báo giá.
