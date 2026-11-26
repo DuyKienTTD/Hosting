@@ -1,0 +1,23 @@
+{
+  "version": "fixture-v2",
+  "ready": "[data-ready]",
+  "chatRow": "[data-chat-row]",
+  "active": "[data-active-chat]",
+  "peerAttribute": "data-peer",
+  "kindAttribute": "data-kind",
+  "directKind": "direct",
+  "messageIdAttribute": "data-message-id",
+  "friendStatus": ":scope > header > [data-friend-status]",
+  "friendStatusAttribute": "data-friend-status",
+  "inbound": "[data-inbound][data-message-id]",
+  "outbound": "[data-outbound][data-message-id]",
+  "body": "[data-body]",
+  "input": "[data-compose]",
+  "send": "[data-send]",
+  "stop": {
+    "verification": "[data-verification]",
+    "warning": "[data-warning]",
+    "restricted": "[data-restricted]",
+    "logged_out": "[data-logged-out]"
+  }
+}

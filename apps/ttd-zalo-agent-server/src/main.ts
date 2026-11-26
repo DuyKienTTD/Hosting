@@ -1,3 +1,4 @@
+import { attachNickAudit } from "./adapters/nick-audit.js";
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
 import { PostgresRuntimeDatabase } from "./data/runtime-database.js";
@@ -141,8 +142,11 @@ if (command !== "serve") {
       ready: okay, channel: mode, smokeOnly, stopped: store.stopped("global"),
     }));
   };
+  const closeNickAudit = process.env.NICK_WORKER_AUTH && !smokeOnly
+    ? attachNickAudit(server, store.db, process.env.NICK_WORKER_AUTH) : undefined;
   server.listen(8080, process.env.HTTP_BIND === "container" ? "0.0.0.0" : "127.0.0.1");
   process.once("SIGTERM", () => {
+    closeNickAudit?.();
     clearInterval(interval);
     clearInterval(pruneSmoke);
     server.close(() => { store.db.close(); process.exit(0); });
