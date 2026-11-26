@@ -9,6 +9,15 @@ import { Envelope } from "./crypto.js";
 
 export const consultationWindow = 7 * 86_400_000;
 export const freeWindow = 2 * 86_400_000;
+export function oaWebhookMaxSkewMs(value?: string) {
+  const seconds = value === undefined ? 300 : Number(value);
+  const milliseconds = seconds * 1000;
+  if (!Number.isSafeInteger(seconds) || seconds <= 0 || !Number.isSafeInteger(milliseconds)) {
+    throw Error("INVALID_OA_WEBHOOK_MAX_SKEW_SECONDS");
+  }
+  return milliseconds;
+}
+
 const queueLifetime = 86_400_000;
 
 export type OaAccount = { appId: string; oaId: string; webhookSecret: string };
@@ -26,15 +35,16 @@ type OaEvent = { key: string; uid: string; at: number; kind: "message" | "follow
 // https://docs.zaloplatforms.com/docs/OA/webhook/tin-nhan/su-kien-nguoi-dung-gui-tin-nhan
 // https://docs.zaloplatforms.com/docs/OA/webhook/quan-ly/su-kien-nguoi-dung-quan-tam-hay-bo-quan-tam-oa
 // https://docs.zaloplatforms.com/docs/OA/webhook/quan-ly/su-kien-nguoi-dung-zalo-thuc-hien-quyen-chu-the-du-lieu
-function verify(raw: Buffer, signature: string, account: OaAccount, now: number): OaEvent | number {
+function verify(raw: Buffer, signature: string, account: OaAccount, now: number, maxSkewMs: number): OaEvent | number {
   let data;
   try { data = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(raw)); }
   catch { return 400; }
   const timestamp = String(data?.timestamp ?? "");
   const at = Number(timestamp);
-  if (!/^\d{1,16}$/.test(timestamp) || !Number.isSafeInteger(at) || at <= 0 || at > now + 60_000) return 400;
+  if (!/^\d{1,16}$/.test(timestamp) || !Number.isSafeInteger(at) || at <= 0) return 400;
   const mac = createHash("sha256").update(account.appId).update(raw).update(timestamp).update(account.webhookSecret).digest();
   if (!/^mac=[0-9a-f]{64}$/i.test(signature) || !timingSafeEqual(mac, Buffer.from(signature.slice(4), "hex"))) return 401;
+  if (Math.abs(now - at) > maxSkewMs) return 401;
   const name = data.event_name;
   const incoming = typeof name === "string" && name.startsWith("user_send_");
   const oa = incoming ? data.recipient?.id : data.oa_id ?? data.recipient?.id;
@@ -55,13 +65,14 @@ function verify(raw: Buffer, signature: string, account: OaAccount, now: number)
 export class OaInbox {
   readonly scope: string;
   constructor(private readonly pool: Pool, private readonly identity: Pick<Store, "hash">, private readonly box: Envelope,
-    private readonly account: OaAccount, private readonly clock = Date.now) {
+    private readonly account: OaAccount, private readonly clock = Date.now,
+    private readonly maxSkewMs = oaWebhookMaxSkewMs()) {
     if (!id(account.appId) || !id(account.oaId) || !account.webhookSecret) throw Error("OA_INVALID_ACCOUNT");
     this.scope = accountScope(account);
   }
 
   async accept(raw: Buffer, signature: string, signal: AbortSignal) {
-    const event = verify(raw, signature, this.account, this.clock());
+    const event = verify(raw, signature, this.account, this.clock(), this.maxSkewMs);
     if (typeof event === "number") return event;
     const contact = oaTarget(this.account, event.uid);
     const target = this.identity.hash(contact);
@@ -71,12 +82,20 @@ export class OaInbox {
       const message: Event = { id: event.key, contact, thread: contact, at: event.at, channel: "oa", kind: "dm", text: event.text };
       sealed = this.box.seal(JSON.stringify(message), inboxContext(this.scope, event.key));
     }
-    try {
-      signal.throwIfAborted();
-      await this.pool.query("SELECT oa_accept_event($1,$2,$3,$4,$5,$6,$7)",
-        [this.scope, event.key, target, event.at, event.kind, new Date(expiry), sealed]);
-      return 200;
-    } catch { return 503; }
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (signal.aborted) return 503;
+      try {
+        await this.pool.query("SELECT oa_accept_event($1,$2,$3,$4,$5,$6,$7)",
+          [this.scope, event.key, target, event.at, event.kind, new Date(expiry), sealed]);
+        return 200;
+      } catch (error) {
+        const code = (error as { code?: string })?.code;
+        // Only retry failures Postgres confirms rolled back. The HTTP deadline
+        // still governs both attempts. Zalo can replay the idempotent event.
+        if (attempt !== 0 || (code !== "40001" && code !== "40P01")) return 503;
+      }
+    }
+    return 503;
   }
 }
 

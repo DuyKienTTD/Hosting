@@ -46,7 +46,7 @@ export class Runtime {
     } catch (error) {
       if (error instanceof Error && ["PROVIDER_MODEL", "PROVIDER_USAGE"].includes(error.message)) this.budget.hold();
       this.store.notice("ai-unavailable", this.clock(), "Một yêu cầu AI chưa đối soát được.");
-      return "none";
+      return this.config.budget.manualReviewOnBudget ? undefined : "none";
     }
   }
 
@@ -147,6 +147,11 @@ export class Runtime {
       } else routed = stored;
     }
     const holdReply = () => {
+      if (inbound && this.config.budget.manualReviewOnBudget) {
+        this.store.db.prepare("UPDATE jobs SET status='review',body='ai_admission_hold' WHERE id=? AND status='queued'").run(id);
+        this.store.notice("ai-review:" + id, this.clock(), "Tin nhắn đang chờ người duyệt do giới hạn hoặc lỗi AI.");
+        return true;
+      }
       // Leave the ledger and transport key intact. Only invalidate the AI decision.
       if (inbound && routed) {
         store.db.prepare("UPDATE jobs SET body=? WHERE id=?").run("retry:" + randomUUID(), id);
@@ -168,7 +173,7 @@ export class Runtime {
         if (!hasNegatedStop(event.text)) options.push("opt-out");
       }
       routed = await this.decide(attempt + "-route", "router", { event: event.kind, question }, options, inbound);
-      if (!routed) return false;
+      if (!routed) return this.config.budget.manualReviewOnBudget ? holdReply() : false;
       if (inbound && (routed === "opt-out" || routed === "review-opt-out")) {
         const disabled = store.atomic(() => {
           if (this.clock() - event.at > this.config.scheduling.maxInboundAgeMs || !permitted.some(valid) ||
@@ -214,7 +219,7 @@ export class Runtime {
     const draft = routed === "support" ? validatedDraft(new GroundedDraft(), { question, sku, date, sources }) : undefined;
     const decision = await this.decide(attempt + "-" + routed, routed,
       { event: event.kind, question, sourceIds: draft?.sourceIds, draftAction: draft?.action }, choices[routed], inbound && routed === "support");
-    if (decision === undefined) return false;
+    if (decision === undefined) return this.config.budget.manualReviewOnBudget ? holdReply() : false;
     if (!valid(routed)) return true;
     if (inbound && this.budget.blocked()) return holdReply();
     if (routed === "support" && decision === "answer" && draft && ["trả lời", "hỏi lại"].includes(draft.action)) {
@@ -321,7 +326,7 @@ export class Runtime {
         if (!this.pending.has(id)) continue;
         if (await this.run(id, payload)) {
           this.pending.delete(id);
-          this.store.db.prepare("UPDATE jobs SET status='processed',body=NULL WHERE id=?").run(id);
+          this.store.db.prepare("UPDATE jobs SET status='processed',body=NULL WHERE id=? AND status='queued'").run(id);
         } else if (this.pending.delete(id)) {
           this.pending.set(id, payload);
         }

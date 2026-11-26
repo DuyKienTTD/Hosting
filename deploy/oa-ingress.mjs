@@ -5,7 +5,7 @@ import { createServer } from "node:http";
 import pg from "pg";
 import { Envelope } from "./dist/ttd-zalo-agent-server/src/channels/oa/crypto.js";
 import { OaTokens } from "./dist/ttd-zalo-agent-server/src/channels/oa/tokens.js";
-import { accountScope, OaInbox, oaWebhook } from "./dist/ttd-zalo-agent-server/src/channels/oa/webhook.js";
+import { accountScope, OaInbox, oaWebhook, oaWebhookMaxSkewMs } from "./dist/ttd-zalo-agent-server/src/channels/oa/webhook.js";
 
 const account = { appId: process.env.ZALO_APP_ID, oaId: process.env.ZALO_OA_ID,
   webhookSecret: process.env.ZALO_WEBHOOK_SECRET };
@@ -16,7 +16,8 @@ const pool = new pg.Pool({ user: "data_runtime", password: process.env.DATA_RUNT
   max: 4, connectionTimeoutMillis: 500, statement_timeout: 1100, query_timeout: 1200 });
 pool.on("error", () => console.error("OA database connection lost"));
 const identity = { hash: value => createHmac("sha256", process.env.IDENTITY_KEY).update(value).digest("hex") };
-const handler = oaWebhook(new OaInbox(pool, identity, box, account));
+const maxSkewMs = oaWebhookMaxSkewMs(process.env.OA_WEBHOOK_MAX_SKEW_SECONDS);
+const handler = oaWebhook(new OaInbox(pool, identity, box, account, Date.now, maxSkewMs));
 
 if (process.argv[2] === "install-tokens") {
   try {

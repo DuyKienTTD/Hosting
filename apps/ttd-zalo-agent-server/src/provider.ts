@@ -23,10 +23,10 @@ function messageParams(task: Task, cfg: Config["budget"]) {
   if (Buffer.byteLength(text) > cfg.maxPayloadBytes) throw Error("PROVIDER_PAYLOAD");
   return {
     model: task.model, max_tokens: cfg.maxOutputTokens,
-    ...(task.model === strong ? { thinking: { type: "between_tools" } } : {}),
-    system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
+    ...(task.model === strong && cfg.provider === "anthropic" ? { thinking: { type: "between_tools" } } : {}),
+    system: [{ type: "text", text: system, ...(cfg.provider === "anthropic" ? { cache_control: { type: "ephemeral" } } : {}) }],
     messages: [{ role: "user", content: text }],
-    tools: [{ name: "propose", description: "Đề xuất một lựa chọn. Không có quyền thực thi.", strict: true,
+    tools: [{ name: "propose", description: "Đề xuất một lựa chọn. Không có quyền thực thi.", ...(cfg.provider === "anthropic" ? { strict: true } : {}),
       input_schema: { type: "object", required: ["choice"], additionalProperties: false,
         properties: { choice: { type: "string", enum: task.choices } } } }],
     tool_choice: { type: "auto", disable_parallel_tool_use: true },
@@ -47,7 +47,7 @@ export class ClaudeProvider implements Provider {
     this.base = url.href.replace(/\/$/u, "");
   }
   private params(task: Task) {
-    if (!Object.hasOwn(this.cfg.models, task.model)) throw Error("PROVIDER_MODEL");
+    if (!Object.hasOwn(this.cfg.models, task.model) || (this.cfg.allowedModels && !this.cfg.allowedModels.includes(task.model))) throw Error("PROVIDER_MODEL");
     return messageParams(task, this.cfg);
   }
   private async request(path: string, body?: object) {
@@ -77,6 +77,7 @@ export class ClaudeProvider implements Provider {
     return this.parse(await (await this.request("", this.params(task))).json(), task.choices, task.model);
   }
   async submit(id: string, task: Task) {
+    if (this.cfg.provider === "anthropic-compatible") throw Error("PROVIDER_BATCH_UNSUPPORTED");
     const data = await (await this.request("/batches", { requests: [{ custom_id: id, params: this.params(task) }] })).json();
     if (typeof data.id !== "string" || !/^msgbatch_[A-Za-z0-9]+$/.test(data.id)) throw Error("BATCH_SCHEMA");
     return data.id as string;

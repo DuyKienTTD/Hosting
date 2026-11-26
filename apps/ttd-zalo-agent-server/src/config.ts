@@ -19,6 +19,8 @@ export const defaults = {
     // channel write is held. Customer replies stay queued for a fresh AI decision.
     holdNotice: "Ngân sách AI đang bị chặn. Lượt gửi tạm dừng và tin khách chưa trả lời vẫn ở hàng chờ.",
     provider: "anthropic" as ProviderMode, compatibleDailyUsd: 0, compatibleRateMultiplier: 1,
+    allowedModels: undefined as readonly string[] | undefined, dailyTokens: 0, monthlyTokens: 0,
+    manualReviewOnBudget: false,
     inputOverheadTokens: 2048, maxEstimatedInputTokens: 100_000,
     batchMultiplier: 0.5, maxOutputTokens: 256, maxPayloadBytes: 16_384,
     source: "https://platform.claude.com/docs/en/about-claude/pricing", checked: "2026-11-26",

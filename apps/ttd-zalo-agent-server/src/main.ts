@@ -10,12 +10,13 @@ import { readFileSync } from "node:fs";
 import { PostgresRuntimeDatabase } from "./data/runtime-database.js";
 import { defaults } from "./config.js";
 import { MockChannel } from "./channel.js";
-import { ClaudeProvider, FakeProvider, isAgent } from "./provider.js";
+import { isAgent } from "./provider.js";
 import { Runtime, type Schedule } from "./runtime.js";
 import { operator } from "./operator.js";
 import { Store } from "./store.js";
 import { readRoutes, setupChannels, webhookHandler } from "./adapters/setup.js";
 import { smoke } from "./adapters/smoke.js";
+import { createLiveOa, liveProvider, readLiveWiring } from "./live-wiring.js";
 
 process.umask(0o077);
 const command = process.argv[2] ?? "serve";
@@ -26,26 +27,15 @@ if (!PGHOST || !PGDATABASE || !DATA_RUNTIME_PASSWORD) throw Error("POSTGRES_CONF
 const key = process.env.IDENTITY_KEY ?? "";
 const config = structuredClone(defaults);
 config.advertising.enabled = process.env.ADS_ENABLED === "true";
-const providerMode = process.env.AI_PROVIDER ?? "anthropic";
-if (providerMode !== "anthropic" && providerMode !== "anthropic-compatible") throw Error("INVALID_AI_PROVIDER");
-config.budget.provider = providerMode;
-if (providerMode === "anthropic-compatible") {
-  config.budget.compatibleDailyUsd = Number(process.env.AI_ROUTER_DAILY_USD);
-  config.budget.compatibleRateMultiplier = Number(process.env.AI_ROUTER_RATE_MULTIPLIER);
-}
 const anchor = Number(process.env.CREDIT_CYCLE_START_DAY ?? config.budget.cycleStartDay);
 if (!Number.isInteger(anchor) || anchor < 1 || anchor > 28 || Buffer.byteLength(key) < 32 ||
   !["mock", "subiz", "oa"].includes(mode)) throw Error("INVALID_CONFIGURATION");
 config.budget.cycleStartDay = anchor;
-for (const agent of Object.keys(config.budget.byAgent) as (keyof typeof config.budget.byAgent)[]) {
-  const model = process.env["MODEL_" + agent.toUpperCase()];
-  if (model === undefined) continue;
-  if (!Object.hasOwn(config.budget.models, model)) throw Error("MODEL_UNPRICED");
-  config.budget.byAgent[agent] = model;
-}
-const database = { host: PGHOST, database: PGDATABASE, user: "data_runtime", password: DATA_RUNTIME_PASSWORD };
-const store = new Store(new PostgresRuntimeDatabase(database), key, Number(process.env.DATA_RETENTION_DAYS ?? "30"));
-if (command === "serve" && (process.env.ADS_ENABLED === "false" || (mode === "oa" && process.env.WEB_ORIGIN))) store.set("ADS_ENABLED", 0);
+const wiring = readLiveWiring(process.env, config, smokeOnly, mode);
+const postgres = { host: PGHOST, database: PGDATABASE, user: "data_runtime", password: DATA_RUNTIME_PASSWORD };
+const store = new Store(new PostgresRuntimeDatabase(postgres), key, Number(process.env.DATA_RETENTION_DAYS ?? "30"));
+const liveOa = wiring.oa && createLiveOa(wiring.oa, store, postgres);
+if (command === "serve" && (process.env.ADS_ENABLED === "false" || ((liveOa || mode === "oa") && process.env.WEB_ORIGIN))) store.set("ADS_ENABLED", 0);
 const input = () => JSON.parse(readFileSync(0, "utf8"));
 const commands: Record<string, () => unknown> = {
   smoke: async () => {
@@ -62,6 +52,14 @@ const commands: Record<string, () => unknown> = {
     } catch { outcome = { status: "FAIL", step: "configuration_or_transport" }; }
     console.log(JSON.stringify(outcome));
     if (outcome.status !== "PASS") process.exitCode = 1;
+  },
+  "oa-install": async () => {
+    if (!liveOa) throw Error("OA_LIVE_REQUIRED");
+    const { access_token, refresh_token, expires_in, issued_at } = input();
+    if (typeof access_token !== "string" || !access_token.trim() || typeof refresh_token !== "string" ||
+      !refresh_token.trim() || !Number.isSafeInteger(issued_at) || issued_at <= 0 || issued_at > Date.now() ||
+      !Number.isSafeInteger(Number(expires_in)) || Number(expires_in) < 1) throw Error("OA_INVALID_TOKEN_PAIR");
+    await liveOa.tokens.install({ access: access_token, refresh: refresh_token, seconds: Number(expires_in) }, issued_at);
   },
   stop: () => {
     const agent = process.argv[3] ?? "global";
@@ -89,48 +87,36 @@ const commands: Record<string, () => unknown> = {
 if (command !== "serve") {
   if (!Object.hasOwn(commands, command)) throw Error("INVALID_COMMAND");
   try { await commands[command](); }
-  finally { store.db.close(); }
+  finally { store.db.close(); await liveOa?.close(); }
 } else {
   const active = mode === "subiz" ? await setupChannels(store, readRoutes(), smokeOnly) : undefined;
   if (active && !smokeOnly && !(await active.subiz.authenticate()).ok) throw Error("SUBIZ_AUTH_FAILED");
   const webOrigin = process.env.WEB_ORIGIN;
-  const oa = mode === "oa" ? (() => {
+  const oa = liveOa ?? (mode === "oa" ? (() => {
     const { OA_APP_ID, OA_ID, OA_APP_SECRET, OA_WEBHOOK_SECRET, OA_ENVELOPE_KEY, OA_FIXTURE_ENDPOINT } = process.env;
     if (!OA_APP_ID || !OA_ID || !OA_APP_SECRET || !OA_WEBHOOK_SECRET || !/^[a-f0-9]{64}$/i.test(OA_ENVELOPE_KEY ?? "")) {
       throw Error("OA_CONFIGURATION_REQUIRED");
     }
-    let endpoint: string | undefined;
+    let endpoint: string;
     if (OA_FIXTURE_ENDPOINT) {
       const url = new URL(OA_FIXTURE_ENDPOINT);
       if (!smokeOnly || url.protocol !== "http:" || url.hostname !== "127.0.0.1" || url.origin !== OA_FIXTURE_ENDPOINT) {
         throw Error("OA_INVALID_FIXTURE_ENDPOINT");
       }
       endpoint = url.origin + "/v3.0/oa/message/cs";
-    } else if (smokeOnly) throw Error("OA_FIXTURE_ENDPOINT_REQUIRED");
+    } else throw Error("OA_FIXTURE_ENDPOINT_REQUIRED");
     const account = { appId: OA_APP_ID, oaId: OA_ID, webhookSecret: OA_WEBHOOK_SECRET };
     const box = new Envelope(Buffer.from(OA_ENVELOPE_KEY!, "hex"));
-    const pool = new Pool(database);
+    const pool = new Pool(postgres);
     const tokens = new OaTokens(pool, box, accountScope(account), account.appId, OA_APP_SECRET,
       endpoint ? OA_FIXTURE_ENDPOINT + "/v4/oa/access_token" : undefined);
     const monthlyQuota = Number(process.env.OA_MONTHLY_QUOTA || "500");
     const channel = new OaRuntimeChannel(new OaAdapter(store, box, tokens, account, OA_APP_SECRET,
-      { endpoint, allowAfter48h: true, monthlyQuota }));
-    return { channel, account, pool, webhook: oaWebhook(new OaInbox(pool, store, box, account)) };
-  })() : undefined;
+      { endpoint, allowAfter48h: true, monthlyQuota, allowedUids: wiring.smokeAllowlist }));
+    return { channel, account, close: () => pool.end(), webhook: oaWebhook(new OaInbox(pool, store, box, account)) };
+  })() : undefined);
   const channel = oa?.channel ?? active?.channel ?? new MockChannel();
-  const compatible = providerMode === "anthropic-compatible";
-  const claudeKey = compatible ? process.env.AI_ROUTER_API_KEY : process.env.ANTHROPIC_API_KEY;
-  const base = compatible ? process.env.AI_ROUTER_BASE_URL : undefined;
-  const enableClaude = process.env.CLAUDE_ENABLED === "1";
-  if (enableClaude && (!claudeKey || process.env.CLAUDE_CREDIT_CONFIRMED !== "1" || smokeOnly)) {
-    throw Error("CLAUDE_CREDIT_CONFIGURATION_REQUIRED");
-  }
-  if (enableClaude && compatible && (!base || process.env.AI_ROUTER_CREDIT_CONFIRMED !== "1" ||
-    !(config.budget.compatibleDailyUsd > 0 && config.budget.compatibleDailyUsd <= 195) ||
-    !(config.budget.compatibleRateMultiplier >= 1 && config.budget.compatibleRateMultiplier <= 100))) {
-    throw Error("AI_ROUTER_BUDGET_CONFIGURATION_REQUIRED");
-  }
-  const provider = enableClaude && claudeKey ? new ClaudeProvider(claudeKey, config.budget, fetch, base) : new FakeProvider();
+  const provider = liveProvider(wiring, config);
   const schedule: Schedule[] = process.env.SCHEDULE_PATH ? JSON.parse(readFileSync(process.env.SCHEDULE_PATH, "utf8")) : [];
   if (!Array.isArray(schedule) || schedule.some(task => !task || !task.key || !task.target ||
     typeof task.key !== "string" || !/^[a-zA-Z0-9_-]{1,80}$/.test(task.key) ||
@@ -148,7 +134,7 @@ if (command !== "serve") {
     runtime.ingest(event);
   });
   let lastTick = Date.now();
-  const interval = smokeOnly ? undefined : setInterval(() => {
+  const interval = smokeOnly && !liveOa ? undefined : setInterval(() => {
     void Promise.resolve().then(() => { active?.journal.prune(); return runtime.tick(); }).then(done => { if (done) lastTick = Date.now(); }, () => {
       store.notice("runtime-error", Date.now(), "Một chu kỳ xử lý không hoàn tất.");
     });
@@ -167,7 +153,7 @@ if (command !== "serve") {
     void handle(req, res).catch(() => { if (!res.headersSent) res.writeHead(503); res.end(); });
   });
   const handle = async (req: import("node:http").IncomingMessage, res: import("node:http").ServerResponse) => {
-    if (oa && req.url === "/webhooks/zalo-oa") { oa.webhook(req, res); return; }
+    if (oa?.webhook && req.url === "/webhooks/zalo-oa") return oa.webhook(req, res);
     if (web && await web(req, res)) return;
     if (hooks && await hooks(req, res)) return;
     if (req.url !== "/health" || req.method !== "GET") {
@@ -176,7 +162,7 @@ if (command !== "serve") {
     }
     const okay = smokeOnly || Date.now() - lastTick < 4 * config.scheduling.pollMs;
     res.writeHead(okay ? 200 : 503, { "content-type": "application/json" }).end(JSON.stringify({
-      ready: okay, channel: mode, smokeOnly, stopped: store.stopped("global"),
+      ready: okay, channel: oa ? "oa" : mode, oaMode: wiring.oaMode, aiMode: wiring.aiMode, smokeOnly, stopped: store.stopped("global"),
     }));
   };
   const closeNickAudit = process.env.NICK_WORKER_AUTH && !smokeOnly
@@ -188,6 +174,6 @@ if (command !== "serve") {
     closeNickAudit?.();
     clearInterval(interval);
     clearInterval(pruneSmoke);
-    server.close(() => { store.db.close(); void (oa?.pool.end() ?? Promise.resolve()).finally(() => process.exit(0)); });
+    server.close(() => { store.db.close(); void Promise.resolve(oa?.close()).finally(() => process.exit(0)); });
   });
 }
