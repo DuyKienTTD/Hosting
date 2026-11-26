@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="vi">
+<meta charset="utf-8">
+<div data-ready>Fixture · hội thoại giả lập</div>
+<nav>
+  <button data-chat-row data-peer="fixture-customer" data-kind="direct">Hội thoại 1</button>
+  <button data-chat-row data-peer="fixture-other" data-kind="direct">Hội thoại 2</button>
+  <button data-chat-row data-peer="fixture-group" data-kind="group">Nhóm fixture</button>
+</nav>
+<main data-active-chat data-peer="fixture-customer" data-kind="direct">
+  <header><span data-peer-name>Khách fixture</span> <span data-friend-status="friend">Bạn bè</span></header>
+  <div data-inbound data-message-id="fixture-in"><span data-body>Mẫu màu đồng?</span></div>
+  <textarea data-compose></textarea>
+  <button data-send>Gửi</button>
+</main>
+<main data-peer="fixture-other" data-kind="direct" hidden>
+  <header><span data-peer-name>Khách fixture</span> <span data-friend-status="friend">Bạn bè</span></header>
+  <div data-inbound data-message-id="fixture-in-other"><span data-body>Mẫu màu nhôm?</span></div>
+  <textarea data-compose></textarea>
+  <button data-send>Gửi</button>
+</main>
+<script>
+  for (const row of document.querySelectorAll('[data-chat-row]')) {
+    row.onclick = () => {
+      for (const chat of document.querySelectorAll('main')) {
+        chat.hidden = chat.dataset.peer !== row.dataset.peer
+        chat.toggleAttribute('data-active-chat', !chat.hidden)
+      }
+    }
+  }
+  window.clicks = 0
+  for (const button of document.querySelectorAll('[data-send]')) button.onclick = () => {
+    const chat = button.closest('main')
+    window.clicks++
+    if (window.hideEcho) return
+    const input = chat.querySelector('[data-compose]')
+    const message = document.createElement('div')
+    message.dataset.outbound = ''
+    message.dataset.messageId = 'fixture-out-' + window.clicks
+    const body = document.createElement('span')
+    body.dataset.body = ''
+    body.textContent = input.value
+    message.append(body)
+    chat.append(message)
+    input.value = ''
+  }
+</script>
+</html>

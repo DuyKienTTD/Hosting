@@ -120,3 +120,7 @@ Guard đọc `settings.ADS_ENABLED`, consent theo mục đích và `ad_status` t
 Đặt `PURGE_RECEIPT_REMOTE` vào bucket hoặc đích rclone riêng, ngoài VPS và ngoài prefix backup DB. Sổ có một object bất biến theo mỗi `purge_id`. Cấp worker quyền thêm và đọc object, khóa ghi đè/xóa bằng chính sách của backend. Worker ghi sổ sau khi biết kết quả commit, đối soát lại ở lần chạy kế tiếp khi lỗi mạng. Tuổi lưu của sổ phải ít nhất bằng thời hạn của backup lâu nhất còn được phép restore.
 
 Chạy `ops/backup-purge-receipts.sh` riêng hằng ngày bằng credential chỉ đọc sổ chính và chỉ thêm vào `PURGE_RECEIPT_BACKUP_REMOTE` trên một đích offsite khác. Bản sao này có chính sách lưu riêng với dump DB. Khi cần khôi phục sổ, trỏ `PURGE_RECEIPT_REMOTE` của tiến trình restore tới bản sao đã xác minh. Nếu cả DB nguồn và sổ đều thiếu bằng chứng, staging giữ dữ liệu cách ly tới khi owner quyết định.
+
+## Audit worker nick Zalo
+
+Với DB hiện hữu, áp migration [008-nick-audit.sql](postgres/008-nick-audit.sql) bằng quy trình migration trước khi bật endpoint. Cấp cùng một `NICK_WORKER_AUTH` ngẫu nhiên (tối thiểu 32 byte) cho runtime và một worker. Reverse proxy TLS chuyển WebSocket Upgrade của `/internal/nick-worker` đến `ttd-zalo-runtime:8080` và giữ header Authorization. Cảnh báo bền xuất hiện ở mục Báo cáo và cảnh báo trên trang quản trị owner. Endpoint tiếp nhận audit cho lượt reply đã được đăng ký trước trong `send_log` với `agent='nick-worker'`.

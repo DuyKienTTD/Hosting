@@ -1,0 +1,19 @@
+{
+  "name": "ttd-zalo-nick-worker",
+  "version": "1.0.0",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node --test",
+    "start": "node src/main.js"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "playwright": "1.65.1",
+    "ws": "8.23.0"
+  }
+}

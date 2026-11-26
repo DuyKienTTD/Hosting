@@ -113,6 +113,7 @@ services:
       CLAUDE_ENABLED: ${CLAUDE_ENABLED:-0}
       CLAUDE_CREDIT_CONFIRMED: ${CLAUDE_CREDIT_CONFIRMED:-0}
       OPERATOR_PASSWORD: ${OPERATOR_PASSWORD:-}
+      NICK_WORKER_AUTH: ${NICK_WORKER_AUTH:-}
     healthcheck:
       test: ["CMD","node","-e","fetch('http://127.0.0.1:8080/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
       interval: 15s
