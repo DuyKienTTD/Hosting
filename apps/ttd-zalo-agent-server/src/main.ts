@@ -10,6 +10,7 @@ import { Envelope } from "./channels/oa/crypto.js";
 import { OaAdapter, OaRuntimeChannel } from "./channels/oa/adapter.js";
 import { OaTokens } from "./channels/oa/tokens.js";
 import { accountScope, OaInbox, oaWebhook } from "./channels/oa/webhook.js";
+import { OaAiDrafts } from "./web/ai-drafts.js";
 import { webApi } from "./web/api.js";
 import { attachNickAudit } from "./adapters/nick-audit.js";
 import { createServer } from "node:http";
@@ -181,7 +182,8 @@ if (command !== "serve") {
     (task.kind === "group_moderate" ? typeof task.message !== "string" :
       typeof task.text !== "string" || !task.text.trim() || task.text.length > config.scheduling.maxText)) ||
     new Set(schedule.map(task => task.key)).size !== schedule.length) throw Error("INVALID_SCHEDULE");
-  const runtime = new Runtime(store, channel, provider, config, Date.now, schedule, !!(webOrigin && oa));
+  const drafts = oa ? new OaAiDrafts(store, config, provider, wiring.aiMode === "live") : undefined;
+  const runtime = new Runtime(store, channel, provider, config, Date.now, schedule, !!(webOrigin && oa), drafts);
   const hooks = active && webhookHandler(active.subiz, active.bot, smokeOnly ? undefined : event => {
     // The signed inbound event is already durable. Apply opt-out without waiting for the next poll.
     runtime.ingest(event);
@@ -204,7 +206,7 @@ if (command !== "serve") {
   const loopbackFixture = !liveOa && mode === "oa";
   const inboxMode = smokeOnly && !loopbackFixture ? "smoke_only" : oa ? "active" : "oa_unavailable";
   const inbox = webOrigin && inboxSource && inboxChannel ? oaWebInbox(store, config,
-    { account: inboxSource.account, envelope: inboxSource.envelope }, inboxChannel, inboxMode) : undefined;
+    { account: inboxSource.account, envelope: inboxSource.envelope }, inboxChannel, inboxMode, drafts) : undefined;
   const inboxTimer = inbox && setInterval(() => {
     try { inbox.project(); }
     catch { console.warn("OA inbox projection failed"); }
@@ -215,7 +217,7 @@ if (command !== "serve") {
     issue: () => pairing!.issue(),
     revoke: () => { pairing!.revoke(); closeNickAudit?.stop(); closeNickAudit?.disconnect(); },
     connected: () => closeNickAudit?.connected() ?? false,
-  }, onboarding, inbox) : undefined;
+  }, onboarding, inbox, drafts) : undefined;
   const server = createServer((req, res) => {
     void handle(req, res).catch(() => { if (!res.headersSent) res.writeHead(503); res.end(); });
   });

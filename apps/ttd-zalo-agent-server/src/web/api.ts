@@ -1,5 +1,6 @@
 import type { OaWebInbox } from "./oa-inbox.js";
 import { oaOAuth, type OaOAuth } from "./oa-oauth.js";
+import type { OaAiDrafts } from "./ai-drafts.js";
 import { createOperator } from "./accounts.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
@@ -19,7 +20,7 @@ const clean = (value: unknown, length: number) =>
   typeof value === "string" && value.trim().length <= length && value.trim() || undefined;
 
 export function webApi(store: Store, config: Config, origin: string,
-  oa?: { account: OaAccount; channel: OaRuntimeChannel }, usdVnd?: number, nick?: { stop(): void; connected(): boolean; issue?(): { code: string; expiresAt: number }; revoke?(): void }, onboarding?: OaOAuth, inbox?: OaWebInbox) {
+  oa?: { account: OaAccount; channel: OaRuntimeChannel }, usdVnd?: number, nick?: { stop(): void; connected(): boolean; issue?(): { code: string; expiresAt: number }; revoke?(): void }, onboarding?: OaOAuth, inbox?: OaWebInbox, drafts?: OaAiDrafts) {
   const db = store.db;
   const session = operatorSessions(store, origin);
   const oauth = onboarding && oaOAuth(origin, session, onboarding);
@@ -80,7 +81,8 @@ export function webApi(store: Store, config: Config, origin: string,
       'Hội thoại Zalo' AS subject,d.body AS draft,d.revision AS version,d.delivery
       FROM web_reply_drafts d JOIN conversations c ON c.id=d.conversation_id
       LEFT JOIN LATERAL (SELECT body,received_at FROM visible_messages WHERE conversation_id=c.id
-        ORDER BY received_at DESC LIMIT 1) m ON true`;
+        ORDER BY received_at DESC LIMIT 1) m ON true
+      ${drafts ? "WHERE (d.ai_state IS NULL OR EXISTS (SELECT 1 FROM visible_messages src WHERE src.id=d.ai_message_id))" : ""}`;
   function workspace(showMessageBody: boolean) {
     const now = Date.now();
     const today = date();
@@ -128,10 +130,14 @@ export function webApi(store: Store, config: Config, origin: string,
     const input = await readJson(request);
     const text = clean(input?.text, config.scheduling.maxText);
     if (!text || !Number.isInteger(input?.version)) return json(response, 400, { message: "Bản nháp không hợp lệ." });
-    const draft = db.prepare(`SELECT c.customer_id,c.channel,d.inbound_id,d.revision,d.delivery
+    const draft = db.prepare(`SELECT c.customer_id,c.channel,d.inbound_id,d.revision,d.delivery${drafts ? ",d.ai_state,d.ai_message_id,d.body" : ""}
       FROM web_reply_drafts d JOIN conversations c ON c.id=d.conversation_id WHERE d.id=?`).get(id);
     if (!draft) return json(response, 404, { message: "Không tìm thấy bản nháp." });
     const target = draft.channel === "oa" && byCustomer(String(draft.customer_id));
+    if (draft.ai_state && (draft.ai_state !== "approved" || draft.body !== text ||
+      !db.prepare("SELECT 1 FROM visible_messages WHERE id=?").get(String(draft.ai_message_id)))) {
+      return json(response, 409, { message: "Cần duyệt đúng nội dung bản nháp AI trước khi gửi." });
+    }
     if (!target || draft.delivery !== "draft" || draft.revision !== input?.version) {
       return json(response, 409, { message: "Bản nháp đã thay đổi hoặc kênh chưa sẵn sàng." });
     }
@@ -143,7 +149,7 @@ export function webApi(store: Store, config: Config, origin: string,
     if (outcome === "sent" || outcome === "unknown" || outcome === "failed") {
       const delivery = outcome === "sent" ? "sent" : outcome === "unknown" ? "unknown_delivery" : "blocked";
       db.prepare("UPDATE web_reply_drafts SET revision=revision+1,delivery=?,body=? WHERE id=? AND revision=?").run(delivery, text, id, Number(draft.revision));
-      return json(response, 200, db.prepare(conversationSelect + " WHERE d.id=?").get(id));
+      return json(response, 200, db.prepare(conversationSelect + (drafts ? " AND d.id=?" : " WHERE d.id=?")).get(id));
     }
     return json(response, 409, { message: "Guard đang chặn lượt gửi." });
   }
@@ -163,6 +169,24 @@ export function webApi(store: Store, config: Config, origin: string,
         : json(response, 503, { code: "oa_unavailable", message: "Kênh OA chưa sẵn sàng." });
     }
     const deny = () => json(response, 403, { message: "Vai trò hiện tại không có quyền thao tác." });
+    const draftList = /^\/api\/v1\/conversations\/([^/]+)\/drafts$/.exec(path);
+    const draftAction = /^\/api\/v1\/drafts\/([^/]+)\/(regenerate|approve)$/.exec(path);
+    if (drafts && request.method === "GET" && draftList && uuid(draftList[1])) {
+      if (role !== "owner" && role !== "support") return deny();
+      return json(response, 200, { drafts: drafts.list(draftList[1]) });
+    }
+    if (drafts && request.method === "POST" && draftAction && uuid(draftAction[1])) {
+      if (role !== "owner" && role !== "support") return deny();
+      const input = await readJson(request);
+      if (!input || Object.keys(input).length !== 1 || !Number.isSafeInteger(input.version) || Number(input.version) < 1) {
+        return json(response, 400, { message: "Phiên bản nháp không hợp lệ." });
+      }
+      const [, id, action] = draftAction;
+      if (!drafts.get(id)) return json(response, 404, { message: "Không tìm thấy bản nháp." });
+      const version = Number(input.version);
+      const result = action === "approve" ? drafts.approve(id, version, principal.id) : await drafts.regenerate(id, version);
+      return result ? json(response, 200, result) : json(response, 409, { message: "Bản nháp đã đổi hoặc chưa sẵn sàng." });
+    }
     if (request.method === "GET") {
       if (path === "/api/v1/workspace") return json(response, 200, workspace(role === "owner" || role === "support"));
       if (path === "/api/v1/agent-router" || path === "/api/v1/settings") {
