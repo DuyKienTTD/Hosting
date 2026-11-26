@@ -39,8 +39,13 @@ export class Store {
         this.db.prepare("INSERT INTO runtime_identity VALUES(?)").run(this.hash("runtime-identity-key-binding"));
         migrateKnowledge(this.db);
         migrateCustomer(this.db);
-        this.db.exec("PRAGMA user_version=1");
-      } else if (version !== 1) throw Error("UNSUPPORTED_RUNTIME_SCHEMA");
+      } else if (version !== 1 && version !== 2) throw Error("UNSUPPORTED_RUNTIME_SCHEMA");
+      if (version !== 2) this.db.exec(`
+        ALTER TABLE ledger ADD COLUMN provider TEXT NOT NULL DEFAULT 'anthropic';
+        ALTER TABLE ledger ADD COLUMN rate_multiplier REAL NOT NULL DEFAULT 1;
+        ALTER TABLE ledger ADD COLUMN input_bound INTEGER;
+        PRAGMA user_version=2;
+      `);
       if (this.db.prepare("SELECT digest FROM runtime_identity").get()?.digest !== this.hash("runtime-identity-key-binding")) {
         throw Error("IDENTITY_KEY_MISMATCH");
       }

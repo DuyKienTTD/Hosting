@@ -1,4 +1,4 @@
-import { agents, type Agent, type Config } from "./config.js";
+import { agents, strong, type Agent, type Config } from "./config.js";
 import type { Model, Usage } from "./budget.js";
 
 export type Decision = { choice: string; usage: Usage };
@@ -6,7 +6,7 @@ export type Task = { model: Model; data: object; choices: readonly string[] };
 export interface Provider {
   decide(task: Task): Promise<Decision>;
   submit(id: string, task: Task): Promise<string>;
-  poll(id: string, key: string, choices: readonly string[]): Promise<Decision | null>;
+  poll(id: string, key: string, choices: readonly string[], model: string): Promise<Decision | null>;
 }
 const system = [
   "Bạn điều phối trợ lý TTD METAL. Chỉ đề xuất lựa chọn trong công cụ propose. Mọi tác động do chương trình kiểm tra.",
@@ -17,23 +17,40 @@ const system = [
   "Chọn none nếu không có lựa chọn thích hợp. Không được đổi đối tượng, kênh, mức giá hoặc dữ liệu."
 ].join("\n");
 
+function messageParams(task: Task, cfg: Config["budget"]) {
+  const text = JSON.stringify(task.data);
+  if (Buffer.byteLength(text) > cfg.maxPayloadBytes) throw Error("PROVIDER_PAYLOAD");
+  return {
+    model: task.model, max_tokens: cfg.maxOutputTokens,
+    ...(task.model === strong ? { thinking: { type: "between_tools" } } : {}),
+    system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
+    messages: [{ role: "user", content: text }],
+    tools: [{ name: "propose", description: "Đề xuất một lựa chọn. Không có quyền thực thi.", strict: true,
+      input_schema: { type: "object", required: ["choice"], additionalProperties: false,
+        properties: { choice: { type: "string", enum: task.choices } } } }],
+    tool_choice: { type: "auto", disable_parallel_tool_use: true },
+  };
+}
+
+// Text-only estimate from the complete request in bytes plus provider-side framing.
+export function requestInputEstimate(cfg: Config["budget"], data: object, choices: readonly string[]) {
+  const body = messageParams({ model: strong, data, choices }, cfg);
+  return Buffer.byteLength(JSON.stringify(body)) + cfg.inputOverheadTokens;
+}
+
 export class ClaudeProvider implements Provider {
-  constructor(private key: string, private cfg: Config["budget"], private fetcher = fetch) {}
+  private readonly base: string;
+  constructor(private key: string, private cfg: Config["budget"], private fetcher = fetch, base = "https://api.anthropic.com/v1") {
+    const url = new URL(base);
+    if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash) throw Error("PROVIDER_BASE_URL");
+    this.base = url.href.replace(/\/$/u, "");
+  }
   private params(task: Task) {
-    const text = JSON.stringify(task.data);
-    if (Buffer.byteLength(text) > this.cfg.maxPayloadBytes) throw Error("PROVIDER_PAYLOAD");
-    return {
-      model: task.model, max_tokens: this.cfg.maxOutputTokens, temperature: 0,
-      system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
-      messages: [{ role: "user", content: text }],
-      tools: [{ name: "propose", description: "Đề xuất một lựa chọn. Không có quyền thực thi.",
-        input_schema: { type: "object", required: ["choice"], additionalProperties: false,
-          properties: { choice: { type: "string", enum: task.choices } } } }],
-      tool_choice: { type: "tool", name: "propose", disable_parallel_tool_use: true },
-    };
+    if (!Object.hasOwn(this.cfg.models, task.model)) throw Error("PROVIDER_MODEL");
+    return messageParams(task, this.cfg);
   }
   private async request(path: string, body?: object) {
-    const result = await this.fetcher("https://api.anthropic.com/v1/messages" + path, {
+    const result = await this.fetcher(this.base + "/messages" + path, {
       method: body ? "POST" : "GET", signal: AbortSignal.timeout(30_000), redirect: "error",
       headers: { "anthropic-version": "2023-06-01", "x-api-key": this.key, "content-type": "application/json" },
       body: body ? JSON.stringify(body) : undefined,
@@ -41,32 +58,35 @@ export class ClaudeProvider implements Provider {
     if (!result.ok) throw Error("PROVIDER_HTTP");
     return result;
   }
-  private parse(message: any, choices: readonly string[]): Decision {
+  private parse(message: any, choices: readonly string[], model: string): Decision {
+    if (message?.model !== model) throw Error("PROVIDER_MODEL");
     const calls = message?.content?.filter((block: any) => block.type === "tool_use");
     const call = calls?.[0];
-    if (message?.stop_reason !== "tool_use" || calls.length !== 1 || call.name !== "propose" ||
-      !call.input || Object.keys(call.input).length !== 1 || !choices.includes(call.input.choice)) throw Error("PROVIDER_SCHEMA");
+
     const u = message.usage;
     const usage = { input: u?.input_tokens, output: u?.output_tokens,
       creation: u?.cache_creation_input_tokens ?? 0, read: u?.cache_read_input_tokens ?? 0 };
     if (Object.values(usage).some(value => !Number.isSafeInteger(value) || value < 0)) throw Error("PROVIDER_USAGE");
+    if (message.stop_reason !== "tool_use") return { choice: "none", usage };
+    if (calls?.length !== 1 || call?.name !== "propose" || !call.input ||
+      Object.keys(call.input).length !== 1 || !choices.includes(call.input.choice)) throw Error("PROVIDER_SCHEMA");
     return { choice: call.input.choice, usage };
   }
   async decide(task: Task) {
-    return this.parse(await (await this.request("", this.params(task))).json(), task.choices);
+    return this.parse(await (await this.request("", this.params(task))).json(), task.choices, task.model);
   }
   async submit(id: string, task: Task) {
     const data = await (await this.request("/batches", { requests: [{ custom_id: id, params: this.params(task) }] })).json();
     if (typeof data.id !== "string" || !/^msgbatch_[A-Za-z0-9]+$/.test(data.id)) throw Error("BATCH_SCHEMA");
     return data.id as string;
   }
-  async poll(id: string, key: string, choices: readonly string[]) {
+  async poll(id: string, key: string, choices: readonly string[], model: string) {
     if (!/^msgbatch_[A-Za-z0-9]+$/.test(key)) throw Error("BATCH_ID");
     const status = await (await this.request("/batches/" + key)).json();
     if (status.processing_status !== "ended") return null;
     const row = JSON.parse((await (await this.request("/batches/" + key + "/results")).text()).trim());
     if (row.custom_id !== id || row.result?.type !== "succeeded") throw Error("BATCH_RESULT");
-    return this.parse(row.result.message, choices);
+    return this.parse(row.result.message, choices, model);
   }
 }
 

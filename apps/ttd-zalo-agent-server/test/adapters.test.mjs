@@ -289,7 +289,7 @@ test("signed Subiz opt-out during contact preflight prevents any provider send",
   const original = bridge.getContact.bind(bridge);
   bridge.getContact = async req => {
     const verified = await original(req);
-    const raw = Buffer.from(JSON.stringify({ events: [eventData(f.clock(), "KHÔNG")] }));
+    const raw = Buffer.from(JSON.stringify({ events: [eventData(f.clock(), "DỪNG NHẬN TIN")] }));
     const response = await fetch(url + "/webhooks/subiz", { method: "POST", body: raw,
       headers: { "Content-Type": "application/json", "X-Hub-Signature-256": signature(raw) } });
     assert.equal(response.status, 204);

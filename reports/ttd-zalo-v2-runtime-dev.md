@@ -46,3 +46,18 @@ Theo [biên nhận A0 trên PR #71](https://github.com/DuyKienTTD/Hosting/pull/7
 | Runtime `node --test --test-name-pattern="month budget under sustained demand" test/runtime.test.mjs` | 0 | 1/1 |
 
 13 ca mới gồm chín phép thử sát biên dưới/đúng/trên của 70%, 90% và $195, ưu đãi được xếp lúc 06:30 ICT rồi gặp trần lúc 08:30 ICT, lượt `sales-ready` và sáu loại thao tác ghi kênh, cùng hai ca tin khách bị giữ do ledger chạm trần khi chuẩn bị gửi hoặc do `budgetStop` trong lúc AI đang xử lý. Các ca chạm trần quan sát 0 lượt gửi.
+
+## V2-02C-GUARD-BUDGET-FIX · 26/11/2026
+
+Base `c5cccd45954b8aa26874978bc7ace8a7cd667df7`. Cập nhật nhận diện opt-out cả tiếng Việt có dấu, không dấu và viết tắt. Từ đơn phải đứng riêng, còn cụm phải khớp ý định dừng. Footer dùng “Nhắn DỪNG NHẬN TIN để không nhận ưu đãi”. “Không” đơn lẻ giữ nguyên consent.
+
+Sonnet giữ chỗ theo prompt thực tế bằng ước tính byte văn bản cộng overhead, cộng giới hạn output. Lượt thử vẫn đủ hạn mức sau khi dùng $2,75 trong ngày. SQLite quyết toán theo usage và bật STOP khi model sai hoặc usage vượt dự phòng. Các ngưỡng 70/90/100% và chặn transport đã xếp hàng vẫn đạt trong test. Schema 2 giữ khả năng quyết toán các lượt cũ theo bảng giá lịch sử. Ước tính input cần đối chiếu với provider trong pilot, và kiểm usage vượt dự phòng chỉ có thể thực hiện sau phản hồi.
+
+Dùng Sonnet 5.5 ($2/$10) và Haiku 5.5 ($0,10/$0,50 trong tier tối đa 100.000 token) theo USD/triệu token input/output. Giá đọc 26/11/2026. ZPC-02 xác nhận Sonnet 5 là Legacy và hướng nâng cùng mức giá. Chế độ tương thích Anthropic có HTTPS base URL và khóa riêng, model allowlist, từ chối phản hồi báo model khác và có hạn mức ngày riêng cùng tổng trần. Chỉ bật sau khi xác minh nguồn credit/biểu phí Hostinger, cấu hình và payload thực tế. [ZPC-02](https://github.com/DuyKienTTD/Hosting/blob/367c36454e021dbf11ea30afb72ebff0f1131afc/program/zalo-mvp01/zpc-01-02/ZPC-02-ai-provider-decision.md) · [Anthropic Pricing](https://platform.claude.com/docs/en/about-claude/pricing) · [Sonnet 5.5](https://platform.claude.com/docs/en/models/sonnet-5-5/overview) · [Haiku 5.5](https://platform.claude.com/docs/en/models/haiku-5-5/overview).
+
+| Lệnh trên Node 24.22.3 | Exit | Kết quả |
+|---|---:|---|
+| Hai app `npm ci --no-audit --no-fund`, `npm run typecheck`, `npm run build`, `npm test` | 0 | Server 47/47 với `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium`, desktop 20/20 với `ELECTRON_SKIP_BINARY_DOWNLOAD=1` khi cài |
+| Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |
+
+Không gọi Claude, Hostinger, Zalo hay Subiz thật. Test Playwright dùng Chromium headless từ gói npm tạm và HTML cục bộ.
