@@ -42,15 +42,18 @@ export function operatorSessions(store: Store, configuredOrigin: string) {
   const admit = loginLimits();
   const clientAddress = loginClientAddress(process.env.TRUSTED_PROXY);
   const fakeVerifier = randomBytes(16).toString("hex") + ":" + randomBytes(64).toString("hex");
-  const authenticate = async (req: IncomingMessage): Promise<Operator | undefined> => {
+  const sessionDigest = (req: IncomingMessage) => {
     const value = token(req);
-    if (!value) return;
-    const row = db.prepare(`SELECT o.id,o.label,o.role FROM web_sessions s JOIN web_operators o ON o.id=s.operator_id
-      WHERE s.digest=? AND o.enabled AND s.expires_at>clock_timestamp()`).get(digest(value));
-    return row as Operator | undefined;
+    return value ? digest(value) : undefined;
+  };
+  const authenticateDigest = (value: string) => db.prepare(`SELECT o.id,o.label,o.role FROM web_sessions s JOIN web_operators o ON o.id=s.operator_id
+      WHERE s.digest=? AND o.enabled AND s.expires_at>clock_timestamp()`).get(value) as Operator | undefined;
+  const authenticate = async (req: IncomingMessage) => {
+    const value = sessionDigest(req);
+    return value ? authenticateDigest(value) : undefined;
   };
   return {
-    authenticate,
+    authenticate, sessionDigest, authenticateDigest,
     allowWrite: (req: IncomingMessage) => req.headers.origin === configuredOrigin && req.headers["sec-fetch-site"] !== "cross-site",
     async handle(req: IncomingMessage, res: ServerResponse) {
       if (req.method === "GET") {

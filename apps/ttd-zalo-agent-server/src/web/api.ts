@@ -1,3 +1,4 @@
+import { oaOAuth, type OaOAuth } from "./oa-oauth.js";
 import { createOperator } from "./accounts.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
@@ -17,9 +18,10 @@ const clean = (value: unknown, length: number) =>
   typeof value === "string" && value.trim().length <= length && value.trim() || undefined;
 
 export function webApi(store: Store, config: Config, origin: string,
-  oa?: { account: OaAccount; channel: OaRuntimeChannel }, usdVnd?: number, nick?: { stop(): void; connected(): boolean }) {
+  oa?: { account: OaAccount; channel: OaRuntimeChannel }, usdVnd?: number, nick?: { stop(): void; connected(): boolean }, onboarding?: OaOAuth) {
   const db = store.db;
   const session = operatorSessions(store, origin);
+  const oauth = onboarding && oaOAuth(origin, session, onboarding);
   const guard = oa && new Guard(store, oa.channel, config, Date.now);
   const approvedPrices = `FROM web_approved_prices p JOIN catalogue c ON c.id=p.catalogue_id
     WHERE p.revoked_at IS NULL AND p.approved_at<=clock_timestamp() AND c.effective<=?
@@ -145,6 +147,7 @@ export function webApi(store: Store, config: Config, origin: string,
   }
 
   return async (request: IncomingMessage, response: ServerResponse) => {
+    if (oauth && await oauth(request, response)) return true;
     const path = request.url;
     if (!path?.startsWith("/api/v1/")) return false;
     if (request.method !== "GET" && !session.allowWrite(request)) return json(response, 403, { message: "Nguồn yêu cầu không hợp lệ." });

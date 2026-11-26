@@ -6,6 +6,7 @@ import { OaTokens } from "./channels/oa/tokens.js";
 import { accountScope, OaInbox, oaWebhook, oaWebhookMaxSkewMs } from "./channels/oa/webhook.js";
 import type { Config } from "./config.js";
 import { ClaudeProvider, FakeProvider } from "./provider.js";
+import { loginClientAddress } from "./web/login-limits.js";
 import type { Store } from "./store.js";
 
 // https://www.hostinger.com/support/what-is-hostinger-ai-router-and-how-to-get-started/
@@ -35,7 +36,7 @@ function bounded(env: Env, name: string, fallback: number, min: number, max: num
 export function readLiveWiring(env: Env, config: Config, smokeOnly: boolean, channelMode: string) {
   const oaMode = mode(env, "OA_MODE");
   const aiMode = mode(env, "AI_MODE");
-  const smokeAllowlist = env.SMOKE_ALLOWLIST === undefined ? undefined :
+  const smokeAllowlist = !env.SMOKE_ALLOWLIST ? undefined :
     new Set(required(env, "SMOKE_ALLOWLIST").split(",").map(value => value.trim()));
   if (smokeAllowlist && [...smokeAllowlist].some(uid => !id(uid))) throw Error("INVALID_SMOKE_ALLOWLIST");
   if ((oaMode === "live" && (!["mock", "oa"].includes(channelMode) || (smokeOnly && !smokeAllowlist))) ||
@@ -46,7 +47,7 @@ export function readLiveWiring(env: Env, config: Config, smokeOnly: boolean, cha
   return { oaMode, aiMode, oa, aiKey, smokeOnly, smokeAllowlist };
 }
 
-function readOa(env: Env, allowedUids?: ReadonlySet<string>) {
+export function readOa(env: Env, allowedUids?: ReadonlySet<string>) {
   const account = { appId: required(env, "ZALO_APP_ID"), oaId: required(env, "ZALO_OA_ID"),
     webhookSecret: required(env, "ZALO_WEBHOOK_SECRET") };
   const appSecret = required(env, "ZALO_APP_SECRET");
@@ -100,6 +101,8 @@ export function createLiveOa(settings: ReturnType<typeof readOa>, store: Store, 
   const { account, appSecret, envelope } = settings;
   const tokens = new OaTokens(pool, envelope, accountScope(account), account.appId, appSecret);
   const channel = new OaRuntimeChannel(new OaAdapter(store, envelope, tokens, account, appSecret, settings));
-  const webhook = ingressPool ? oaWebhook(new OaInbox(ingressPool, store, envelope, account, Date.now, settings.maxSkewMs)) : undefined;
-  return { channel, account, webhook, tokens, close: async () => { await Promise.all([pool.end(), ingressPool?.end()]); } };
+  const clientAddress = loginClientAddress(process.env.TRUSTED_PROXY);
+  const webhook = ingressPool ? oaWebhook(new OaInbox(ingressPool, store, envelope, account, Date.now, settings.maxSkewMs),
+    request => clientAddress(request.socket.remoteAddress, request.headers["x-forwarded-for"])) : undefined;
+  return { channel, account, webhook, tokens, appSecret, close: async () => { await Promise.all([pool.end(), ingressPool?.end()]); } };
 }

@@ -158,11 +158,13 @@ test("OA webhook authenticates raw bytes, persists before ACK, deduplicates, and
   assert.equal((await f.hook(f.message())).status, 200);
   assert.ok(performance.now() - started < 2000);
   assert.equal((await f.pool.query("SELECT event_id FROM oa_inbox")).rowCount, 1);
-  assert.equal((await f.hook(f.message(), { tamper: true })).status, 401);
+  const rejected = await f.hook(f.message("tampered_unique"), { tamper: true });
+  assert.equal(rejected.status, 200);
+  assert.deepEqual(await rejected.json(), { error: 0 });
   const responses = await Promise.all(Array.from({ length: 8 }, () => f.hook(f.message())));
   assert.ok(responses.every(response => response.status === 200));
   for (const offset of [-300_001, 300_001]) {
-    assert.equal((await f.hook({ ...f.message("fixture_skew"), timestamp: String(f.clock() + offset) })).status, 401);
+    assert.equal((await f.hook({ ...f.message("fixture_skew"), timestamp: String(f.clock() + offset) })).status, 200);
   }
   assert.equal((await f.pool.query("SELECT event_id FROM oa_inbox")).rowCount, 1);
   const request = { key: "fixture_poll", target: "channel" };

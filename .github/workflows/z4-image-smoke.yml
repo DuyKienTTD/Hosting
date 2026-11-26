@@ -68,6 +68,7 @@ jobs:
               "AI_ROUTER_RATE_MULTIPLIER": "1",
               "ZALO_APP_ID": "fixture_app",
               "ZALO_OA_ID": "fixture_oa",
+              "SMOKE_ALLOWLIST": "",
               "BACKUP_REMOTE": ":local:/run/z4-smoke-storage/dump",
               "PURGE_RECEIPT_REMOTE": ":local:/run/z4-smoke-storage/receipt",
               "PURGE_RECEIPT_BACKUP_REMOTE": ":local:/run/z4-smoke-storage/receipt-copy",
@@ -151,5 +152,12 @@ jobs:
           curl --silent --show-error --fail --noproxy '*' --retry 5 --retry-connrefused \
             --resolve cskh.thuanthanhdat.com.vn:443:127.0.0.1 --cacert "$fixture/certs/fullchain.pem" \
             https://cskh.thuanthanhdat.com.vn/health >/dev/null
+          rejected=$(curl --silent --show-error --fail --noproxy '*' \
+            --resolve cskh.thuanthanhdat.com.vn:443:127.0.0.1 --cacert "$fixture/certs/fullchain.pem" \
+            -H 'Content-Type: application/json' -d '{}' https://cskh.thuanthanhdat.com.vn/webhooks/zalo-oa)
+          test "$rejected" = '{"error":0}'
+          receipts=$(compose exec -T postgres sh -c 'psql -X -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atc "SELECT count(*) FROM oa_inbox"')
+          test "$receipts" = 0
+          echo 'PASS OA unsigned probe acknowledged with zero receipts'
           python3 deploy/smoke-web.py "$fixture/certs/fullchain.pem" "$fixture/owner-passphrase"
           compose exec -T data-api node --input-type=module < deploy/smoke-web-peer.mjs

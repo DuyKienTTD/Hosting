@@ -17,7 +17,7 @@ Gói này dùng runtime đã merge tại `c4ee17c` và bổ sung tiến trình n
 - Từ gốc repo, chạy `(umask 077 && cp deploy/.env.example deploy/.env)`. Điền digest, bốn mật khẩu DB riêng, `IDENTITY_KEY` ổn định tối thiểu 32 byte, và `DATA_TOMBSTONE_KEY` dạng 64 ký tự hex. Giữ các khóa cố định và sao lưu qua kho bí mật. Không in kết quả Compose đã nội suy ra log.
 - Điền `AI_ROUTER_BASE_URL` (HTTPS), `AI_ROUTER_API_KEY`, `AI_ROUTER_DAILY_USD` và `AI_ROUTER_RATE_MULTIPLIER` đã xác minh. Runtime khóa model bằng bảng giá trong [config.ts](../apps/ttd-zalo-agent-server/src/config.ts), cho phép `claude-sonnet-5-5` và `claude-haiku-5-5`. Chọn model cho từng agent bằng `MODEL_*`. Giữ cả ba cờ bật và xác nhận credit ở 0 trong smoke. Chỉ bật AI sau khi đối chiếu trần chi và nguồn credit.
 - Điền `ZALO_APP_ID`, `ZALO_APP_SECRET`, `ZALO_OA_ID`, `ZALO_WEBHOOK_SECRET` và `ZALO_OA_ENCRYPTION_KEY` (64 ký tự hex). Từ phiên cấp quyền quản trị OA, lưu cặp access/refresh token vào tệp JSON 0600 gồm `access`, `refresh`, `seconds` (tuổi token), `issued` (epoch ms). `ZALO_OA_TOKEN_FILE` và `SMOKE_TEST_PHONE` dùng riêng cho người vận hành. Số test phải là tài khoản đã đồng ý tham gia smoke. Không gắn tệp token hay số test vào container.
-- `OA_WEBHOOK_MAX_SKEW_SECONDS` mặc định 300. Webhook kiểm timestamp đã ký trước khi truy cập Postgres. Event còn trong cửa sổ và đã nhận sẽ trả 200 một cách idempotent. Event nằm ngoài cửa sổ trả 401.
+- `OA_WEBHOOK_MAX_SKEW_SECONDS` mặc định 300. Webhook kiểm timestamp đã ký trước khi truy cập Postgres. Event còn trong cửa sổ và đã nhận sẽ trả 200 một cách idempotent. Event thiếu chữ ký, chữ ký sai hoặc nằm ngoài cửa sổ nhận 200 và bị bỏ trước Postgres. Sau 30 lượt bị bỏ mỗi IP/phút, ingress trả 429. Cấu hình `TRUSTED_PROXY` chỉ với địa chỉ peer thực của Nginx để ingress dùng IP client do Nginx ghi đè.
 - Điền `AGE_RECIPIENT`, `BACKUP_REMOTE`, `PURGE_RECEIPT_REMOTE`, `PURGE_RECEIPT_BACKUP_REMOTE`, `WORKER_RCLONE_FILE` và `BACKUP_RCLONE_FILE`. Sổ chính và bản sao dùng đích offsite độc lập với dump. Cấp worker quyền xóa chỉ trong pending, đọc và thêm immutable đối với confirmed và sổ biên nhận. Cấp backup quyền ghi dump và đọc sổ chính, chỉ thêm vào đích sao lưu sổ. Tạo object `tombstones/_format` chứa `z4-tombstones-v1` tại prefix dump trước khi bật worker.
 
 ## 2. Khởi động và TLS
@@ -107,24 +107,20 @@ Cài template bằng `nginx -t` rồi reload nếu site còn dùng cấu hình c
 ## 3. Smoke có kiểm soát
 
 1. Kiểm tra `https://cskh.thuanthanhdat.com.vn/health` trả 200, `stopped=true` và `channel=mock`. `/internal`, `/internal/nick-worker` và `/operator` phải trả 404 qua Nginx. Kiểm tra không có cổng DB hoặc cổng ứng dụng bind ra ngoài loopback.
-2. Gửi chữ ký giả kèm timestamp hiện tại. Kỳ vọng **401** và không tạo receipt. Kiểm tra thời gian thực tế bằng `time_total`.
+2. Gửi chữ ký giả kèm timestamp hiện tại. Kỳ vọng **200** với `{"error":0}` và thay đổi **0 receipt**. Đếm bằng `SELECT count(*) FROM oa_inbox` trước và sau trong phiên smoke cô lập. Kiểm tra thời gian thực tế bằng `time_total`.
 
    ```sh
-   curl -sS -o /dev/null -w '%{http_code} %{time_total}\n' \
+   curl -sS -w '%{http_code} %{time_total}\n' \
      -H 'Content-Type: application/json' \
      -H "X-ZEvent-Signature: mac=$(printf '%064d' 0)" \
      -d "{\"timestamp\":\"$(date +%s%3N)\"}" \
      https://cskh.thuanthanhdat.com.vn/webhooks/zalo-oa
    ```
 
-3. Đọc đường dẫn tệp token từ cấu hình riêng, rồi nhập bằng stdin sau khi kiểm tra đúng OA.
-
-   ```sh
-   cskh exec -T oa-ingress node /app/oa-ingress.mjs install-tokens < "$ZALO_OA_TOKEN_FILE"
-   ```
-
-4. Đăng ký webhook HTTPS `/webhooks/zalo-oa` trong Zalo và dùng tài khoản test để gửi một sự kiện test đã đồng ý. Kỳ vọng callback **200** trong dưới 2 giây. Đối soát timestamp và số receipt tại Postgres, không in ciphertext hay token. Gửi lại cùng sự kiện phải giữ một receipt. Dừng smoke nếu nhận 404, 5xx hoặc trễ. Mục này đo callback sự kiện OA. OAuth token pair được nhập ở bước 3.
-5. Rà tình trạng UI và wiring OA đã nghiệm thu trước khi cho phép gửi. Chỉ dùng số test được chỉ định cho lần nghiệm thu gửi thực tế.
+3. Trên Zalo Developers, đặt **Callback URL** của app là `https://cskh.thuanthanhdat.com.vn/api/v1/oa/oauth/callback` và lưu quyền OA dùng cho nhắn tin. Giữ STOP, OA mock và AI mock. Đăng nhập giao diện bằng tài khoản owner, mở **Kênh Zalo → Kết nối OA**, rồi chọn đúng OA và bấm cho phép bằng tài khoản quản trị OA. Nút tạo link cấp quyền mới tại `https://oauth.zaloapp.com/v4/oa/permission` với PKCE và state hết hạn sau 10 phút. Sau callback thành công, hệ thống lưu cặp token mã hóa trong Postgres và trở lại Kênh Zalo. [OAuth v4 của Zalo](https://docs.zaloplatforms.com/docs/OA/bat-dau/xac-thuc-va-uy-quyen-cho-ung-dung-new)
+4. Gửi một tin từ tài khoản test đã đồng ý để tạo tương tác. Webhook có chữ ký hợp lệ phải trả 200 dưới 2 giây. Phát lại trong cửa sổ giữ đúng một receipt. Chỉ kiểm thời gian và số receipt.
+5. Trong `.env`, đặt `OA_MODE=live`, `CHANNEL_MODE=mock`, `CHANNEL_SMOKE_ONLY=1`, `SMOKE_ALLOWLIST=<UID OA của tài khoản test>` và `AI_MODE=mock`. Allowlist chứa UID mà OA nhận trong webhook, ví dụ trường `sender.id`. Chạy `cskh up -d --wait runtime`, kiểm health và STOP, rồi chạy `cskh exec -T runtime node dist/ttd-zalo-agent-server/src/main.js resume global` ngay trước lượt gửi đã duyệt. Giữ quảng cáo tắt. Chỉ dùng hội thoại test có consent và đã tương tác hợp lệ.
+6. Kết thúc smoke hoặc gặp lỗi, chạy `cskh exec -T runtime node dist/ttd-zalo-agent-server/src/main.js stop global`. Đặt lại `OA_MODE=mock`, `CHANNEL_SMOKE_ONLY=0`, xóa giá trị `SMOKE_ALLOWLIST` và giữ `AI_MODE=mock`. Tạo lại runtime, kiểm `channel=mock` và `stopped=true`. Chỉ xem xét bật AI sau khi owner xác nhận credit, allowlist model và các trần ngân sách.
 
 ## 4. Backup và thử restore
 
