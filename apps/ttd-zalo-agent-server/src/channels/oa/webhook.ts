@@ -103,8 +103,8 @@ export class OaInbox {
 export function oaWebhook(inbox: OaInbox, clientIp = (req: IncomingMessage) => req.socket.remoteAddress ?? "unknown") {
   const buckets = new Map<string, { count: number }>();
   let minute = -1;
-  let dropped = 0;
-  function admitDrop(req: IncomingMessage) {
+  const drops = { invalid: 0, wrong_target: 0 };
+  function admitDrop(req: IncomingMessage, reason: keyof typeof drops = "invalid") {
     const current = Math.floor(Date.now() / 60_000);
     if (minute !== current) { minute = current; buckets.clear(); }
     const key = clientIp(req);
@@ -114,8 +114,10 @@ export function oaWebhook(inbox: OaInbox, clientIp = (req: IncomingMessage) => r
       bucket = { count: 0 };
       buckets.set(key, bucket);
     }
-    dropped++;
-    if (Number.isInteger(Math.log2(dropped))) console.warn(JSON.stringify({ event: "oa_webhook_dropped", count: dropped }));
+    const count = ++drops[reason];
+    if (Number.isInteger(Math.log2(count))) {
+      console.warn(JSON.stringify({ event: "oa_webhook_dropped", ...(reason === "wrong_target" ? { reason } : {}), count }));
+    }
     return bucket && ++bucket.count <= 30 ? 200 : 429;
   }
   return (req: IncomingMessage, res: ServerResponse) => {
@@ -140,7 +142,9 @@ export function oaWebhook(inbox: OaInbox, clientIp = (req: IncomingMessage) => r
     });
     req.on("end", () => {
       if (!res.writableEnded) void inbox.accept(Buffer.concat(chunks), signature, signal).then(status => {
-        if (!res.writableEnded && !res.destroyed) reply(status === 401 ? admitDrop(req) : status);
+        if (res.writableEnded || res.destroyed) return;
+        if (status === 403) return reply(admitDrop(req, "wrong_target"));
+        reply(status === 401 ? admitDrop(req) : status);
       }, () => reply(503));
     });
     req.on("error", () => reply(400));

@@ -4,7 +4,7 @@ import { once } from "node:events";
 import { createServer } from "node:http";
 import test from "node:test";
 import { oaOAuth } from "../dist/ttd-zalo-agent-server/src/web/oa-oauth.js";
-import { oaWebhook } from "../dist/ttd-zalo-agent-server/src/channels/oa/webhook.js";
+import { OaInbox, oaWebhook } from "../dist/ttd-zalo-agent-server/src/channels/oa/webhook.js";
 
 async function listen(t, run) {
   const server = createServer(run).listen(0, "127.0.0.1");
@@ -84,4 +84,36 @@ test("unsigned ingress probe is acknowledged without touching inbox and drops ar
   const separate = await post("source-b");
   assert.equal(separate.status, 200);
   assert.deepEqual(await separate.json(), { error: 0 });
+});
+
+test("signed webhook for another app or OA is acknowledged, counted separately and never reaches Postgres", async t => {
+  const logger = t.mock.method(console, "warn", () => {});
+  const account = { appId: "fixture_app", oaId: "fixture_oa", webhookSecret: "fixture_only" };
+  const now = Date.now();
+  let queries = 0;
+  const inbox = new OaInbox({ query: async () => { queries++; } }, { hash: value => value },
+    { seal: () => Buffer.from("fixture") }, account, () => now);
+  const endpoint = await listen(t, oaWebhook(inbox));
+  const post = async (fields, signed = true) => {
+    const timestamp = String(now);
+    const body = JSON.stringify({ timestamp, app_id: account.appId, recipient: { id: account.oaId },
+      event_name: "user_send_text", sender: { id: "fixture_uid" },
+      message: { msg_id: "fixture_message", text: "fixture body" }, ...fields });
+    const signature = createHash("sha256").update(account.appId + body + timestamp + account.webhookSecret).digest("hex");
+    const result = await fetch(endpoint + "/webhooks/zalo-oa", { method: "POST", body,
+      headers: signed ? { "x-zevent-signature": "mac=" + signature } : {} });
+    assert.equal(result.status, 200);
+    assert.deepEqual(await result.json(), { error: 0 });
+  };
+  await post({}, false);
+  await post({ recipient: { id: "another_oa" } });
+  await post({ app_id: "another_app" });
+  assert.equal(queries, 0);
+  assert.deepEqual(logger.mock.calls.map(call => JSON.parse(call.arguments[0])), [
+    { event: "oa_webhook_dropped", count: 1 },
+    { event: "oa_webhook_dropped", reason: "wrong_target", count: 1 },
+    { event: "oa_webhook_dropped", reason: "wrong_target", count: 2 },
+  ]);
+  await post({});
+  assert.equal(queries, 1);
 });
