@@ -18,7 +18,7 @@ import { operator } from "./operator.js";
 import { Store } from "./store.js";
 import { readRoutes, setupChannels, webhookHandler } from "./adapters/setup.js";
 import { smoke } from "./adapters/smoke.js";
-import { createLiveOa, liveProvider, readLiveWiring } from "./live-wiring.js";
+import { createLiveOa, liveProvider, readLiveWiring, readOa } from "./live-wiring.js";
 
 process.umask(0o077);
 const command = process.argv[2] ?? "serve";
@@ -37,6 +37,9 @@ const wiring = readLiveWiring(process.env, config, smokeOnly, mode);
 const postgres = { host: PGHOST, database: PGDATABASE, user: "data_runtime", password: DATA_RUNTIME_PASSWORD };
 const store = new Store(new PostgresRuntimeDatabase(postgres), key, Number(process.env.DATA_RETENTION_DAYS ?? "30"));
 const liveOa = wiring.oa && createLiveOa(wiring.oa, store, postgres);
+const onboarding = command === "serve" && process.env.WEB_ORIGIN && process.env.OA_ONBOARD_ENABLED === "1"
+  ? liveOa || createLiveOa(readOa({ ...process.env, OA_WEBHOOK_INGRESS: "external" }), store, postgres)
+  : undefined;
 if (command === "serve" && (process.env.ADS_ENABLED === "false" || ((liveOa || mode === "oa") && process.env.WEB_ORIGIN))) store.set("ADS_ENABLED", 0);
 const input = () => JSON.parse(readFileSync(0, "utf8"));
 const commands: Record<string, () => unknown> = {
@@ -158,7 +161,7 @@ if (command !== "serve") {
   const web = webOrigin ? webApi(store, config, webOrigin, oa, rate, {
     stop: () => closeNickAudit?.stop(),
     connected: () => closeNickAudit?.connected() ?? false,
-  }) : undefined;
+  }, onboarding) : undefined;
   const server = createServer((req, res) => {
     void handle(req, res).catch(() => { if (!res.headersSent) res.writeHead(503); res.end(); });
   });
@@ -185,6 +188,6 @@ if (command !== "serve") {
     closeNickAudit?.();
     clearInterval(interval);
     clearInterval(pruneSmoke);
-    server.close(() => { store.db.close(); void Promise.resolve(oa?.close()).finally(() => process.exit(0)); });
+    server.close(() => { store.db.close(); void Promise.all([oa?.close(), onboarding !== liveOa ? onboarding?.close() : undefined]).finally(() => process.exit(0)); });
   });
 }

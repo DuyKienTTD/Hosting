@@ -47,7 +47,22 @@ services:
     environment:
       <<: *runtime-db
       HTTP_BIND: container
-      CHANNEL_MODE: mock
+      CHANNEL_MODE: ${CHANNEL_MODE:-mock}
+      OA_MODE: ${OA_MODE:-mock}
+      AI_MODE: ${AI_MODE:-mock}
+      CHANNEL_SMOKE_ONLY: ${CHANNEL_SMOKE_ONLY:-0}
+      SMOKE_ALLOWLIST: ${SMOKE_ALLOWLIST:-}
+      OA_ONBOARD_ENABLED: ${OA_ONBOARD_ENABLED:-1}
+      OA_WEBHOOK_INGRESS: external
+      ZALO_APP_ID: ${ZALO_APP_ID:?set Zalo App ID}
+      ZALO_APP_SECRET: ${ZALO_APP_SECRET:?set Zalo App Secret}
+      ZALO_OA_ID: ${ZALO_OA_ID:?set OA ID}
+      ZALO_WEBHOOK_SECRET: ${ZALO_WEBHOOK_SECRET:?set webhook signing secret}
+      ZALO_OA_ENCRYPTION_KEY: ${ZALO_OA_ENCRYPTION_KEY:?set OA encryption key}
+      AI_MODEL_ALLOWLIST: ${AI_MODEL_ALLOWLIST:-}
+      AI_ROUTER_MONTHLY_USD: ${AI_ROUTER_MONTHLY_USD:-}
+      AI_DAILY_TOKENS: ${AI_DAILY_TOKENS:-}
+      AI_MONTHLY_TOKENS: ${AI_MONTHLY_TOKENS:-}
       WEB_ORIGIN: https://cskh.thuanthanhdat.com.vn
       WEB_DIST: /app/web-dist
       TRUSTED_PROXY: ${TRUSTED_PROXY:-}
@@ -88,6 +103,7 @@ services:
       ZALO_APP_SECRET: ${ZALO_APP_SECRET:?set Zalo App Secret}
       ZALO_OA_ID: ${ZALO_OA_ID:?set OA ID}
       ZALO_WEBHOOK_SECRET: ${ZALO_WEBHOOK_SECRET:?set webhook signing secret}
+      TRUSTED_PROXY: ${TRUSTED_PROXY:-}
       OA_WEBHOOK_MAX_SKEW_SECONDS: ${OA_WEBHOOK_MAX_SKEW_SECONDS:-300}
       ZALO_OA_ENCRYPTION_KEY: ${ZALO_OA_ENCRYPTION_KEY:?set OA encryption key}
     healthcheck: *http-health

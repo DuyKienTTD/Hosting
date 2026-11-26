@@ -7,6 +7,8 @@ import { Envelope } from "./dist/ttd-zalo-agent-server/src/channels/oa/crypto.js
 import { OaTokens } from "./dist/ttd-zalo-agent-server/src/channels/oa/tokens.js";
 import { accountScope, OaInbox, oaWebhook, oaWebhookMaxSkewMs } from "./dist/ttd-zalo-agent-server/src/channels/oa/webhook.js";
 
+import { loginClientAddress } from "./dist/ttd-zalo-agent-server/src/web/login-limits.js";
+
 const account = { appId: process.env.ZALO_APP_ID, oaId: process.env.ZALO_OA_ID,
   webhookSecret: process.env.ZALO_WEBHOOK_SECRET };
 const key = process.env.ZALO_OA_ENCRYPTION_KEY ?? "";
@@ -17,7 +19,9 @@ const pool = new pg.Pool({ user: "data_runtime", password: process.env.DATA_RUNT
 pool.on("error", () => console.error("OA database connection lost"));
 const identity = { hash: value => createHmac("sha256", process.env.IDENTITY_KEY).update(value).digest("hex") };
 const maxSkewMs = oaWebhookMaxSkewMs(process.env.OA_WEBHOOK_MAX_SKEW_SECONDS);
-const handler = oaWebhook(new OaInbox(pool, identity, box, account, Date.now, maxSkewMs));
+const clientAddress = loginClientAddress(process.env.TRUSTED_PROXY);
+const handler = oaWebhook(new OaInbox(pool, identity, box, account, Date.now, maxSkewMs),
+  request => clientAddress(request.socket.remoteAddress, request.headers["x-forwarded-for"]));
 
 if (process.argv[2] === "install-tokens") {
   try {

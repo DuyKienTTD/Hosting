@@ -152,6 +152,7 @@ async function request<T>(
 }
 
 export const api = {
+  connectOa: () => request<{ authorizationUrl: string }>("/oa/oauth/start", "POST"),
   session: () => request<Operator>("/session"),
   login: (
     credentials: { account: string; passphrase: string } | { demoRole: Role },

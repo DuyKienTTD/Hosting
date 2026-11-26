@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from urllib.parse import urlparse, parse_qs
 
 HOST = "cskh.thuanthanhdat.com.vn"
 ORIGIN = "https://" + HOST
@@ -79,6 +80,17 @@ def main():
             request("/api/v1/operators", 400, method="POST", session="owner",
                     body={"account": "other-owner", "label": "Fixture", "role": "owner", "passphrase": secrets.token_hex(20)})
 
+        def oa_onboarding():
+            request("/api/v1/oa/oauth/start", 403, method="POST", session="sales", body={})
+            body, headers, _ = request("/api/v1/oa/oauth/start", 200, method="POST", session="owner", body={})
+            url = urlparse(json.loads(body)["authorizationUrl"])
+            assert url.netloc == "oauth.zaloapp.com" and url.path == "/v4/oa/permission"
+            query = parse_qs(url.query)
+            assert query["redirect_uri"] == [ORIGIN + "/api/v1/oa/oauth/callback"]
+            assert len(query["state"][0]) == 64 and len(query["code_challenge"][0]) == 43
+            assert "httponly; samesite=lax" in headers
+            request("/api/v1/oa/oauth/callback?state=invalid", 403, session="owner")
+
         def csrf():
             request("/api/v1/operators", 403, method="POST", session="owner", origin="https://external.invalid",
                     body={"account": "csrf-fixture", "label": "Fixture", "role": "sales", "passphrase": secrets.token_hex(20)})
@@ -101,6 +113,7 @@ def main():
         evidence("04a IP limit 429 after 10 failures; another account/IP still logs in after 30 attempts", ip_limit)
         evidence("04b normalized account limit 429 across multiple IPs", account_limit)
         evidence("05 Owner creates Sales/CSKH; other roles receive 403", roles)
+        evidence("OA owner-only PKCE start and callback forwarded by Nginx", oa_onboarding)
         evidence("06 production SPA, JavaScript and CSP served by HTTPS Nginx", frontend)
         evidence("07 internal/operator 404; HEAD /health 200; mock and STOP preserved", ingress)
 

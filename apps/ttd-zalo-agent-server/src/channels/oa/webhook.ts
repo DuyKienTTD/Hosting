@@ -38,10 +38,10 @@ type OaEvent = { key: string; uid: string; at: number; kind: "message" | "follow
 function verify(raw: Buffer, signature: string, account: OaAccount, now: number, maxSkewMs: number): OaEvent | number {
   let data;
   try { data = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(raw)); }
-  catch { return 400; }
+  catch { return 401; }
   const timestamp = String(data?.timestamp ?? "");
   const at = Number(timestamp);
-  if (!/^\d{1,16}$/.test(timestamp) || !Number.isSafeInteger(at) || at <= 0) return 400;
+  if (!/^\d{1,16}$/.test(timestamp) || !Number.isSafeInteger(at) || at <= 0) return 401;
   const mac = createHash("sha256").update(account.appId).update(raw).update(timestamp).update(account.webhookSecret).digest();
   if (!/^mac=[0-9a-f]{64}$/i.test(signature) || !timingSafeEqual(mac, Buffer.from(signature.slice(4), "hex"))) return 401;
   if (Math.abs(now - at) > maxSkewMs) return 401;
@@ -100,7 +100,24 @@ export class OaInbox {
 }
 
 // https://docs.zaloplatforms.com/docs/OA/webhook/tong-quan
-export function oaWebhook(inbox: OaInbox) {
+export function oaWebhook(inbox: OaInbox, clientIp = (req: IncomingMessage) => req.socket.remoteAddress ?? "unknown") {
+  const buckets = new Map<string, { count: number }>();
+  let minute = -1;
+  let dropped = 0;
+  function admitDrop(req: IncomingMessage) {
+    const current = Math.floor(Date.now() / 60_000);
+    if (minute !== current) { minute = current; buckets.clear(); }
+    const key = clientIp(req);
+    let bucket = buckets.get(key);
+    const overflow = !bucket && buckets.size >= 4096;
+    if (!bucket && !overflow) {
+      bucket = { count: 0 };
+      buckets.set(key, bucket);
+    }
+    dropped++;
+    if (Number.isInteger(Math.log2(dropped))) console.warn(JSON.stringify({ event: "oa_webhook_dropped", count: dropped }));
+    return bucket && ++bucket.count <= 30 ? 200 : 429;
+  }
   return (req: IncomingMessage, res: ServerResponse) => {
     const reply = (status: number) => {
       if (res.writableEnded || res.destroyed) return;
@@ -110,7 +127,7 @@ export function oaWebhook(inbox: OaInbox) {
     if (req.url !== "/webhooks/zalo-oa") return reply(404);
     if (req.method !== "POST") return reply(405);
     const signature = req.headers["x-zevent-signature"];
-    if (typeof signature !== "string") return reply(401);
+    if (typeof signature !== "string") { req.resume(); return reply(admitDrop(req)); }
     const signal = AbortSignal.timeout(1750);
     signal.addEventListener("abort", () => reply(503), { once: true });
     const chunks: Buffer[] = [];
@@ -122,7 +139,9 @@ export function oaWebhook(inbox: OaInbox) {
       chunks.push(chunk);
     });
     req.on("end", () => {
-      if (!res.writableEnded) void inbox.accept(Buffer.concat(chunks), signature, signal).then(reply, () => reply(503));
+      if (!res.writableEnded) void inbox.accept(Buffer.concat(chunks), signature, signal).then(status => {
+        if (!res.writableEnded && !res.destroyed) reply(status === 401 ? admitDrop(req) : status);
+      }, () => reply(503));
     });
     req.on("error", () => reply(400));
   };

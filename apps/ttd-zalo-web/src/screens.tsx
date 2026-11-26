@@ -991,6 +991,18 @@ export function Channels({ data, user, run, busy }: Props) {
         <Card key={channel.id} title={channel.label}>
           <ChannelStatus channel={channel} />
           <p className="muted">{channel.detail}</p>
+          {channel.id === "oa" && user.role === "owner" && !demoMode && (
+            <button
+              disabled={busy}
+              onClick={() => void run(async () => {
+                const { authorizationUrl } = await api.connectOa();
+                window.location.assign(authorizationUrl);
+                return (current) => current;
+              }, "Đang mở trang cấp quyền Zalo.")}
+            >
+              Kết nối OA
+            </button>
+          )}
           {channel.id === "nick" && channel.state !== "stopped" && (
             <Can user={user} action="stop">
               {confirm ? (
