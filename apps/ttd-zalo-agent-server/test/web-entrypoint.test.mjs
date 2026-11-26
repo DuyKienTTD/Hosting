@@ -14,6 +14,12 @@ import { accountScope, oaTarget } from "../dist/ttd-zalo-agent-server/src/channe
 import { PostgresRuntimeDatabase } from "../dist/ttd-zalo-agent-server/src/data/runtime-database.js";
 import { Store } from "../dist/ttd-zalo-agent-server/src/store.js";
 
+import { OaAiDrafts } from "../dist/ttd-zalo-agent-server/src/web/ai-drafts.js";
+import { Runtime } from "../dist/ttd-zalo-agent-server/src/runtime.js";
+import { MockChannel } from "../dist/ttd-zalo-agent-server/src/channel.js";
+import { FakeProvider } from "../dist/ttd-zalo-agent-server/src/provider.js";
+import { defaults } from "../dist/ttd-zalo-agent-server/src/config.js";
+
 const hour = 3600000;
 async function listen(handler) {
   const server = createServer(handler).listen(0, "127.0.0.1");
@@ -117,7 +123,7 @@ test("production Web UI receives and replies to OA and sends an approved quote",
   const child = spawn(process.execPath, ["dist/ttd-zalo-agent-server/src/main.js", "serve"], {
     env: { ...process.env, PGDATABASE: database, IDENTITY_KEY: key, HTTP_PORT: String(port), HTTP_BIND: "local",
       CHANNEL_MODE: "oa", CHANNEL_SMOKE_ONLY: "1", WEB_ORIGIN: origin, WEB_DIST: dist, ADS_ENABLED: "false", CLAUDE_ENABLED: "0",
-      AI_PROVIDER: "anthropic", OA_APP_ID: account.appId, OA_ID: account.oaId, OA_APP_SECRET: appSecret,
+      AI_PROVIDER: "anthropic", WEB_USD_VND: "25000", OA_APP_ID: account.appId, OA_ID: account.oaId, OA_APP_SECRET: appSecret,
       OA_WEBHOOK_SECRET: account.webhookSecret, OA_ENVELOPE_KEY: oaKey.toString("hex"),
       OA_FIXTURE_ENDPOINT: address(upstream), OA_MONTHLY_QUOTA: "0" },
     stdio: ["ignore", "ignore", "pipe"],
@@ -263,13 +269,96 @@ test("production Web UI receives and replies to OA and sends an approved quote",
   assert.equal((await post("inbox/" + row.conversation_id + "/replies", { text: reply }, support)).status, 409);
   assert.equal(calls.length, 3);
   const threadPath = "inbox/" + row.conversation_id;
+  const question = "Hỏi giá SKU DEMO-01";
+  await webhook("user_send_text", {
+    sender: { id: uid }, recipient: { id: account.oaId },
+    message: { msg_id: "fixture-ai-draft", text: question },
+  });
+  await ownerPage.getByText(question, { exact: true }).waitFor({ timeout: 25_000 });
+  const retained = (await pg.query("SELECT event_id,received_ms FROM web_oa_projection WHERE target=$1 AND retained", [targetHash])).rows[0];
+  assert.ok(retained);
+  runtime.knowledge.add({ id: "price-fixture-ui", sku: "DEMO-01", kind: "price", title: "Giá đã kiểm tra",
+    summary: "Nguồn fixture", version: "1", effective: "2020-01-01", until: null, origin: "fixture", amount: 123000, unit: "mét" });
+  const provider = new FakeProvider(task => task.choices.includes("price") ? "price" : task.choices[0]);
+  const config = structuredClone(defaults);
+  const draftService = new OaAiDrafts(runtime, config, provider, true);
+  const draftRuntime = new Runtime(runtime, new MockChannel(), provider, config, Date.now, [], true, draftService);
+  const signedMessageId = retained.event_id;
+  draftRuntime.ingest({ id: signedMessageId, at: Number(retained.received_ms),
+    contact: rawTarget, thread: rawTarget, channel: "oa", kind: "dm", text: question });
+  await draftRuntime.tick(false);
+  const generated = draftService.list(row.conversation_id)[0];
+  assert.equal(generated.state, "ready");
+  assert.deepEqual(generated.sourceIds, ["price-fixture-ui"]);
+  assert.equal(calls.length, 3);
+  await ownerPage.getByRole("button", { name: /Làm mới/ }).click();
+  await ownerPage.getByText("price-fixture-ui", { exact: true }).waitFor();
+  await ownerPage.getByText(/Hỏi giá/, { exact: false }).first().waitFor();
+  await ownerPage.getByText(/Chi phí AI soạn nháp hôm nay/).waitFor();
+  const ownerRouter = await (await read("agent-router", owner)).json();
+  assert.ok(ownerRouter.usedVnd > 0);
+  assert.ok(ownerRouter.budgetVnd > 0);
+  assert.ok(ownerRouter.agents.some(agent => agent.usedUsd > 0 && agent.usedVnd > 0));
+  assert.equal(typeof ownerRouter.unassignedUsd, "number");
+
+  const draftPath = "conversations/" + row.conversation_id + "/drafts";
+  for (const [role, session] of Object.entries({ owner, support, sales, a0 })) {
+    for (const [path, status] of [
+      ["agent-router", role === "owner" || role === "a0" ? 200 : 403],
+      ["inbox", 200],
+      [threadPath, 200],
+      [draftPath, role === "owner" || role === "support" ? 200 : 403],
+      ["workspace", 200],
+    ]) {
+      const response = await read(path, session);
+      assert.equal(response.status, status, role + " " + path);
+      const body = await response.json();
+      if (role === "owner" && path === threadPath) assert.ok(body.estimatedAiUsdToday > 0);
+      if (role === "a0" && path === "agent-router") assert.deepEqual(body, { status: "available" });
+      if (role !== "owner") {
+        const aiProjection = path === "workspace"
+          ? { ...body, products: undefined, quotes: undefined }
+          : body;
+        assert.doesNotMatch(JSON.stringify(aiProjection), /"[^"]*(?:Usd|Vnd|budget|cost|spend|reserv)[^"]*":/i,
+          role + " " + path + " must exclude AI costs");
+      }
+    }
+  }
+
+  runtime.set("budgetStop", 1);
+  assert.deepEqual(await (await read("agent-router", a0)).json(), { status: "capped" });
+  runtime.set("budgetStop", 0);
+
+  await ownerPage.getByRole("button", { name: "Sửa", exact: true }).click();
+  const revised = "Giá xác nhận sau khi kiểm tra là 123.000 VND mỗi mét.";
+  await ownerPage.getByLabel("Nội dung nháp").fill(revised);
+  await ownerPage.getByRole("button", { name: "Duyệt", exact: true }).click();
+  const composer = ownerPage.getByLabel("Nội dung trả lời");
+  await ownerPage.waitForFunction(text => {
+    const field = [...document.querySelectorAll("textarea")].find(input => input.parentElement?.textContent.includes("Nội dung trả lời"));
+    return field?.readOnly && field.value === text;
+  }, revised);
+  assert.equal(await composer.inputValue(), revised);
+  assert.equal(calls.length, 3, "approval must not send");
+  const approved = draftService.get(generated.id);
+  const altered = await post("conversations/" + approved.id + "/approve",
+    { version: approved.version, text: "Nội dung khác" }, owner);
+  assert.equal(altered.status, 409);
+  assert.equal(calls.length, 3);
+  const sendApproved = ownerPage.waitForResponse(res => res.url().endsWith("/conversations/" + approved.id + "/approve") && res.request().method() === "POST");
+  await ownerPage.getByRole("button", { name: "Gửi trả lời OA" }).click();
+  assert.equal((await sendApproved).status(), 200);
+  await ownerPage.getByText("OA đã tiếp nhận tin trả lời.", { exact: true }).waitFor();
+  assert.equal(calls.length, 4);
+  assert.equal(calls[3].message.text, revised);
+
   for (const [age, code] of [[49, "quota_exhausted"], [168, "oa_window_expired"]]) {
     await pg.query("UPDATE oa_contacts SET interaction_at=$1 WHERE scope=$2 AND target=$3",
       [Date.now() - age * hour, accountScope(account), targetHash]);
     assert.equal((await (await read(threadPath, owner)).json()).sendBlock.code, code);
     assert.equal((await post(threadPath + "/replies", { text: "Guard fixture" }, support)).status, 409);
   }
-  assert.equal(calls.length, 3);
+  assert.equal(calls.length, 4);
   await webhook("unfollow", { oa_id: account.oaId, follower: { id: uid }, event_id: "fixture-unfollow" });
   const following = await (await read("inbox/" + row.conversation_id, owner)).json();
   assert.equal(following.following, false);

@@ -154,7 +154,9 @@ export function createHandlers({
     ),
     http.get(
       prefix + "/agent-router",
-      () => denied("restrictedRead") ?? HttpResponse.json(demoRouter),
+      () => denied("restrictedRead") ?? HttpResponse.json(
+        session()?.role === "owner" ? demoRouter : { status: "available" },
+      ),
     ),
     http.get(
       prefix + "/settings",

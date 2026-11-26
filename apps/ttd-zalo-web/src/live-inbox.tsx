@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { api, ApiError, type OaThread, type OaThreadDetail } from "./api";
+import {
+  api,
+  ApiError,
+  type InboxDraft,
+  type OaThread,
+  type OaThreadDetail,
+} from "./api";
 
 const localDate = new Intl.DateTimeFormat("vi-VN", {
   timeZone: "Asia/Ho_Chi_Minh",
@@ -80,6 +86,129 @@ export function LiveInbox({
   );
 }
 
+const intentLabel = {
+  price: "Hỏi giá",
+  technical: "Kỹ thuật",
+  complaint: "Khiếu nại",
+  other: "Khác",
+};
+const draftState = {
+  pending: "Đang chờ",
+  generating: "Đang soạn nháp",
+  ready: "Chờ duyệt",
+  needs_human: "Cần người",
+  approved: "Đã duyệt",
+};
+const draftReason = {
+  mock: "AI đang chạy giả lập.",
+  budget: "Đang chạm giới hạn ngân sách.",
+  consent: "Chưa đủ quyền xử lý bằng AI.",
+  unavailable: "Chưa nhận được kết quả từ AI.",
+  no_knowledge: "Chưa đủ nguồn tri thức đã xác minh.",
+};
+
+function DraftPanel({
+  draft,
+  busy,
+  update,
+  report,
+}: {
+  draft: InboxDraft;
+  busy: boolean;
+  update: (draft: InboxDraft) => void;
+  report: (work: () => Promise<void>) => Promise<void>;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [edited, setEdited] = useState(draft.text);
+  const ready =
+    draft.state === "ready" ||
+    (draft.state === "needs_human" && draft.reason === "no_knowledge");
+  const open = draft.delivery === "draft";
+  const regenerate = draft.state === "ready" || draft.state === "needs_human";
+  return (
+    <div className="callout">
+      <p>
+        <strong>{draftState[draft.state]}</strong>
+        {draft.intent && " · " + intentLabel[draft.intent]}
+      </p>
+      {draft.reason && <p className="muted">{draftReason[draft.reason]}</p>}
+      {editing ? (
+        <label>
+          Nội dung nháp
+          <textarea
+            rows={4}
+            maxLength={1500}
+            value={edited}
+            onChange={(event) => setEdited(event.target.value)}
+            disabled={busy}
+          />
+        </label>
+      ) : (
+        draft.text && <p className="message-history">{draft.text}</p>
+      )}
+      {draft.sourceIds.length > 0 && (
+        <div>
+          Nguồn tri thức
+          <ul>
+            {draft.sourceIds.map((source) => (
+              <li key={source}>{source}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {open && (ready || regenerate) && (
+        <div className="pair">
+          {ready && (
+            <button
+              type="button"
+              className="secondary"
+              disabled={busy}
+              onClick={() => {
+                setEdited(draft.text);
+                setEditing(!editing);
+              }}
+            >
+              {editing ? "Hủy sửa" : "Sửa"}
+            </button>
+          )}
+          {regenerate && (
+            <button
+              type="button"
+              className="secondary"
+              disabled={busy}
+              onClick={() =>
+                void report(async () =>
+                  update(await api.regenerateDraft(draft.id, draft.version)),
+                )
+              }
+            >
+              Tạo lại
+            </button>
+          )}
+          {ready && (
+            <button
+              type="button"
+              disabled={busy || (editing && !edited.trim())}
+              onClick={() =>
+                void report(async () => {
+                  const approved = await api.approveDraft(
+                    draft.id,
+                    draft.version,
+                    editing ? edited.trim() : undefined,
+                  );
+                  update({ ...draft, ...approved, state: "approved" });
+                })
+              }
+            >
+              Duyệt
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Thread({ id, refresh }: { id: string; refresh: number }) {
   const [detail, setDetail] = useState<OaThreadDetail>();
   const [text, setText] = useState("");
@@ -89,6 +218,33 @@ function Thread({ id, refresh }: { id: string; refresh: number }) {
   const [lockedAfterSend, setLockedAfterSend] = useState(false);
   const [reload, setReload] = useState(0);
   const inFlight = useRef(false);
+  const draft = detail?.aiDraft;
+  const approved =
+    draft?.state === "approved" && draft.delivery === "draft"
+      ? draft
+      : undefined;
+  const replyText = approved?.text ?? text;
+
+  function updateDraft(next: InboxDraft) {
+    setDetail((previous) => previous && { ...previous, aiDraft: next });
+  }
+
+  async function runDraft(work: () => Promise<void>) {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setSending(true);
+    setError("");
+    setNotice("");
+    try {
+      await work();
+    } catch (err) {
+      setError(describe(err));
+    } finally {
+      inFlight.current = false;
+      setSending(false);
+      setReload((value) => value + 1);
+    }
+  }
 
   useEffect(() => {
     let current = true;
@@ -98,7 +254,17 @@ function Thread({ id, refresh }: { id: string; refresh: number }) {
       pending = true;
       try {
         const item = await api.oaThread(id);
-        if (current) setDetail(item);
+        if (current)
+          setDetail((previous) => {
+            const known = previous?.aiDraft;
+            const incoming = item.aiDraft;
+            return known &&
+              incoming &&
+              known.id === incoming.id &&
+              known.version > incoming.version
+              ? { ...item, aiDraft: known }
+              : item;
+          });
       } catch (err) {
         if (current) {
           setDetail(undefined);
@@ -122,7 +288,7 @@ function Thread({ id, refresh }: { id: string; refresh: number }) {
       !detail ||
       detail.sendBlock ||
       lockedAfterSend ||
-      !text.trim()
+      !replyText.trim()
     )
       return;
     inFlight.current = true;
@@ -130,7 +296,27 @@ function Thread({ id, refresh }: { id: string; refresh: number }) {
     setError("");
     setNotice("");
     try {
-      await api.replyOa(id, text.trim());
+      if (approved) {
+        const result = await api.approve(
+          approved.id,
+          approved.version,
+          approved.text,
+        );
+        updateDraft({
+          ...approved,
+          delivery: result.delivery,
+          version: result.version,
+        });
+        if (result.delivery !== "sent") {
+          setLockedAfterSend(result.delivery === "unknown_delivery");
+          setError(
+            result.delivery === "unknown_delivery"
+              ? "Chưa rõ đã giao. Kiểm tra lịch sử trước khi soạn tin mới."
+              : "OA chưa tiếp nhận tin trả lời.",
+          );
+          return;
+        }
+      } else await api.replyOa(id, text.trim());
       setText("");
       setNotice("OA đã tiếp nhận tin trả lời.");
     } catch (err) {
@@ -183,9 +369,25 @@ function Thread({ id, refresh }: { id: string; refresh: number }) {
               </li>
             ))}
           </ol>
+          {detail.estimatedAiUsdToday !== undefined && (
+            <p className="muted">
+              Chi phí AI soạn nháp hôm nay (ước tính) ·{" "}
+              {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "USD",
+                maximumFractionDigits: 6,
+              }).format(detail.estimatedAiUsdToday)}
+            </p>
+          )}
           <h3>Bản nháp AI</h3>
-          {detail.aiDraft ? (
-            <p className="callout">{detail.aiDraft.text}</p>
+          {draft ? (
+            <DraftPanel
+              key={draft.id + ":" + draft.version}
+              draft={draft}
+              busy={sending}
+              update={updateDraft}
+              report={runDraft}
+            />
           ) : (
             <p className="muted">Chưa có bản nháp.</p>
           )}
@@ -199,9 +401,10 @@ function Thread({ id, refresh }: { id: string; refresh: number }) {
             <label>
               Nội dung trả lời
               <textarea
-                value={text}
+                value={replyText}
                 onChange={(event) => setText(event.target.value)}
                 rows={4}
+                readOnly={Boolean(approved)}
                 required
                 maxLength={1500}
                 disabled={
@@ -219,7 +422,7 @@ function Thread({ id, refresh }: { id: string; refresh: number }) {
                 sending ||
                 Boolean(detail.sendBlock) ||
                 lockedAfterSend ||
-                !text.trim()
+                !replyText.trim()
               }
               aria-describedby={
                 detail.sendBlock ? "oa-inbox-send-block" : undefined

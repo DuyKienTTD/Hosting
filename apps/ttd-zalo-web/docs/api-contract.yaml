@@ -463,7 +463,7 @@ paths:
   /agent-router:
     get:
       operationId: readAgentRouter
-      description: 'Chỉ Chủ dự án và A0 được xem. A0 không có quyền sửa. Phản hồi Cache-Control: no-store.'
+      description: 'Chủ dự án nhận cấu hình và chi phí AI. A0 chỉ nhận trạng thái available hoặc capped. Phản hồi Cache-Control: no-store.'
       x-roles:
       - owner
       - a0
@@ -473,7 +473,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Router'
+                oneOf:
+                - $ref: '#/components/schemas/Router'
+                - $ref: '#/components/schemas/RouterStatus'
         '401':
           description: Chưa xác thực
           content:
@@ -665,6 +667,127 @@ paths:
         '409': *id004
         '502': *id004
         '503': *id004
+  /conversations/{id}/drafts:
+    parameters:
+    - &id007
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    get:
+      operationId: listConversationDrafts
+      x-roles:
+      - owner
+      - support
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - drafts
+                properties:
+                  drafts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/InboxDraft'
+        '401': &id006
+          description: Yêu cầu bị từ chối
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403': *id006
+  /drafts/{id}/regenerate:
+    parameters:
+    - *id007
+    post:
+      operationId: regenerateInboxDraft
+      x-roles:
+      - owner
+      - support
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - version
+              properties:
+                version:
+                  type: integer
+                  minimum: 1
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxDraft'
+        '400': *id006
+        '401': *id006
+        '403': *id006
+        '404': *id006
+        '409': *id006
+  /drafts/{id}/approve:
+    parameters:
+    - *id007
+    post:
+      operationId: approveInboxDraft
+      x-roles:
+      - owner
+      - support
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - version
+              properties:
+                version:
+                  type: integer
+                  minimum: 1
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 1500
+                  description: Nội dung người vận hành đã sửa. Duyệt khóa nội dung và không gửi OA.
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - id
+                - conversationId
+                - version
+                - text
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  conversationId:
+                    type: string
+                    format: uuid
+                  version:
+                    type: integer
+                    minimum: 1
+                  text:
+                    type: string
+        '400': *id006
+        '401': *id006
+        '403': *id006
+        '404': *id006
+        '409': *id006
 components:
   securitySchemes:
     operatorSession:
@@ -848,13 +971,13 @@ components:
       - unit
       - quantity
       properties:
-        customerId: &id006
+        customerId: &id008
           type: string
-        productId: &id007
+        productId: &id009
           type: string
-        unit: &id008
+        unit: &id010
           $ref: '#/components/schemas/Unit'
-        quantity: &id009
+        quantity: &id011
           type: number
           minimum: 0.001
           maximum: 10000
@@ -873,10 +996,10 @@ components:
       properties:
         id:
           type: string
-        customerId: *id006
-        productId: *id007
-        unit: *id008
-        quantity: *id009
+        customerId: *id008
+        productId: *id009
+        unit: *id010
+        quantity: *id011
         totalMillimetres:
           type: integer
           minimum: 1
@@ -986,6 +1109,42 @@ components:
           nullable: true
         model:
           type: string
+        unassignedUsd:
+          type: number
+          minimum: 0
+        agents:
+          type: array
+          items:
+            type: object
+            required: [id, model, permission, enabled, blocked, usedUsd, usedVnd]
+            properties:
+              id:
+                type: string
+              model:
+                type: string
+              permission:
+                type: string
+                enum: [read, propose]
+              enabled:
+                type: boolean
+              blocked:
+                type: boolean
+              usedUsd:
+                type: number
+                minimum: 0
+              usedVnd:
+                type: integer
+                minimum: 0
+                nullable: true
+            additionalProperties: false
+      additionalProperties: false
+    RouterStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [available, capped]
       additionalProperties: false
     Activity:
       type: object
@@ -1172,16 +1331,16 @@ components:
     OaThread:
       type: object
       properties:
-        id: &id010
+        id: &id012
           type: string
           format: uuid
-        customerId: &id011
+        customerId: &id013
           type: string
           format: uuid
-        lastInteractionAt: &id012
+        lastInteractionAt: &id014
           type: string
           format: date-time
-        following: &id013
+        following: &id015
           type: boolean
           nullable: true
       required:
@@ -1192,10 +1351,10 @@ components:
     OaThreadDetail:
       type: object
       properties:
-        id: *id010
-        customerId: *id011
-        lastInteractionAt: *id012
-        following: *id013
+        id: *id012
+        customerId: *id013
+        lastInteractionAt: *id014
+        following: *id015
         messages:
           type: array
           items:
@@ -1234,18 +1393,65 @@ components:
           nullable: true
         aiDraft:
           type: object
-          properties:
+          required: &id016
+          - id
+          - version
+          - text
+          - state
+          - intent
+          - reason
+          - sourceIds
+          - delivery
+          properties: &id017
             id:
               type: string
-            revision:
+              format: uuid
+            version:
               type: integer
+              minimum: 1
             text:
               type: string
-          required:
-          - id
-          - revision
-          - text
+            state:
+              type: string
+              enum:
+              - pending
+              - generating
+              - ready
+              - needs_human
+              - approved
+            intent:
+              type: string
+              nullable: true
+              enum:
+              - price
+              - technical
+              - complaint
+              - other
+              - null
+            reason:
+              type: string
+              nullable: true
+              enum:
+              - mock
+              - budget
+              - consent
+              - unavailable
+              - no_knowledge
+              - null
+            sourceIds:
+              type: array
+              items:
+                type: string
+            delivery:
+              type: string
+            conversationId:
+              type: string
+              format: uuid
           nullable: true
+        estimatedAiUsdToday:
+          type: number
+          minimum: 0
+          description: Chỉ owner. USD ước tính theo ledger AI soạn nháp trong ngày giờ Việt Nam.
       required:
       - id
       - customerId
@@ -1254,6 +1460,10 @@ components:
       - messages
       - sendBlock
       - aiDraft
+    InboxDraft:
+      type: object
+      required: *id016
+      properties: *id017
 x-operator-permissions:
   sharedScreens:
   - overview

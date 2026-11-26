@@ -74,7 +74,8 @@ test("OA drafts use budgeted Router choices, persist approval and never initiate
     assert.equal(store.db.prepare("SELECT count(*)::int AS n FROM ledger WHERE id LIKE 'oa-draft:%' AND amount>0 AND input=100").get().n, 2);
     assert.equal(service.list(ready.conversationId).length, 1);
     assert.deepEqual(await service.find(ready.conversationId, { id: operator, role: "support", label: "fixture" }),
-      { id, revision: ready.version, text: ready.text });
+      { id, version: ready.version, text: ready.text, state: "ready", intent: "price", reason: null,
+        sourceIds: ["price-demo"], delivery: "draft" });
     assert.equal(await service.find(ready.conversationId, { id: operator, role: "sales", label: "fixture" }), null);
     const origin = "https://fixture.invalid";
     const api = webApi(store, config, origin, undefined, undefined, undefined, undefined, undefined, service);

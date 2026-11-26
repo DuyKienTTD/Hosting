@@ -972,6 +972,8 @@ export function Agents({ data, refresh, user, busy, run }: Props) {
       <Card title="Hostinger AI Router">
         {error ? (
           <p role="alert">{error}</p>
+        ) : router && "status" in router ? (
+          <p role="status">{router.status === "capped" ? "AI Router đã chạm giới hạn" : "AI Router có thể sử dụng"}</p>
         ) : router ? (
           <>
             <dl>

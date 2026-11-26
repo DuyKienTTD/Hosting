@@ -15,7 +15,7 @@ sensitivity: public
 | Báo giá | Xem, lưu, duyệt và gửi OA | Xem | Xem, lưu, duyệt và gửi OA | Xem |
 | Khách hàng & theo sát | Xem | Xem | Xem | Xem |
 | Phòng điều phối | Xem, đăng trao đổi, tạo phiếu | Xem | Xem | Xem |
-| Agent & AI Router | Xem | Chặn | Chặn | Xem |
+| Agent & AI Router | Xem cấu hình và chi phí | Chặn | Chặn | Chỉ xem trạng thái sử dụng |
 | Kênh Zalo | Xem, bật kill switch | Xem | Xem | Xem |
 | Dữ liệu & quyền riêng tư | Xem, yêu cầu xóa | Xem | Xem | Xem |
 | Cài đặt | Xem, tạo tài khoản Bán hàng và CSKH | Chặn | Chặn | Xem |

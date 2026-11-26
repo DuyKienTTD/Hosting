@@ -38,12 +38,15 @@ export class OaAiDrafts implements InboxDraftReader {
 
   async find(conversationId: string, operator: Parameters<InboxDraftReader["find"]>[1]) {
     if (operator.role !== "owner" && operator.role !== "support") return null;
-    const row = this.store.db.prepare(`SELECT d.id,d.revision,d.body,i.target ${sourceJoin}
-      WHERE d.conversation_id=? AND d.delivery='draft'
+    const row = this.store.db.prepare(`SELECT ${projection},i.target ${sourceJoin}
+      WHERE d.conversation_id=?
       ORDER BY m.received_at DESC,d.id DESC LIMIT 1`).get(conversationId);
-    if (!row || typeof row.body !== "string" || !row.body.trim() ||
+    if (!row ||
         this.store.contact(String(row.target), this.clock())?.retain !== 1) return null;
-    return { id: String(row.id), revision: Number(row.revision), text: row.body };
+    return { id: String(row.id), version: Number(row.version), text: String(row.text), state: String(row.state),
+      intent: row.intent === null ? null : String(row.intent), reason: row.reason === null ? null : String(row.reason),
+      sourceIds: Array.isArray(row.sourceIds) ? row.sourceIds.filter((value): value is string => typeof value === "string") : [],
+      delivery: String(row.delivery) };
   }
 
   get(id: string) {
@@ -66,12 +69,12 @@ export class OaAiDrafts implements InboxDraftReader {
     return this.generate(id, version, true);
   }
 
-  approve(id: string, version: number, operator: string) {
+  approve(id: string, version: number, operator: string, editedText?: string) {
     const row = this.store.db.prepare(`UPDATE web_reply_drafts d SET ai_state='approved', revision=revision+1,
-      ai_approved_by=?,ai_approved_at=clock_timestamp()
+      ai_approved_by=?,body=coalesce(?::text,body),ai_approved_at=clock_timestamp()
       WHERE d.id=? AND d.revision=? AND d.delivery='draft' AND (d.ai_state='ready' OR (d.ai_state='needs_human' AND d.ai_reason='no_knowledge'))
         AND EXISTS(SELECT 1 FROM visible_messages m WHERE m.id=d.ai_message_id)
-      RETURNING d.id,d.conversation_id AS "conversationId",d.revision AS version,d.body AS text`).get(operator, id, version);
+      RETURNING d.id,d.conversation_id AS "conversationId",d.revision AS version,d.body AS text`).get(operator, editedText ?? null, id, version);
     return row;
   }
 
