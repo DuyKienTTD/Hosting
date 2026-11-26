@@ -418,3 +418,14 @@ test('revoke after commit emits durable owner audit without another click', asyn
   assert.equal(f.messages.filter(message => message.type === 'audit_alert').length, 1)
   assert.equal(await f.clicks(), 1)
 })
+
+test('installed smoke worker clamps budgets and does not authorize peers outside its list', async t => {
+  const f = await setup(t)
+  f.worker.smokePeers = new Set(['fixture-other'])
+  await f.receive({ type: 'policy', hour: 100, day: 100, adsEnabled: false, expiresAt: Date.now() + 20_000 })
+  assert.equal(f.worker.policy.hour, 2)
+  assert.equal(f.worker.policy.day, 5)
+  await f.receive(f.send)
+  assert.equal(f.messages.at(-1).result, 'rejected')
+  assert.equal(await f.clicks(), 0)
+})

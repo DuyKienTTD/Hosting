@@ -23,6 +23,15 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '24'
+      - name: Parse Windows installation scripts
+        shell: powershell
+        run: |
+          foreach ($script in @('install-nick-worker.ps1', 'start-nick-worker.ps1')) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $script), [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count) { throw ($errors | Out-String) }
+          }
       - run: npm ci
       - run: npx playwright install chromium
       - run: npm test
