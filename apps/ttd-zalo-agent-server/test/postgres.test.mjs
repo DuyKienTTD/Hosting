@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readdirSync, rmSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { Pool } from "pg";
 import { authenticate, PostgresRepository } from "../dist/ttd-zalo-agent-server/src/data/repository.js";
-import { requestDeletion, runRetention } from "../dist/ttd-zalo-agent-server/src/data/deletion.js";
+import { cleanPendingPurges, requestDeletion, runRetention } from "../dist/ttd-zalo-agent-server/src/data/deletion.js";
 
 const config = process.env;
 test("Postgres grants, deletion, encrypted backup and restore", { skip: config.RUN_POSTGRES_TESTS !== "1" }, async t => {
@@ -92,19 +92,20 @@ test("Postgres grants, deletion, encrypted backup and restore", { skip: config.R
     await admin.query("INSERT INTO legal_holds(message_id,reason) VALUES($1,'fixture')", [record]);
     await runRetention(worker, join(root, "unavailable"));
     await admin.query("UPDATE legal_holds SET released_at=now() WHERE message_id=$1", [record]);
+    const attempt = randomUUID();
     const runtimeRole = new Pool({ user: "data_runtime", password: config.DATA_RUNTIME_PASSWORD });
     try {
       for (const role of [worker, app, runtimeRole, admin]) {
         await assert.rejects(role.query("SELECT authorize_purge($1,1,1)", [record]), /does not exist/);
         await assert.rejects(role.query("DELETE FROM messages WHERE id=$1", [record]),
           /permission denied|purge_receipt_required/);
-        await assert.rejects(role.query("SELECT purge_message($1,1,1,$2)", [record, "0".repeat(64)]),
+        await assert.rejects(role.query("SELECT purge_message($1,1,1,$2,$3)", [record, attempt, "0".repeat(64)]),
           /permission denied|purge_receipt_required/);
       }
       for (const role of [worker, app, runtimeRole]) {
         await assert.rejects(role.query("SELECT * FROM purge_private.signing_key"), /permission denied/);
-        await assert.rejects(role.query("SELECT purge_private.replay_tombstone($1,$2,$3,1,1,$4)",
-          [record, conversation, "0".repeat(64), "0".repeat(64)]), /permission denied/);
+        await assert.rejects(role.query("SELECT purge_private.replay_tombstone($1,$2,$3,$4,1,1,$5)",
+          [attempt, record, conversation, "0".repeat(64), "0".repeat(64)]), /permission denied/);
       }
       const session = await worker.connect();
       try {
@@ -113,14 +114,14 @@ test("Postgres grants, deletion, encrypted backup and restore", { skip: config.R
         await session.query("INSERT INTO signing_key VALUES(true,$1)", [decoyKey]);
         const eventKey = (await admin.query("SELECT event_id FROM messages WHERE id=$1", [record])).rows[0].event_id;
         const decoySignature = createHmac("sha256", decoyKey)
-          .update(["z4-tombstone-v1", record, conversation, eventKey, 1, 1].join("|")).digest("hex");
-        await assert.rejects(session.query("SELECT purge_message($1,1,1,$2)", [record, decoySignature]),
+          .update(["z4-tombstone-v2", "pending", attempt, record, conversation, eventKey, 1, 1].join("|")).digest("hex");
+        await assert.rejects(session.query("SELECT purge_message($1,1,1,$2,$3)", [record, attempt, decoySignature]),
           /purge_receipt_required/);
       } finally {
         await session.query("DROP TABLE IF EXISTS pg_temp.signing_key");
         session.release();
       }
-      assert.equal((await worker.query("SELECT purge_message($1,1,1,NULL) AS eligible", [record])).rows[0].eligible, true);
+      assert.equal((await worker.query("SELECT purge_message($1,1,1,$2,NULL) AS eligible", [record, attempt])).rows[0].eligible, true);
       assert.equal((await admin.query("SELECT id FROM messages WHERE id=$1", [record])).rowCount, 1);
       await assert.rejects(admin.query("TRUNCATE messages CASCADE"), /purge_receipt_required/);
     } finally { await runtimeRole.end(); }
@@ -137,6 +138,15 @@ test("Postgres grants, deletion, encrypted backup and restore", { skip: config.R
       } finally { await restored.end(); }
     } finally { await admin.query(`DROP DATABASE IF EXISTS ${beforeArchive}`); }
 
+    const signingKey = config.DATA_TOMBSTONE_KEY;
+    try {
+      process.env.DATA_TOMBSTONE_KEY = randomBytes(32).toString("hex");
+      await assert.rejects(runRetention(worker, root), /purge_receipt_required/);
+    } finally { process.env.DATA_TOMBSTONE_KEY = signingKey; }
+    const pending = join(root, "tombstones", "pending");
+    assert.equal(readdirSync(pending).length, 1);
+    assert.equal((await admin.query("SELECT count(*)::int AS count FROM purge_private.commits")).rows[0].count, 0);
+
     await admin.query(`CREATE FUNCTION fixture_purge_failure() RETURNS trigger LANGUAGE plpgsql AS $$
       BEGIN RAISE EXCEPTION 'fixture_purge_failed'; END $$;
       CREATE TRIGGER fixture_purge_failure AFTER DELETE ON messages
@@ -149,9 +159,71 @@ test("Postgres grants, deletion, encrypted backup and restore", { skip: config.R
     assert.equal((await admin.query("SELECT id FROM messages WHERE id=$1", [record])).rowCount, 1);
     assert.equal((await admin.query("SELECT record_id FROM restore_tombstones WHERE record_id=$1", [record])).rowCount, 0);
     assert.equal((await admin.query("SELECT record_id FROM deletion_log WHERE record_id=$1 AND action='purge'", [record])).rowCount, 0);
-    assert.ok(readdirSync(join(root, "tombstones")).includes(record + ".json"));
-    await runRetention(worker, root);
+    assert.equal(readdirSync(pending).length, 2);
+    assert.equal((await admin.query("SELECT count(*)::int AS count FROM purge_private.commits")).rows[0].count, 0);
+    await admin.query("INSERT INTO legal_holds(message_id,reason) VALUES($1,'fixture rollback hold')", [record]);
+    await new Promise(resolve => setTimeout(resolve, 1100));
+    execFileSync("sh", ["ops/backup.sh"], { env });
+    const heldDump = readdirSync(join(root, "dumps")).sort().at(-1);
+    assert.notEqual(heldDump, dump);
+    const probeRestore = async (backup, suffix, expectedAudit) => {
+      const database = restore + suffix;
+      try {
+        execFileSync("sh", ["ops/restore.sh", backup, database], { env });
+        const snapshot = new Pool({ database });
+        try {
+          assert.equal((await snapshot.query("SELECT id FROM messages WHERE id=$1", [record])).rowCount, 1);
+          if (expectedAudit) assert.ok((await snapshot.query("SELECT 1 FROM audit_log WHERE action=$1 AND record_id=$2",
+            [expectedAudit, record])).rowCount);
+        } finally { await snapshot.end(); }
+      } finally { await admin.query(`DROP DATABASE IF EXISTS ${database}`); }
+    };
+    await probeRestore(heldDump, "_rollback", "pending_ignored_no_commit");
+    await admin.query("UPDATE legal_holds SET released_at=now() WHERE message_id=$1", [record]);
+
+    // A filesystem obstruction prevents publication after the database commits.
+    const confirmed = join(root, "tombstones", "confirmed");
+    writeFileSync(confirmed, "fixture");
+    await admin.query(`CREATE FUNCTION fixture_check_commit() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN
+        IF EXISTS (SELECT 1 FROM committed_purges() AS receipt WHERE receipt.purge_id=NEW.purge_id)
+          THEN RAISE EXCEPTION 'fixture_confirmation_before_commit'; END IF;
+        RETURN NEW;
+      END $$;
+      CREATE TRIGGER fixture_check_commit AFTER INSERT ON purge_private.commits
+        FOR EACH ROW EXECUTE FUNCTION fixture_check_commit()`);
+    try {
+      await assert.rejects(runRetention(worker, root),
+        error => !String(error).includes("fixture_confirmation_before_commit"));
+    } finally {
+      await admin.query("DROP TRIGGER fixture_check_commit ON purge_private.commits; DROP FUNCTION fixture_check_commit()");
+    }
     assert.equal((await admin.query("SELECT id FROM messages WHERE id=$1", [record])).rowCount, 0);
+    assert.equal((await worker.query("SELECT * FROM committed_purges()")).rowCount, 1);
+    rmSync(confirmed);
+    await probeRestore(dump, "_pending", "pending_ignored_no_commit");
+    assert.equal(readdirSync(pending).length, 3);
+    const expired = new Date(Date.now() - 48 * 60 * 60 * 1000);
+    for (const name of readdirSync(pending)) utimesSync(join(pending, name), expired, expired);
+    await cleanPendingPurges(worker, root);
+    assert.equal(readdirSync(pending).length, 1, "unpublished committed pending survives cleanup");
+    await admin.query(`CREATE FUNCTION fixture_ack_failure() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN RAISE EXCEPTION 'fixture_ack_failed'; END $$;
+      CREATE TRIGGER fixture_ack_failure BEFORE UPDATE ON purge_private.commits
+        FOR EACH ROW EXECUTE FUNCTION fixture_ack_failure()`);
+    try {
+      await assert.rejects(runRetention(worker, root), /fixture_ack_failed/);
+      assert.equal(readdirSync(confirmed).length, 1);
+      assert.equal((await worker.query("SELECT * FROM committed_purges()")).rowCount, 1);
+    } finally {
+      await admin.query("DROP TRIGGER fixture_ack_failure ON purge_private.commits; DROP FUNCTION fixture_ack_failure()");
+    }
+    await runRetention(worker, root);
+    assert.equal(readdirSync(confirmed).length, 1);
+    assert.equal((await worker.query("SELECT * FROM committed_purges()")).rowCount, 0);
+    await cleanPendingPurges(worker, root);
+    assert.equal(readdirSync(pending).length, 0);
+    await probeRestore(heldDump, "_held", "purge_blocked");
     assert.equal(await repository.ingest(channel, conversation, "fixture-event", "replay after purge"), false);
     await assert.rejects(admin.query("DELETE FROM deletion_log"), /append_only/);
     execFileSync("sh", ["ops/restore.sh", dump, restore], { env });

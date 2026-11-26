@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
 import { Pool } from "pg";
 import { authenticate, PostgresRepository, transaction, uuid } from "./repository.js";
-import { requestDeletion, runRetention } from "./deletion.js";
+import { cleanPendingPurges, requestDeletion, runRetention } from "./deletion.js";
 
 const command = process.argv[2] ?? "serve";
 const worker = command !== "serve";
@@ -19,8 +19,14 @@ const env = {
   // The deletion credential is never accepted by the application listener.
   ...(worker ? {} : { DATA_TOKEN_RETENTION: undefined }),
 };
+let nextPendingCleanup = 0;
 const runOnce = async () => {
-  await runRetention(pool, process.env.BACKUP_REMOTE ?? "");
+  const target = process.env.BACKUP_REMOTE ?? "";
+  await runRetention(pool, target);
+  if (Date.now() >= nextPendingCleanup) {
+    await cleanPendingPurges(pool, target);
+    nextPendingCleanup = Date.now() + 60 * 60 * 1000;
+  }
   // This stage acknowledges intake only. OA and AI processing are subsequent steps.
   await transaction(pool, async db => {
     await db.query(`WITH due AS (

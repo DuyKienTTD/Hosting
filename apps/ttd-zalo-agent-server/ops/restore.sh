@@ -27,6 +27,9 @@ migrations="$script_dir/../postgres"
 if [ "$(psql -X -A -t -v ON_ERROR_STOP=1 -d "$db" -c "SELECT to_regnamespace('purge_private') IS NULL")" = t ]; then
   psql -X -v ON_ERROR_STOP=1 -d "$db" -f "$migrations/003-purge.sql"
 fi
+if [ "$(psql -X -A -t -v ON_ERROR_STOP=1 -d "$db" -c "SELECT to_regclass('purge_private.commits') IS NULL")" = t ]; then
+  psql -X -v ON_ERROR_STOP=1 -d "$db" -f "$migrations/004-purge-confirmation.sql"
+fi
 psql -X -v ON_ERROR_STOP=1 -d "$db" -f "$migrations/purge-key.sql"
 python3 "$script_dir/restore-tombstones.py" "$tmp/tombstones" > "$tmp/replay.sql"
 psql -v ON_ERROR_STOP=1 -d "$db" -f "$tmp/replay.sql"

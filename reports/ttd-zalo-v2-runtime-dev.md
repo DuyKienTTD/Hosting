@@ -156,3 +156,9 @@ CI chạy toàn bộ suite runtime với Postgres service container. Ca tích h�
 Migration 003 bỏ `authorize_purge`. Chỉ `data_worker` được gọi entrypoint purge từ các vai trò dịch vụ. Worker giữ transaction mở, ghi và đọc lại tombstone ở kho độc lập, rồi ký biên nhận gắn với đúng bản ghi và phiên bản. PostgreSQL xác thực biên nhận trước khi ghi audit và xóa. Trigger chặn DELETE và TRUNCATE trực tiếp thiếu biên nhận.
 
 Hồi quy Postgres tái tạo backup → cách ly → hết hạn → gọi trực tiếp theo từng vai trò → restore. Bản ghi vẫn còn khi purge bị từ chối. Khi SQL lỗi sau khi xóa, dữ liệu và audit nội bộ rollback, tombstone đã ghi ngoài DB vẫn bền. Lần chạy lại tái sử dụng tombstone, purge thành công, và restore backup cũ không làm bản ghi sống lại. `DEPLOY.md` ghi cách cấp khóa và áp migration trước khi chạy worker.
+
+## Z4-S1-FIX2 · Tombstone hai pha
+
+Migration 004 lưu biên nhận commit theo `purge_id` và phiên bản trong transaction xóa. Worker ghi pending trước khi xóa, chỉ xuất bản confirmed có proof lấy từ biên nhận đã commit. Lần chạy lại đối soát xác nhận chưa xuất bản. Job dọn pending quá 24 giờ theo biên nhận của DB nguồn, giữ các lượt commit đang chờ xuất bản.
+
+Restore chỉ áp confirmed có proof hợp lệ lên bảng tin nhắn. Legal hold, danh tính bản ghi lệch và phiên bản mới hơn chặn replay, giữ bản ghi và ghi cảnh báo. Pending và tệp cũ không có bằng chứng commit không được áp. Hồi quy Postgres tái hiện rollback sau DELETE, đặt legal hold rồi backup/restore, cùng các lỗi sau ghi pending, sau commit trước confirm và sau confirm trước ghi nhận xuất bản. Nếu mất DB nguồn trước khi xuất bản confirmed và bản backup không chứa commit, restore giữ bản ghi vì thiếu bằng chứng xác nhận.
