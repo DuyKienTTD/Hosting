@@ -129,6 +129,7 @@ export type Router = { status: "available" | "capped" } | {
   usedVnd: number | null;
   model: string;
   unassignedUsd?: number;
+  draftsEnabled?: boolean;
   agents?: { id: string; model: string; permission: "read" | "propose"; enabled: boolean; blocked: boolean;
     usedUsd: number; usedVnd: number | null }[];
 };

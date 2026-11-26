@@ -228,6 +228,7 @@ export function webApi(store: Store, config: Config, origin: string,
         const costs = ownerAiCosts(principal, () => ({
           provider: budget.provider, model: budget.byAgent.router,
           ...room?.ownerView(principal, usdVnd ?? 0),
+          ...(drafts ? { draftsEnabled: drafts.enabled() } : {}),
           budgetVnd: usdVnd ? Math.round(cap * usdVnd) : null,
           usedVnd: usdVnd ? Math.round(used * usdVnd / 1e9) : null,
         }));
@@ -249,15 +250,19 @@ export function webApi(store: Store, config: Config, origin: string,
       }
       const toggle = /^\/api\/v1\/agent-router\/([^/]+)\/enabled$/.exec(path);
       const review = /^\/api\/v1\/work-items\/([^/]+)\/review$/.exec(path);
-      if (room && (toggle || review)) {
+      if ((drafts && toggle?.[1] === "drafts") || (room && (toggle || review))) {
         if (role !== "owner") return deny();
         const input = await readJson(request);
         if (input && Object.keys(input).length === 1) {
-          if (toggle && typeof input.enabled === "boolean" && room.toggle(principal, toggle[1], input.enabled)) {
+          if (drafts && toggle?.[1] === "drafts" && typeof input.enabled === "boolean") {
+            drafts.setEnabled(input.enabled);
+            return json(response, 200, { enabled: input.enabled });
+          }
+          if (toggle && typeof input.enabled === "boolean" && room?.toggle(principal, toggle[1], input.enabled)) {
             return json(response, 200, { enabled: input.enabled });
           }
           if (review && uuid(review[1]) && (input.decision === "accept" || input.decision === "dismiss")) {
-            return room.review(principal, review[1], input.decision)
+            return room?.review(principal, review[1], input.decision)
               ? json(response, 200, { status: "done" })
               : json(response, 409, { message: "Phiếu không còn chờ duyệt." });
           }

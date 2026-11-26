@@ -14,6 +14,8 @@ import { Pool } from "pg";
 import { PostgresRuntimeDatabase } from "../dist/ttd-zalo-agent-server/src/data/runtime-database.js";
 import { Store } from "../dist/ttd-zalo-agent-server/src/store.js";
 import { Guard } from "../dist/ttd-zalo-agent-server/src/guard.js";
+import { OaAiDrafts } from "../dist/ttd-zalo-agent-server/src/web/ai-drafts.js";
+import { liveProvider, readLiveWiring } from "../dist/ttd-zalo-agent-server/src/live-wiring.js";
 import { oaQuotes } from "../dist/ttd-zalo-agent-server/src/web/oa-quotes.js";
 import { Runtime } from "../dist/ttd-zalo-agent-server/src/runtime.js";
 import { FakeProvider } from "../dist/ttd-zalo-agent-server/src/provider.js";
@@ -32,7 +34,7 @@ async function server(t, listener) {
   return `http://127.0.0.1:${running.address().port}`;
 }
 
-async function fixture(t) {
+async function fixture(t, extraMigrations = []) {
   const schema = "oa_test_" + randomUUID().replaceAll("-", "");
   const root = new Pool();
   const admin = new Pool({ options: "-c search_path=" + schema });
@@ -51,6 +53,9 @@ async function fixture(t) {
   }
   const runtimeGrants = await readFile(new URL("../postgres/runtime-grants.sql", import.meta.url), "utf8");
   await admin.query(runtimeGrants.split("\n").filter(line => line.startsWith("GRANT ")).join("\n"));
+  for (const file of extraMigrations) {
+    await admin.query(await readFile(new URL("../postgres/" + file, import.meta.url), "utf8"));
+  }
   await root.query("GRANT USAGE ON SCHEMA " + schema + " TO data_runtime");
   const identity = randomUUID();
   const store = new Store(db, identity);
@@ -225,6 +230,69 @@ test("OA runtime consumes the queue and Guard records a provider ambiguity once 
   assert.equal(f.calls.send.length, before + 2);
   assert.equal(f.store.setting("ADS_ENABLED"), 0);
 });
+
+test("live OA in mock channel mode drafts under global STOP without sending or retaining unconsented text",
+  { skip: !postgres }, async t => {
+    const f = await fixture(t, ["009-web-operator.sql", "012-ai-drafts.sql", "016-draft-consent-marker.sql"]);
+    const config = structuredClone(defaults);
+    const wiring = readLiveWiring({
+      OA_MODE: "live", CHANNEL_SMOKE_ONLY: "0", AI_MODE: "live", CHANNEL_MODE: "mock",
+      ZALO_APP_ID: f.account.appId, ZALO_OA_ID: f.account.oaId, ZALO_APP_SECRET: f.appSecret,
+      ZALO_WEBHOOK_SECRET: f.account.webhookSecret, ZALO_OA_ENCRYPTION_KEY: randomBytes(32).toString("hex"),
+      AI_ROUTER_API_KEY: randomUUID(), AI_MODEL_ALLOWLIST: config.budget.byAgent.support,
+      AI_ROUTER_RATE_MULTIPLIER: "1", AI_ROUTER_DAILY_USD: "1", AI_DAILY_TOKENS: "50000", AI_MONTHLY_TOKENS: "500000",
+    }, config, false, "mock");
+    assert.equal(wiring.oaMode, "live");
+    assert.equal(wiring.aiMode, "live");
+    let calls = 0;
+    const provider = liveProvider(wiring, config, async (_url, init) => {
+      calls++;
+      const request = JSON.parse(init.body);
+      assert.equal(JSON.parse(request.messages[0].content).purpose, "classify_customer_intent");
+      return Response.json({ model: request.model, stop_reason: "tool_use", usage: { input_tokens: 100, output_tokens: 20 },
+        content: [{ type: "tool_use", name: "propose", input: { choice: "price" } }] });
+    });
+    const drafts = new OaAiDrafts(f.store, config, provider, true, f.clock);
+    const runtime = new Runtime(f.store, f.channel, provider, config, f.clock, [], true, drafts);
+    f.consent();
+    f.store.stop("global", true);
+    const event = f.message("budget_fixture");
+    event.message.text = "Xin báo giá SKU UNKNOWN-01.";
+    assert.equal((await f.hook(event)).status, 200);
+    assert.equal((await f.hook(event)).status, 200);
+    await runtime.tick();
+    const { rows } = await f.pool.query("SELECT id,inbound_id,ai_state,ai_reason,ai_intent,ai_message_id FROM web_reply_drafts");
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].ai_state, "needs_human");
+    assert.equal(rows[0].ai_reason, "no_knowledge");
+    assert.equal(rows[0].ai_intent, "price");
+    assert.ok(rows[0].ai_message_id);
+    assert.equal(calls, 1);
+    assert.equal((await f.pool.query("SELECT 1 FROM ledger WHERE state='settled'")).rowCount, 1);
+    assert.equal(await runtime.guard.dispatch({ agent: "support", kind: "reply", id: "fixture_stopped", origin: rows[0].inbound_id,
+      target: f.target, thread: f.target, text: "Fixture", revision: f.store.policy(f.hashed, "support", f.clock()).revision,
+      epoch: f.store.setting("epoch") }), "stopped");
+
+    const noConsent = f.message("without_consent");
+    noConsent.sender.id = "fixture_no_consent";
+    assert.equal((await f.hook(noConsent)).status, 200);
+    await runtime.tick();
+    const marker = (await f.pool.query("SELECT id,body,ai_state,ai_reason,ai_message_id FROM web_reply_drafts WHERE ai_reason='consent'")).rows[0];
+    assert.deepEqual(marker && [marker.body, marker.ai_state, marker.ai_reason, marker.ai_message_id], ["", "needs_human", "consent", null]);
+    assert.equal(drafts.get(marker.id).reason, "consent");
+    assert.equal(await drafts.regenerate(marker.id, drafts.get(marker.id).version), undefined);
+    assert.equal((await f.pool.query("SELECT id FROM visible_messages")).rowCount, 1);
+    assert.equal(calls, 1);
+    assert.equal((await f.pool.query("SELECT id FROM ledger")).rowCount, 1);
+
+    drafts.setEnabled(false);
+    assert.equal((await f.hook(f.message("drafts_disabled"))).status, 200);
+    await runtime.tick();
+    assert.equal((await f.pool.query("SELECT 1 FROM web_reply_drafts WHERE ai_reason='unavailable'")).rowCount, 1);
+    assert.equal(calls, 1);
+    assert.equal((await f.pool.query("SELECT id FROM send_log")).rowCount, 0);
+    assert.equal(f.calls.send.length, 0);
+  });
 
 test("OA checks the 48h and seven-day boundaries and invalidates provider-rejected access", { skip: !postgres }, async t => {
   const f = await fixture(t);

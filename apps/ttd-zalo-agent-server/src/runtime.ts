@@ -99,12 +99,17 @@ export class Runtime {
         if (!store.db.prepare("UPDATE contact SET accepted=1,revision=revision+1 WHERE target=? AND opted_out=0 AND accepted=0").run(target).changes) return;
       }
       const agent = event.kind === "dm" ? "support" : event.kind === "group" ? "listen" : "sales";
-      const policy = store.policy(target, agent, now);
-      if (event.kind === "dm" && policy.retain) {
-        store.retainMessage(target, event.thread, event.channel ?? "oa", id, event.text, event.at);
-        if (event.channel === "oa") this.drafts?.enqueue(id, policy.respond);
+      const isOaDraft = event.kind === "dm" && event.channel === "oa" && this.drafts;
+      const policy = isOaDraft ? store.draftPolicy(target, now) : store.policy(target, agent, now);
+      if (isOaDraft && event.kind === "dm") {
+        const conversation = policy.retain
+          ? store.retainMessage(target, event.thread, "oa", id, event.text, event.at)
+          : store.ensureConversation(target, event.thread, "oa");
+        if (!conversation || !this.drafts?.enqueue(id, conversation, policy.retain, policy.respond)) return;
+      } else {
+        if (event.kind === "dm" && policy.retain) store.retainMessage(target, event.thread, event.channel ?? "oa", id, event.text, event.at);
+        if (!policy.respond) return;
       }
-      if (!policy.respond) return;
       const epoch = store.setting("epoch");
       store.db.prepare("INSERT INTO jobs VALUES(?,?,?,'queued',?,?,?,NULL)").run(id, event.kind, target, event.at, policy.revision, epoch);
       return { revision: policy.revision, epoch };
@@ -136,7 +141,7 @@ export class Runtime {
       this.guard.dispatch({ id, agent, kind, text, target: event.contact, revision, epoch, origin: id, thread: event.kind === "dm" ? event.thread : undefined });
     if (event.at < now - this.config.scheduling.maxInboundAgeMs) return true;
     if (this.drafts && event.kind === "dm" && event.channel === "oa") {
-      await this.drafts.process(id, valid("support"));
+      await this.drafts.process(id);
       return true;
     }
     if (!allowed.some(valid)) return true;

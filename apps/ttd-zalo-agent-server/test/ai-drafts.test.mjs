@@ -15,7 +15,7 @@ test("OA drafts use budgeted Router choices, persist approval and never initiate
   { skip: !usesPostgres }, async t => {
     const store = fixtureStore(t, ":memory:", randomBytes(32).toString("hex"));
     store.db.exec("DO $$ BEGIN CREATE ROLE data_runtime; EXCEPTION WHEN duplicate_object THEN NULL; END $$");
-    for (const migration of ["009-web-operator.sql", "012-ai-drafts.sql"]) {
+    for (const migration of ["009-web-operator.sql", "012-ai-drafts.sql", "016-draft-consent-marker.sql"]) {
       store.db.exec(readFileSync(new URL("../postgres/" + migration, import.meta.url), "utf8"));
     }
     const config = structuredClone(defaults);
@@ -88,6 +88,15 @@ test("OA drafts use budgeted Router choices, persist approval and never initiate
       .run(createHash("sha256").update(session).digest("hex"), operator);
     const headers = { origin, cookie: "ttd_operator_session=" + session, "content-type": "application/json" };
     const draftPath = "/conversations/" + ready.conversationId + "/drafts";
+    const toggle = enabled => fetch(base + "/agent-router/drafts/enabled", {
+      method: "POST", headers, body: JSON.stringify({ enabled }),
+    });
+    assert.equal((await toggle(false)).status, 403); // CSKH cannot control drafting.
+    store.db.prepare("UPDATE web_operators SET role='owner' WHERE id=?").run(operator);
+    assert.equal((await toggle(false)).status, 200);
+    assert.equal(service.enabled(), false);
+    assert.equal((await toggle(true)).status, 200);
+    assert.equal(service.enabled(), true);
     assert.equal((await fetch(base + draftPath)).status, 401);
     assert.deepEqual(await (await fetch(base + draftPath, { headers })).json(), { drafts: [ready] });
     const post = (action, version, requestHeaders = headers) => fetch(base + "/drafts/" + id + "/" + action, {

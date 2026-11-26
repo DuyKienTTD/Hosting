@@ -13,8 +13,9 @@ const handoff = "Bên em chưa có dữ liệu đã xác minh cho yêu cầu nà
 const manual = "Nhân viên phụ trách sẽ kiểm tra và phản hồi yêu cầu của bạn.";
 const projection = `d.id,d.conversation_id AS "conversationId",d.revision AS version,d.body AS text,
   d.ai_state AS state,d.ai_intent AS intent,d.ai_reason AS reason,d.ai_source_ids AS "sourceIds",d.delivery`;
-const sourceJoin = `FROM web_reply_drafts d JOIN visible_messages m ON m.id=d.ai_message_id
+const sourceJoin = `FROM web_reply_drafts d LEFT JOIN visible_messages m ON m.id=d.ai_message_id
   JOIN inbound i ON i.id=d.inbound_id`;
+const visible = "(m.id IS NOT NULL OR (d.ai_message_id IS NULL AND d.ai_state='needs_human' AND d.ai_reason='consent'))";
 
 export class OaAiDrafts implements InboxDraftReader {
   private readonly budget: Budget;
@@ -23,26 +24,43 @@ export class OaAiDrafts implements InboxDraftReader {
     this.budget = new Budget(store, config.budget, clock);
   }
 
-  enqueue(inbound: string, canRespond: boolean) {
-    this.store.db.prepare(`INSERT INTO web_reply_drafts(conversation_id,inbound_id,body,ai_message_id,ai_state,ai_reason)
+  enabled() { return !this.store.setting("drafts"); }
+
+  setEnabled(enabled: boolean) {
+    this.store.atomic(() => {
+      if (this.enabled() === enabled) return;
+      this.store.set("drafts", Number(!enabled));
+      this.store.set("drafts_epoch", this.store.setting("drafts_epoch") + 1);
+    });
+  }
+
+  enqueue(inbound: string, conversation: string, retain: boolean, respond: boolean) {
+    const { db } = this.store;
+    if (!retain) {
+      db.prepare(`INSERT INTO web_reply_drafts(conversation_id,inbound_id,body,ai_state,ai_reason)
+        VALUES(?,?,'','needs_human','consent') ON CONFLICT(conversation_id,inbound_id) DO NOTHING`).run(conversation, inbound);
+      return false;
+    }
+    const inserted = db.prepare(`INSERT INTO web_reply_drafts(conversation_id,inbound_id,body,ai_message_id,ai_state,ai_reason)
       SELECT m.conversation_id,?, ?,m.id,?,? FROM messages raw JOIN visible_messages m ON m.id=raw.id
-      JOIN conversations c ON c.id=m.conversation_id WHERE raw.event_id=? AND c.channel='oa'
+      WHERE raw.conversation_id=? AND raw.event_id=?
       ON CONFLICT(conversation_id,inbound_id) DO NOTHING`)
-      .run(inbound, canRespond ? "" : manual, canRespond ? "pending" : "needs_human", canRespond ? null : "consent", inbound);
+      .run(inbound, respond ? "" : manual, respond ? "pending" : "needs_human", respond ? null : "consent", conversation, inbound);
+    return respond && inserted.changes === 1;
   }
 
   list(conversation: string) {
     return this.store.db.prepare(`SELECT ${projection} ${sourceJoin}
-      WHERE d.conversation_id=? ORDER BY m.received_at DESC,d.id DESC LIMIT 50`).all(conversation);
+      WHERE d.conversation_id=? AND ${visible} ORDER BY i.received DESC,d.id DESC LIMIT 50`).all(conversation);
   }
 
   async find(conversationId: string, operator: Parameters<InboxDraftReader["find"]>[1]) {
     if (operator.role !== "owner" && operator.role !== "support") return null;
-    const row = this.store.db.prepare(`SELECT ${projection},i.target ${sourceJoin}
-      WHERE d.conversation_id=?
-      ORDER BY m.received_at DESC,d.id DESC LIMIT 1`).get(conversationId);
+    const row = this.store.db.prepare(`SELECT ${projection},i.target,d.ai_message_id ${sourceJoin}
+      WHERE d.conversation_id=? AND ${visible}
+      ORDER BY i.received DESC,d.id DESC LIMIT 1`).get(conversationId);
     if (!row ||
-        this.store.contact(String(row.target), this.clock())?.retain !== 1) return null;
+        row.ai_message_id !== null && this.store.contact(String(row.target), this.clock())?.retain !== 1) return null;
     return { id: String(row.id), version: Number(row.version), text: String(row.text), state: String(row.state),
       intent: row.intent === null ? null : String(row.intent), reason: row.reason === null ? null : String(row.reason),
       sourceIds: Array.isArray(row.sourceIds) ? row.sourceIds.filter((value): value is string => typeof value === "string") : [],
@@ -50,15 +68,10 @@ export class OaAiDrafts implements InboxDraftReader {
   }
 
   get(id: string) {
-    return this.store.db.prepare(`SELECT ${projection} ${sourceJoin} WHERE d.id=?`).get(id);
+    return this.store.db.prepare(`SELECT ${projection} ${sourceJoin} WHERE d.id=? AND ${visible}`).get(id);
   }
 
-  async process(inbound: string, canRespond: boolean) {
-    if (!canRespond) {
-      this.store.db.prepare(`UPDATE web_reply_drafts SET ai_state='needs_human',ai_reason='consent',body=?,revision=revision+1
-        WHERE inbound_id=? AND ai_state='pending'`).run(manual, inbound);
-      return;
-    }
+  async process(inbound: string) {
     const row = this.store.db.prepare(`SELECT d.id,d.revision ${sourceJoin}
       WHERE d.inbound_id=? AND (d.ai_state='pending' OR
         (d.ai_state='generating' AND d.ai_started_at < clock_timestamp()-interval '2 minutes'))`).get(inbound);
@@ -78,11 +91,20 @@ export class OaAiDrafts implements InboxDraftReader {
     return row;
   }
 
-  private async choose(key: string, agent: "router" | "support" | "sales", data: object, choices: readonly string[]) {
-    const reservation = this.budget.reserve(key, agent, true, false, requestInputEstimate(this.config.budget, data, choices));
-    if (!reservation) return { reason: "budget" as const };
+  private async choose(key: string, agent: "router" | "support" | "sales", data: object, choices: readonly string[],
+    denied: () => Reason | undefined) {
+    let pending: ReturnType<Provider["decide"]> | undefined;
+    let reason: Reason | undefined;
     try {
-      const result = await this.provider.decide({ ...reservation, data, choices });
+      this.store.admit(() => {
+        reason = denied();
+        if (reason) return;
+        return this.budget.reserve(key, agent, true, false, requestInputEstimate(this.config.budget, data, choices));
+      }, reservation => {
+        if (reservation) pending = this.provider.decide({ ...reservation, data, choices });
+      });
+      if (!pending) return { reason: reason ?? "budget" as const };
+      const result = await pending;
       if (!this.budget.settle(key, result.usage)) return { reason: "budget" as const };
       if (!choices.includes(result.choice)) return { reason: "unavailable" as const };
       return { choice: result.choice };
@@ -107,12 +129,13 @@ export class OaAiDrafts implements InboxDraftReader {
     if (!row) return;
     const claimedVersion = version + 1;
     const target = String(row.target);
-    const initial = this.store.policy(target, "support", this.clock());
-    const epoch = this.store.setting("epoch");
-    const permitted = (agent: "router" | "support" | "sales") => {
-      const policy = this.store.policy(target, "support", this.clock());
-      return initial.retain && initial.respond && policy.retain && policy.respond && policy.revision === initial.revision && epoch === this.store.setting("epoch") &&
-        !this.store.stopped(agent) && !!this.get(id);
+    const initial = this.store.draftPolicy(target, this.clock());
+    const epoch = this.store.setting("drafts_epoch");
+    const denied = (): Reason | undefined => {
+      if (!this.enabled() || epoch !== this.store.setting("drafts_epoch")) return "unavailable";
+      const policy = this.store.draftPolicy(target, this.clock());
+      if (!initial.retain || !initial.respond || !policy.retain || !policy.respond ||
+          policy.revision !== initial.revision || !this.get(id)) return "consent";
     };
     let intent: Intent | null = null;
     const finish = (state: State, text: string, reason: Reason | null, sourceIds: string[] = []) => {
@@ -123,16 +146,18 @@ export class OaAiDrafts implements InboxDraftReader {
       return this.get(id);
     };
     if (!this.live) return finish("needs_human", manual, "mock");
-    if (!permitted("router")) return finish("needs_human", manual, "consent");
+    const blocked = denied();
+    if (blocked) return finish("needs_human", manual, blocked);
     const question = String(row.body).slice(0, this.config.scheduling.maxText)
       .replace(/(?:\+?\d[\d.() -]{7,}\d)/gu, "[số đã ẩn]")
       .replace(/[\w.+-]+@[\w.-]+\.[a-z]+/giu, "[email đã ẩn]").replace(/https?:\/\/\S+/giu, "[link đã ẩn]");
     const key = `oa-draft:${id}:${claimedVersion}`;
-    const routed = await this.choose(key + ":route", "router", { purpose: "classify_customer_intent", customerText: question }, intents);
+    const routed = await this.choose(key + ":route", "router", { purpose: "classify_customer_intent", customerText: question }, intents, denied);
     if (routed.reason) return finish("needs_human", manual, routed.reason);
     intent = routed.choice as Intent;
     const agent = intent === "price" ? "sales" : "support";
-    if (!permitted(agent)) return finish("needs_human", manual, "consent");
+    const admission = denied();
+    if (admission) return finish("needs_human", manual, admission);
     const candidates = extractSkus(question);
     const sku = candidates.length === 1 ? candidates[0] : undefined;
     const date = vietnam(this.clock()).date;
@@ -154,13 +179,15 @@ export class OaAiDrafts implements InboxDraftReader {
       source.kind === "policy" && response.sourceIds.includes(source.id));
     const grounded = priceVerified && complaintVerified && response.action === "trả lời" &&
       response.text.length <= this.config.scheduling.maxText;
+    if (!grounded) return finish("needs_human", handoff, "no_knowledge");
     const composed = await this.choose(key + ":compose", agent, {
       purpose: "compose_grounded_reply", intent, customerText: question,
-      candidate: grounded ? { text: response.text, sourceIds: response.sourceIds } : null,
-    }, grounded ? ["grounded_reply", "human_handoff"] : ["human_handoff"]);
-    if (!permitted(agent)) return finish("needs_human", manual, "consent");
+      candidate: { text: response.text, sourceIds: response.sourceIds },
+    }, ["grounded_reply", "human_handoff"], denied);
+    const completion = denied();
+    if (completion) return finish("needs_human", manual, completion);
     if (composed.reason) return finish("needs_human", manual, composed.reason);
-    return grounded && composed.choice === "grounded_reply"
+    return composed.choice === "grounded_reply"
       ? finish("ready", response.text.trim(), null, response.sourceIds)
       : finish("needs_human", handoff, "no_knowledge");
   }

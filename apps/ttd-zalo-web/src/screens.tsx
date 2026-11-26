@@ -988,6 +988,18 @@ export function Agents({ data, refresh, user, busy, run }: Props) {
                   : money(router.usedVnd) + " / " + money(router.budgetVnd)}
               </dd>
             </dl>
+            {user.role === "owner" && router.draftsEnabled !== undefined && (
+              <div className="row">
+                <span>Soạn nháp OA · {router.draftsEnabled ? "Đang bật" : "Đang tắt"}</span>
+                <button type="button" disabled={busy} onClick={() => void run(async () => {
+                  await api.toggleAgent("drafts", !router.draftsEnabled);
+                  setChanges((value) => value + 1);
+                  return (current) => current;
+                }, router.draftsEnabled ? "Đã tắt soạn nháp." : "Đã bật soạn nháp.")}>
+                  {router.draftsEnabled ? "Tắt soạn nháp" : "Bật soạn nháp"}
+                </button>
+              </div>
+            )}
             {user.role === "owner" && router.agents && (
               <div className="rows">
                 {router.agents.map((agent) => (

@@ -64,6 +64,9 @@ export class Store {
   policy(target: string, agent: string, now: number) {
     return effectivePolicy(this.contact(target, now), this.stopped(agent), now);
   }
+  draftPolicy(target: string, now: number) {
+    return effectivePolicy(this.contact(target, now), false, now);
+  }
   private customerId(target: string) {
     const found = this.db.prepare("SELECT customer_id FROM runtime_customer WHERE target=?").get(target)?.customer_id;
     if (typeof found === "string") return found;
@@ -143,18 +146,25 @@ export class Store {
       if (this.db.backend) this.db.exec("SELECT pg_advisory_unlock(76425161)");
     }
   }
-  retainMessage(target: string, thread: string, channel: "oa" | "nick" | "bot", id: string, text: string, at: number) {
+  ensureConversation(target: string, thread: string, channel: "oa" | "nick" | "bot") {
     if (!this.db.backend) return;
+    this.db.prepare("INSERT INTO contact(target) VALUES(?) ON CONFLICT(target) DO NOTHING").run(target);
     const customer = this.customerId(target);
     const threadKey = this.hash(thread);
     const { id: conversation } = this.db.prepare(`INSERT INTO conversations(customer_id,channel,runtime_thread)
       VALUES(?,?,?) ON CONFLICT(customer_id,channel,runtime_thread)
       DO UPDATE SET runtime_thread=excluded.runtime_thread RETURNING id`).get(customer,channel,threadKey)!;
+    return String(conversation);
+  }
+  retainMessage(target: string, thread: string, channel: "oa" | "nick" | "bot", id: string, text: string, at: number) {
+    const conversation = this.ensureConversation(target, thread, channel);
+    if (!conversation) return;
     this.db.prepare(`INSERT INTO messages(conversation_id,event_id,body,received_at,retain_until)
       SELECT ?,?,?,to_timestamp(?::double precision/1000),to_timestamp(?::double precision/1000)
       WHERE NOT EXISTS (SELECT 1 FROM restore_tombstones WHERE conversation_id=? AND event_id=?)
       ON CONFLICT(conversation_id,event_id) DO NOTHING`)
       .run(conversation,id,text,at,at+this.retentionDays*86_400_000,conversation,id);
+    return conversation;
   }
   reserveSend(id: string, target: string, agent: string, kind: string, now: number, classification?: SendClassification) {
     if (classification) {
