@@ -6,14 +6,16 @@ Runtime khởi động ở `OA_MODE=mock` và `AI_MODE=mock` nếu bỏ trống 
 
 `OA_MODE=live` cần `ZALO_APP_ID`, `ZALO_OA_ID`, `ZALO_APP_SECRET`, `ZALO_WEBHOOK_SECRET` và `ZALO_OA_ENCRYPTION_KEY` (32 byte dạng hex). Postgres cần migration 006 và 007. Sau bước ủy quyền OA, chạy entrypoint với lệnh `oa-install` và nạp JSON qua stdin gồm `access_token`, `refresh_token`, `expires_in` theo giây và `issued_at` theo Unix milliseconds. Runtime xoay cặp token trong Postgres. Access token có hạn tối đa 25 giờ, refresh token được tiêu thụ một lần. Gọi gửi tin và refresh có timeout 5 giây và mỗi lượt chỉ thực hiện một POST. Kết quả gửi không xác định giữ `unknown_delivery`. Nếu kết quả refresh không xác định, cấp quyền lại thay vì dùng lại refresh token.
 
-`OA_WEBHOOK_INGRESS=embedded` mặc định đăng ký `POST /webhooks/zalo-oa`. Production dùng `external` khi tiến trình ingress riêng đã xử lý HTTPS và ghi vào cùng Postgres. Webhook có ngân sách phản hồi 1.75 giây và chỉ thử lại một lần khi Postgres xác nhận transaction đã rollback do serialization hoặc deadlock. Guard tiếp tục kiểm tra STOP, consent, cửa sổ tương tác và quota. `OA_ALLOW_AFTER_48H` và `OA_ALLOW_PAID_OVERFLOW` bật bằng `1`, mặc định tắt. `OA_MONTHLY_QUOTA` mặc định 500.
+`OA_WEBHOOK_INGRESS=embedded` mặc định đăng ký `POST /webhooks/zalo-oa`. Production dùng `external` khi tiến trình ingress riêng đã xử lý HTTPS và ghi vào cùng Postgres. Webhook có ngân sách phản hồi 1.75 giây và chỉ thử lại một lần khi Postgres xác nhận transaction đã rollback do serialization hoặc deadlock. Zalo đưa timestamp vào phép ký. Chữ ký hợp lệ nhưng lệch giờ server quá `OA_WEBHOOK_MAX_SKEW_SECONDS` (mặc định 300 giây, tính cả quá khứ và tương lai) nhận `401` trước truy vấn Postgres. Event trùng còn trong cửa sổ nhận `200` và chỉ được lưu/xử lý một lần. [Công thức chữ ký Zalo](https://docs.zaloplatforms.com/docs/OA/webhook/tin-nhan/su-kien-nguoi-dung-gui-tin-nhan)
+
+Guard tiếp tục kiểm tra STOP, consent, cửa sổ tương tác và quota. `OA_ALLOW_AFTER_48H` và `OA_ALLOW_PAID_OVERFLOW` bật bằng `1`, mặc định tắt. `OA_MONTHLY_QUOTA` mặc định 500.
 
 Smoke OA dùng `CHANNEL_SMOKE_ONLY=1`, `OA_MODE=live`, `AI_MODE=mock` và `SMOKE_ALLOWLIST` là UID OA phân cách bằng dấu phẩy. Adapter kiểm danh sách trước khi chuẩn bị token và trước transport. Các cuộc hội thoại ngoài danh sách cũng không được đưa vào runtime từ inbox. Khi chạy live OA ngoài smoke với AI mock, provider chỉ chọn `none` để dữ liệu mô phỏng không tự tạo phản hồi thật.
 
 - [Zalo OAuth v4](https://docs.zaloplatforms.com/docs/OA/bat-dau/xac-thuc-va-uy-quyen-cho-ung-dung-new)
 - [Zalo Webhook](https://docs.zaloplatforms.com/docs/OA/webhook/tong-quan)
 - [API gửi Tin Tư vấn](https://docs.zaloplatforms.com/docs/OA/tin-nhan/tin-tu-van/gui-tin-tu-van-dang-van-ban)
-- [App Secret Proof trong SDK Zalo](https://github.com/zaloplatform/zalo-php-sdk/blob/6bacb1bea670ce1fa9f1ae616bbbfd92742e20aa/src/Zalo.php#L229-L234)
+- Header `appsecret_proof` là HMAC-SHA256 của access token với App Secret làm khóa, mã hóa hex. [SDK Zalo chính thức, phép tính và HTTP header](https://github.com/zaloplatform/zalo-php-sdk/blob/6bacb1bea670ce1fa9f1ae616bbbfd92742e20aa/src/Zalo.php#L229-L234)
 
 ## Hostinger AI Router
 
@@ -23,4 +25,4 @@ Khai báo `AI_ROUTER_DAILY_USD`, `AI_ROUTER_MONTHLY_USD`, `AI_ROUTER_RATE_MULTIP
 
 - [Hostinger AI Router và Anthropic API](https://www.hostinger.com/support/what-is-hostinger-ai-router-and-how-to-get-started/)
 
-Fixture UI của #79 vẫn chạy chế độ OA mô phỏng qua `CHANNEL_MODE=oa` và endpoint loopback cùng `CHANNEL_SMOKE_ONLY=1`. Tích hợp giữ nguyên route và hợp đồng UI. Cấu hình triển khai ở #80 nằm ngoài phạm vi chỉnh sửa. Bộ test dùng HTTP fixture, không cần tài khoản hoặc token nhà cung cấp.
+Fixture UI của #79 vẫn chạy chế độ OA mô phỏng qua `CHANNEL_MODE=oa` và endpoint loopback cùng `CHANNEL_SMOKE_ONLY=1`. Tích hợp giữ nguyên route và hợp đồng UI. Ingress triển khai qua #80 nhận cùng cấu hình cửa sổ timestamp. Bộ test dùng HTTP fixture, không cần tài khoản hoặc token nhà cung cấp.

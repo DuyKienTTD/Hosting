@@ -3,7 +3,7 @@ import { id } from "./adapters/common.js";
 import { OaAdapter, OaRuntimeChannel } from "./channels/oa/adapter.js";
 import { Envelope } from "./channels/oa/crypto.js";
 import { OaTokens } from "./channels/oa/tokens.js";
-import { accountScope, OaInbox, oaWebhook } from "./channels/oa/webhook.js";
+import { accountScope, OaInbox, oaWebhook, oaWebhookMaxSkewMs } from "./channels/oa/webhook.js";
 import type { Config } from "./config.js";
 import { ClaudeProvider, FakeProvider } from "./provider.js";
 import type { Store } from "./store.js";
@@ -55,6 +55,7 @@ function readOa(env: Env, allowedUids?: ReadonlySet<string>) {
   const ingress = env.OA_WEBHOOK_INGRESS ?? "embedded";
   if (ingress !== "embedded" && ingress !== "external") throw Error("INVALID_OA_WEBHOOK_INGRESS");
   return { account, appSecret, envelope: new Envelope(Buffer.from(key, "hex")), ingress, allowedUids,
+    maxSkewMs: oaWebhookMaxSkewMs(env.OA_WEBHOOK_MAX_SKEW_SECONDS),
     allowAfter48h: env.OA_ALLOW_AFTER_48H === "1",
     monthlyQuota: bounded(env, "OA_MONTHLY_QUOTA", 500, 0, Number.MAX_SAFE_INTEGER, true),
     allowPaidOverflow: env.OA_ALLOW_PAID_OVERFLOW === "1" };
@@ -99,6 +100,6 @@ export function createLiveOa(settings: ReturnType<typeof readOa>, store: Store, 
   const { account, appSecret, envelope } = settings;
   const tokens = new OaTokens(pool, envelope, accountScope(account), account.appId, appSecret);
   const channel = new OaRuntimeChannel(new OaAdapter(store, envelope, tokens, account, appSecret, settings));
-  const webhook = ingressPool ? oaWebhook(new OaInbox(ingressPool, store, envelope, account)) : undefined;
+  const webhook = ingressPool ? oaWebhook(new OaInbox(ingressPool, store, envelope, account, Date.now, settings.maxSkewMs)) : undefined;
   return { channel, account, webhook, tokens, close: async () => { await Promise.all([pool.end(), ingressPool?.end()]); } };
 }

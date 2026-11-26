@@ -18,7 +18,7 @@ import { Runtime } from "../dist/ttd-zalo-agent-server/src/runtime.js";
 import { FakeProvider } from "../dist/ttd-zalo-agent-server/src/provider.js";
 import { defaults } from "../dist/ttd-zalo-agent-server/src/config.js";
 import { Envelope } from "../dist/ttd-zalo-agent-server/src/channels/oa/crypto.js";
-import { accountScope, createOaWebhookServer, OaInbox, oaTarget, oaWebhook } from "../dist/ttd-zalo-agent-server/src/channels/oa/webhook.js";
+import { accountScope, createOaWebhookServer, OaInbox, oaTarget, oaWebhook, oaWebhookMaxSkewMs } from "../dist/ttd-zalo-agent-server/src/channels/oa/webhook.js";
 import { OaTokens } from "../dist/ttd-zalo-agent-server/src/channels/oa/tokens.js";
 import { OaAdapter, OaRuntimeChannel } from "../dist/ttd-zalo-agent-server/src/channels/oa/adapter.js";
 
@@ -161,6 +161,9 @@ test("OA webhook authenticates raw bytes, persists before ACK, deduplicates, and
   assert.equal((await f.hook(f.message(), { tamper: true })).status, 401);
   const responses = await Promise.all(Array.from({ length: 8 }, () => f.hook(f.message())));
   assert.ok(responses.every(response => response.status === 200));
+  for (const offset of [-300_001, 300_001]) {
+    assert.equal((await f.hook({ ...f.message("fixture_skew"), timestamp: String(f.clock() + offset) })).status, 401);
+  }
   assert.equal((await f.pool.query("SELECT event_id FROM oa_inbox")).rowCount, 1);
   const request = { key: "fixture_poll", target: "channel" };
   const first = await f.channel.receiveMessage(request);
@@ -464,4 +467,24 @@ test("two quote HTTP sessions contend for one Postgres quota slot", { skip: !pos
     assert.equal(f.calls.send.length, 1);
   } finally { release.resolve(); }
   assert.equal((await first).status, 201);
+});
+
+test("signed stale or future events fail before any database access", async () => {
+  const account = { appId: "fixture_app", oaId: "fixture_oa", webhookSecret: randomUUID() };
+  const now = Date.now();
+  const maxSkewMs = oaWebhookMaxSkewMs("60");
+  assert.equal(oaWebhookMaxSkewMs(), 300_000);
+  assert.throws(() => oaWebhookMaxSkewMs("0"), /INVALID_OA_WEBHOOK_MAX_SKEW_SECONDS/);
+  let queries = 0;
+  const pool = { query: async () => { queries++; } };
+  const inbox = new OaInbox(pool, { hash: value => value }, new Envelope(randomBytes(32)), account, () => now, maxSkewMs);
+  for (const [offset, status] of [[-60_001, 401], [60_001, 401], [-60_000, 200], [60_000, 200]]) {
+    const timestamp = String(now + offset);
+    const raw = Buffer.from(JSON.stringify({ app_id: account.appId, timestamp, event_name: "user_send_text",
+      sender: { id: "fixture_uid" }, recipient: { id: account.oaId }, message: { msg_id: "fixture_id", text: "Fixture" } }));
+    const signature = createHash("sha256").update(account.appId).update(raw).update(timestamp).update(account.webhookSecret).digest("hex");
+    const before = queries;
+    assert.equal(await inbox.accept(raw, "mac=" + signature, AbortSignal.timeout(1000)), status);
+    assert.equal(queries - before, status === 200 ? 1 : 0);
+  }
 });

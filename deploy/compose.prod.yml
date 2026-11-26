@@ -85,6 +85,7 @@ services:
       ZALO_APP_SECRET: ${ZALO_APP_SECRET:?set Zalo App Secret}
       ZALO_OA_ID: ${ZALO_OA_ID:?set OA ID}
       ZALO_WEBHOOK_SECRET: ${ZALO_WEBHOOK_SECRET:?set webhook signing secret}
+      OA_WEBHOOK_MAX_SKEW_SECONDS: ${OA_WEBHOOK_MAX_SKEW_SECONDS:-300}
       ZALO_OA_ENCRYPTION_KEY: ${ZALO_OA_ENCRYPTION_KEY:?set OA encryption key}
     healthcheck: *http-health
   data-api:
