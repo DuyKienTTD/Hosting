@@ -1,0 +1,87 @@
+name: Z4 Postgres data
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'apps/ttd-zalo-agent-server/**'
+      - 'apps/ttd-zalo-assistant/**'
+      - '.github/workflows/z4-data.yml'
+permissions:
+  contents: read
+jobs:
+  data:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-bookworm
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: zalo
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres -d zalo" --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGDATABASE: zalo
+      PGUSER: postgres
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Install backup and Postgres tools
+        timeout-minutes: 4
+        run: |
+          apt_checked() { sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 "$@"; }
+          apt_checked update
+          apt_checked install -y age rclone
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl --connect-timeout 15 --max-time 30 --retry 2 --fail --silent --show-error -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          apt_checked update
+          apt_checked install -y postgresql-client-17
+          echo /usr/lib/postgresql/17/bin >> "$GITHUB_PATH"
+      - name: Provision isolated fixture database
+        working-directory: apps/ttd-zalo-agent-server
+        run: |
+          export DATA_APP_PASSWORD=$(openssl rand -hex 24)
+          export DATA_WORKER_PASSWORD=$(openssl rand -hex 24)
+          export DATA_TOMBSTONE_KEY=$(openssl rand -hex 32)
+          export DATA_RUNTIME_PASSWORD=$(openssl rand -hex 24)
+          {
+            echo "DATA_APP_PASSWORD=$DATA_APP_PASSWORD"
+            echo "DATA_WORKER_PASSWORD=$DATA_WORKER_PASSWORD"
+            echo "DATA_TOMBSTONE_KEY=$DATA_TOMBSTONE_KEY"
+            echo "DATA_RUNTIME_PASSWORD=$DATA_RUNTIME_PASSWORD"
+          } >> "$GITHUB_ENV"
+          sed 's@/migrations/@postgres/@g' postgres/init.sh | POSTGRES_USER=postgres POSTGRES_DB=zalo sh
+      - name: Typecheck, build and test existing assistant
+        working-directory: apps/ttd-zalo-assistant
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+        run: |
+          npm ci
+          npm run typecheck
+          npm run build
+          npm test
+      - name: Typecheck, build and test runtime and Postgres
+        working-directory: apps/ttd-zalo-agent-server
+        env:
+          RUN_POSTGRES_TESTS: '1'
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm run typecheck
+          npm run build
+          npm test
+      - name: Validate Compose configuration
+        working-directory: apps/ttd-zalo-agent-server
+        run: |
+          export DATA_APP_IMAGE=local/z4-app:fixture DATA_POSTGRES_IMAGE=local/z4-postgres:fixture DATA_PROXY_NETWORK=z4-ci
+          export POSTGRES_PASSWORD=$(openssl rand -hex 24) IDENTITY_KEY=$(openssl rand -hex 24)
+          export BACKUP_REMOTE=fixture:backup PURGE_RECEIPT_REMOTE=fixture:receipts WORKER_RCLONE_FILE=/tmp/worker.conf BACKUP_RCLONE_FILE=/tmp/backup.conf
+          docker compose -f compose.data.yaml --profile maintenance config --quiet

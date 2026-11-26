@@ -34,7 +34,7 @@ export function runtimeEvent(e: ChannelEvent): Event {
     contact: e.payload.contactId, thread: e.payload.contactId, kind: "accepted" };
   const { thread, senderId, text } = e.payload;
   return { id: e.eventId, at: Date.parse(e.occurredAt), contact: senderId, text,
-    ...(thread.kind === "direct" ? { kind: "dm" as const, thread: thread.conversationId } : { kind: "group" as const, thread: thread.groupId }) };
+    ...(thread.kind === "direct" ? { kind: "dm" as const, thread: thread.conversationId, channel: "nick" as const } : { kind: "group" as const, thread: thread.groupId }) };
 }
 function convert<T, U>(r: Result<T>, map: (v: T) => U): import("../channel.js").Result<U> {
   return r.ok ? { ok: true, value: map(r.value) } : { ok: false, error: r.error.code as ChannelError };

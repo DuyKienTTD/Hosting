@@ -7,7 +7,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { chromium } from "playwright";
-import { Store } from "../dist/ttd-zalo-agent-server/src/store.js";
+import { fixtureStore, usesPostgres } from "./runtime-store.mjs";
 import { defaults } from "../dist/ttd-zalo-agent-server/src/config.js";
 import { ChannelJournal } from "../dist/ttd-zalo-agent-server/src/adapters/common.js";
 import { SubizAdapter } from "../dist/ttd-zalo-agent-server/src/adapters/subiz.js";
@@ -20,8 +20,8 @@ import { smoke } from "../dist/ttd-zalo-agent-server/src/adapters/smoke.js";
 function setup(t, path = ":memory:") {
   let now = 1795651200000;
   const clock = () => now;
-  const store = new Store(path, "synthetic-index-key");
-  t.after(() => store.db.close());
+  const store = fixtureStore(t, path, "synthetic-index-key");
+  if (usesPostgres) store.set("ADS_ENABLED", 1);
   const journal = new ChannelJournal(store, clock);
   return { store, journal, clock, advance: delta => { now += delta; } };
 }
@@ -140,8 +140,7 @@ test("Subiz exact conversation POST, auth and source, accepted distinction, dura
   assert.equal((await adapter.sendMessage(write("first", "changed"))).error.code, "invalid_input");
   state.mode = "lost";
   assert.equal((await adapter.sendMessage(write("unknown"))).error.code, "unknown_delivery");
-  const reopened = new Store(path, "synthetic-index-key");
-  t.after(() => reopened.db.close());
+  const reopened = fixtureStore(t, path, "synthetic-index-key");
   const replay = new SubizAdapter(config, new ChannelJournal(reopened, f.clock), providerFetch, f.clock);
   assert.deepEqual(await replay.sendMessage(write("first")), sent);
   assert.equal((await replay.sendMessage(write("unknown"))).error.code, "unknown_delivery");

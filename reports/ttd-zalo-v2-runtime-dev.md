@@ -114,3 +114,57 @@ Ads tắt mặc định. Guard trả và ghi `ads_disabled` trước các điề
 Phủ định trong cùng mệnh đề có thể chi phối động từ dừng qua các từ trung gian. Bộ lọc tất định không thu hồi consent trong mệnh đề như vậy. Router cũng bỏ lựa chọn thu hồi khi phát hiện phạm vi phủ định. Sáu câu phủ định và ca AI trả lựa chọn ngoài danh sách đều đạt hồi quy. Tập FIX4 giữ kết quả 0/30 quảng cáo lọt, 0/20 opted_out nhầm ở ca âm khó và 0/30 tin thường tạm dừng.
 
 Node 24.22.3. Typecheck, build và test exit 0. Server 58/58, desktop 20/20, Playwright chạy riêng 1/1, corpus 48/48. Chưa đo AI trên tin thật.
+
+## Z4-S1-DATA · Delivery log
+
+Nguồn quyết định [DIRECTION-04 tại main](https://github.com/DuyKienTTD/Hosting/blob/b9ec088/decisions/ZALO-PRODUCT-DIRECTION-04.md). Base `480fcdd` chứa bản merge PR #73.
+
+- Migration Postgres, repository với phân quyền tại tầng dịch vụ, intake hàng đợi và phiếu việc độc lập với nội dung tin khách.
+- Retention tự động trong phạm vi tin nhắn, có kiểm tra version/chính sách/legal hold, cách ly, audit chỉ ghi thêm và tombstone ngoài DB.
+- Compose riêng, backup mã hóa và restore vào DB tạm, quy trình cấu hình và rollback trong [DEPLOY](../apps/ttd-zalo-agent-server/DEPLOY.md).
+- Runtime cũ vẫn dùng repository SQLite. Chưa có cutover các luồng policy, AI và gửi tin sang repository Postgres. Chỉ test với fixture.
+
+| Kiểm tra trên Node 24.22.3 | Exit | Kết quả |
+|---|---:|---|
+| Assistant `npm run typecheck`, `npm run build`, `npm test` | 0 | 20/20 |
+| Runtime `npm run typecheck`, `npm run build` | 0 | TypeScript đạt |
+| Runtime `RUN_POSTGRES_TESTS=1 npm test` trên PostgreSQL 17.12, có Chromium | 0 | 62/62, gồm kiểm quyền, xóa và restore bản backup cũ |
+| `docker compose -f compose.data.yaml --profile maintenance config --quiet` | 0 | Compose hợp lệ với biến giả lập |
+
+CI `Z4 Postgres data` chạy lại bằng PostgreSQL service container.
+
+## Z4-S1-DATA-B · Runtime trên Postgres
+
+Bổ sung trên PR #75, từ HEAD `32d080b`. Runtime triển khai dùng Postgres cho AI, ledger ngân sách, journal kênh, consent/opt-out và gửi. SQLite phục vụ fixture cục bộ. Ảnh runtime loại bản cài đặt repository SQLite khỏi output triển khai.
+
+- Migration 002 và quyền DB riêng cho runtime. Consent theo mục đích có bằng chứng, hạn hiệu lực và lịch sử rút lại. Tin 1-1 chỉ được ghi nội dung khi khách còn consent lưu giữ.
+- Guard đọc cờ `ADS_ENABLED`, consent và `ad_status` sau bước xác minh đích. Cùng transaction, Guard xét lại giới hạn và ghi giữ chỗ vào `send_log`. Khóa Postgres giữ đến khi bắt đầu gọi kênh. Ghi kết quả trong transaction kế tiếp. Lượt `unknown_delivery` và giữ chỗ chưa quyết toán không tự chạy lại. Restore bật STOP để đối soát trước khi phục vụ.
+- [DEPLOY](../apps/ttd-zalo-agent-server/DEPLOY.md) ghi cấu hình Postgres mặc định, migration cho DB đã có schema 001 và quy trình đối soát khi restore. API dữ liệu `/messages` chuẩn bị cho tích hợp OA tiếp theo. Adapter runtime hiện có đi qua đường tiếp nhận của runtime.
+
+| Kiểm tra | Kết quả |
+|---|---|
+| Runtime Node 24 `npm run typecheck` và `npm run build` | Exit 0 |
+| Assistant Node 24 `npm run typecheck`, `npm run build`, `npm test` | Exit 0, 20/20 |
+| Postgres 17 `node --test test/postgres.test.mjs` với `RUN_POSTGRES_TESTS=1` | Exit 0, 5/5 |
+| SQLite cục bộ `npm test` | Exit 0, 58 đạt, 2 bộ Postgres bỏ qua khi không có DB |
+| `docker compose --profile maintenance config --quiet` và cùng lệnh với `-f compose.data.yaml` | Exit 0 |
+
+CI chạy toàn bộ suite runtime với Postgres service container. Ca tích hợp dùng role triển khai `data_runtime` và đi từ MockChannel qua FakeProvider, Guard đến `send_log`. Ca kiểm tra nhìn thấy giữ chỗ đã commit từ kết nối độc lập, thay đổi cờ quảng cáo, trạng thái và consent sau xác minh đích, và chặn gửi lại khi kênh trả `unknown_delivery`.
+
+## Z4-S1-FIX1 · Biên nhận tombstone trước purge
+
+Migration 003 bỏ `authorize_purge`. Chỉ `data_worker` được gọi entrypoint purge từ các vai trò dịch vụ. Worker giữ transaction mở, ghi và đọc lại tombstone ở kho độc lập, rồi ký biên nhận gắn với đúng bản ghi và phiên bản. PostgreSQL xác thực biên nhận trước khi ghi audit và xóa. Trigger chặn DELETE và TRUNCATE trực tiếp thiếu biên nhận.
+
+Hồi quy Postgres tái tạo backup → cách ly → hết hạn → gọi trực tiếp theo từng vai trò → restore. Bản ghi vẫn còn khi purge bị từ chối. Khi SQL lỗi sau khi xóa, dữ liệu và audit nội bộ rollback, tombstone đã ghi ngoài DB vẫn bền. Lần chạy lại tái sử dụng tombstone, purge thành công, và restore backup cũ không làm bản ghi sống lại. `DEPLOY.md` ghi cách cấp khóa và áp migration trước khi chạy worker.
+
+## Z4-S1-FIX2 · Tombstone hai pha
+
+Migration 004 lưu biên nhận commit theo `purge_id` và phiên bản trong transaction xóa. Worker ghi pending trước khi xóa, chỉ xuất bản confirmed có proof lấy từ biên nhận đã commit. Lần chạy lại đối soát xác nhận chưa xuất bản. Job dọn pending quá 24 giờ theo biên nhận của DB nguồn, giữ các lượt commit đang chờ xuất bản.
+
+Restore chỉ áp confirmed có proof hợp lệ lên bảng tin nhắn. Legal hold, danh tính bản ghi lệch và phiên bản mới hơn chặn replay, giữ bản ghi và ghi cảnh báo. Pending và tệp cũ không có bằng chứng commit không được áp. Hồi quy Postgres tái hiện rollback sau DELETE, đặt legal hold rồi backup/restore, cùng các lỗi sau ghi pending, sau commit trước confirm và sau confirm trước ghi nhận xuất bản. Nếu mất DB nguồn trước khi xuất bản confirmed và bản backup không chứa commit, restore giữ bản ghi vì thiếu bằng chứng xác nhận.
+
+## Z4-S1-FIX3 · Đối soát purge độc lập khi restore
+
+Migration 005 bổ sung đối soát từ PostgreSQL nguồn và sổ biên nhận append-only riêng offsite. Worker công bố biên nhận sau commit, xác nhận tombstone sau khi ghi sổ và thử lại từ outbox nếu lỗi. Bằng chứng rollback dựa trên trạng thái giao dịch của đúng DB nguồn hoặc biên nhận đã ký. Thiếu bằng chứng không được suy ra rollback. Legal hold từ nguồn truy cập được hoặc trong backup vẫn chặn xóa.
+
+Restore dựng staging khóa vai trò phục vụ. Pending chưa xác minh bị ẩn và chặn promote. Owner quyết định xóa hoặc khôi phục, có audit. Hồi quy PostgreSQL bao gồm rollback sau DELETE, commit trước confirmed với DB nguồn hoặc chỉ sổ còn truy cập được, sổ lỗi, legal hold mới hơn backup và chặn promote.

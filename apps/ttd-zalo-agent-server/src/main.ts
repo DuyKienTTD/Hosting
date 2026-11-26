@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
-import { chmodSync, readFileSync, renameSync, existsSync } from "node:fs";
-import { backup } from "node:sqlite";
-import { defaults, day } from "./config.js";
+import { readFileSync } from "node:fs";
+import { PostgresRuntimeDatabase } from "./data/runtime-database.js";
+import { defaults } from "./config.js";
 import { MockChannel } from "./channel.js";
 import { ClaudeProvider, FakeProvider, isAgent } from "./provider.js";
 import { Runtime, type Schedule } from "./runtime.js";
@@ -14,8 +14,9 @@ process.umask(0o077);
 const command = process.argv[2] ?? "serve";
 const mode = process.env.CHANNEL_MODE ?? "mock";
 const smokeOnly = process.env.CHANNEL_SMOKE_ONLY === "1";
-const path = process.env.DB_PATH ?? "./runtime.sqlite";
-const key = process.env.IDENTITY_KEY || (mode === "mock" && !process.env.ANTHROPIC_API_KEY ? "offline-fixture" : "");
+const { PGHOST, PGDATABASE, DATA_RUNTIME_PASSWORD } = process.env;
+if (!PGHOST || !PGDATABASE || !DATA_RUNTIME_PASSWORD) throw Error("POSTGRES_CONFIGURATION_REQUIRED");
+const key = process.env.IDENTITY_KEY ?? "";
 const config = structuredClone(defaults);
 config.advertising.enabled = process.env.ADS_ENABLED === "true";
 const providerMode = process.env.AI_PROVIDER ?? "anthropic";
@@ -26,7 +27,7 @@ if (providerMode === "anthropic-compatible") {
   config.budget.compatibleRateMultiplier = Number(process.env.AI_ROUTER_RATE_MULTIPLIER);
 }
 const anchor = Number(process.env.CREDIT_CYCLE_START_DAY ?? config.budget.cycleStartDay);
-if (!Number.isInteger(anchor) || anchor < 1 || anchor > 28 || key.length < 8 ||
+if (!Number.isInteger(anchor) || anchor < 1 || anchor > 28 || Buffer.byteLength(key) < 32 ||
   !["mock", "subiz"].includes(mode)) throw Error("INVALID_CONFIGURATION");
 config.budget.cycleStartDay = anchor;
 for (const agent of Object.keys(config.budget.byAgent) as (keyof typeof config.budget.byAgent)[]) {
@@ -35,8 +36,10 @@ for (const agent of Object.keys(config.budget.byAgent) as (keyof typeof config.b
   if (!Object.hasOwn(config.budget.models, model)) throw Error("MODEL_UNPRICED");
   config.budget.byAgent[agent] = model;
 }
-const store = new Store(path, key);
-if (path !== ":memory:") chmodSync(path, 0o600);
+const store = new Store(new PostgresRuntimeDatabase({
+  host: PGHOST, database: PGDATABASE, user: "data_runtime", password: DATA_RUNTIME_PASSWORD,
+}), key, Number(process.env.DATA_RETENTION_DAYS ?? "30"));
+if (command === "serve" && process.env.ADS_ENABLED === "false") store.set("ADS_ENABLED", 0);
 const input = () => JSON.parse(readFileSync(0, "utf8"));
 const commands: Record<string, () => unknown> = {
   smoke: async () => {
@@ -65,21 +68,17 @@ const commands: Record<string, () => unknown> = {
     store.stop(agent, false);
   },
   consent: () => {
-    const { target, expires, retain, respond, send, ads } = input();
+    const { target, expires, retain, respond, send, ads, displayedText, policyVersion, evidence } = input();
     if (typeof target !== "string" || !target || !Number.isSafeInteger(expires) ||
-      [retain, respond, send, ads].some(v => typeof v !== "boolean")) throw Error("INVALID_CONSENT");
-    store.consent(store.hash(target), expires, retain, respond, send, ads);
+      [retain, respond, send, ads].some(v => typeof v !== "boolean") ||
+      typeof displayedText !== "string" || !displayedText.trim() || typeof policyVersion !== "string" || !policyVersion.trim() ||
+      !evidence || typeof evidence !== "object" || Array.isArray(evidence) || !Object.keys(evidence).length) throw Error("INVALID_CONSENT");
+    store.consent(store.hash(target), expires, retain, respond, send, ads, { displayedText, policyVersion, evidence });
   },
   export: () => console.log(JSON.stringify(store.exportCustomer(String(input().target)))),
   delete: () => store.deleteCustomer(String(input().target)),
   catalogue: () => store.knowledge.add(input()),
   notices: () => console.log(JSON.stringify(store.db.prepare("SELECT * FROM notices ORDER BY at DESC LIMIT 50").all())),
-  backup: async () => {
-    const name = process.argv[3];
-    if (!name) throw Error("BACKUP_PATH_REQUIRED");
-    await backup(store.db, name);
-    chmodSync(name, 0o600);
-  },
 };
 if (command !== "serve") {
   if (!Object.hasOwn(commands, command)) throw Error("INVALID_COMMAND");
@@ -143,27 +142,9 @@ if (command !== "serve") {
     }));
   };
   server.listen(8080, process.env.HTTP_BIND === "container" ? "0.0.0.0" : "127.0.0.1");
-  let backingUp = false;
-  const backupDir = process.env.BACKUP_DIR;
-  const dailyBackup = async () => {
-    if (!backupDir || backingUp) return;
-    const file = backupDir + "/runtime-" + new Date().toISOString().slice(0, 10) + ".sqlite";
-    if (existsSync(file)) return;
-    backingUp = true;
-    try {
-      await backup(store.db, file + ".partial");
-      chmodSync(file + ".partial", 0o600);
-      renameSync(file + ".partial", file);
-    } catch { store.notice("backup-error", Date.now(), "Sao lưu SQLite thất bại."); }
-    finally { backingUp = false; }
-  };
-  if (backupDir) {
-    void dailyBackup();
-    setInterval(() => { void dailyBackup(); }, day / 24);
-  }
   process.once("SIGTERM", () => {
     clearInterval(interval);
     clearInterval(pruneSmoke);
-    server.close(() => process.exit(0));
+    server.close(() => { store.db.close(); process.exit(0); });
   });
 }

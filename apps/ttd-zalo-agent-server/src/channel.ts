@@ -3,7 +3,7 @@ import type { ChannelErrorCode as ChannelError } from "./adapters/contract.js";
 export type Result<T = void> = { ok: true; value: T } | { ok: false; error: ChannelError };
 export type Request = { key: string; target: string; text?: string; message?: string; thread?: string; memberIds?: string[] };
 export type Contact = { id: string; friend: boolean };
-export type Event = { id: string; contact: string; thread: string; at: number } & (
+export type Event = { id: string; contact: string; thread: string; at: number; channel?: "oa" | "nick" | "bot" } & (
   { kind: "dm" | "group"; text: string } | { kind: "accepted" | "spam" });
 export interface ChannelAdapter {
   acknowledge?(stream: "message" | "friend"): void;
