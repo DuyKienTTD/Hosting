@@ -1,3 +1,4 @@
+import { workerFailureCode } from "./worker-logging.js";
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
 import { Pool } from "pg";
@@ -58,8 +59,8 @@ if (command === "cron" || command === "delete-eligible") {
     const tick = () => {
       if (running) return;
       running = true;
-      void runOnce().then(() => { lastSuccess = Date.now(); }, () => {
-        console.error("data_worker_cycle_failed");
+      void runOnce().then(() => { lastSuccess = Date.now(); }, (error: unknown) => {
+        console.error("data_worker_cycle_failed", workerFailureCode(error));
       }).finally(() => { running = false; });
     };
     tick();

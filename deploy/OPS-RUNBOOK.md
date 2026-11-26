@@ -7,3 +7,29 @@ Copy `ops.env.example` into a private configuration file and substitute the plac
 3. Install the checked-in units. In private service drop-ins, set `EnvironmentFile=<OPS_ENV_FILE>` under `[Service]`. In private timer drop-ins, set `OnCalendar=<BACKUP_SCHEDULE>` and `OnCalendar=<MONITOR_SCHEDULE>` under `[Timer]`, respectively. Validate each calendar expression before enabling the timers.
 4. Run `host-job.sh backup` once with the private environment and verify the success marker. Run `host-job.sh drill <DUMP_NAME>` with the age identity and tombstone key provided through the private environment. The drill never promotes staging. It refuses to reuse an existing staging database.
 5. Check the logs under `<STATE_DIR>` and review owner notices after running `host-job.sh monitor`. Monitor reads service health, certificate expiry, disk use, backup freshness, budget consumption, and OA token expiry. Alerts are recorded locally and in owner notices when the database is reachable.
+
+## OAuth và quyền đọc cấu hình
+
+Tạo OAuth client loại **Desktop** trong Google Cloud. Chọn **Internal** khi tổ chức dùng Workspace và ứng dụng phục vụ nội bộ. Chạy script setup trong terminal riêng. Client ID, client secret và kết quả token đều nhập ẩn. Script lưu blob URL-safe không padding vào tệp tạm riêng. Chuyển tệp này qua kênh riêng, dùng lệnh authorize được in ra, rồi xóa bản sao trên máy trình duyệt. Blob có thể giải mã thành thông tin client.
+
+Scope `drive.file` không tự cấp cho client mới quyền đọc các tệp do client cũ tạo. Khi đổi client, tạo lại thư mục và `_format` bằng client mới, giữ bản backup cũ cùng đường truy cập đã xác minh. Sau đó thử backup và restore với đích mới.
+
+`BACKUP_REMOTE=<REMOTE>:<PREFIX>` là prefix gốc. Script tự nối `/dumps` và `/tombstones`. Dùng `<REMOTE>:<PREFIX>/dumps` làm giá trị sẽ tạo `dumps/dumps` và worker không đọc được marker. Kiểm tra bằng `rclone --config "$BACKUP_RCLONE_FILE" cat "$BACKUP_REMOTE/tombstones/_format"`. Kỳ vọng `z4-tombstones-v1`.
+
+Giữ bản cấu hình quản trị root 0600 riêng. Worker chạy dưới user node của image, mặc định UID/GID 1000. Tạo bản worker riêng bằng `install -o <CONTAINER_UID> -g <CONTAINER_GID> -m 0400 <ADMIN_RCLONE_CONFIG_FILE> <WORKER_RCLONE_CONFIG_FILE>` và trỏ `WORKER_RCLONE_FILE` vào bản đó. Khi đổi hoặc cấp lại token, cập nhật lại bản worker và tạo lại container worker để bind mount đọc tệp mới.
+
+## Môi trường riêng cho restore drill
+
+Đặt `DATA_TOMBSTONE_KEY` và `AGE_IDENTITY_HOST_FILE` trong tệp môi trường riêng quyền 0600. Giữ key ngoài `ops.env`. Chạy drill trong subshell với biến được export:
+
+```sh
+(
+  set -a
+  . "<PRIVATE_OPS_ENV_FILE>"
+  . "<PRIVATE_DRILL_ENV_FILE>"
+  set +a
+  bash deploy/host-job.sh drill "<DUMP_NAME>"
+)
+```
+
+Giữ tệp Compose `.env` để Compose đọc qua `--env-file`. Tránh source tệp này vào shell tương tác vì biến shell đã export được ưu tiên hơn giá trị trong `--env-file`.
