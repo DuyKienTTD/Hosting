@@ -83,5 +83,5 @@ jobs:
         run: |
           export DATA_APP_IMAGE=local/z4-app:fixture DATA_POSTGRES_IMAGE=local/z4-postgres:fixture DATA_PROXY_NETWORK=z4-ci
           export POSTGRES_PASSWORD=$(openssl rand -hex 24) IDENTITY_KEY=$(openssl rand -hex 24)
-          export BACKUP_REMOTE=fixture:backup WORKER_RCLONE_FILE=/tmp/worker.conf BACKUP_RCLONE_FILE=/tmp/backup.conf
+          export BACKUP_REMOTE=fixture:backup PURGE_RECEIPT_REMOTE=fixture:receipts WORKER_RCLONE_FILE=/tmp/worker.conf BACKUP_RCLONE_FILE=/tmp/backup.conf
           docker compose -f compose.data.yaml --profile maintenance config --quiet

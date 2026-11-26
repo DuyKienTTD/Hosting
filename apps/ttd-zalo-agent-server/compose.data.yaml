@@ -76,6 +76,7 @@ services:
       DATA_TOMBSTONE_KEY: ${DATA_TOMBSTONE_KEY:?set tombstone signing key}
       DATA_TOKEN_RETENTION: ${DATA_TOKEN_RETENTION:-}
       BACKUP_REMOTE: ${BACKUP_REMOTE:?set offsite remote and prefix}
+      PURGE_RECEIPT_REMOTE: ${PURGE_RECEIPT_REMOTE:?set independent receipt ledger remote}
       RCLONE_CONFIG: /run/rclone.conf
     volumes:
       - ${WORKER_RCLONE_FILE:?set worker rclone config}:/run/rclone.conf:ro

@@ -76,7 +76,15 @@ test("Postgres grants, deletion, encrypted backup and restore", { skip: config.R
   });
 
   await t.test("quarantine, recheck hold, archive before purge, replay old backup", async () => {
-    const env = { ...config, BACKUP_REMOTE: root, AGE_IDENTITY_FILE: join(root, "restore-key") };
+    const ledger = join(root, "receipts");
+    const originalLedger = process.env.PURGE_RECEIPT_REMOTE;
+    process.env.PURGE_RECEIPT_REMOTE = ledger;
+    t.after(() => {
+      if (originalLedger === undefined) delete process.env.PURGE_RECEIPT_REMOTE;
+      else process.env.PURGE_RECEIPT_REMOTE = originalLedger;
+    });
+    const env = { ...config, RESTORE_SOURCE_DATABASE: config.PGDATABASE, BACKUP_REMOTE: root,
+      PURGE_RECEIPT_REMOTE: ledger, AGE_IDENTITY_FILE: join(root, "restore-key") };
     execFileSync("age-keygen", ["-o", env.AGE_IDENTITY_FILE], { stdio: ["ignore", "ignore", "ignore"] });
     env.AGE_RECIPIENT = execFileSync("age-keygen", ["-y", env.AGE_IDENTITY_FILE], { encoding: "utf8" }).trim();
     mkdirSync(join(root, "tombstones"));
@@ -138,11 +146,15 @@ test("Postgres grants, deletion, encrypted backup and restore", { skip: config.R
       } finally { await restored.end(); }
     } finally { await admin.query(`DROP DATABASE IF EXISTS ${beforeArchive}`); }
 
-    const signingKey = config.DATA_TOMBSTONE_KEY;
+    await admin.query(`CREATE FUNCTION fixture_after_pending() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN RAISE EXCEPTION 'fixture_after_pending'; END $$;
+      CREATE TRIGGER fixture_after_pending BEFORE INSERT ON restore_tombstones
+        FOR EACH ROW EXECUTE FUNCTION fixture_after_pending()`);
     try {
-      process.env.DATA_TOMBSTONE_KEY = randomBytes(32).toString("hex");
-      await assert.rejects(runRetention(worker, root), /purge_receipt_required/);
-    } finally { process.env.DATA_TOMBSTONE_KEY = signingKey; }
+      await assert.rejects(runRetention(worker, root), /fixture_after_pending/);
+    } finally {
+      await admin.query("DROP TRIGGER fixture_after_pending ON restore_tombstones; DROP FUNCTION fixture_after_pending()");
+    }
     const pending = join(root, "tombstones", "pending");
     assert.equal(readdirSync(pending).length, 1);
     assert.equal((await admin.query("SELECT count(*)::int AS count FROM purge_private.commits")).rows[0].count, 0);
@@ -166,19 +178,20 @@ test("Postgres grants, deletion, encrypted backup and restore", { skip: config.R
     execFileSync("sh", ["ops/backup.sh"], { env });
     const heldDump = readdirSync(join(root, "dumps")).sort().at(-1);
     assert.notEqual(heldDump, dump);
-    const probeRestore = async (backup, suffix, expectedAudit) => {
+    const probeRestore = async (backup, suffix, expectedAudit, remaining = 1, overrides = {}, check) => {
       const database = restore + suffix;
       try {
-        execFileSync("sh", ["ops/restore.sh", backup, database], { env });
+        execFileSync("sh", ["ops/restore.sh", backup, database], { env: { ...env, ...overrides } });
         const snapshot = new Pool({ database });
         try {
-          assert.equal((await snapshot.query("SELECT id FROM messages WHERE id=$1", [record])).rowCount, 1);
+          assert.equal((await snapshot.query("SELECT id FROM messages WHERE id=$1", [record])).rowCount, remaining);
           if (expectedAudit) assert.ok((await snapshot.query("SELECT 1 FROM audit_log WHERE action=$1 AND record_id=$2",
             [expectedAudit, record])).rowCount);
+          if (check) await check(snapshot, database);
         } finally { await snapshot.end(); }
       } finally { await admin.query(`DROP DATABASE IF EXISTS ${database}`); }
     };
-    await probeRestore(heldDump, "_rollback", "pending_ignored_no_commit");
+    await probeRestore(heldDump, "_rollback", "pending_rollback_verified");
     await admin.query("UPDATE legal_holds SET released_at=now() WHERE message_id=$1", [record]);
 
     // A filesystem obstruction prevents publication after the database commits.
@@ -201,7 +214,29 @@ test("Postgres grants, deletion, encrypted backup and restore", { skip: config.R
     assert.equal((await admin.query("SELECT id FROM messages WHERE id=$1", [record])).rowCount, 0);
     assert.equal((await worker.query("SELECT * FROM committed_purges()")).rowCount, 1);
     rmSync(confirmed);
-    await probeRestore(dump, "_pending", "pending_ignored_no_commit");
+    await probeRestore(dump, "_source", null, 0, { PURGE_RECEIPT_REMOTE: join(root, "unavailable") });
+    await probeRestore(dump, "_ledger", null, 0, { RESTORE_SOURCE_DATABASE: "missing_fixture_source" });
+    await probeRestore(dump, "_unknown", "purge_unverified", 1, {
+      RESTORE_SOURCE_DATABASE: "missing_fixture_source", PURGE_RECEIPT_REMOTE: join(root, "unavailable"),
+    }, async (snapshot, database) => {
+      assert.equal((await snapshot.query("SELECT id FROM visible_messages WHERE id=$1", [record])).rowCount, 0);
+      const serving = new Pool({ database, user: "data_runtime", password: config.DATA_RUNTIME_PASSWORD });
+      try {
+        await assert.rejects(serving.query("SELECT 1"), /permission denied/);
+      } finally { await serving.end(); }
+      await assert.rejects(snapshot.query("SELECT purge_private.promote_restore()"), /restore_promotion_blocked/);
+      const unknown = (await snapshot.query("SELECT purge_id FROM purge_private.restore_unknown")).rows;
+      for (const item of unknown) await snapshot.query("SELECT purge_private.resolve_restore($1,'restore')", [item.purge_id]);
+      assert.equal((await snapshot.query("SELECT id FROM visible_messages WHERE id=$1", [record])).rowCount, 1);
+      await snapshot.query("SELECT purge_private.promote_restore()");
+      assert.ok((await snapshot.query("SELECT 1 FROM audit_log WHERE action='restore_owner_restore'")).rowCount);
+    });
+    await admin.query("INSERT INTO legal_holds(message_id,reason) VALUES($1,'fixture post-purge hold')", [record]);
+    await probeRestore(dump, "_newer_hold", "purge_blocked", 1, {}, async snapshot => {
+      assert.ok((await snapshot.query("SELECT 1 FROM legal_holds WHERE message_id=$1 AND released_at IS NULL",
+        [record])).rowCount);
+    });
+    await admin.query("UPDATE legal_holds SET released_at=now() WHERE message_id=$1", [record]);
     assert.equal(readdirSync(pending).length, 3);
     const expired = new Date(Date.now() - 48 * 60 * 60 * 1000);
     for (const name of readdirSync(pending)) utimesSync(join(pending, name), expired, expired);

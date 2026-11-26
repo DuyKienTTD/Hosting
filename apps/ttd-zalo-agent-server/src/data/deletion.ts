@@ -25,6 +25,26 @@ export async function requestDeletion(pool: Pool, principal: object, value: unkn
 
 type Attempt = Tombstone & { purge_id: string };
 type Confirmed = Attempt & { proof: string };
+type Recovery = Attempt & { origin: string; xid: string; intent: string };
+type Evidence = Confirmed & { status: "confirmed" | "rolled_back" };
+
+async function writeImmutable(name: string, item: object) {
+  const data = JSON.stringify(item);
+  const child = exec("rclone", ["rcat", name, "--immutable", "--retries", "1"], { timeout: 20000 });
+  child.child.stdin!.on("error", () => {});
+  child.child.stdin!.end(data);
+  try { await child; } catch { /* Read-back also handles an identical object on retry. */ }
+  const existing = await exec("rclone", ["cat", name], { timeout: 20000 });
+  if (existing.stdout !== data) throw Error("tombstone_archive_mismatch");
+}
+
+function receiptLedger(archiveTarget: string) {
+  const target = (process.env.PURGE_RECEIPT_REMOTE ?? "").replace(/\/$/, "");
+  if (!target || target === archiveTarget.replace(/\/$/, "") || /[\r\n]/.test(target)) {
+    throw Error("invalid_purge_receipt_remote");
+  }
+  return (entry: Evidence) => writeImmutable(target + "/" + entry.purge_id + ".json", entry);
+}
 
 function remoteArchive(target: string) {
   if (!target || /[\r\n]/.test(target)) throw Error("invalid_tombstone_archive");
@@ -35,16 +55,13 @@ function remoteArchive(target: string) {
     if (result.stdout.trim() !== "z4-tombstones-v1") throw Error("invalid_tombstone_format");
   };
   return {
-    async write(phase: "pending" | "confirmed", item: Attempt | Confirmed) {
+    async write(phase: "pending" | "confirmed", item: Recovery | Confirmed) {
       await format();
-      const name = prefix + phase + "/" + item.purge_id + ".json";
-      const data = JSON.stringify(item);
-      const child = exec("rclone", ["rcat", name, "--immutable", "--retries", "1"], { timeout: 20000 });
-      child.child.stdin!.on("error", () => {});
-      child.child.stdin!.end(data);
-      try { await child; } catch { /* An earlier attempt may have published identical bytes. */ }
-      const existing = await exec("rclone", ["cat", name], { timeout: 20000 });
-      if (existing.stdout !== data) throw Error("tombstone_archive_mismatch");
+      await writeImmutable(prefix + phase + "/" + item.purge_id + ".json", item);
+    },
+    async readPending(id: string): Promise<Recovery> {
+      const { stdout } = await exec("rclone", ["cat", prefix + "pending/" + id + ".json"], { timeout: 10000 });
+      return JSON.parse(stdout);
     },
     async expired() {
       await format();
@@ -61,15 +78,18 @@ function remoteArchive(target: string) {
   };
 }
 
-function sign(phase: "pending" | "published", item: Attempt, key: string) {
+function sign(phase: string, item: Attempt, key: string) {
   return createHmac("sha256", Buffer.from(key, "hex"))
     .update(["z4-tombstone-v2", phase, item.purge_id, item.id, item.conversation_id,
       item.event_id, item.version, item.policy_version].join("|")).digest("hex");
 }
 
-async function publish(pool: Pool, archive: ReturnType<typeof remoteArchive>, key: string) {
+async function publish(pool: Pool, archive: ReturnType<typeof remoteArchive>, key: string, target: string) {
   const { rows } = await pool.query<Confirmed>("SELECT * FROM committed_purges()");
+  if (!rows.length) return;
+  const ledger = receiptLedger(target);
   for (const item of rows) {
+    await ledger({ ...item, status: "confirmed" });
     await archive.write("confirmed", item);
     await pool.query("SELECT purge_published($1,$2)", [item.purge_id, sign("published", item, key)]);
   }
@@ -79,31 +99,59 @@ export async function runRetention(pool: Pool, target: string) {
   const key = process.env.DATA_TOMBSTONE_KEY ?? "";
   const archive = remoteArchive(target);
   if (!/^[a-f0-9]{64}$/.test(key)) throw Error("invalid_tombstone_key");
-  await publish(pool, archive, key);
+  await publish(pool, archive, key, target);
   const eligible = await pool.query<Tombstone>("SELECT * FROM purge_candidates('quarantine')");
   for (const item of eligible.rows) {
     await pool.query("SELECT delete_eligible($1,$2,$3,'retention_elapsed')", [item.id, item.version, item.policy_version]);
   }
   const candidates = await pool.query<Tombstone>("SELECT * FROM purge_candidates('purge')");
   for (const item of candidates.rows) {
-    await transaction(pool, async db => {
-      const attempt = { purge_id: randomUUID(), ...item };
-      const identity = [item.id, item.version, item.policy_version, attempt.purge_id];
-      const statement = "SELECT purge_message($1,$2,$3,$4,$5) AS accepted";
-      if (!(await db.query(statement, [...identity, null])).rows[0].accepted) return;
-      await archive.write("pending", attempt);
-      const signature = sign("pending", attempt, key);
-      if (!(await db.query(statement, [...identity, signature])).rows[0].accepted) throw Error("purge_rejected");
-    });
+    const ledger = receiptLedger(target);
+    let pending: Recovery | undefined;
+    try {
+      await transaction(pool, async db => {
+        const attempt = { purge_id: randomUUID(), ...item };
+        const identity = [item.id, item.version, item.policy_version, attempt.purge_id];
+        const statement = "SELECT purge_message($1,$2,$3,$4,$5) AS accepted";
+        if (!(await db.query(statement, [...identity, null])).rows[0].accepted) return;
+        const { origin, xid } = (await db.query("SELECT * FROM purge_intent()")).rows[0];
+        pending = { ...attempt, origin, xid, intent: sign("intent:" + origin + ":" + xid, attempt, key) };
+        await archive.write("pending", pending);
+        const signature = sign("pending", attempt, key);
+        if (!(await db.query(statement, [...identity, signature])).rows[0].accepted) throw Error("purge_rejected");
+      });
+    } catch (error) {
+      if (pending) {
+        // An ambiguous COMMIT failure is never a rollback receipt.
+        try {
+          const evidence = await resolveSource(pool, pending);
+          if (evidence?.status === "rolled_back") await ledger(evidence);
+        } catch { /* The original failure is reported; cleanup can retry evidence later. */ }
+      }
+      throw error;
+    }
   }
-  if (candidates.rows.length) await publish(pool, archive, key);
+  if (candidates.rows.length) await publish(pool, archive, key, target);
+}
+
+async function resolveSource(db: Pick<Pool, "query">, pending: Recovery) {
+  const { purge_id, id, conversation_id, event_id, version, policy_version, origin, xid, intent } = pending;
+  const { rows } = await db.query<Pick<Evidence, "status" | "proof">>(
+    "SELECT * FROM purge_recovery_evidence($1,$2,$3,$4,$5,$6,$7,$8,$9)",
+    [purge_id,id,conversation_id,event_id,version,policy_version,origin ?? null,xid ?? null,intent ?? null]);
+  return rows[0] && { purge_id,id,conversation_id,event_id,version,policy_version,...rows[0] };
 }
 
 export async function cleanPendingPurges(pool: Pool, target: string) {
   const archive = remoteArchive(target);
   for (const id of await archive.expired()) {
     await transaction(pool, async db => {
-      if ((await db.query("SELECT pending_purge_discardable($1) AS discard", [id])).rows[0].discard) {
+      const discardable = (await db.query("SELECT pending_purge_discardable($1) AS discard", [id])).rows[0].discard;
+      const item = await archive.readPending(id);
+      if (item.purge_id !== id) throw Error("invalid_pending_identity");
+      const evidence = discardable ? undefined : await resolveSource(db, item);
+      if (evidence?.status === "rolled_back") await receiptLedger(target)(evidence);
+      if (discardable || evidence?.status === "rolled_back") {
         try { await archive.discard(id); } catch (error) {
           if ((error as { code?: number }).code !== 4) throw error;
         }

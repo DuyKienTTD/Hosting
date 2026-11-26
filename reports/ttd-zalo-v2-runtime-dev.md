@@ -162,3 +162,9 @@ Hồi quy Postgres tái tạo backup → cách ly → hết hạn → gọi tr�
 Migration 004 lưu biên nhận commit theo `purge_id` và phiên bản trong transaction xóa. Worker ghi pending trước khi xóa, chỉ xuất bản confirmed có proof lấy từ biên nhận đã commit. Lần chạy lại đối soát xác nhận chưa xuất bản. Job dọn pending quá 24 giờ theo biên nhận của DB nguồn, giữ các lượt commit đang chờ xuất bản.
 
 Restore chỉ áp confirmed có proof hợp lệ lên bảng tin nhắn. Legal hold, danh tính bản ghi lệch và phiên bản mới hơn chặn replay, giữ bản ghi và ghi cảnh báo. Pending và tệp cũ không có bằng chứng commit không được áp. Hồi quy Postgres tái hiện rollback sau DELETE, đặt legal hold rồi backup/restore, cùng các lỗi sau ghi pending, sau commit trước confirm và sau confirm trước ghi nhận xuất bản. Nếu mất DB nguồn trước khi xuất bản confirmed và bản backup không chứa commit, restore giữ bản ghi vì thiếu bằng chứng xác nhận.
+
+## Z4-S1-FIX3 · Đối soát purge độc lập khi restore
+
+Migration 005 bổ sung đối soát từ PostgreSQL nguồn và sổ biên nhận append-only riêng offsite. Worker công bố biên nhận sau commit, xác nhận tombstone sau khi ghi sổ và thử lại từ outbox nếu lỗi. Bằng chứng rollback dựa trên trạng thái giao dịch của đúng DB nguồn hoặc biên nhận đã ký. Thiếu bằng chứng không được suy ra rollback. Legal hold từ nguồn truy cập được hoặc trong backup vẫn chặn xóa.
+
+Restore dựng staging khóa vai trò phục vụ. Pending chưa xác minh bị ẩn và chặn promote. Owner quyết định xóa hoặc khôi phục, có audit. Hồi quy PostgreSQL bao gồm rollback sau DELETE, commit trước confirmed với DB nguồn hoặc chỉ sổ còn truy cập được, sổ lỗi, legal hold mới hơn backup và chặn promote.
