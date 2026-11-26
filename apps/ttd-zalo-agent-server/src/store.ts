@@ -39,8 +39,17 @@ export class Store {
         this.db.prepare("INSERT INTO runtime_identity VALUES(?)").run(this.hash("runtime-identity-key-binding"));
         migrateKnowledge(this.db);
         migrateCustomer(this.db);
-        this.db.exec("PRAGMA user_version=1");
-      } else if (version !== 1) throw Error("UNSUPPORTED_RUNTIME_SCHEMA");
+      } else if (version !== 1 && version !== 2 && version !== 3) throw Error("UNSUPPORTED_RUNTIME_SCHEMA");
+      if (version === 0 || version === 1) this.db.exec(`
+        ALTER TABLE ledger ADD COLUMN provider TEXT NOT NULL DEFAULT 'anthropic';
+        ALTER TABLE ledger ADD COLUMN rate_multiplier REAL NOT NULL DEFAULT 1;
+        ALTER TABLE ledger ADD COLUMN input_bound INTEGER;
+        PRAGMA user_version=2;
+      `);
+      if (version !== 3) this.db.exec(`
+        ALTER TABLE contact ADD COLUMN ads_paused_review TEXT;
+        PRAGMA user_version=3;
+      `);
       if (this.db.prepare("SELECT digest FROM runtime_identity").get()?.digest !== this.hash("runtime-identity-key-binding")) {
         throw Error("IDENTITY_KEY_MISMATCH");
       }
@@ -67,7 +76,7 @@ export class Store {
   }
   contact(target: string) {
     return this.db.prepare("SELECT * FROM contact WHERE target=?").get(target) as
-      (PolicyRow & { ads: number; opted_out: number; accepted: number; interest: number }) | undefined;
+      (PolicyRow & { ads: number; opted_out: number; ads_paused_review: string | null; accepted: number; interest: number }) | undefined;
   }
   policy(target: string, agent: string, now: number) {
     return effectivePolicy(this.contact(target), this.stopped(agent), now);
@@ -80,7 +89,22 @@ export class Store {
   }
   optOut(target: string) {
     this.db.prepare(`INSERT INTO contact(target,opted_out,revision) VALUES(?,1,1)
-      ON CONFLICT(target) DO UPDATE SET opted_out=1,ads=0,revision=revision+1`).run(target);
+      ON CONFLICT(target) DO UPDATE SET opted_out=1,ads=0,ads_paused_review=NULL,revision=revision+1`).run(target);
+  }
+  pauseAdsForReview(target: string, event: string) {
+    this.db.prepare(`INSERT INTO contact(target,ads_paused_review,revision) VALUES(?,?,1)
+      ON CONFLICT(target) DO UPDATE SET ads_paused_review=excluded.ads_paused_review WHERE opted_out=0`).run(target, event);
+  }
+  resolveAdsReview(target: string, event: string, action: "active" | "opted_out") {
+    return this.atomic(() => {
+      const cleared = this.db.prepare(`UPDATE contact SET ads_paused_review=NULL,revision=revision+1
+        WHERE target=? AND ads_paused_review=? AND opted_out=0`).run(target, event);
+      if (cleared.changes !== 1) return false;
+      if (action === "opted_out") this.optOut(target);
+      this.notice("ads-review-resolved:" + event, Date.now(), action === "opted_out"
+        ? "Người vận hành xác nhận ngừng quảng cáo." : "Người vận hành xác nhận kết thúc tạm dừng quảng cáo.");
+      return true;
+    });
   }
   notice(key: string, at: number, body: string) {
     this.db.prepare("INSERT OR REPLACE INTO notices VALUES(?,?,?)").run(key, at, body);

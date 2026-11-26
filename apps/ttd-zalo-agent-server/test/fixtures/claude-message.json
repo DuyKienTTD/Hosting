@@ -1,4 +1,5 @@
 {
+  "model": "claude-haiku-5-5",
   "stop_reason": "tool_use",
   "content": [{"type":"tool_use","id":"toolu_fixture","name":"propose","input":{"choice":"answer"}}],
   "usage": {"input_tokens": 800, "output_tokens": 20, "cache_creation_input_tokens": 1100, "cache_read_input_tokens": 0}

@@ -46,3 +46,71 @@ Theo [biên nhận A0 trên PR #71](https://github.com/DuyKienTTD/Hosting/pull/7
 | Runtime `node --test --test-name-pattern="month budget under sustained demand" test/runtime.test.mjs` | 0 | 1/1 |
 
 13 ca mới gồm chín phép thử sát biên dưới/đúng/trên của 70%, 90% và $195, ưu đãi được xếp lúc 06:30 ICT rồi gặp trần lúc 08:30 ICT, lượt `sales-ready` và sáu loại thao tác ghi kênh, cùng hai ca tin khách bị giữ do ledger chạm trần khi chuẩn bị gửi hoặc do `budgetStop` trong lúc AI đang xử lý. Các ca chạm trần quan sát 0 lượt gửi.
+
+## V2-02C-GUARD-BUDGET-FIX · 26/11/2026
+
+Base `c5cccd45954b8aa26874978bc7ace8a7cd667df7`. Cập nhật nhận diện opt-out cả tiếng Việt có dấu, không dấu và viết tắt. Từ đơn phải đứng riêng, còn cụm phải khớp ý định dừng. Footer dùng “Nhắn DỪNG NHẬN TIN để không nhận ưu đãi”. “Không” đơn lẻ giữ nguyên consent.
+
+Sonnet giữ chỗ theo prompt thực tế bằng ước tính byte văn bản cộng overhead, cộng giới hạn output. Lượt thử vẫn đủ hạn mức sau khi dùng $2,75 trong ngày. SQLite quyết toán theo usage và bật STOP khi model sai hoặc usage vượt dự phòng. Các ngưỡng 70/90/100% và chặn transport đã xếp hàng vẫn đạt trong test. Schema 2 giữ khả năng quyết toán các lượt cũ theo bảng giá lịch sử. Ước tính input cần đối chiếu với provider trong pilot, và kiểm usage vượt dự phòng chỉ có thể thực hiện sau phản hồi.
+
+Dùng Sonnet 5.5 ($2/$10) và Haiku 5.5 ($0,10/$0,50 trong tier tối đa 100.000 token) theo USD/triệu token input/output. Giá đọc 26/11/2026. ZPC-02 xác nhận Sonnet 5 là Legacy và hướng nâng cùng mức giá. Chế độ tương thích Anthropic có HTTPS base URL và khóa riêng, model allowlist, từ chối phản hồi báo model khác và có hạn mức ngày riêng cùng tổng trần. Chỉ bật sau khi xác minh nguồn credit/biểu phí Hostinger, cấu hình và payload thực tế. [ZPC-02](https://github.com/DuyKienTTD/Hosting/blob/367c36454e021dbf11ea30afb72ebff0f1131afc/program/zalo-mvp01/zpc-01-02/ZPC-02-ai-provider-decision.md) · [Anthropic Pricing](https://platform.claude.com/docs/en/about-claude/pricing) · [Sonnet 5.5](https://platform.claude.com/docs/en/models/sonnet-5-5/overview) · [Haiku 5.5](https://platform.claude.com/docs/en/models/haiku-5-5/overview).
+
+| Lệnh trên Node 24.22.3 | Exit | Kết quả |
+|---|---:|---|
+| Hai app `npm ci --no-audit --no-fund`, `npm run typecheck`, `npm run build`, `npm test` | 0 | Server 47/47 với `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium`, desktop 20/20 với `ELECTRON_SKIP_BINARY_DOWNLOAD=1` khi cài |
+| Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |
+
+Không gọi Claude, Hostinger, Zalo hay Subiz thật. Test Playwright dùng Chromium headless từ gói npm tạm và HTML cục bộ.
+
+## V2-02C-FIX1 · 26/11/2026
+
+Theo biên nhận độc lập trên [PR #73](https://github.com/DuyKienTTD/Hosting/pull/73), bộ nhận diện tất định xử lý chủ ngữ, chuỗi hậu tố và yêu cầu rút khỏi danh sách quảng cáo ở dạng có hoặc không dấu. Từ đơn vẫn chỉ có hiệu lực khi đứng riêng. Hai test hồi quy bao gồm 16 câu dương mới (ba câu báo lỗi, ba biến thể không dấu, mười câu tự nhiên khác), 18 câu âm mới và các ca cũ giữ nguyên.
+
+Bước phân loại con đường tin nhắn riêng hiện tại có hai lựa chọn bổ sung. Yêu cầu rõ ràng có thể thu hồi quảng cáo đúng đối tượng trong transaction và hủy việc chờ. Ý định chưa rõ chỉ tạo cờ vận hành với ID nội bộ, không đổi consent. Cổng gửi tiếp tục kiểm tra trạng thái và revision tất định. Test bằng FakeProvider xác nhận tin nhóm không có lựa chọn này, giá trị đăng ký lại nằm ngoài allowlist và lượt quảng cáo cũ bị chặn. Chưa đo phân loại bằng Claude thật.
+
+| Lệnh trên Node 24.22.3 | Exit | Kết quả |
+|---|---:|---|
+| Cả hai app `npm run typecheck`, `npm run build`, `npm test` (server với `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium`) | 0 | Server 49/49, desktop 20/20 |
+| Server `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium node --test --test-name-pattern='Playwright fixture' test/adapters.test.mjs` | 0 | 1/1 |
+| Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |
+
+## V2-02C-FIX2 · 26/11/2026
+
+Thay danh sách cụm hoàn chỉnh bằng luật kết hợp dấu hiệu dừng và đối tượng nhắn tin hoặc quảng cáo trong cùng một câu. Khoảng cách mặc định là 8 từ và có thể cấu hình qua `optOutMaxGapWords`. Câu hỏi, ngữ cảnh giao dịch rõ ràng và từ “dùng” được xử lý riêng. Từ đơn tiếp tục chỉ có hiệu lực khi đứng riêng. Tin riêng chưa đủ căn cứ được gắn cờ ngay khi nhận, kể cả khi AI đang dừng. Nhánh phân loại AI hiện hữu vẫn chỉ có thể thu hồi quảng cáo hoặc gắn cờ.
+
+Ba câu báo lỗi của A0 nằm trong tập phát triển và đều đạt. [Tập kiểm định riêng](../apps/ttd-zalo-agent-server/test/fixtures/opt-out-validation.json) được soạn sau khi hoàn thiện luật. Không chỉnh luật theo kết quả của tập này. Lần chấm đầu tiên đạt **30/30 ca xin ngừng và 20/20 ca âm**, gồm nhiều kiểu diễn đạt, tên shop, số tổng hợp, không dấu và viết tắt.
+
+| Lệnh trên Node 24.22.3 | Exit | Kết quả |
+|---|---:|---|
+| Hai app `npm run typecheck`, `npm run build`, `npm test` (server với `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium`) | 0 | Server 52/52, desktop 20/20 |
+| Server `node --test test/opt-out-validation.test.mjs` (chấm corpus riêng) | 0 | 30/30, 20/20 |
+| Server `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium node --test --test-name-pattern='Playwright fixture' test/adapters.test.mjs` | 0 | 1/1 |
+| Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |
+
+## V2-02C-FIX3 · 26/11/2026
+
+Theo biên nhận lần 3 trên [PR #73](https://github.com/DuyKienTTD/Hosting/pull/73), yêu cầu rõ ràng mới chuyển `opted_out`. Luật kiểm tra động từ và đối tượng trong một mệnh đề, loại câu hỏi/thao tác với tin cụ thể/ngữ cảnh thương mại khỏi quyết định thu hồi vĩnh viễn. Dấu hiệu từ chối cùng ngữ cảnh nhắn tin chưa đủ chắc sẽ lưu `ads_paused_review`, giữ consent và gắn cờ. Guard chặn cả hai trạng thái với quảng cáo. Test chứng minh phản hồi 1:1 còn đủ quyền vẫn gửi được. Trang vận hành có nút xác nhận thu hồi hoặc bỏ tạm dừng, kiểm CSRF và phiên bản phiếu. AI chỉ xác nhận thu hồi hoặc đặt cờ.
+
+[Corpus cũ](../apps/ttd-zalo-agent-server/test/fixtures/opt-out-validation.json) giữ nguyên câu và chấm theo tiêu chí mới. Tám câu A0 thành ca hồi quy. [Tập mới 30 + 20](../apps/ttd-zalo-agent-server/test/fixtures/opt-out-fix3-validation.json) qua Runtime và Guard đạt **0/30 lượt quảng cáo gửi**, **0/20 opted_out nhầm**, **16/20 ca âm tạm dừng (80%)**. Đây là đánh đổi của việc tạm dừng khi có dấu hiệu chưa chắc chắn, cần người vận hành xác nhận. Lần chạy đầu phát hiện một câu hỏi gián tiếp cần quy tắc loại trừ và một ca kiểm khoảng cách dùng cụm vượt ngưỡng 2 từ. Đã sửa và chạy lại. Kết quả là kiểm thử tổng hợp, chưa đo phân loại Claude thật.
+
+| Lệnh trên Node 24.22.3 | Exit | Kết quả |
+|---|---:|---|
+| Hai app `npm run typecheck`, `npm run build`, `npm test` (server với `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium`) | 0 | Server 54/54, desktop 20/20 |
+| Server `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium node --test --test-name-pattern='Playwright fixture' test/adapters.test.mjs` | 0 | 1/1 |
+| Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |
+
+## V2-02C-FIX4 · 26/11/2026
+
+Bộ lọc tất định chỉ dừng hoặc tạm dừng quảng cáo khi cùng câu có dấu hiệu tiếp thị và từ chối, ngoài lệnh đứng riêng. Phủ định kép và lỗi giao dịch đi qua trạng thái active. Dấu hiệu bổ sung gồm dẹp, cắt, bớt, tránh, miễn và đủ rồi. Chín câu A0 đều đạt.
+
+[Tập FIX4](../apps/ttd-zalo-agent-server/test/fixtures/opt-out-fix4-validation.json) đi qua Runtime và Guard. Kết quả **0/30 quảng cáo lọt**, **0/20 ca âm khó bị opted_out**, **0/30 tin thường bị opted_out**, **0/30 tin thường bị paused**. Hai tập cũ giữ nguyên dữ liệu và được chấm để thấy ảnh hưởng của chính sách mới. Mức chặn tất định lần lượt là **26/30 và 17/30**, vì câu chỉ có dấu hiệu tin/gửi/nhắn hoặc hai dấu hiệu ở hai câu riêng cần lớp AI. Các ca âm cũ vẫn 0 opted_out nhầm. Chưa đo lớp AI trên pilot.
+
+Node 24.22.3. Typecheck, build và test đều exit 0. Server **55/55** gồm Playwright fixture, desktop **20/20**, corpus **48/48**.
+
+## V2-02C-FIX5 · 26/11/2026
+
+Ads tắt mặc định. Guard trả và ghi `ads_disabled` trước các điều kiện khác, trước tra liên hệ và trước gửi; luồng CSKH 1:1 vẫn áp dụng policy riêng. Chỉ bật `ADS_ENABLED=true` sau khi đo lớp AI một chiều trên tin thật và được chủ dự án duyệt.
+
+Phủ định trong cùng mệnh đề có thể chi phối động từ dừng qua các từ trung gian. Bộ lọc tất định không thu hồi consent trong mệnh đề như vậy. Router cũng bỏ lựa chọn thu hồi khi phát hiện phạm vi phủ định. Sáu câu phủ định và ca AI trả lựa chọn ngoài danh sách đều đạt hồi quy. Tập FIX4 giữ kết quả 0/30 quảng cáo lọt, 0/20 opted_out nhầm ở ca âm khó và 0/30 tin thường tạm dừng.
+
+Node 24.22.3. Typecheck, build và test exit 0. Server 58/58, desktop 20/20, Playwright chạy riêng 1/1, corpus 48/48. Chưa đo AI trên tin thật.

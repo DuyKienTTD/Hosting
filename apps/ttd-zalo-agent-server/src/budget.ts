@@ -4,6 +4,10 @@ import type { Store } from "./store.js";
 export type Usage = { input: number; output: number; creation: number; read: number };
 export type Model = keyof Config["budget"]["models"];
 const usd = 1_000_000_000;
+const legacyRates: Record<string, Config["budget"]["models"][Model]> = {
+  "claude-haiku-4-5-20251001": { input: 1000, output: 5000, creation: 1250, read: 100 },
+  "claude-sonnet-4-6": { input: 3000, output: 15000, creation: 3750, read: 300 },
+};
 
 export class Budget {
   constructor(private store: Store, private cfg: Config["budget"], private clock: () => number) {}
@@ -40,7 +44,7 @@ export class Budget {
     return true;
   }
 
-  reserve(id: string, agent: keyof Config["budget"]["byAgent"], inbound: boolean, batch: boolean): { id: string; model: Model; batch: boolean } | undefined {
+  reserve(id: string, agent: keyof Config["budget"]["byAgent"], inbound: boolean, batch: boolean, inputTokens: number): { id: string; model: Model; batch: boolean } | undefined {
     return this.store.atomic(() => {
       const { db } = this.store;
       const now = this.clock();
@@ -54,38 +58,63 @@ export class Budget {
       const fraction = (prior + today) / cap;
       if (fraction >= this.cfg.inboundOnly && !inbound) return;
       const model: Model = fraction >= this.cfg.downgrade ? light : this.cfg.byAgent[agent] as Model;
+      if (!Number.isSafeInteger(inputTokens) || inputTokens < 1 || inputTokens > this.cfg.maxEstimatedInputTokens) return;
       const rate = this.cfg.models[model];
-      // Use on-demand rates for reservation even for batch. Unknown billing remains reserved.
-      const amount = rate.context * Math.max(rate.input, rate.creation, rate.read) + this.cfg.maxOutputTokens * rate.output;
+      const { provider, compatibleRateMultiplier, compatibleDailyUsd } = this.cfg;
+      const multiplier = provider === "anthropic-compatible" ? compatibleRateMultiplier : 1;
+      if (!Number.isFinite(multiplier) || multiplier < 1) return;
+      // Reserve on-demand rates, including a possible five-minute cache write.
+      const amount = Math.ceil((inputTokens * Math.max(rate.input, rate.creation, rate.read) +
+        this.cfg.maxOutputTokens * rate.output) * multiplier);
       if (today + amount > Math.floor((cap - prior) / left)) {
         if (prior + today + amount > cap) this.notifyHold(cycle, now);
         return;
       }
-      db.prepare("INSERT INTO ledger(id,cycle,date,model,amount,state) VALUES(?,?,?,?,?,'reserved')")
-        .run(id, cycle, date, model, amount);
+      if (provider === "anthropic-compatible") {
+        if (batch) return;
+        const used = Number(db.prepare("SELECT coalesce(sum(amount),0) n FROM ledger WHERE date=? AND provider=?").get(date, provider)?.n);
+        if (!Number.isFinite(compatibleDailyUsd) || compatibleDailyUsd <= 0 || used + amount > Math.floor(compatibleDailyUsd * usd)) {
+          this.store.notice(`router-budget:${date}`, now, "Đã chạm hạn mức ngày của AI Router.");
+          return;
+        }
+      }
+      db.prepare(`INSERT INTO ledger(id,cycle,date,model,amount,state,provider,rate_multiplier,input_bound)
+        VALUES(?,?,?,?,?,'reserved',?,?,?)`).run(id, cycle, date, model, amount, provider, multiplier, inputTokens);
       return { id, model, batch };
     });
   }
   batch(id: string, key: string) {
     this.store.db.prepare("UPDATE ledger SET batch=?,state='batch' WHERE id=? AND state='reserved'").run(key, id);
   }
+  hold() {
+    this.store.set("budgetStop", 1);
+    this.store.notice("unknown-billing", this.clock(), "Model hoặc usage vượt giới hạn đã xác minh. Hệ thống tạm dừng.");
+  }
   settle(id: string, usage: Usage) {
-    this.store.atomic(() => {
+    return this.store.atomic(() => {
       const { db } = this.store;
-      const row = db.prepare("SELECT model,amount,state FROM ledger WHERE id=?").get(id);
-      if (!row || !["reserved", "batch"].includes(String(row.state))) return;
-      const rate = this.cfg.models[row.model as Model];
+      const row = db.prepare("SELECT model,amount,state,input_bound,rate_multiplier,provider FROM ledger WHERE id=?").get(id);
+      if (!row || !["reserved", "batch"].includes(String(row.state))) return false;
+      const name = String(row.model);
+      const rate = this.cfg.models[name as Model] ?? legacyRates[name];
       const { input, output, creation, read } = usage;
-      if ([input, output, creation, read].some(n => !Number.isSafeInteger(n) || n < 0) ||
-        input + creation + read > rate.context || output > this.cfg.maxOutputTokens) {
-        this.store.set("budgetStop", 1);
-        this.store.notice("unknown-billing", this.clock(), "Anthropic trả số token ngoài hạn mức dự kiến.");
-        return;
+      if (!rate || [input, output, creation, read].some(n => !Number.isSafeInteger(n) || n < 0 || n > 1_000_000)) {
+        this.hold();
+        return false;
       }
-      const onDemand = input * rate.input + output * rate.output + creation * rate.creation + read * rate.read;
-      const amount = row.state === "batch" ? Math.ceil(onDemand * this.cfg.batchMultiplier) : onDemand;
+      const totalInput = input + creation + read;
+      const tier = name === light && totalInput > 100_000 ? 5 : 1;
+      const onDemand = (input * rate.input + output * rate.output + creation * rate.creation + read * rate.read) * tier;
+      const discount = row.state === "batch" && row.provider === "anthropic" ? this.cfg.batchMultiplier : 1;
+      const amount = Math.ceil(onDemand * discount * Number(row.rate_multiplier));
       db.prepare("UPDATE ledger SET input=?,output=?,cache_write=?,cache_read=?,amount=?,state='settled',settled_cycle=? WHERE id=?")
         .run(input, output, creation, read, amount, this.cycle().cycle, id);
+      if (amount > Number(row.amount) || (row.input_bound !== null && totalInput > Number(row.input_bound)) ||
+        output > this.cfg.maxOutputTokens) {
+        this.hold();
+        return false;
+      }
+      return true;
     });
   }
 }

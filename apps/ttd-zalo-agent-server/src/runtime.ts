@@ -1,3 +1,4 @@
+import { classifyOptOut, hasNegatedStop } from "./opt-out.js";
 import { randomUUID } from "node:crypto";
 import { extractSkus, FakeProvider as GroundedDraft, questionDate, validatedDraft } from "../../ttd-zalo-assistant/src/ai.js";
 import { validField } from "../../ttd-zalo-assistant/src/customer.js";
@@ -5,7 +6,7 @@ import { Budget } from "./budget.js";
 import type { ChannelAdapter, Event } from "./channel.js";
 import { day, vietnam, type Agent, type Config } from "./config.js";
 import { Guard, type Kind } from "./guard.js";
-import { isAgent, type Provider } from "./provider.js";
+import { isAgent, requestInputEstimate, type Provider } from "./provider.js";
 import { Store } from "./store.js";
 
 const choices = {
@@ -36,24 +37,34 @@ export class Runtime {
 
   private async decide(id: string, agent: Agent | "router", data: object, options: readonly string[], inbound = false) {
     if (this.store.stopped(agent)) return;
-    const reservation = this.budget.reserve(id, agent, inbound, false);
+    const reservation = this.budget.reserve(id, agent, inbound, false, requestInputEstimate(this.config.budget, data, options));
     if (!reservation) return;
     try {
       const decision = await this.provider.decide({ ...reservation, data, choices: options });
-      this.budget.settle(id, decision.usage);
+      if (!this.budget.settle(id, decision.usage)) return;
       return options.includes(decision.choice) ? decision.choice : "none";
-    } catch {
+    } catch (error) {
+      if (error instanceof Error && ["PROVIDER_MODEL", "PROVIDER_USAGE"].includes(error.message)) this.budget.hold();
       this.store.notice("ai-unavailable", this.clock(), "Một yêu cầu AI chưa đối soát được.");
       return "none";
     }
   }
 
-  private isOptOut(text: string) {
-    const normalized = text.normalize("NFC").trim().toLocaleLowerCase("vi-VN");
-    return this.config.advertising.optOut.some(word =>
-      normalized === word || normalized.startsWith(word + " nhận") || normalized.startsWith(word + " gửi") ||
-      normalized.startsWith(word + " nhắn") || [".", "!", ","].some(mark => normalized.startsWith(word + mark)));
+  private disableAds(target: string) {
+    // Called inside the same transaction as inbound persistence or AI admission.
+    this.store.optOut(target);
+    this.store.db.prepare("DELETE FROM jobs WHERE target=?").run(target);
   }
+
+  private flagOptOut(target: string, id: string) {
+    this.store.pauseAdsForReview(target, id);
+    this.store.notice("review-opt-out:" + id, this.clock(), "Cần xem lại ý định ngừng nhận ưu đãi của tin nhắn này.");
+  }
+
+  private discardPending(contact: string) {
+    for (const [key, item] of this.pending) if (item.event.contact === contact) this.pending.delete(key);
+  }
+
 
   ingest(event: Event) {
     const now = this.clock();
@@ -64,6 +75,7 @@ export class Runtime {
     const { store } = this;
     const id = store.eventKey(event.contact, event.thread, event.id);
     const target = store.hash(event.contact);
+    const optOut = event.kind === "dm" ? classifyOptOut(event.text, this.config.advertising) : "none";
     const record = store.atomic(() => {
       if (!store.db.prepare("INSERT OR IGNORE INTO inbound VALUES(?,?,?)").run(id, target, event.at).changes) {
         if (this.pending.has(id) || event.at < now - this.config.scheduling.maxInboundAgeMs) return;
@@ -73,11 +85,11 @@ export class Runtime {
         }
         return;
       }
-      if (event.kind === "dm" && this.isOptOut(event.text)) {
-        store.optOut(target);
-        store.db.prepare("DELETE FROM jobs WHERE target=?").run(target);
+      if (optOut === "stop") {
+        this.disableAds(target);
         return;
       }
+      if (optOut === "review") this.flagOptOut(target, id);
       if (event.kind === "spam") return { spam: true } as const;
       if (event.at < now - this.config.scheduling.maxInboundAgeMs) return;
       if (event.kind === "accepted") {
@@ -92,9 +104,7 @@ export class Runtime {
       return { revision: policy.revision, epoch };
     });
     if (!record) {
-      if (event.kind === "dm" && this.isOptOut(event.text)) {
-        for (const [key, item] of this.pending) if (item.event.contact === event.contact) this.pending.delete(key);
-      }
+      if (optOut === "stop") this.discardPending(event.contact);
       return;
     }
     if ("spam" in record) { this.guard.spam(); return; }
@@ -149,8 +159,27 @@ export class Runtime {
     }
     if (typeof routed !== "string") {
       if (!permitted.some(valid)) return true;
-      routed = await this.decide(attempt + "-route", "router", { event: event.kind, question }, [...permitted, "none"], inbound);
+      const options: string[] = [...permitted, "none"];
+      if (inbound) {
+        options.push("review-opt-out");
+        if (!hasNegatedStop(event.text)) options.push("opt-out");
+      }
+      routed = await this.decide(attempt + "-route", "router", { event: event.kind, question }, options, inbound);
       if (!routed) return false;
+      if (inbound && (routed === "opt-out" || routed === "review-opt-out")) {
+        const disabled = store.atomic(() => {
+          if (this.clock() - event.at > this.config.scheduling.maxInboundAgeMs || !permitted.some(valid) ||
+            !store.db.prepare("SELECT 1 FROM jobs WHERE id=? AND target=? AND status='queued'").get(id, target)) return false;
+          if (routed === "opt-out") {
+            this.disableAds(target);
+            return true;
+          }
+          this.flagOptOut(target, id);
+          return false;
+        });
+        if (disabled) this.discardPending(event.contact);
+        return true;
+      }
       store.db.prepare("UPDATE jobs SET body=? WHERE id=?").run(attempt === id ? routed : attempt.slice(id.length + 1) + "|" + routed, id);
     }
     if (routed === "sales-ready" && valid("sales")) {
@@ -206,23 +235,29 @@ export class Runtime {
   private async batch(id: string, agent: "listen" | "report", data: object) {
     if (this.store.stopped(agent)) return;
     const key = this.batchId(id, agent);
-    const reservation = this.budget.reserve(key, agent, false, true);
+    if (this.config.budget.provider === "anthropic-compatible") {
+      const choice = await this.decide(key, agent, data, choices[agent]);
+      if (choice && choice !== "none") this.store.notice("batch:" + key, this.clock(), choice);
+      return;
+    }
+    const reservation = this.budget.reserve(key, agent, false, true, requestInputEstimate(this.config.budget, data, choices[agent]));
     if (!reservation) return;
     try { this.budget.batch(key, await this.provider.submit(key, { ...reservation, data, choices: choices[agent] })); }
     catch { this.store.notice("batch-unavailable", this.clock(), "Yêu cầu batch chưa đối soát được."); }
   }
   private async pollBatches() {
-    if (this.store.setting("budgetStop")) return;
+    if (this.store.setting("budgetStop") || this.config.budget.provider === "anthropic-compatible") return;
     const { db } = this.store;
-    for (const row of db.prepare("SELECT id,batch FROM ledger WHERE state='batch' LIMIT 25").all()) {
+    for (const row of db.prepare("SELECT id,batch,model FROM ledger WHERE state='batch' AND provider='anthropic' LIMIT 25").all()) {
       const id = String(row.id);
       const key = String(row.batch);
       try {
-        const outcome = await this.provider.poll(id, key, [...choices.listen, ...choices.report]);
+        const outcome = await this.provider.poll(id, key, [...choices.listen, ...choices.report], String(row.model));
         if (!outcome) continue;
-        this.budget.settle(id, outcome.usage);
+        if (!this.budget.settle(id, outcome.usage)) return;
         if (outcome.choice !== "none") this.store.notice("batch:" + id, this.clock(), outcome.choice);
-      } catch {
+      } catch (error) {
+        if (error instanceof Error && ["PROVIDER_MODEL", "PROVIDER_USAGE"].includes(error.message)) this.budget.hold();
         this.store.notice("batch-poll", this.clock(), "Chưa lấy được kết quả batch.");
       }
     }

@@ -17,6 +17,14 @@ const smokeOnly = process.env.CHANNEL_SMOKE_ONLY === "1";
 const path = process.env.DB_PATH ?? "./runtime.sqlite";
 const key = process.env.IDENTITY_KEY || (mode === "mock" && !process.env.ANTHROPIC_API_KEY ? "offline-fixture" : "");
 const config = structuredClone(defaults);
+config.advertising.enabled = process.env.ADS_ENABLED === "true";
+const providerMode = process.env.AI_PROVIDER ?? "anthropic";
+if (providerMode !== "anthropic" && providerMode !== "anthropic-compatible") throw Error("INVALID_AI_PROVIDER");
+config.budget.provider = providerMode;
+if (providerMode === "anthropic-compatible") {
+  config.budget.compatibleDailyUsd = Number(process.env.AI_ROUTER_DAILY_USD);
+  config.budget.compatibleRateMultiplier = Number(process.env.AI_ROUTER_RATE_MULTIPLIER);
+}
 const anchor = Number(process.env.CREDIT_CYCLE_START_DAY ?? config.budget.cycleStartDay);
 if (!Number.isInteger(anchor) || anchor < 1 || anchor > 28 || key.length < 8 ||
   !["mock", "subiz"].includes(mode)) throw Error("INVALID_CONFIGURATION");
@@ -81,12 +89,19 @@ if (command !== "serve") {
   const active = mode === "subiz" ? await setupChannels(store, readRoutes(), smokeOnly) : undefined;
   if (active && !smokeOnly && !(await active.subiz.authenticate()).ok) throw Error("SUBIZ_AUTH_FAILED");
   const channel = active?.channel ?? new MockChannel();
-  const claudeKey = process.env.ANTHROPIC_API_KEY;
+  const compatible = providerMode === "anthropic-compatible";
+  const claudeKey = compatible ? process.env.AI_ROUTER_API_KEY : process.env.ANTHROPIC_API_KEY;
+  const base = compatible ? process.env.AI_ROUTER_BASE_URL : undefined;
   const enableClaude = process.env.CLAUDE_ENABLED === "1";
   if (enableClaude && (!claudeKey || process.env.CLAUDE_CREDIT_CONFIRMED !== "1" || smokeOnly)) {
     throw Error("CLAUDE_CREDIT_CONFIGURATION_REQUIRED");
   }
-  const provider = enableClaude && claudeKey ? new ClaudeProvider(claudeKey, config.budget) : new FakeProvider();
+  if (enableClaude && compatible && (!base || process.env.AI_ROUTER_CREDIT_CONFIRMED !== "1" ||
+    !(config.budget.compatibleDailyUsd > 0 && config.budget.compatibleDailyUsd <= 195) ||
+    !(config.budget.compatibleRateMultiplier >= 1 && config.budget.compatibleRateMultiplier <= 100))) {
+    throw Error("AI_ROUTER_BUDGET_CONFIGURATION_REQUIRED");
+  }
+  const provider = enableClaude && claudeKey ? new ClaudeProvider(claudeKey, config.budget, fetch, base) : new FakeProvider();
   const schedule: Schedule[] = process.env.SCHEDULE_PATH ? JSON.parse(readFileSync(process.env.SCHEDULE_PATH, "utf8")) : [];
   if (!Array.isArray(schedule) || schedule.some(task => !task || !task.key || !task.target ||
     typeof task.key !== "string" || !/^[a-zA-Z0-9_-]{1,80}$/.test(task.key) ||

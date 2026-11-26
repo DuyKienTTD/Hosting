@@ -31,6 +31,8 @@ async function serve(t, handler) {
   t.after(() => { server.closeAllConnections(); server.close(); });
   return "http://127.0.0.1:" + server.address().port;
 }
+const adsTestConfig = { ...defaults, advertising: { ...defaults.advertising, enabled: true } };
+
 const account = "synthetic-account";
 const agent = "synthetic-agent";
 const profile = "synthetic-profile";
@@ -280,7 +282,7 @@ test("signed Subiz opt-out during contact preflight prevents any provider send",
   const router = new CapabilityRouter({ sendMessage: "api", getContact: "api" },
     { api: { adapter, operations: ["sendMessage", "getContact"] } });
   const bridge = new RuntimeChannel(router, account, new Map([[contact, cid]]), []);
-  const runtime = new Runtime(f.store, bridge, new FakeProvider(), defaults, f.clock);
+  const runtime = new Runtime(f.store, bridge, new FakeProvider(), adsTestConfig, f.clock);
   const hook = webhookHandler(adapter, undefined, event => runtime.ingest(event));
   const url = await serve(t, async (req, res) => { if (!await hook(req, res)) res.writeHead(404).end(); });
   f.store.stop("global", false);
@@ -289,7 +291,7 @@ test("signed Subiz opt-out during contact preflight prevents any provider send",
   const original = bridge.getContact.bind(bridge);
   bridge.getContact = async req => {
     const verified = await original(req);
-    const raw = Buffer.from(JSON.stringify({ events: [eventData(f.clock(), "KHÔNG")] }));
+    const raw = Buffer.from(JSON.stringify({ events: [eventData(f.clock(), "DỪNG NHẬN TIN")] }));
     const response = await fetch(url + "/webhooks/subiz", { method: "POST", body: raw,
       headers: { "Content-Type": "application/json", "X-Hub-Signature-256": signature(raw) } });
     assert.equal(response.status, 204);
@@ -317,7 +319,7 @@ for (const reason of ["not_friend", "hours", "allowed"]) {
     f.store.stop("global", false);
     const target = f.store.hash(contact);
     f.store.consent(target, f.clock() + 50000, false, true, true, true);
-    const result = await new Guard(f.store, bridge, defaults, f.clock).dispatch({
+    const result = await new Guard(f.store, bridge, adsTestConfig, f.clock).dispatch({
       agent: "campaign", kind: "advertising", id: "preflight-offer", target: contact, thread: cid,
       text: "Ưu đãi fixture", revision: f.store.contact(target).revision, epoch: f.store.setting("epoch"),
     });
