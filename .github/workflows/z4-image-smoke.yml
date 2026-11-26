@@ -43,6 +43,14 @@ jobs:
         run: |
           fixture=$(mktemp -d)
           touch "$fixture/rclone.conf"
+          mkdir -p "$fixture/storage/dump/tombstones"
+          printf 'z4-tombstones-v1\n' > "$fixture/storage/dump/tombstones/_format"
+          cat > "$fixture/storage.yml" <<YAML
+          services:
+            worker:
+              volumes:
+                - "$fixture/storage:/run/z4-smoke-storage:ro"
+          YAML
           env_file="$fixture/fixture.env"
           export env_file fixture
           python3 - <<'PY'
@@ -59,9 +67,9 @@ jobs:
               "AI_ROUTER_RATE_MULTIPLIER": "1",
               "ZALO_APP_ID": "fixture_app",
               "ZALO_OA_ID": "fixture_oa",
-              "BACKUP_REMOTE": ":local:/tmp/z4-dump-fixture",
-              "PURGE_RECEIPT_REMOTE": ":local:/tmp/z4-receipt-fixture",
-              "PURGE_RECEIPT_BACKUP_REMOTE": ":local:/tmp/z4-receipt-copy-fixture",
+              "BACKUP_REMOTE": ":local:/run/z4-smoke-storage/dump",
+              "PURGE_RECEIPT_REMOTE": ":local:/run/z4-smoke-storage/receipt",
+              "PURGE_RECEIPT_BACKUP_REMOTE": ":local:/run/z4-smoke-storage/receipt-copy",
               "AGE_RECIPIENT": "unused_fixture",
               "WORKER_RCLONE_FILE": str(fixture / "rclone.conf"),
               "BACKUP_RCLONE_FILE": str(fixture / "rclone.conf"),
@@ -74,7 +82,7 @@ jobs:
               entries.append(f"{key}={values.get(key, default or secrets.token_hex(32))}")
           Path(os.environ["env_file"]).write_text("\n".join(entries) + "\n")
           PY
-          compose() { docker compose --env-file "$env_file" -p z4-image-smoke -f deploy/compose.prod.yml "$@"; }
+          compose() { docker compose --env-file "$env_file" -p z4-image-smoke -f deploy/compose.prod.yml -f "$fixture/storage.yml" "$@"; }
           cleanup() {
             status=$?
             if [ "$status" -ne 0 ]; then
