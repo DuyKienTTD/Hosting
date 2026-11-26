@@ -51,7 +51,7 @@ export class Store {
     const row = this.db.prepare(this.db.backend ? "SELECT * FROM runtime_contact_policy WHERE target=?"
       : "SELECT * FROM contact WHERE target=?").get(target) as
       (PolicyRow & { ads: number; opted_out: number; ads_paused_review: string | null; accepted: number; interest: number;
-        retain_until?: number; respond_until?: number; send_until?: number; ads_until?: number }) | undefined;
+        ad_state?: string; retain_until?: number; respond_until?: number; send_until?: number; ads_until?: number }) | undefined;
     if (row && this.db.backend) {
       if (Number(row.retain_until) <= now) row.retain = 0;
       if (Number(row.respond_until) <= now) row.respond = 0;

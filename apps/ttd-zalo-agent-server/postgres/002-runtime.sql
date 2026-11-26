@@ -18,10 +18,10 @@ CREATE VIEW runtime_contact_policy AS
          CASE WHEN r.withdrawn=false AND r.valid_until_ms IS NOT NULL THEN 1 ELSE 0 END AS retain,
          CASE WHEN p.withdrawn=false AND p.valid_until_ms IS NOT NULL THEN 1 ELSE 0 END AS respond,
          CASE WHEN s.withdrawn=false AND s.valid_until_ms IS NOT NULL THEN 1 ELSE 0 END AS send,
-         CASE WHEN status.state='active' AND a.withdrawn=false AND a.valid_until_ms IS NOT NULL THEN 1 ELSE 0 END AS ads,
+         CASE WHEN a.withdrawn=false AND a.valid_until_ms IS NOT NULL THEN 1 ELSE 0 END AS ads,
          r.valid_until_ms AS retain_until, p.valid_until_ms AS respond_until,
          s.valid_until_ms AS send_until, a.valid_until_ms AS ads_until,
-         CASE WHEN status.state='opted_out' THEN 1 ELSE 0 END AS opted_out,
+         status.state AS ad_state, CASE WHEN status.state='opted_out' THEN 1 ELSE 0 END AS opted_out,
          CASE WHEN status.state='ads_paused_review' THEN coalesce(c.ads_paused_review,'pending') END AS ads_paused_review
   FROM contact c LEFT JOIN runtime_customer x USING(target)
   LEFT JOIN ad_status status USING(customer_id)
