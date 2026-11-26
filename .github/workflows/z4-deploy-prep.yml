@@ -78,6 +78,42 @@ jobs:
             --mount "type=bind,source=$PWD/deploy/nginx/cskh-https.conf,target=/etc/nginx/conf.d/default.conf,readonly" \
             --mount "type=bind,source=$certs,target=/etc/letsencrypt/live/cskh.thuanthanhdat.com.vn,readonly" \
             nginx:1.28-alpine nginx -t
+      - name: Smoke-test verifier and webhook routing
+        run: |
+          certs="$RUNNER_TEMP/cskh-cert"
+          fixture="$RUNNER_TEMP/zalo-verifier"
+          mkdir -p "$fixture/files"
+          printf 'fixture verifier\n' > "$fixture/files/zalo_verifierFixture-1_test.html"
+          cat > "$fixture/oa.conf" <<'NGINX'
+          server {
+              listen 127.0.0.1:18081;
+              location = /webhooks/zalo-oa {
+                  if ($request_method = POST) { return 201; }
+                  return 405;
+              }
+          }
+          NGINX
+          container=$(docker run -d -p 127.0.0.1::443 \
+            --mount "type=bind,source=$PWD/deploy/nginx/cskh-https.conf,target=/etc/nginx/conf.d/default.conf,readonly" \
+            --mount "type=bind,source=$certs,target=/etc/letsencrypt/live/cskh.thuanthanhdat.com.vn,readonly" \
+            --mount "type=bind,source=$fixture/files,target=/var/www/cskh-verify,readonly" \
+            --mount "type=bind,source=$fixture/oa.conf,target=/etc/nginx/conf.d/fixture-oa.conf,readonly" \
+            nginx:1.28-alpine)
+          trap 'docker rm -f "$container" >/dev/null' EXIT
+          url="https://$(docker port "$container" 443/tcp)"
+          probe() { curl -ksS --max-time 4 -H 'Host: cskh.thuanthanhdat.com.vn' "$@"; }
+          for attempt in $(seq 1 15); do
+            if probe -f "$url/zalo_verifierFixture-1_test.html" >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          for prefix in '' '/webhooks/zalo-oa'; do
+            endpoint="$url$prefix/zalo_verifierFixture-1_test.html"
+            probe -f "$endpoint" | cmp "$fixture/files/zalo_verifierFixture-1_test.html" -
+            probe -fI "$endpoint" | grep -i '^content-type: text/html'
+            test "$(probe -X POST -o /dev/null -w '%{http_code}' "$endpoint")" = 405
+            test "$(probe -o /dev/null -w '%{http_code}' "$url$prefix/zalo_verifierMissing.html")" = 404
+          done
+          test "$(probe -X POST -o /dev/null -w '%{http_code}' "$url/webhooks/zalo-oa")" = 201
       - name: Check backup job status logging and failure
         run: |
           fixture="$RUNNER_TEMP/backup-fixture"
