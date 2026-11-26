@@ -132,3 +132,21 @@ Nguồn quyết định [DIRECTION-04 tại main](https://github.com/DuyKienTTD/
 | `docker compose -f compose.data.yaml --profile maintenance config --quiet` | 0 | Compose hợp lệ với biến giả lập |
 
 CI `Z4 Postgres data` chạy lại bằng PostgreSQL service container.
+
+## Z4-S1-DATA-B · Runtime trên Postgres
+
+Bổ sung trên PR #75, từ HEAD `32d080b`. Runtime triển khai dùng Postgres cho AI, ledger ngân sách, journal kênh, consent/opt-out và gửi. SQLite phục vụ fixture cục bộ. Ảnh runtime loại bản cài đặt repository SQLite khỏi output triển khai.
+
+- Migration 002 và quyền DB riêng cho runtime. Consent theo mục đích có bằng chứng, hạn hiệu lực và lịch sử rút lại. Tin 1-1 chỉ được ghi nội dung khi khách còn consent lưu giữ.
+- Guard đọc cờ `ADS_ENABLED`, consent và `ad_status` sau bước xác minh đích. Cùng transaction, Guard xét lại giới hạn và ghi giữ chỗ vào `send_log`. Khóa Postgres giữ đến khi bắt đầu gọi kênh. Ghi kết quả trong transaction kế tiếp. Lượt `unknown_delivery` và giữ chỗ chưa quyết toán không tự chạy lại. Restore bật STOP để đối soát trước khi phục vụ.
+- [DEPLOY](../apps/ttd-zalo-agent-server/DEPLOY.md) ghi cấu hình Postgres mặc định, migration cho DB đã có schema 001 và quy trình đối soát khi restore. API dữ liệu `/messages` chuẩn bị cho tích hợp OA tiếp theo. Adapter runtime hiện có đi qua đường tiếp nhận của runtime.
+
+| Kiểm tra | Kết quả |
+|---|---|
+| Runtime Node 24 `npm run typecheck` và `npm run build` | Exit 0 |
+| Assistant Node 24 `npm run typecheck`, `npm run build`, `npm test` | Exit 0, 20/20 |
+| Postgres 17 `node --test test/postgres.test.mjs` với `RUN_POSTGRES_TESTS=1` | Exit 0, 5/5 |
+| SQLite cục bộ `npm test` | Exit 0, 58 đạt, 2 bộ Postgres bỏ qua khi không có DB |
+| `docker compose --profile maintenance config --quiet` và cùng lệnh với `-f compose.data.yaml` | Exit 0 |
+
+CI chạy toàn bộ suite runtime với Postgres service container. Ca tích hợp dùng role triển khai `data_runtime` và đi từ MockChannel qua FakeProvider, Guard đến `send_log`. Ca kiểm tra nhìn thấy giữ chỗ đã commit từ kết nối độc lập, thay đổi cờ quảng cáo, trạng thái và consent sau xác minh đích, và chặn gửi lại khi kênh trả `unknown_delivery`.

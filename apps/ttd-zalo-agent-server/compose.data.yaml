@@ -22,6 +22,7 @@ services:
       POSTGRES_USER: zalo_admin
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set postgres administrator password}
       DATA_APP_PASSWORD: ${DATA_APP_PASSWORD:?set app password}
+      DATA_RUNTIME_PASSWORD: ${DATA_RUNTIME_PASSWORD:?set runtime password}
       DATA_WORKER_PASSWORD: ${DATA_WORKER_PASSWORD:?set worker password}
     volumes:
       - postgres:/var/lib/postgresql/data
@@ -81,6 +82,39 @@ services:
       interval: 30s
       timeout: 6s
       retries: 5
+  runtime:
+    <<: *data
+    entrypoint: ["node","dist/ttd-zalo-agent-server/src/main.js"]
+    command: [serve]
+    cpus: 0.20
+    mem_limit: 384m
+    networks:
+      private:
+      outbound:
+      ingress:
+        aliases: [ttd-zalo-runtime]
+    environment:
+      PGHOST: postgres
+      PGDATABASE: zalo
+      DATA_RUNTIME_PASSWORD: ${DATA_RUNTIME_PASSWORD:?set runtime password}
+      HTTP_BIND: container
+      DATA_RETENTION_DAYS: ${DATA_RETENTION_DAYS:-30}
+      IDENTITY_KEY: ${IDENTITY_KEY:?set a persistent runtime identity key}
+      ADS_ENABLED: "false"
+      AI_PROVIDER: anthropic-compatible
+      AI_ROUTER_BASE_URL: ${AI_ROUTER_BASE_URL:-}
+      AI_ROUTER_API_KEY: ${AI_ROUTER_API_KEY:-}
+      AI_ROUTER_DAILY_USD: ${AI_ROUTER_DAILY_USD:-}
+      AI_ROUTER_RATE_MULTIPLIER: ${AI_ROUTER_RATE_MULTIPLIER:-}
+      AI_ROUTER_CREDIT_CONFIRMED: ${AI_ROUTER_CREDIT_CONFIRMED:-0}
+      CLAUDE_ENABLED: ${CLAUDE_ENABLED:-0}
+      CLAUDE_CREDIT_CONFIRMED: ${CLAUDE_CREDIT_CONFIRMED:-0}
+      OPERATOR_PASSWORD: ${OPERATOR_PASSWORD:-}
+    healthcheck:
+      test: ["CMD","node","-e","fetch('http://127.0.0.1:8080/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 15s
+      timeout: 6s
+      retries: 4
   backup:
     image: ${DATA_POSTGRES_IMAGE:?set immutable postgres image}
     profiles: [maintenance]

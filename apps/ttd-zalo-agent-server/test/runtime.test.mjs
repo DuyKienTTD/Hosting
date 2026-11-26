@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { defaults, day, minute, light, strong } from "../dist/ttd-zalo-agent-server/src/config.js";
 import { MockChannel, UnsupportedChannel } from "../dist/ttd-zalo-agent-server/src/channel.js";
 import { Guard } from "../dist/ttd-zalo-agent-server/src/guard.js";
-import { Store } from "../dist/ttd-zalo-agent-server/src/store.js";
+import { fixtureStore, usesPostgres } from "./runtime-store.mjs";
 import { Budget } from "../dist/ttd-zalo-agent-server/src/budget.js";
 import { FakeProvider, ClaudeProvider, requestInputEstimate } from "../dist/ttd-zalo-agent-server/src/provider.js";
 import { Runtime } from "../dist/ttd-zalo-agent-server/src/runtime.js";
@@ -19,8 +19,8 @@ function fixture(t, path = ":memory:") {
   const advance = ms => { now += ms; };
   const config = structuredClone(defaults);
   config.advertising.enabled = true;
-  const store = new Store(path, "fixture-key");
-  t.after(() => store.db.close());
+  const store = fixtureStore(t, path, "fixture-key");
+  if (usesPostgres) store.set("ADS_ENABLED", 1);
   const channel = new MockChannel();
   const guard = new Guard(store, channel, config, clock);
   store.stop("global", false);
@@ -139,7 +139,7 @@ test("spike, repeated channel failures, and spam independently engage global STO
   assert.ok(f.store.stopped("global"));
 });
 
-test("same intent starts once, unknown delivery never retries after reopening SQLite", async t => {
+test("same intent starts once, unknown delivery never retries after reopening the repository", async t => {
   const folder = await mkdtemp(join(tmpdir(), "ttd-runtime-test-"));
   t.after(() => rm(folder, { recursive: true, force: true }));
   const path = join(folder, "runtime.sqlite");
@@ -148,8 +148,7 @@ test("same intent starts once, unknown delivery never retries after reopening SQ
   f.channel.fail = "unknown_delivery";
   const outcomes = await Promise.all([f.guard.dispatch(f.draft("same")), f.guard.dispatch(f.draft("same"))]);
   assert.deepEqual(outcomes.sort(), ["duplicate", "unknown"]);
-  const restored = new Store(path, "fixture-key");
-  t.after(() => restored.db.close());
+  const restored = fixtureStore(t, path, "fixture-key");
   const guard = new Guard(restored, f.channel, f.config, f.clock);
   assert.equal(await guard.dispatch(f.draft("same")), "duplicate");
   assert.equal(f.channel.sent.size, 1);
@@ -385,7 +384,7 @@ test("queued sales-ready offer and every transport kind respect the budget cap",
   const id = f.store.eventKey("a", "dm", "synthetic");
   f.store.db.prepare("INSERT INTO inbound VALUES(?,?,?)").run(id, f.store.hash("a"), f.clock());
   f.store.db.prepare("INSERT INTO jobs VALUES(?,?,?,'queued',?,?,?,'sales-ready')")
-    .run(id, "accepted", f.store.hash("a"), f.clock(), 1, f.store.setting("epoch"));
+    .run(id, "accepted", f.store.hash("a"), f.clock(), f.store.contact(f.store.hash("a")).revision, f.store.setting("epoch"));
   seedSpend(f, runtime.budget, 195e9);
   f.channel.events.push({ id: "synthetic", contact: "a", thread: "dm", kind: "accepted", at: f.clock() });
   await runtime.tick();
@@ -398,7 +397,7 @@ test("queued sales-ready offer and every transport kind respect the budget cap",
     assert.equal(await runtime.guard.dispatch(proposal), "budget_held");
   }
   assert.equal(f.channel.sent.size, 0);
-  assert.equal(f.store.db.prepare("SELECT count(*) n FROM outbound").get().n, 0);
+  assert.equal(f.store.db.prepare("SELECT count(*) n FROM send_log").get().n, 0);
 });
 
 for (const reason of ["ledger cap during transport admission", "budgetStop during AI"]) {
@@ -519,7 +518,17 @@ test("v1 ledger migration preserves pending legacy model charges", async t => {
   const folder = await mkdtemp(join(tmpdir(), "zalo-ledger-"));
   t.after(() => rm(folder, { recursive: true, force: true }));
   const path = join(folder, "ledger.sqlite");
-  const old = new Store(path, "fixture-key");
+  const old = fixtureStore(t, path, "fixture-key");
+  if (usesPostgres) {
+    old.db.prepare("INSERT INTO ledger(id,cycle,date,model,amount,state) VALUES(?,?,?,?,?,'reserved')")
+      .run("legacy", "2026-11-01", "2026-11-01", "claude-sonnet-4-6", 3753840000);
+    const migrated = fixtureStore(t, path, "fixture-key");
+    const budget = new Budget(migrated, defaults.budget, () => fixtureStart);
+    assert.equal(budget.settle("legacy", { input: 1000, output: 20, creation: 0, read: 0 }), true);
+    assert.deepEqual(migrated.db.prepare("SELECT amount,state,provider FROM ledger WHERE id='legacy'").get(),
+      { amount: 3_300_000, state: "settled", provider: "anthropic" });
+    return;
+  }
   old.db.exec(`ALTER TABLE contact DROP COLUMN ads_paused_review;
     ALTER TABLE ledger DROP COLUMN input_bound;
     ALTER TABLE ledger DROP COLUMN rate_multiplier;
@@ -527,9 +536,8 @@ test("v1 ledger migration preserves pending legacy model charges", async t => {
     PRAGMA user_version=1;
     INSERT INTO ledger(id,cycle,date,model,amount,state)
     VALUES('legacy','2026-11-01','2026-11-01','claude-sonnet-4-6',3753840000,'reserved');`);
-  old.db.close();
-  const migrated = new Store(path, "fixture-key");
-  t.after(() => migrated.db.close());
+
+  const migrated = fixtureStore(t, path, "fixture-key");
   const budget = new Budget(migrated, defaults.budget, () => fixtureStart);
   assert.equal(budget.settle("legacy", { input: 1000, output: 20, creation: 0, read: 0 }), true);
   const row = migrated.db.prepare("SELECT amount,state,provider FROM ledger WHERE id='legacy'").get();
@@ -741,6 +749,7 @@ test("ads are disabled by default before STOP, contact checks and transport; sup
   const f = fixture(t);
   assert.equal(defaults.advertising.enabled, false);
   f.config.advertising.enabled = defaults.advertising.enabled;
+  if (usesPostgres) f.store.set("ADS_ENABLED", 0);
   f.create("a");
   const runtime = new Runtime(f.store, f.channel, new FakeProvider(), f.config, f.clock);
   runtime.ingest({ kind: "dm", id: "msg", at: f.clock(), contact: "a", thread: "a", text: "Giá mẫu A01?" });

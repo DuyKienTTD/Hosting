@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -f /migrations/001.sql
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -f /migrations/001.sql -f /migrations/002-runtime.sql -f /migrations/runtime-grants.sql
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<'SQL'
 \getenv app_password DATA_APP_PASSWORD
 \getenv worker_password DATA_WORKER_PASSWORD

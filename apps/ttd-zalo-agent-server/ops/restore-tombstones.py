@@ -37,4 +37,10 @@ for path in sorted(Path(sys.argv[1]).iterdir()):
         f"VALUES ({values},'retention_elapsed','restore_tombstone') ON CONFLICT DO NOTHING;"
     )
     print(f"DELETE FROM messages WHERE id='{record_id}' OR (conversation_id='{conversation_id}' AND event_id='{event_id}');")
+# An old snapshot cannot prove delivery of sends started after the snapshot.
+print("DO $restore$ BEGIN IF to_regclass('settings') IS NOT NULL THEN")
+print("UPDATE settings SET value=1 WHERE key='global';")
+print("UPDATE settings SET value=0 WHERE key='ADS_ENABLED';")
+print("INSERT INTO settings VALUES ('epoch',1) ON CONFLICT(key) DO UPDATE SET value=settings.value+1;")
+print("END IF; END $restore$;")
 print("COMMIT;")

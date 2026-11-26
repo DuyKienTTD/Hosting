@@ -10,23 +10,11 @@ sensitivity: public
 
 ## Chạy bản mô phỏng
 
-Cần Docker Engine và Compose v2. Checkout commit đã nghiệm thu, vào `apps/ttd-zalo-agent-server` và tạo cấu hình riêng.
-
-```sh
-umask 077
-cp .env.example .env
-chmod 600 .env
-docker compose config --quiet
-docker compose up --build -d
-docker compose ps
-curl --fail --silent http://127.0.0.1:8080/health
-```
-
-Trước lần khởi động đầu tiên, đặt `IDENTITY_KEY` bằng khóa ngẫu nhiên riêng có ít nhất 32 byte và sao lưu khóa trong kho bí mật của chủ dự án. DB đã tạo gắn với khóa này. Giữ `CHANNEL_MODE=mock` và `CLAUDE_ENABLED=0` khi diễn tập. Hệ thống khởi tạo ở trạng thái DỪNG. Hai volume `database` và `backups` dùng riêng cho dịch vụ này. Compose bind cổng 8080 vào loopback của VPS.
+Thực hiện các bước [Z4-S1-DATA và Postgres](#z4-s1-data-và-postgres). Dịch vụ `runtime` dùng `MockChannel` và FakeProvider với cấu hình pilot mặc định. Xác minh health qua mạng riêng hoặc proxy quản trị. Postgres khởi tạo với STOP toàn hệ thống và quảng cáo tắt.
 
 ## DỪNG và khôi phục
 
-Đặt `OPERATOR_PASSWORD` bằng mật khẩu ngẫu nhiên dài ít nhất 24 ký tự. Dùng SSH port forwarding đến cổng 8080 trên VPS. Mở `http://127.0.0.1:8080/operator` qua đường hầm, đăng nhập `owner` và dùng nút DỪNG toàn hệ thống hoặc từng agent. Báo cáo hằng ngày và cảnh báo ngân sách nằm trên trang này và qua lệnh `notices`.
+Đặt `OPERATOR_PASSWORD` bằng mật khẩu ngẫu nhiên dài ít nhất 24 ký tự. Dùng reverse proxy quản trị riêng đến `ttd-zalo-runtime:8080`. Mở `/operator` qua mạng quản trị, đăng nhập `owner` và dùng nút DỪNG toàn hệ thống hoặc từng agent. Báo cáo hằng ngày và cảnh báo ngân sách nằm trên trang này và qua lệnh `notices`.
 
 ```sh
 docker compose exec runtime node dist/ttd-zalo-agent-server/src/main.js stop global
@@ -35,7 +23,7 @@ docker compose exec runtime node dist/ttd-zalo-agent-server/src/main.js notices
 docker compose exec runtime node dist/ttd-zalo-agent-server/src/main.js resume global
 ```
 
-Chỉ `resume` sau khi người vận hành kiểm tra lý do dừng. STOP ngăn khởi tạo lượt gửi tiếp theo. Đối soát trạng thái `reserved`, `started` hoặc `unknown` trước khi can thiệp. Adapter live phải bắt đầu gửi đồng bộ tại điểm gọi và cung cấp hợp đồng xác thực sự kiện, định danh, tính bạn bè, idempotency và thứ tự opt-out. Cấu hình các năng lực đã xác minh theo phần kết nối adapter bên dưới.
+Chỉ `resume` sau khi người vận hành kiểm tra lý do dừng. STOP ngăn khởi tạo lượt gửi tiếp theo. Đối soát trạng thái `reserved` hoặc `unknown_delivery` trước khi can thiệp. Adapter live phải bắt đầu gửi đồng bộ tại điểm gọi và cung cấp hợp đồng xác thực sự kiện, định danh, tính bạn bè, idempotency và thứ tự opt-out. Cấu hình các năng lực đã xác minh theo phần kết nối adapter bên dưới.
 
 ## Claude và ngân sách
 
@@ -57,11 +45,11 @@ docker compose exec -T runtime node dist/ttd-zalo-agent-server/src/main.js expor
 docker compose exec -T runtime node dist/ttd-zalo-agent-server/src/main.js delete < /path/private/customer.json
 ```
 
-`consent` nhận `target`, `expires` (epoch ms) và các cờ boolean `retain`, `respond`, `send`, `ads`. Chỉ đặt `ads=true` với bằng chứng đồng ý trước. Kết bạn độc lập với consent quảng cáo. `catalogue` nhận đối tượng Source của app desktop. `export` và `delete` nhận `{ "target": "synthetic-id" }`. Hàng chờ SQLite lưu trạng thái, không lưu nội dung tin. Sau restart, adapter cần phát lại sự kiện để dựng lại hàng chờ còn hiệu lực. Xóa hồ sơ loại bỏ trường CRM và hàng chờ, giữ dấu HMAC tối thiểu để từ chối quảng cáo và phát lại. Phạm vi xóa dữ liệu vận hành bao gồm cả lịch riêng và bản sao lưu theo chính sách của chủ dự án.
+`consent` nhận `target`, `expires` (epoch ms), các cờ boolean `retain`, `respond`, `send`, `ads` và bằng chứng gồm `displayedText`, `policyVersion`, `evidence`. Chỉ đặt `ads=true` với bằng chứng đồng ý trước. Kết bạn độc lập với consent quảng cáo. `catalogue` nhận đối tượng Source của app desktop. `export` và `delete` nhận `{ "target": "synthetic-id" }`. Postgres lưu trạng thái hàng chờ. Nội dung tin 1-1 chỉ được ghi vào `messages` khi còn consent lưu giữ. Sau restart, adapter cần phát lại sự kiện để dựng lại hàng chờ còn hiệu lực. Xóa hồ sơ loại bỏ trường CRM và hàng chờ, giữ dấu HMAC tối thiểu để từ chối quảng cáo và phát lại. Phạm vi xóa dữ liệu vận hành bao gồm cả lịch riêng và bản sao lưu theo chính sách của chủ dự án.
 
 Lịch chiến dịch và cộng đồng đọc từ `SCHEDULE_PATH` nếu mount tệp JSON riêng chỉ đọc vào container. Mỗi đề mục có `key` duy nhất, `agent`, `kind`, `at` (epoch ms), `target`, `text` hoặc `message` cho kiểm duyệt. Agent chiến dịch nhận `advertising`, cộng đồng nhận `group_post`, `group_create`, `group_moderate`. Dùng nội dung nhóm phi quảng cáo do chủ dự án duyệt.
 
-SQLite backup trực tuyến tạo bản sao mỗi ngày UTC trong volume `backups`. Sao chép sang kho backup riêng, áp dụng chính sách lưu giữ và bảo vệ ổ đĩa backup. Khi phục hồi, dừng container, giữ bản hiện tại và khôi phục cùng khóa định danh. Dừng hệ thống trước khi xử lý tiếp và đối soát mọi lượt gửi/chi phí sau thời điểm snapshot để tránh replay. Chạy kiểm tra phục hồi định kỳ bằng dữ liệu mô phỏng.
+Dùng [backup và restore Postgres](#z4-s1-data-và-postgres). Khi khôi phục snapshot cũ, giữ STOP và đối soát lượt gửi, consent và chi phí phát sinh sau snapshot. Khôi phục đầy đủ các khóa lượt gửi đang `reserved` hoặc `unknown_delivery` trước khi mở STOP. Không phát lại lượt chưa rõ kết quả.
 
 ## Kết nối adapter trên VPS
 
@@ -87,7 +75,7 @@ Nguồn giao thức xem [Subiz webhook](https://subiz.com.vn/developers/webhooks
 
    Mỗi route phải là một cuộc hội thoại 1:1 đã đối chiếu thủ công trong inbox. Dùng `friendUntil` theo Unix ms chỉ khi đã xác minh đúng trạng thái bạn bè và đặt ngày hết hạn kiểm chứng. Thiếu bằng chứng thì runtime không gửi. Gửi cần thêm consent của Policy Core. Bản nhận webhook chỉ nhận văn bản từ actor khách đúng cặp user/CID đã duyệt.
 
-2. Đặt reverse proxy TLS trước loopback 8080. Chỉ public `POST /webhooks/subiz`, và `POST /webhooks/zalo-bot` khi bật bot. Giới hạn request 256 KiB, giữ nguyên raw body và các header xác thực, tắt log body và header bí mật. Giữ `/operator` và các đường quản trị trong mạng riêng. Đăng ký URL HTTPS `/webhooks/subiz` trong Subiz và chỉ chọn `message_sent`. Sau khi lưu webhook, nạp shared secret thật vào môi trường dịch vụ. Hai digest trong giai đoạn đổi secret được hỗ trợ. Inbound được mã hóa, ghi bền vững trước ACK và tự dọn sau 24 giờ.
+2. Đặt reverse proxy TLS trước service runtime. Chỉ public `POST /webhooks/subiz`, và `POST /webhooks/zalo-bot` khi bật bot. Giới hạn request 256 KiB, giữ nguyên raw body và các header xác thực, tắt log body và header bí mật. Giữ `/operator` và các đường quản trị trong mạng riêng. Đăng ký URL HTTPS `/webhooks/subiz` trong Subiz và chỉ chọn `message_sent`. Sau khi lưu webhook, nạp shared secret thật vào môi trường dịch vụ. Hai digest trong giai đoạn đổi secret được hỗ trợ. Inbound được mã hóa, ghi bền vững trước ACK và tự dọn sau 24 giờ.
 
 3. **Smoke 1:1.** Đặt `CHANNEL_SMOKE_ONLY=1`, `CLAUDE_ENABLED=0` và khởi động dịch vụ trên DB pilot. Chế độ này nhận webhook nhưng không chạy worker tự động. Cấp consent phản hồi cho đúng liên hệ pilot, xác minh `friendUntil` còn hiệu lực và mở STOP trong phạm vi thử. Đặt `SUBIZ_SMOKE_CONTACT` bằng contact ID pilot và `SUBIZ_SMOKE_NONCE` là chuỗi ngẫu nhiên dạng `TTD-SMOKE-<12-ký-tự-trở-lên>`. Yêu cầu người thử gửi đúng chuỗi từ Zalo; chạy:
 
@@ -113,10 +101,12 @@ Nguồn giao thức xem [Subiz webhook](https://subiz.com.vn/developers/webhooks
 
 ## Z4-S1-DATA và Postgres
 
-Mục này dành cho nghiệm thu bằng dữ liệu giả lập. Dùng Compose riêng `compose.data.yaml`. App Postgres nhận tin và phiếu việc đã xác thực, worker xử lý hàng đợi tiếp nhận và retention. Runtime AI và guard hiện hành vẫn dùng SQLite. Bản này chưa chuyển dữ liệu hoặc luồng gửi từ SQLite sang Postgres.
+Dùng Compose riêng `compose.data.yaml`. `runtime` chạy AI, Guard, journal kênh và gửi, với Postgres là backend bắt buộc. `app` nhận tin và phiếu việc đã xác thực ở API dữ liệu, `worker` xử lý hàng đợi tiếp nhận và retention. API dữ liệu `/messages` lưu tin cho lớp tích hợp OA sau này. Các adapter runtime hiện có đưa sự kiện trực tiếp vào runtime. SQLite dùng cho fixture cục bộ.
+
+Guard đọc `settings.ADS_ENABLED`, consent theo mục đích và `ad_status` trong transaction giữ chỗ ngay sau khi xác minh đích. Transaction commit giữ chỗ trước khi gọi kênh. Kết quả cập nhật trong transaction riêng, với `unknown_delivery` và giữ chỗ chưa quyết toán đều chặn phát lại. Bật quảng cáo cần phê duyệt trước và thay đổi cờ trong Postgres bằng đường bảo trì. Cấu hình pilot đặt lại cờ về tắt mỗi khi service runtime khởi động.
 
 1. SSH vào VPS và tạo thư mục triển khai riêng. Checkout đúng hai thành phần của cùng một commit đã nghiệm thu. Từ gốc repository, build bằng `docker build -f apps/ttd-zalo-agent-server/Dockerfile.data .` và `docker build apps/ttd-zalo-agent-server/postgres`. Lưu hai image theo commit và đặt `DATA_APP_IMAGE`, `DATA_POSTGRES_IMAGE` theo digest đã kiểm tra trong registry.
-2. Từ thư mục app, sao chép `.env.example` thành `.env.data` ngoài Git, đặt quyền đọc chỉ cho người vận hành. Cấp riêng mật khẩu quản trị, app, worker và token từng vai trò dùng thử. Tất cả token tối thiểu 32 ký tự, không dùng chung. Migration khởi tạo chạy trên volume Postgres mới. Thay đổi schema tiếp theo phải chạy migration đã duyệt bằng tài khoản bảo trì trước khi đổi image. Để quảng cáo tắt và giữ cấu hình provider `anthropic-compatible`.
+2. Từ thư mục app, sao chép `.env.example` thành `.env.data` ngoài Git, đặt quyền đọc chỉ cho người vận hành. Cấp riêng mật khẩu quản trị, app, runtime, worker và token từng vai trò dùng thử. Tất cả token tối thiểu 32 ký tự, không dùng chung. Migration khởi tạo 001 và 002 chạy trên volume Postgres mới. Không trỏ runtime vào DB SQLite cũ. Giữ STOP trong suốt chuyển đổi dữ liệu. Với volume Postgres đã chạy schema 001, sao lưu rồi dùng tài khoản bảo trì chạy `psql -v ON_ERROR_STOP=1 -f postgres/002-runtime.sql -f postgres/runtime-grants.sql` trên DB đích. Nạp `DATA_RUNTIME_PASSWORD` từ kho bí mật trước khi chạy. Thay đổi schema tiếp theo phải chạy migration đã duyệt bằng tài khoản bảo trì trước khi đổi image. Để quảng cáo tắt và giữ cấu hình provider `anthropic-compatible`.
 3. Chuẩn bị riêng network ingress mà reverse proxy HTTPS được phép tham gia. Điền tên miền và network trong môi trường triển khai. Dùng [mẫu route Caddy](ops/Caddyfile.data) trên reverse proxy đang phục vụ 443 với biến `DATA_DOMAIN`. Bật route chỉ sau khi kiểm tra TLS, health và quyền. Compose không mở cổng host cho Postgres, app hoặc worker. Webhook retention `POST /retention` chỉ có trong mạng riêng, dùng bearer retention và JSON gồm `record_id`, `expected_version`, `policy_version`, `reason_code`. Tin khách đi vào `POST /messages` bằng token kênh. Phiếu việc dùng riêng `POST /tasks` và token vai trò được cấp.
 4. Dùng đích rclone ngoài VPS cho backup. Chuẩn bị hai cấu hình quyền hẹp. Worker được đọc và thêm object bất biến trong `tombstones/`. Backup được ghi và dọn theo tuổi trong `dumps/`, không được sửa/xóa tombstone. Cấu hình object retention trên đích, giữ tombstone ít nhất lâu hơn mọi bản sao có thể restore. Tạo object `tombstones/_format` với đúng chuỗi `z4-tombstones-v1` tại prefix dành riêng cho cơ sở dữ liệu này. Khóa giải mã age giữ riêng với hệ thống chạy thường trực. Host chỉ cần public recipient khi backup.
 5. Chạy `docker compose --env-file .env.data -f compose.data.yaml config --quiet`, sau đó `docker compose --env-file .env.data -f compose.data.yaml up -d --wait`. Xác minh health trong project và qua route HTTPS. Khởi tạo hội thoại fixture bằng đường bảo trì DB trước khi gửi tin fixture. Khi chưa có bản test restore thành công, giữ route tắt.

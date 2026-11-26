@@ -25,7 +25,7 @@ export class BaseAdapter implements ChannelAdapter {
 
 export class ChannelJournal {
   constructor(private store: Store, private clock = Date.now, private ttl = 86_400_000) {
-    store.db.exec(`
+    if (!store.db.backend) store.db.exec(`
       CREATE TABLE IF NOT EXISTS adapter_inbox(seq INTEGER PRIMARY KEY AUTOINCREMENT, scope TEXT NOT NULL,
         event TEXT NOT NULL, stream TEXT NOT NULL, sender TEXT NOT NULL, expires INTEGER NOT NULL, sealed TEXT NOT NULL, UNIQUE(scope,event));
       CREATE INDEX IF NOT EXISTS adapter_inbox_page ON adapter_inbox(scope,stream,seq);
@@ -92,7 +92,7 @@ export class ChannelJournal {
     const settle = (result: Result<Results[K]>) => {
       if (!result.ok && result.error.code === "rate_limited") {
         this.store.atomic(() => {
-          db.prepare("INSERT INTO adapter_throttle VALUES(?,?) ON CONFLICT(scope) DO UPDATE SET until=max(until,excluded.until)")
+          db.prepare("INSERT INTO adapter_throttle VALUES(?,?) ON CONFLICT(scope) DO UPDATE SET until=CASE WHEN adapter_throttle.until>excluded.until THEN adapter_throttle.until ELSE excluded.until END")
             .run(scope, this.clock() + (result.error.retryAfterSeconds ?? 60) * 1000);
           db.prepare("DELETE FROM adapter_writes WHERE scope=? AND key=?").run(writeScope, key);
         });

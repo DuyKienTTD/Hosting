@@ -48,11 +48,13 @@ jobs:
         run: |
           export DATA_APP_PASSWORD=$(openssl rand -hex 24)
           export DATA_WORKER_PASSWORD=$(openssl rand -hex 24)
+          export DATA_RUNTIME_PASSWORD=$(openssl rand -hex 24)
           {
             echo "DATA_APP_PASSWORD=$DATA_APP_PASSWORD"
             echo "DATA_WORKER_PASSWORD=$DATA_WORKER_PASSWORD"
+            echo "DATA_RUNTIME_PASSWORD=$DATA_RUNTIME_PASSWORD"
           } >> "$GITHUB_ENV"
-          sed 's@/migrations/001.sql@postgres/001.sql@g' postgres/init.sh | POSTGRES_USER=postgres POSTGRES_DB=zalo sh
+          sed 's@/migrations/@postgres/@g' postgres/init.sh | POSTGRES_USER=postgres POSTGRES_DB=zalo sh
       - name: Typecheck, build and test existing assistant
         working-directory: apps/ttd-zalo-assistant
         env:
@@ -76,6 +78,6 @@ jobs:
         working-directory: apps/ttd-zalo-agent-server
         run: |
           export DATA_APP_IMAGE=local/z4-app:fixture DATA_POSTGRES_IMAGE=local/z4-postgres:fixture DATA_PROXY_NETWORK=z4-ci
-          export POSTGRES_PASSWORD=$(openssl rand -hex 24)
+          export POSTGRES_PASSWORD=$(openssl rand -hex 24) IDENTITY_KEY=$(openssl rand -hex 24)
           export BACKUP_REMOTE=fixture:backup WORKER_RCLONE_FILE=/tmp/worker.conf BACKUP_RCLONE_FILE=/tmp/backup.conf
           docker compose -f compose.data.yaml --profile maintenance config --quiet

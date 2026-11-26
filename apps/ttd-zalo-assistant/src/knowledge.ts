@@ -32,7 +32,10 @@ export function localDate(now = new Date()) {
 }
 
 export class Knowledge {
-  constructor(private readonly db: DatabaseSync) {}
+  constructor(private readonly db: { prepare(sql: string): {
+    all(...values: (string | number | null)[]): unknown[];
+    run(...values: (string | number | null)[]): unknown;
+  } }, private readonly backend?: "postgres") {}
 
   add(row: Source) {
     if (![row.id, row.title, row.summary, row.version, row.origin].every(
@@ -70,6 +73,9 @@ export class Knowledge {
     const terms = query.normalize("NFC").match(/[\p{L}\p{N}]+/gu)?.map((term) => `"${term}"`).join(" AND ");
     const filter = sku ?? (skuPattern.test(query.toUpperCase()) && this.bySku(query.toUpperCase()).length ? query.toUpperCase() : null);
     if (terms && filter !== query.toUpperCase()) {
+      if (this.backend === "postgres") return this.db.prepare(`SELECT c.* FROM catalogue c
+        WHERE to_tsvector('simple',concat_ws(' ',sku,title,summary)) @@ websearch_to_tsquery('simple',?)
+          AND (? IS NULL OR c.sku=?) ORDER BY c.id LIMIT 100`).all(terms.replaceAll(" AND ", " "), filter, filter) as Source[];
       return this.db.prepare(`SELECT c.* FROM catalogue_fts f JOIN catalogue c ON c.rowid=f.rowid
         WHERE catalogue_fts MATCH ? AND (? IS NULL OR c.sku=?) ORDER BY bm25(catalogue_fts),c.id LIMIT 100`)
         .all(terms, filter, filter) as Source[];
@@ -85,6 +91,11 @@ export class Knowledge {
     const terms = words.filter(word => !stop.has(word) && !/^\d+$/u.test(word)).slice(0, 24);
     const phrases = [...new Set(terms.slice(1).map((word, i) => `"${terms[i]} ${word}"`))];
     if (!phrases.length) return [];
+    if (this.backend === "postgres") return this.db.prepare(`SELECT c.* FROM catalogue c
+      WHERE to_tsvector('simple',concat_ws(' ',sku,title,summary)) @@ websearch_to_tsquery('simple',?)
+        AND c.kind='document' AND (c.sku IS NULL OR c.sku=?)
+        AND c.effective<=? AND (c.until IS NULL OR c.until>?)
+      ORDER BY c.id LIMIT 3`).all(phrases.join(" OR "), sku ?? null, date, date) as Source[];
     return this.db.prepare(`SELECT c.* FROM catalogue_fts f JOIN catalogue c ON c.rowid=f.rowid
       WHERE catalogue_fts MATCH ? AND c.kind='document' AND (c.sku IS NULL OR c.sku=?)
         AND c.effective<=? AND (c.until IS NULL OR c.until>?)

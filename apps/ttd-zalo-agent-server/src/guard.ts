@@ -30,7 +30,7 @@ export class Guard {
   private deny(p: Proposal, target: string, friend: boolean | undefined, now: number): string | undefined {
     const { db } = this.store;
     const policy = this.store.policy(target, p.agent, now);
-    const contact = this.store.contact(target);
+    const contact = this.store.contact(target, now);
     if (this.store.stopped(p.agent) || p.epoch !== this.store.setting("epoch")) return "stopped";
     if (p.kind.startsWith("group_")) {
       if (p.agent !== "community" || !p.groupApproved) return "group_denied";
@@ -38,7 +38,7 @@ export class Guard {
       if (p.revision !== policy.revision || !policy.send) return "consent";
       if (p.kind === "invite") {
         if (p.agent !== "sales" || friend || !contact?.interest || now - contact.interest > this.config.invitations.interestMs ||
-          contact.opted_out || db.prepare("SELECT 1 FROM outbound WHERE target=? AND kind='invite' AND state IN ('started','sent','unknown','failed')").get(target)) return "invite_denied";
+          contact.opted_out || db.prepare("SELECT 1 FROM send_log WHERE target=? AND kind='invite' AND state IN ('reserved','sent','unknown_delivery','failed')").get(target)) return "invite_denied";
       } else if (friend === false) return "not_friend";
       if (p.kind === "reply" && (p.agent !== "support" || !policy.respond ||
         !db.prepare("SELECT 1 FROM inbound WHERE id=? AND target=? AND received>=?").get(p.origin ?? "", target, now - this.config.scheduling.maxInboundAgeMs))) return "reply_denied";
@@ -47,7 +47,7 @@ export class Guard {
     }
 
     const recent = (kind: Kind, since: number, who?: string) => Number(db.prepare(
-      "SELECT count(*) n FROM outbound WHERE kind=? AND at>=? AND state IN ('started','sent','unknown','failed') AND (? IS NULL OR target=?)")
+      "SELECT count(*) n FROM send_log WHERE kind=? AND at>=? AND state IN ('reserved','sent','unknown_delivery','failed') AND (? IS NULL OR target=?)")
       .get(kind, since, who ?? null, who ?? null)?.n);
     const local = vietnam(now);
     if (p.kind === "advertising") {
@@ -62,7 +62,7 @@ export class Guard {
       const week = Math.min(limits.weeklyDailyLimits.length - 1, Math.floor(Math.max(0, now - start) / (7 * day)));
       if (recent(p.kind, local.midnight) >= limits.weeklyDailyLimits[week] || recent(p.kind, now - limits.spacingMs + 1)) return "invite_limit";
     }
-    const count = Number(db.prepare("SELECT count(*) n FROM outbound WHERE at>=? AND state IN ('started','sent','unknown','failed')")
+    const count = Number(db.prepare("SELECT count(*) n FROM send_log WHERE at>=? AND state IN ('reserved','sent','unknown_delivery','failed')")
       .get(now - this.config.anomaly.windowMs)?.n);
     if (count >= this.config.anomaly.starts) {
       this.pause(now);
@@ -70,13 +70,15 @@ export class Guard {
     }
   }
   private adsDisabled(p: Proposal) {
-    if (p.kind !== "advertising" || this.config.advertising.enabled) return false;
+    if (p.kind !== "advertising") return false;
+    const enabled = this.store.db.backend ? this.store.setting("ADS_ENABLED") === 1 : this.config.advertising.enabled;
+    if (enabled) return false;
     this.store.notice("ads_disabled", this.clock(), "ads_disabled");
     return true;
   }
 
   async dispatch(p: Proposal) {
-    if (this.adsDisabled(p)) return "ads_disabled";
+
     const target = this.store.hash(p.target);
     const { db } = this.store;
     const key = this.store.hash(p.id);
@@ -85,8 +87,9 @@ export class Guard {
     const local = group ? undefined : this.channel.localContact?.(lookup);
     const preflight = this.store.atomic(() => {
       const now = this.clock();
+      if (this.adsDisabled(p)) return "ads_disabled";
       if (this.store.stopped(p.agent) || p.epoch !== this.store.setting("epoch")) return "stopped";
-      if (db.prepare("SELECT 1 FROM outbound WHERE id=?").get(key)) return "duplicate";
+      if (db.prepare("SELECT 1 FROM send_log WHERE id=?").get(key)) return "duplicate";
       if (this.budget.blocked(now)) return "budget_held";
       if (local && !local.ok) return local.error;
       return this.deny(p, target, local?.value.friend, now);
@@ -100,21 +103,17 @@ export class Guard {
       if (!result.ok || result.value.id !== p.target) { this.failure(); return "channel_error"; }
       friend = result.value.friend === true;
     }
-    // Persist before starting any transport. A crash leaves a non-retryable reservation.
-    const reserved = db.prepare("INSERT OR IGNORE INTO outbound VALUES(?,?,?,?,?,'reserved')")
-      .run(key, target, p.agent, p.kind, this.clock());
-    if (!reserved.changes) return "duplicate";
     let pending: Promise<Result> | undefined;
-    const decision = this.store.atomic(() => {
+    const decision = this.store.admit(() => {
       const now = this.clock();
       const denial = this.adsDisabled(p) ? "ads_disabled"
+        : db.prepare("SELECT 1 FROM send_log WHERE id=?").get(key) ? "duplicate"
         : this.budget.blocked(now) ? "budget_held" : this.deny(p, target, friend, now);
-      if (denial) {
-        db.prepare("DELETE FROM outbound WHERE id=? AND state='reserved'").run(key);
-        return denial;
-      }
-      db.prepare("UPDATE outbound SET at=?,state='started' WHERE id=?").run(now, key);
+      if (denial) return denial;
+      if (!this.store.reserveSend(key, target, p.agent, p.kind, now)) return "duplicate";
       if (p.kind === "invite" && !this.store.setting("firstInvite")) this.store.set("firstInvite", now);
+    }, denial => {
+      if (denial) return;
       const request: Request = { key, target: p.target, message: p.message, thread: p.thread, memberIds: p.memberIds,
         text: p.kind === "advertising" ? `${p.text}\n\n${this.config.advertising.footer}` : p.text };
       const methods = {
@@ -129,7 +128,10 @@ export class Guard {
     try { outcome = await pending!; }
     catch { outcome = { ok: false, error: "unknown_delivery" }; }
     const state = outcome.ok ? "sent" : outcome.error === "unknown_delivery" ? "unknown" : "failed";
-    db.prepare("UPDATE outbound SET state=? WHERE id=?").run(state, key);
+    this.store.atomic(() => {
+      db.prepare("UPDATE send_log SET state=? WHERE id=? AND state='reserved'")
+        .run(state === "unknown" ? "unknown_delivery" : state, key);
+    });
     if (!outcome.ok) this.failure();
     return state;
   }

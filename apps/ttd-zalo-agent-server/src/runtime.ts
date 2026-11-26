@@ -93,11 +93,14 @@ export class Runtime {
       if (event.kind === "spam") return { spam: true } as const;
       if (event.at < now - this.config.scheduling.maxInboundAgeMs) return;
       if (event.kind === "accepted") {
-        if (!store.db.prepare("SELECT 1 FROM outbound WHERE target=? AND kind='invite' AND at<=? AND state IN ('started','sent','unknown')").get(target, event.at)) return;
+        if (!store.db.prepare("SELECT 1 FROM send_log WHERE target=? AND kind='invite' AND at<=? AND state IN ('reserved','sent','unknown_delivery')").get(target, event.at)) return;
         if (!store.db.prepare("UPDATE contact SET accepted=1,revision=revision+1 WHERE target=? AND opted_out=0 AND accepted=0").run(target).changes) return;
       }
       const agent = event.kind === "dm" ? "support" : event.kind === "group" ? "listen" : "sales";
       const policy = store.policy(target, agent, now);
+      if (event.kind === "dm" && policy.retain) {
+        store.retainMessage(target, event.thread, event.channel ?? "oa", id, event.text, event.at);
+      }
       if (!policy.respond) return;
       const epoch = store.setting("epoch");
       store.db.prepare("INSERT INTO jobs VALUES(?,?,?,'queued',?,?,?,NULL)").run(id, event.kind, target, event.at, policy.revision, epoch);
@@ -129,7 +132,7 @@ export class Runtime {
     const send = (agent: Agent, kind: Kind, text?: string) =>
       this.guard.dispatch({ id, agent, kind, text, target: event.contact, revision, epoch, origin: id, thread: event.kind === "dm" ? event.thread : undefined });
     if (event.at < now - this.config.scheduling.maxInboundAgeMs || !allowed.some(valid)) return true;
-    const contact = store.contact(target);
+    const contact = store.contact(target, now);
     const inbound = event.kind === "dm";
     const question = event.kind === "dm" || event.kind === "group" ? sanitized(event.text).slice(0, this.config.scheduling.maxText) : "";
     const permitted = allowed.filter(agent => valid(agent) && (agent !== "crm" || !!contact?.retain));
@@ -321,7 +324,7 @@ export class Runtime {
       const { date, midnight } = vietnam(now);
       const reportKey = "report:" + date;
       if (!this.store.stopped("report") && !this.store.db.prepare("SELECT 1 FROM notices WHERE key=?").get(reportKey)) {
-        const counts = this.store.db.prepare("SELECT kind,state,count(*) n FROM outbound WHERE at>=? AND at<? GROUP BY kind,state")
+        const counts = this.store.db.prepare("SELECT kind,state,count(*) n FROM send_log WHERE at>=? AND at<? GROUP BY kind,state")
           .all(midnight - day, midnight);
         this.store.notice(reportKey, now, JSON.stringify({ date: vietnam(midnight - day).date, counts }));
       }

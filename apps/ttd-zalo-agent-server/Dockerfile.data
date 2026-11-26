@@ -5,7 +5,7 @@ RUN npm ci --no-audit --no-fund
 COPY apps/ttd-zalo-agent-server/src ./src
 COPY apps/ttd-zalo-agent-server/tsconfig.json ./
 COPY apps/ttd-zalo-assistant/src /workspace/ttd-zalo-assistant/src
-RUN npm run build
+RUN npm run build && rm dist/ttd-zalo-agent-server/src/local-store.js
 
 FROM node:24-bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends rclone ca-certificates && rm -rf /var/lib/apt/lists/*

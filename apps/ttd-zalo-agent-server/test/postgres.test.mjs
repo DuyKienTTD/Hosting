@@ -111,3 +111,93 @@ test("Postgres grants, deletion, encrypted backup and restore", { skip: config.R
     } finally { await restored.end(); }
   });
 });
+
+test("Postgres runtime role processes customer input through AI, Guard and durable send_log",
+  { skip: config.RUN_POSTGRES_TESTS !== "1" }, async t => {
+    const { Store } = await import("../dist/ttd-zalo-agent-server/src/store.js");
+    const { PostgresRuntimeDatabase } = await import("../dist/ttd-zalo-agent-server/src/data/runtime-database.js");
+    const { Runtime } = await import("../dist/ttd-zalo-agent-server/src/runtime.js");
+    const { MockChannel } = await import("../dist/ttd-zalo-agent-server/src/channel.js");
+    const { FakeProvider } = await import("../dist/ttd-zalo-agent-server/src/provider.js");
+    const { defaults } = await import("../dist/ttd-zalo-agent-server/src/config.js");
+    const db = new PostgresRuntimeDatabase({ user: "data_runtime", password: config.DATA_RUNTIME_PASSWORD });
+    const admin = new Pool();
+    t.after(async () => { db.close(); await admin.end(); });
+    const store = new Store(db, "synthetic-runtime-binding");
+    const timestamp = Date.parse("2026-11-26T03:00:00Z");
+    const clock = () => timestamp;
+    const customer = "synthetic-contact";
+    const target = store.hash(customer);
+    store.stop("global", false);
+    store.consent(target, timestamp + 86_400_000, true, true, true, true, {
+      displayedText: "Dữ liệu giả lập", policyVersion: "fixture-1", evidence: { fixture: true },
+    });
+    const settings = structuredClone(defaults);
+    settings.advertising.enabled = true; // PostgreSQL setting remains authoritative.
+    const mock = new MockChannel();
+    mock.contacts.set(customer, { id: customer, friend: true });
+    store.knowledge.add({ id: "fixture-z4", sku: "MAU-01", kind: "product", title: "Mẫu thử",
+      summary: "Chiều cao 900 mm", version: "1", effective: "2026-01-01", until: null,
+      origin: "fixture", amount: null, unit: null });
+    mock.events.push({ id: "event-z4", contact: customer, thread: "thread-z4", kind: "dm", at: timestamp,
+      text: "Chiều cao và giá của MAU-01?", channel: "oa" });
+    let calls = 0;
+    const provider = new FakeProvider(task => { calls++; return task.choices.includes("support") ? "support" : task.choices.includes("answer") ? "answer" : "none"; });
+    const runtime = new Runtime(store, mock, provider, settings, clock);
+    const send = mock.sendMessage;
+    let observedReservation = false;
+    mock.sendMessage = async request => {
+      const { rows } = await admin.query("SELECT state,customer_id FROM send_log WHERE id=$1", [request.key]);
+      assert.equal(rows[0]?.state, "reserved");
+      assert.ok(rows[0].customer_id);
+      observedReservation = true;
+      return send(request);
+    };
+    assert.equal(await runtime.tick(), true);
+    assert.ok(calls > 0, "FakeProvider received the request");
+    assert.ok(observedReservation, "transport saw committed reservation");
+    assert.equal(mock.sent.size, 1);
+    assert.equal(db.prepare("SELECT state FROM send_log WHERE target=? AND kind='reply'").get(target).state, "sent");
+    const eventKey = store.eventKey(customer, "thread-z4", "event-z4");
+    assert.equal(db.prepare("SELECT state FROM ledger WHERE id=?").get(eventKey + "-support").state, "settled");
+    assert.equal((await admin.query("SELECT count(*)::int n FROM messages WHERE event_id=$1",
+      [store.eventKey(customer, "thread-z4", "event-z4")])).rows[0].n, 1);
+
+    const ad = id => ({ id, target: customer, agent: "campaign", kind: "advertising", text: "Synthetic",
+      epoch: store.setting("epoch"), revision: store.contact(target, timestamp).revision });
+    assert.equal(await runtime.guard.dispatch(ad("disabled")), "ads_disabled");
+    store.set("ADS_ENABLED", 1);
+    const getContact = mock.getContact.bind(mock);
+    mock.getContact = async request => {
+      await admin.query("UPDATE settings SET value=0 WHERE key='ADS_ENABLED'");
+      return getContact(request);
+    };
+    assert.equal(await runtime.guard.dispatch(ad("revoked-during-lookup")), "ads_disabled");
+    assert.equal(mock.sent.size, 1);
+    store.set("ADS_ENABLED", 1);
+    mock.getContact = async request => {
+      await admin.query("UPDATE ad_status SET state='ads_paused_review' WHERE customer_id=(SELECT customer_id FROM runtime_customer WHERE target=$1)", [target]);
+      return getContact(request);
+    };
+    assert.equal(await runtime.guard.dispatch(ad("paused-during-lookup")), "advertising_consent");
+    await admin.query("UPDATE ad_status SET state='active' WHERE customer_id=(SELECT customer_id FROM runtime_customer WHERE target=$1)", [target]);
+    mock.getContact = async request => {
+      await admin.query(`INSERT INTO consents(customer_id,purpose,displayed_text,policy_version,evidence,withdrawn,previous_id)
+        SELECT customer_id,purpose,displayed_text,policy_version,'{"fixture":true}',true,id
+        FROM consents WHERE customer_id=(SELECT customer_id FROM runtime_customer WHERE target=$1)
+        AND purpose='ads' ORDER BY occurred_at DESC,id DESC LIMIT 1`, [target]);
+      return getContact(request);
+    };
+    assert.equal(await runtime.guard.dispatch(ad("consent-during-lookup")), "consent");
+    assert.equal(mock.sent.size, 1);
+    store.consent(target, timestamp + 86_400_000, true, true, true, true, {
+      displayedText: "Dữ liệu giả lập", policyVersion: "fixture-2", evidence: { fixture: true },
+    });
+    mock.getContact = getContact;
+    mock.fail = "unknown_delivery";
+    const proposal = ad("uncertain");
+    assert.equal(await runtime.guard.dispatch(proposal), "unknown");
+    assert.equal(db.prepare("SELECT state FROM send_log WHERE id=?").get(store.hash(proposal.id)).state, "unknown_delivery");
+    assert.equal(await runtime.guard.dispatch(proposal), "duplicate");
+    assert.equal(mock.sent.size, 2);
+  });
