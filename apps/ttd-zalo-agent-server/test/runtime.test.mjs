@@ -460,8 +460,8 @@ test("opt-out accepts unaccented intent and abbreviations; ordinary answers keep
     f.create(contact);
     runtime.ingest({ kind: "dm", id: "message", contact, thread: contact, at: f.clock(), text });
     const row = f.store.contact(f.store.hash(contact));
-    assert.equal(Boolean(row.opted_out), expected, text);
-    assert.equal(Boolean(row.ads), !expected, text);
+    assert.equal(Boolean(expected ? row.opted_out || row.ads_paused_review : row.opted_out), expected, text);
+    assert.equal(Boolean(row.ads), !row.opted_out, text);
   }
 });
 
@@ -519,7 +519,8 @@ test("v1 ledger migration preserves pending legacy model charges", async t => {
   t.after(() => rm(folder, { recursive: true, force: true }));
   const path = join(folder, "ledger.sqlite");
   const old = new Store(path, "fixture-key");
-  old.db.exec(`ALTER TABLE ledger DROP COLUMN input_bound;
+  old.db.exec(`ALTER TABLE contact DROP COLUMN ads_paused_review;
+    ALTER TABLE ledger DROP COLUMN input_bound;
     ALTER TABLE ledger DROP COLUMN rate_multiplier;
     ALTER TABLE ledger DROP COLUMN provider;
     PRAGMA user_version=1;
@@ -532,7 +533,7 @@ test("v1 ledger migration preserves pending legacy model charges", async t => {
   assert.equal(budget.settle("legacy", { input: 1000, output: 20, creation: 0, read: 0 }), true);
   const row = migrated.db.prepare("SELECT amount,state,provider FROM ledger WHERE id='legacy'").get();
   assert.deepEqual({ ...row }, { amount: 3_300_000, state: "settled", provider: "anthropic" });
-  assert.equal(migrated.db.prepare("PRAGMA user_version").get().user_version, 2);
+  assert.equal(migrated.db.prepare("PRAGMA user_version").get().user_version, 3);
 });
 
 test("opt-out handles subjects, repeated suffixes and list removals in accented or plain text", t => {
@@ -560,8 +561,8 @@ test("opt-out handles subjects, repeated suffixes and list removals in accented 
     f.create(contact);
     runtime.ingest({ kind: "dm", id: "message", contact, thread: contact, at: f.clock(), text });
     const row = f.store.contact(f.store.hash(contact));
-    assert.equal(row.opted_out, Number(expected), text);
-    assert.equal(row.ads, Number(!expected), text);
+    assert.equal(Boolean(row.opted_out), expected && !row.ads_paused_review, text);
+    assert.equal(row.ads, 1 - row.opted_out, text);
   }
 });
 
@@ -604,7 +605,7 @@ test("AI opt-out cancels queued work, flags uncertain private messages and canno
 
 test("distance, sentence boundaries and questions flag uncertain opt-outs", () => {
   const config = { ...defaults.advertising, optOutMaxGapWords: 2 };
-  assert.equal(classifyOptOut("Dừng ngay việc gửi tin", config), "stop");
+  assert.equal(classifyOptOut("Dừng ngay gửi tin", config), "stop");
   assert.equal(classifyOptOut("Dừng ngay toàn bộ các hoạt động gửi quảng cáo", config), "review");
   assert.equal(classifyOptOut("Xin dừng. Tin quảng cáo đến nhiều.", config), "review");
   assert.equal(classifyOptOut("Tôi có thể ngừng nhận quảng cáo không?", config), "review");
@@ -631,4 +632,65 @@ test("development probes cover the three reported misses and persist uncertain f
   const key = "review-opt-out:" + f.store.eventKey("review", "review", "msg");
   assert.ok(f.store.db.prepare("SELECT 1 FROM notices WHERE key=?").get(key));
   assert.equal(f.store.contact(f.store.hash("review")).ads, 1);
+});
+
+test("three advertising states block the eight A0 regressions without blocking customer replies", async t => {
+  const f = fixture(t);
+  const runtime = new Runtime(f.store, f.channel, new FakeProvider(), f.config, f.clock);
+  const texts = [
+    "Bớt làm phiền tôi bằng tin tiếp thị đi", "Cắt quảng cáo cho em", "Thôi nhắn tin mời mua cho cô",
+    "Shop có thể đừng gửi bản tin cuối tuần cho em nữa được không?",
+    "Thôi, tôi sẽ nhắn lại giờ đến xem mẫu", "Bỏ dấu chấm cuối tin nhắn giúp em",
+    "Đừng xóa tin nhắn xác nhận giúp tôi", "Gửi nhầm tin cho chị rồi, bỏ qua hộ em",
+  ];
+  for (const [i, text] of texts.entries()) {
+    const contact = "a0-" + i;
+    f.create(contact);
+    runtime.ingest({ kind: "dm", id: "msg", at: f.clock(), contact, thread: contact, text });
+    const target = f.store.hash(contact);
+    const row = f.store.contact(target);
+    assert.equal(row.opted_out, 0, text);
+    assert.ok(row.ads_paused_review, text);
+    assert.equal(row.ads, 1, text);
+    assert.equal(await f.guard.dispatch(f.draft("ad-" + i, contact)), "advertising_consent");
+    if (i === 0) {
+      const reply = { ...f.draft("reply", contact, "reply", "support"), origin: f.store.eventKey(contact, contact, "msg") };
+      assert.equal(await f.guard.dispatch(reply), "sent");
+      assert.equal(f.store.resolveAdsReview(target, "stale-event", "active"), false);
+      assert.equal(f.store.resolveAdsReview(target, row.ads_paused_review, "active"), true);
+      assert.equal(f.store.contact(target).ads_paused_review, null);
+      assert.equal(f.store.contact(target).ads, 1);
+    }
+    if (i === 1) {
+      assert.equal(f.store.resolveAdsReview(target, row.ads_paused_review, "opted_out"), true);
+      assert.equal(f.store.contact(target).opted_out, 1);
+      assert.equal(f.store.resolveAdsReview(target, row.ads_paused_review, "active"), false);
+    }
+  }
+});
+
+test("new validation corpus sends zero ads on opt-out requests and logs negative review rate", async t => {
+  const f = fixture(t);
+  const runtime = new Runtime(f.store, f.channel, new FakeProvider(), f.config, f.clock);
+  const corpus = JSON.parse(await readFile(new URL("./fixtures/opt-out-fix3-validation.json", import.meta.url)));
+  assert.equal(corpus.positive.length, 30);
+  assert.equal(corpus.negative.length, 20);
+  let paused = 0;
+  for (const [kind, texts] of Object.entries(corpus)) {
+    for (const [i, text] of texts.entries()) {
+      const contact = kind + "-" + i;
+      f.create(contact);
+      runtime.ingest({ kind: "dm", id: "msg", contact, thread: contact, at: f.clock(), text });
+      const row = f.store.contact(f.store.hash(contact));
+      if (kind === "positive") {
+        assert.ok(row.opted_out || row.ads_paused_review, text);
+        assert.equal(await f.guard.dispatch(f.draft("notice-" + i, contact)), "advertising_consent", text);
+      } else {
+        assert.equal(row.opted_out, 0, text);
+        if (row.ads_paused_review) paused++;
+      }
+    }
+  }
+  assert.equal(f.channel.sent.size, 0);
+  t.diagnostic(`positive ads sent=0/30; false opted_out=0/20; negative paused=${paused}/20`);
 });

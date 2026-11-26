@@ -42,7 +42,7 @@ export class Guard {
       } else if (friend === false) return "not_friend";
       if (p.kind === "reply" && (p.agent !== "support" || !policy.respond ||
         !db.prepare("SELECT 1 FROM inbound WHERE id=? AND target=? AND received>=?").get(p.origin ?? "", target, now - this.config.scheduling.maxInboundAgeMs))) return "reply_denied";
-      if (p.kind === "advertising" && (!["sales","campaign"].includes(p.agent) || !contact?.ads || contact.opted_out ||
+      if (p.kind === "advertising" && (!["sales","campaign"].includes(p.agent) || !contact?.ads || contact.opted_out || contact.ads_paused_review ||
         (p.agent === "sales" && !contact.accepted))) return "advertising_consent";
     }
 

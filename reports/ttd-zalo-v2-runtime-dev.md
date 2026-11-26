@@ -86,3 +86,15 @@ Ba câu báo lỗi của A0 nằm trong tập phát triển và đều đạt. [
 | Server `node --test test/opt-out-validation.test.mjs` (chấm corpus riêng) | 0 | 30/30, 20/20 |
 | Server `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium node --test --test-name-pattern='Playwright fixture' test/adapters.test.mjs` | 0 | 1/1 |
 | Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |
+
+## V2-02C-FIX3 · 26/11/2026
+
+Theo biên nhận lần 3 trên [PR #73](https://github.com/DuyKienTTD/Hosting/pull/73), yêu cầu rõ ràng mới chuyển `opted_out`. Luật kiểm tra động từ và đối tượng trong một mệnh đề, loại câu hỏi/thao tác với tin cụ thể/ngữ cảnh thương mại khỏi quyết định thu hồi vĩnh viễn. Dấu hiệu từ chối cùng ngữ cảnh nhắn tin chưa đủ chắc sẽ lưu `ads_paused_review`, giữ consent và gắn cờ. Guard chặn cả hai trạng thái với quảng cáo. Test chứng minh phản hồi 1:1 còn đủ quyền vẫn gửi được. Trang vận hành có nút xác nhận thu hồi hoặc bỏ tạm dừng, kiểm CSRF và phiên bản phiếu. AI chỉ xác nhận thu hồi hoặc đặt cờ.
+
+[Corpus cũ](../apps/ttd-zalo-agent-server/test/fixtures/opt-out-validation.json) giữ nguyên câu và chấm theo tiêu chí mới. Tám câu A0 thành ca hồi quy. [Tập mới 30 + 20](../apps/ttd-zalo-agent-server/test/fixtures/opt-out-fix3-validation.json) qua Runtime và Guard đạt **0/30 lượt quảng cáo gửi**, **0/20 opted_out nhầm**, **16/20 ca âm tạm dừng (80%)**. Đây là đánh đổi của việc tạm dừng khi có dấu hiệu chưa chắc chắn, cần người vận hành xác nhận. Lần chạy đầu phát hiện một câu hỏi gián tiếp cần quy tắc loại trừ và một ca kiểm khoảng cách dùng cụm vượt ngưỡng 2 từ. Đã sửa và chạy lại. Kết quả là kiểm thử tổng hợp, chưa đo phân loại Claude thật.
+
+| Lệnh trên Node 24.22.3 | Exit | Kết quả |
+|---|---:|---|
+| Hai app `npm run typecheck`, `npm run build`, `npm test` (server với `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium`) | 0 | Server 54/54, desktop 20/20 |
+| Server `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium node --test --test-name-pattern='Playwright fixture' test/adapters.test.mjs` | 0 | 1/1 |
+| Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |

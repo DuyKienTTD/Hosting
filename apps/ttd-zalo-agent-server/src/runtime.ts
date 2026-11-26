@@ -56,7 +56,8 @@ export class Runtime {
     this.store.db.prepare("DELETE FROM jobs WHERE target=?").run(target);
   }
 
-  private flagOptOut(id: string) {
+  private flagOptOut(target: string, id: string) {
+    this.store.pauseAdsForReview(target, id);
     this.store.notice("review-opt-out:" + id, this.clock(), "Cần xem lại ý định ngừng nhận ưu đãi của tin nhắn này.");
   }
 
@@ -88,7 +89,7 @@ export class Runtime {
         this.disableAds(target);
         return;
       }
-      if (optOut === "review") this.flagOptOut(id);
+      if (optOut === "review") this.flagOptOut(target, id);
       if (event.kind === "spam") return { spam: true } as const;
       if (event.at < now - this.config.scheduling.maxInboundAgeMs) return;
       if (event.kind === "accepted") {
@@ -169,7 +170,7 @@ export class Runtime {
             this.disableAds(target);
             return true;
           }
-          this.flagOptOut(id);
+          this.flagOptOut(target, id);
           return false;
         });
         if (disabled) this.discardPending(event.contact);
