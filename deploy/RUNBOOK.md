@@ -185,7 +185,7 @@ export RELEASE_NGINX_RENDERER='<RENDERER_EXECUTABLE>'
 
 Chỉ đặt các biến tùy chọn nếu dùng. Script mặc định thao tác project Compose `ttd-cskh`. Nếu template có giá trị khác với site thực tế, dùng renderer riêng để giữ các thiết lập của site và kiểm tra bản render trước giờ bảo trì. Lưu thư mục state ở nơi bền, riêng tư. Dump trước migration nằm trong `<PRIVATE_RELEASE_STATE_DIR>/backups` và cần được bảo vệ như dữ liệu DB.
 
-Với DB hiện có chưa có ledger, đối chiếu hồ sơ triển khai, checksum migration và quyền đã áp với đúng checkout. Kiểm tra cả grant bootstrap và cấu hình khóa purge. Khai báo **đúng** migration cuối đã xác minh, theo một dải liên tục. Script dùng khai báo này để ghi ledger lần đầu.
+Với DB hiện có chưa có ledger, đối chiếu hồ sơ triển khai, checksum migration và quyền đã áp với đúng checkout. Kiểm tra cả grant bootstrap và cấu hình khóa purge. Khai báo **đúng** migration cuối đã xác minh, theo đúng tiền tố của danh sách manifest, kể cả khi có khoảng trống số thứ tự. Script dùng khai báo này để ghi ledger lần đầu.
 
 ```sh
 deploy/release.sh --adopt-through '<LAST_VERIFIED_MIGRATION.sql>' '<MANIFEST_FILE>'
@@ -194,7 +194,7 @@ deploy/release.sh '<40_CHARACTER_COMMIT>'
 deploy/release.sh '<MANIFEST_FILE>'
 ```
 
-Khi có migration mới, script tạm dừng bốn dịch vụ ứng dụng, tạo và kiểm tra dump, rồi áp mọi migration còn thiếu theo số thứ tự trong một transaction cùng ledger. Script xác thực chữ ký trước khi pull image theo digest. Sau đó nó cập nhật hai dòng image trong `.env`, kiểm cấu hình Nginx nếu đổi, chạy Compose và kiểm bốn đường HTTP. Trạng thái chế độ và STOP giữ theo cấu hình và DB đang có. Chọn cửa sổ bảo trì vì có thể gián đoạn trong lúc cập nhật.
+Khi có migration mới, script tạm dừng bốn dịch vụ ứng dụng, tạo và kiểm tra dump, rồi áp mọi migration còn thiếu theo số thứ tự trong một transaction cùng ledger. Script xác thực chữ ký trước khi pull image theo digest. Sau đó nó cập nhật hai dòng image trong `.env`, kiểm cấu hình Nginx nếu đổi, chạy Compose và kiểm bốn đường HTTP. Compose chỉ nhận biến kết nối Docker cần thiết từ shell và đọc cấu hình ứng dụng từ file môi trường chỉ định. Trạng thái chế độ và STOP giữ theo cấu hình và DB đang có. Chọn cửa sổ bảo trì vì có thể gián đoạn trong lúc cập nhật.
 
 ```sh
 deploy/release.sh --rollback

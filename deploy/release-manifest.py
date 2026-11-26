@@ -13,10 +13,12 @@ DIGEST = re.compile(r"[0-9a-f]{64}\Z")
 
 
 def entries(root):
-    files = sorted(path for path in (root / MIGRATIONS).glob("[0-9]*.sql") if NAME.fullmatch(path.name))
-    for expected, path in enumerate(files, 1):
-        if int(path.name[:3]) != expected:
-            raise ValueError("migration numbers must be contiguous and unique")
+    files = sorted((root / MIGRATIONS).glob("[0-9]*.sql"))
+    previous = 0
+    for path in files:
+        if not NAME.fullmatch(path.name) or int(path.name[:3]) <= previous:
+            raise ValueError("migration names must be valid with strictly increasing, unique numbers")
+        previous = int(path.name[:3])
     if not files:
         raise ValueError("migration list is empty")
     return [{"file": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for path in files]
@@ -29,9 +31,11 @@ def read(path):
     for kind, prefix in IMAGES.items():
         if not re.fullmatch(re.escape(prefix) + r"@sha256:[a-f0-9]{64}", data["images"][kind]):
             raise ValueError("invalid image reference")
-    for index, item in enumerate(data["migrations"], 1):
-        if (not NAME.fullmatch(item["file"]) or int(item["file"][:3]) != index or not DIGEST.fullmatch(item["sha256"])):
+    previous = 0
+    for item in data["migrations"]:
+        if (not NAME.fullmatch(item["file"]) or int(item["file"][:3]) <= previous or not DIGEST.fullmatch(item["sha256"])):
             raise ValueError("invalid migration entry")
+        previous = int(item["file"][:3])
     if not data["migrations"]:
         raise ValueError("migration list is empty")
     return data

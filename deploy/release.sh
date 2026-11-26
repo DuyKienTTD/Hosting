@@ -35,8 +35,17 @@ nginx_changed=0
 services_changed=0
 schema_changed=0
 backup=
-unset DATA_APP_IMAGE DATA_POSTGRES_IMAGE OA_MODE AI_MODE CHANNEL_MODE CHANNEL_SMOKE_ONLY SMOKE_ALLOWLIST
-compose() { docker compose -p "$project" --env-file "$env_file" -f "$compose_file" "$@"; }
+docker_env=( "PATH=$PATH" "HOME=$HOME" )
+for variable in DOCKER_HOST DOCKER_CONTEXT DOCKER_CONFIG DOCKER_TLS DOCKER_TLS_VERIFY DOCKER_CERT_PATH XDG_RUNTIME_DIR; do
+  if [[ -v $variable ]]; then docker_env+=("$variable=${!variable}"); fi
+done
+docker_release() { env -i "${docker_env[@]}" docker "$@"; }
+compose_with() {
+  local environment=$1 definition=$2
+  shift 2
+  docker_release compose -p "$project" --env-file "$environment" -f "$definition" "$@"
+}
+compose() { compose_with "$env_file" "$compose_file" "$@"; }
 psql_admin() {
   # shellcheck disable=SC2016
   compose exec -T postgres sh -c 'exec psql -X -q -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" "$@"' sh "$@"
@@ -114,8 +123,8 @@ if [[ -f $state/current.json ]]; then
 fi
 compose_file=$old_compose
 [[ -f $compose_file ]] || { echo 'Active Compose file is missing' >&2; exit 1; }
-docker pull "$app_image"
-docker pull "$pg_image"
+docker_release pull "$app_image"
+docker_release pull "$pg_image"
 
 ledger="$work/ledger"
 : > "$ledger"
@@ -146,7 +155,7 @@ for key, value in zip((b"DATA_APP_IMAGE", b"DATA_POSTGRES_IMAGE"), sys.argv[2:])
         sys.exit("Expected exactly one definition for " + key.decode("ascii"))
 path.write_bytes(data)
 PY
-docker compose -p "$project" --env-file "$work/new.env" -f "$assets/deploy/compose.prod.yml" config --quiet
+compose_with "$work/new.env" "$assets/deploy/compose.prod.yml" config --quiet
 if grep -q '^apply|' "$work/plan"; then
   services_changed=1
   compose stop "${apps[@]}"

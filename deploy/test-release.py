@@ -18,6 +18,9 @@ def run(args, directory=None, env=None, stdin=None):
 def fixture_bin(directory):
     binary = directory / "bin"
     binary.mkdir()
+    transport = {name: os.environ[name] for name in ("PGHOST", "PGPORT", "PGUSER", "PGDATABASE",
+        "LD_LIBRARY_PATH", "RELEASE_TEST_POSTGRES_CONTAINER", "RELEASE_TEST_DOCKER") if name in os.environ}
+    (directory / "transport.json").write_text(json.dumps(transport))
     program = r'''#!/usr/bin/env python3
 import json
 import os
@@ -26,13 +29,14 @@ import subprocess
 import sys
 name = pathlib.Path(sys.argv[0]).name
 args = sys.argv[1:]
-root = pathlib.Path(os.environ["FIXTURE_ROOT"])
+root = pathlib.Path(sys.argv[0]).resolve().parent.parent
+transport = json.loads((root / "transport.json").read_text())
 with (root / "commands").open("a") as out:
     print(name, *args, file=out)
 if name in ("psql", "pg_dump", "pg_restore"):
-    os.execv(os.environ["RELEASE_TEST_DOCKER"], ["docker", "exec", "-i",
+    os.execv(transport["RELEASE_TEST_DOCKER"], ["docker", "exec", "-i",
               "-e", "PGUSER=postgres", "-e", "PGDATABASE=postgres",
-              os.environ["RELEASE_TEST_POSTGRES_CONTAINER"], name, *args])
+              transport["RELEASE_TEST_POSTGRES_CONTAINER"], name, *args])
 if name == "gh":
     if args[:2] == ["attestation", "verify"]:
         assert "refs/heads/dev/ttd-zalo-mvp01" in args
@@ -45,11 +49,21 @@ if name == "gh":
     else:
         raise SystemExit("unexpected gh invocation")
 elif name == "docker":
+    assert not ({"AI_ROUTER_API_KEY", "ZALO_APP_SECRET", "OA_MODE", "COMPOSE_FILE"} & os.environ.keys())
     if args[0] == "pull":
         assert "@sha256:" in args[1]
     elif args[0] == "compose":
         action = args[7]
         assert args[1:3] == ["-p", "fixture"]
+        if action == "config":
+            values = dict(line.split("=", 1) for line in pathlib.Path(args[4]).read_text().splitlines())
+            assert values["AI_ROUTER_API_KEY"] == "fixture_file_router"
+            assert values["ZALO_APP_SECRET"] == "fixture_file_oa"
+            if "RELEASE_TEST_DOCKER" in transport:
+                output = subprocess.check_output([transport["RELEASE_TEST_DOCKER"], *args[:8], "--format", "json"])
+                environment = json.loads(output)["services"]["runtime"]["environment"]
+                assert environment["AI_ROUTER_API_KEY"] == values["AI_ROUTER_API_KEY"]
+                assert environment["ZALO_APP_SECRET"] == values["ZALO_APP_SECRET"]
         if action == "exec":
             assert args[8:10] == ["-T", "postgres"]
             command = args[10:]
@@ -57,7 +71,7 @@ elif name == "docker":
                 sql = command[2]
                 command = (["pg_dump", "-Fc"] if "pg_dump" in sql else
                            ["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", *command[4:]])
-            os.execvp(command[0], command)
+            os.execvpe(command[0], command, {**os.environ, **transport})
         assert action in ("stop", "up", "config")
     else:
         raise SystemExit("unexpected docker invocation")
@@ -100,7 +114,10 @@ def main():
         (deploy / "nginx").mkdir(parents=True)
         for module in ("release.sh", "release-manifest.py"):
             shutil.copy(SOURCE / module, deploy / module)
-        (deploy / "compose.prod.yml").write_text("services: {}\n")
+        (deploy / "compose.prod.yml").write_text(
+            "services:\n  runtime:\n    image: fixture:local\n    environment:\n"
+            "      AI_ROUTER_API_KEY: ${AI_ROUTER_API_KEY:?missing}\n"
+            "      ZALO_APP_SECRET: ${ZALO_APP_SECRET:?missing}\n")
         (ops / "fixture").touch()
         run(["git", "init", "-q"], checkout)
         run(["git", "config", "user.name", "Fixture"], checkout)
@@ -111,10 +128,11 @@ def main():
         initial = "BEGIN;\nCREATE TABLE public.fixture_data(id integer PRIMARY KEY);\nCOMMIT;\n"
         (postgres / "001.sql").write_text(initial)
         env_file = root / "fixture.env"
-        other = "OA_MODE=live\nAI_MODE=mock\nCHANNEL_SMOKE_ONLY=1\nSMOKE_ALLOWLIST=fixture\nSTOP=1\n"
+        other = "OA_MODE=live\nAI_MODE=mock\nCHANNEL_SMOKE_ONLY=1\nSMOKE_ALLOWLIST=fixture\nSTOP=1\nAI_ROUTER_API_KEY=fixture_file_router\nZALO_APP_SECRET=fixture_file_oa\n"
         env_file.write_text("DATA_APP_IMAGE=fixture/runtime:previous\nDATA_POSTGRES_IMAGE=fixture/postgres:previous\n" + other)
         env = {**os.environ, "PATH": str(fixture_bin(root)) + ":" + os.environ["PATH"],
-               "FIXTURE_ROOT": str(root), "RELEASE_ENV_FILE": str(env_file),
+               "AI_ROUTER_API_KEY": "fixture_shell_router", "ZALO_APP_SECRET": "fixture_shell_oa",
+               "OA_MODE": "fixture_shell_mode", "COMPOSE_FILE": "/ignored/fixture.yml", "RELEASE_ENV_FILE": str(env_file),
                "RELEASE_STATE_DIR": str(root / "state"), "RELEASE_NGINX_SITE": str(site),
                "RELEASE_SMOKE_ORIGIN": "https://fixture.invalid", "RELEASE_COMPOSE_PROJECT": "fixture"}
         state = root / "state"
@@ -159,9 +177,9 @@ def main():
         release("--rollback")
         assert site.read_text() == "nginx release A\n" and env_file.read_bytes() == old_env
 
-        (postgres / "002-next.sql").write_text("BEGIN;\nALTER TABLE fixture_data ADD COLUMN note text;\nCOMMIT;\n")
+        (postgres / "003-next.sql").write_text("BEGIN;\nALTER TABLE fixture_data ADD COLUMN note text;\nCOMMIT;\n")
         c, manifest_c = new_release("nginx release C")
-        assert "apply|002-next.sql|" in release(manifest_c)
+        assert "apply|003-next.sql|" in release(manifest_c)
         assert run(["psql", "-Atc", "SELECT id FROM fixture_data"], env=env) == "42"
         assert run(["psql", "-Atc", "SELECT count(*) FROM release_migrations"], env=env) == "2"
         dumps = list((state / "backups").glob(c + "-*.dump"))
@@ -171,8 +189,16 @@ def main():
         assert b"fixture_data" in listing.stdout
         release("--rollback", manifest_a, error="not an exact prefix")
         assert "apply|" not in release(manifest_c)
+        migration = postgres / "003-next.sql"
+        original = migration.read_text()
+        migration.write_text(original.replace("ADD COLUMN note text", "ADD COLUMN note varchar(10)"))
+        _, changed = new_release("changed applied checksum")
+        release(changed, error="not an exact prefix")
+        assert run(["psql", "-Atc", "SELECT count(*) FROM release_migrations"], env=env) == "2"
+        migration.write_text(original)
 
-        (postgres / "003-broken.sql").write_text("BEGIN;\nCREATE TABLE fixture_partial(id integer);\nBAD SQL;\nCOMMIT;\n")
+
+        (postgres / "005-broken.sql").write_text("BEGIN;\nCREATE TABLE fixture_partial(id integer);\nBAD SQL;\nCOMMIT;\n")
         _, broken = new_release("broken SQL")
         release(broken, error="App services stopped")
         assert run(["psql", "-Atc", "SELECT to_regclass('fixture_partial') IS NULL"], env=env) == "t"
