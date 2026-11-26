@@ -9,7 +9,7 @@ Nền triển khai: PR #75 tại `a56ec820148ab0bdc4a3577808f25a4a9d3077b6`. Ph�
 
 ## Điểm nối bàn giao
 
-Áp dụng [schema.sql](schema.sql) sau hai migration của PR #75. Schema bổ sung quyền truy cập các đối tượng OA mới cho `data_runtime` đã có. Dùng chung khóa định danh với Store và cấp khóa mã hóa OA 32 byte từ môi trường triển khai. Bootstrap ủy quyền OAuth của quản trị viên gọi `OaTokens.install` với cặp token và thời điểm được cấp.
+Áp dụng [schema.sql](schema.sql) sau migration runtime của PR #75, rồi áp dụng [quota.sql](quota.sql) một lần. Cơ sở dữ liệu đã chạy schema OA chỉ cần migration quota. Schema bổ sung quyền truy cập các đối tượng OA mới cho `data_runtime` đã có. Dùng chung khóa định danh với Store và cấp khóa mã hóa OA 32 byte từ môi trường triển khai. Bootstrap ủy quyền OAuth của quản trị viên gọi `OaTokens.install` với cặp token và thời điểm được cấp.
 
 Nối `OaRuntimeChannel` vào Runtime và đăng ký `oaWebhook` sau reverse proxy HTTPS, hoặc dùng `createOaWebhookServer` khi lớp tiếp nhận kết thúc TLS trực tiếp. Dành tiến trình riêng cho ingress để việc chờ Postgres đồng bộ ở Runtime không chặn đồng hồ phản hồi webhook. Dùng pool ingress có deadline kết nối/truy vấn trong ngân sách 2 giây. Chạy worker định kỳ để xử lý nội dung còn hạn và dọn ciphertext hết hạn.
 
@@ -21,3 +21,10 @@ Nguồn Zalo truy cập ngày 26/11/2026
 - [Webhook HTTPS và thời hạn ACK](https://docs.zaloplatforms.com/docs/OA/webhook/tong-quan)
 - [Điều kiện gửi Tin Tư vấn](https://docs.zaloplatforms.com/docs/OA/tin-nhan/tin-tu-van/dieu-kien-gui-tin-tu-van) · [API gửi văn bản](https://docs.zaloplatforms.com/docs/OA/tin-nhan/tin-tu-van/gui-tin-tu-van-dang-van-ban)
 - [App Secret Proof trong SDK Zalo](https://github.com/zaloplatform/zalo-php-sdk/blob/6bacb1bea670ce1fa9f1ae616bbbfd92742e20aa/src/Zalo.php#L229-L234)
+
+
+## Z4-S2-FIX1
+
+Guard phân loại Tin Tư vấn theo tương tác gần nhất và ghi `message_type`, `send_window`, tài khoản OA, tháng và nguồn quota vào `send_log` trong transaction giữ chỗ. Lượt dưới 48 giờ không trừ quota tháng. Lượt từ 48 giờ đến dưới 7 ngày dùng `monthlyQuota` (mặc định 500 lượt/OA/tháng theo giờ Việt Nam). Khi đầy, Guard chặn trước khi gọi API trừ khi bật rõ `allowPaidOverflow` (mặc định tắt). Lượt vượt quota được ghi `paid_overflow`. Từ 7 ngày trở đi luôn bị chặn.
+
+Các trạng thái `reserved`, `sent` và `unknown_delivery` giữ lượt tháng. Lỗi xác định (`failed`) trả lượt về quota. Cơ chế này kiểm soát lượt gửi qua runtime dùng chung Postgres. Zalo quyết định nguồn quota thực tế phía nhà cung cấp và có thể tính cả lượt từ OA Manager hoặc app khác. Phản hồi API báo nguồn quota sau khi gửi. [Tài liệu API](https://docs.zaloplatforms.com/docs/OA/tin-nhan/tin-tu-van/gui-tin-tu-van-dang-van-ban)

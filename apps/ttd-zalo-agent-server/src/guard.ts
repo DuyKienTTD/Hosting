@@ -110,7 +110,9 @@ export class Guard {
         : db.prepare("SELECT 1 FROM send_log WHERE id=?").get(key) ? "duplicate"
         : this.budget.blocked(now) ? "budget_held" : this.deny(p, target, friend, now);
       if (denial) return denial;
-      if (!this.store.reserveSend(key, target, p.agent, p.kind, now)) return "duplicate";
+      const admission = this.channel.admitSend?.(lookup, p.kind, now);
+      if (admission && "denial" in admission) return admission.denial;
+      if (!this.store.reserveSend(key, target, p.agent, p.kind, now, admission?.classification)) return "duplicate";
       if (p.kind === "invite" && !this.store.setting("firstInvite")) this.store.set("firstInvite", now);
     }, denial => {
       if (denial) return;

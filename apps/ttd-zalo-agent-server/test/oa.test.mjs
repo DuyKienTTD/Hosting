@@ -44,13 +44,19 @@ async function fixture(t) {
     finally { await root.end(); }
   });
   await root.query("CREATE SCHEMA " + schema);
-  for (const path of ["postgres/001.sql", "postgres/002-runtime.sql", "src/channels/oa/schema.sql"]) {
+  for (const path of ["postgres/001.sql", "postgres/002-runtime.sql", "src/channels/oa/schema.sql", "src/channels/oa/quota.sql"]) {
     await admin.query(await readFile(new URL("../" + path, import.meta.url), "utf8"));
   }
   const runtimeGrants = await readFile(new URL("../postgres/runtime-grants.sql", import.meta.url), "utf8");
   await admin.query(runtimeGrants.split("\n").filter(line => line.startsWith("GRANT ")).join("\n"));
   await root.query("GRANT USAGE ON SCHEMA " + schema + " TO data_runtime");
-  const store = new Store(db, randomUUID());
+  const identity = randomUUID();
+  const store = new Store(db, identity);
+  const secondStore = () => {
+    const otherDb = new PostgresRuntimeDatabase(runtime, schema);
+    t.after(() => otherDb.close());
+    return new Store(otherDb, identity);
+  };
   store.stop("global", false);
   const box = new Envelope(randomBytes(32));
   const account = { appId: "fixture_app", oaId: "fixture_oa", webhookSecret: randomUUID() };
@@ -74,6 +80,7 @@ async function fixture(t) {
     if (url.pathname !== "/v3.0/oa/message/cs") return res.writeHead(404).end();
     const message = JSON.parse(body);
     calls.send.push({ token: req.headers.access_token, proof: req.headers.appsecret_proof, message });
+    if (upstream.beforeSend) await upstream.beforeSend();
     if (upstream.disconnect) return res.destroy();
     res.end(JSON.stringify({ error: upstream.sendError, data: { message_id: "fixture_delivery", user_id: message.recipient.user_id } }));
   });
@@ -82,8 +89,8 @@ async function fixture(t) {
   const advance = ms => { now += ms; };
   const tokenManager = () => new OaTokens(pool, box, scope, account.appId, appSecret, mock + "/v4/oa/access_token", clock);
   const tokens = tokenManager();
-  const makeChannel = (allowAfter48h = false) => new OaRuntimeChannel(new OaAdapter(store, box, tokens, account,
-    appSecret, { endpoint: mock + "/v3.0/oa/message/cs", clock, allowAfter48h }));
+  const makeChannel = (options = {}, channelStore = store) => new OaRuntimeChannel(new OaAdapter(channelStore, box, tokens, account,
+    appSecret, { endpoint: mock + "/v3.0/oa/message/cs", clock, ...options }));
   const channel = makeChannel();
   const inbox = new OaInbox(pool, store, box, account, clock);
   const url = await server(t, oaWebhook(inbox));
@@ -109,7 +116,7 @@ async function fixture(t) {
   const consent = () => store.consent(hashed, now + 10 * 24 * hour, true, true, true, true,
     { displayedText: "Fixture", policyVersion: "fixture-1", evidence: { source: "mock" } });
   const install = (issued = now) => tokens.install({ access: "mock_initial_access", refresh: "mock_initial_refresh", seconds: 90_000 }, issued);
-  return { pool, store, target, hashed, account, appSecret, channel, makeChannel, clock, advance, calls, upstream,
+  return { pool, store, target, hashed, account, appSecret, channel, makeChannel, secondStore, clock, advance, calls, upstream,
     tokens, tokenManager, hook, message, follow, withdraw, consent, install, inbox, signed };
 }
 
@@ -233,7 +240,7 @@ test("OA checks the 48h and seven-day boundaries and invalidates provider-reject
   assert.equal(f.calls.send.at(-1).token, "mock_access_1");
   f.advance(48 * hour);
   assert.equal(await guard.dispatch(reply("free_boundary")), "policy_denied");
-  const extended = new Guard(f.store, f.makeChannel(true), config, f.clock);
+  const extended = new Guard(f.store, f.makeChannel({ allowAfter48h: true }), config, f.clock);
   assert.equal(await extended.dispatch(reply("paid_boundary")), "sent");
   f.advance(5 * 24 * hour);
   assert.equal(await extended.dispatch(reply("week_boundary")), "policy_denied");
@@ -275,4 +282,91 @@ test("OA accepts signed events over HTTPS and returns a timely 503 under lock co
   }
   assert.equal(await post(), 200);
   assert.equal((await f.pool.query("SELECT 1 FROM oa_inbox")).rowCount, 1);
+});
+
+async function consultationFixture(t, options = {}) {
+  const f = await fixture(t);
+  await f.install();
+  f.consent();
+  assert.equal((await f.hook(f.message())).status, 200);
+  const config = structuredClone(defaults);
+  config.scheduling.maxInboundAgeMs = 7 * 24 * hour;
+  const [{ id }] = (await f.channel.receiveMessage({ key: "quota_poll", target: "channel" })).value;
+  const origin = f.store.eventKey(f.target, f.target, id);
+  f.store.db.prepare("INSERT INTO inbound VALUES(?,?,?)").run(origin, f.hashed, f.clock());
+  const proposal = id => ({ agent: "support", kind: "reply", id, origin, target: f.target, thread: f.target,
+    text: "Fixture", revision: f.store.policy(f.hashed, "support", f.clock()).revision, epoch: f.store.setting("epoch") });
+  const guard = (overrides = {}, store = f.store) => new Guard(store,
+    f.makeChannel({ allowAfter48h: true, ...options, ...overrides }, store), config, f.clock);
+  const log = id => f.pool.query("SELECT state,message_type,send_window,quota_month,quota_bucket FROM send_log WHERE id=$1",
+    [f.store.hash(id)]).then(result => result.rows[0]);
+  return { ...f, proposal, guard, log };
+}
+
+test("OA logs consultation type and classifies 47h, 49h, 6d 23h and 7d 1h", { skip: !postgres }, async t => {
+  const f = await consultationFixture(t);
+  const guard = f.guard();
+  let previous = 0;
+  for (const [hours, window, bucket] of [
+    [47, "within_48h", "free_window"], [49, "48h_to_7d", "monthly"], [167, "48h_to_7d", "monthly"],
+  ]) {
+    f.advance((hours - previous) * hour);
+    previous = hours;
+    const id = "quota_" + hours;
+    assert.equal(await guard.dispatch(f.proposal(id)), "sent");
+    const row = await f.log(id);
+    assert.equal(row.message_type, "oa_consultation");
+    assert.equal(row.send_window, window);
+    assert.equal(row.quota_bucket, bucket);
+    assert.equal(row.quota_month, bucket === "monthly"
+      ? new Date(f.clock() + 7 * hour).toISOString().slice(0, 7) : null);
+  }
+  f.advance(2 * hour);
+  assert.equal(await guard.dispatch(f.proposal("too_late")), "policy_denied");
+  assert.equal(await f.log("too_late"), undefined);
+  assert.equal(f.calls.send.length, 3);
+});
+
+test("OA releases a definite failure, keeps unknown delivery, and requires opt-in for paid overflow", { skip: !postgres }, async t => {
+  const f = await consultationFixture(t, { monthlyQuota: 1 });
+  f.advance(49 * hour);
+  const guard = f.guard();
+  f.upstream.sendError = -200;
+  assert.equal(await guard.dispatch(f.proposal("definite_failure")), "failed");
+  assert.equal((await f.log("definite_failure")).state, "failed");
+  f.upstream.sendError = 0;
+  f.upstream.disconnect = true;
+  assert.equal(await guard.dispatch(f.proposal("ambiguous")), "unknown");
+  assert.equal((await f.log("ambiguous")).state, "unknown_delivery");
+  assert.equal(await guard.dispatch(f.proposal("ambiguous")), "duplicate");
+  assert.equal(await guard.dispatch(f.proposal("blocked")), "quota_exhausted");
+  assert.equal(await f.log("blocked"), undefined);
+  assert.equal(f.calls.send.length, 2);
+  f.upstream.disconnect = false;
+  assert.equal(await f.guard({ allowPaidOverflow: true }).dispatch(f.proposal("paid")), "sent");
+  assert.equal((await f.log("paid")).quota_bucket, "paid_overflow");
+  assert.equal(f.calls.send.length, 3);
+});
+
+test("OA commits the last monthly slot before transport and blocks a competing Postgres session", { skip: !postgres }, async t => {
+  const f = await consultationFixture(t, { monthlyQuota: 1 });
+  f.advance(49 * hour);
+  const other = f.secondStore();
+  const transportStarted = Promise.withResolvers();
+  const releaseTransport = Promise.withResolvers();
+  f.upstream.beforeSend = () => {
+    transportStarted.resolve();
+    return releaseTransport.promise;
+  };
+  const first = f.guard().dispatch(f.proposal("first"));
+  try {
+    await Promise.race([transportStarted.promise, first.then(outcome => assert.fail(outcome))]);
+    assert.equal((await f.log("first")).state, "reserved");
+    assert.equal((await f.log("first")).quota_bucket, "monthly");
+    assert.equal(await f.guard({}, other).dispatch(f.proposal("competing")), "quota_exhausted");
+    assert.equal(await f.log("competing"), undefined);
+    assert.equal(f.calls.send.length, 1);
+  } finally { releaseTransport.resolve(); }
+  assert.equal(await first, "sent");
+  assert.equal((await f.log("first")).state, "sent");
 });

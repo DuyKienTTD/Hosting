@@ -2,7 +2,8 @@ import { createHmac } from "node:crypto";
 import { BaseAdapter, ChannelJournal, fail, id, ok } from "../../adapters/common.js";
 import type { ChannelEvent, Command, Result, Results } from "../../adapters/contract.js";
 import { command } from "../../adapters/router.js";
-import { UnsupportedChannel, type ChannelAdapter, type Event, type Request, type Result as RuntimeResult } from "../../channel.js";
+import { UnsupportedChannel, type ChannelAdapter, type Event, type Request, type SendAdmission, type SendClassification, type Result as RuntimeResult } from "../../channel.js";
+import { vietnam } from "../../config.js";
 import type { Store } from "../../store.js";
 import { Envelope } from "./crypto.js";
 import { type Access, OaTokens } from "./tokens.js";
@@ -19,16 +20,19 @@ export class OaAdapter extends BaseAdapter {
   readonly accountId: string;
   private readonly scope: string;
   private readonly journal: ChannelJournal;
+  private readonly monthlyQuota: number;
   private readonly prepared = new Map<string, { target: string; token: Access }>();
 
   constructor(private readonly store: Store, private readonly box: Envelope, private readonly tokens: OaTokens,
     private readonly account: OaAccount, private readonly appSecret: string,
-    private readonly options: { endpoint?: string; allowAfter48h?: boolean; clock?: () => number } = {}) {
+    private readonly options: { endpoint?: string; allowAfter48h?: boolean; monthlyQuota?: number; allowPaidOverflow?: boolean; clock?: () => number } = {}) {
     super();
     this.scope = accountScope(account);
     if (!store.db.backend || this.scope !== tokens.scope || !id(account.appId) || !id(account.oaId) || !appSecret) {
       throw Error("OA_INVALID_ACCOUNT");
     }
+    this.monthlyQuota = options.monthlyQuota ?? 500;
+    if (!Number.isSafeInteger(this.monthlyQuota) || this.monthlyQuota < 0) throw Error("OA_INVALID_MONTHLY_QUOTA");
     this.accountId = "oa:" + this.scope;
     this.journal = new ChannelJournal(store, () => this.now());
   }
@@ -36,16 +40,37 @@ export class OaAdapter extends BaseAdapter {
   private now() { return this.options.clock?.() ?? Date.now(); }
 
   // https://docs.zaloplatforms.com/docs/OA/tin-nhan/tin-tu-van/dieu-kien-gui-tin-tu-van
-  private eligible(target: string) {
+  private sendWindow(target: string, now: number): SendClassification["window"] | undefined {
     const row = this.store.db.prepare("SELECT interaction_at,withdrawn FROM oa_contacts WHERE scope=? AND target=?")
       .get(this.scope, this.store.hash(target));
-    const age = this.now() - Number(row?.interaction_at ?? 0);
-    return !!row && !row.withdrawn && age >= 0 && age < consultationWindow &&
-      (age < freeWindow || this.options.allowAfter48h === true);
+    const interaction = Number(row?.interaction_at ?? 0);
+    const age = now - interaction;
+    if (!row || row.withdrawn || !interaction || age < 0 || age >= consultationWindow) return;
+    if (age < freeWindow) return "within_48h";
+    if (this.options.allowAfter48h === true) return "48h_to_7d";
+  }
+
+  admitSend(req: Request, kind: string, now: number): SendAdmission {
+    const window = kind === "reply" && oaUid(this.account, req.target) && this.sendWindow(req.target, now);
+    if (!window) return { denial: "policy_denied" };
+
+    const quotaMonth = window === "48h_to_7d" ? vietnam(now).date.slice(0, 7) : null;
+    const quotaAccount = this.account.oaId;
+    let quotaBucket: SendClassification["quotaBucket"] = "free_window";
+    if (quotaMonth) {
+      // Guard serializes writers across processes. This count and the send_log
+      // insert are one transaction. Definite failures release their slot.
+      const used = Number(this.store.db.prepare(`SELECT count(*) AS used FROM send_log
+        WHERE quota_account=? AND quota_month=? AND quota_bucket='monthly'
+        AND state IN ('reserved','sent','unknown_delivery')`).get(quotaAccount, quotaMonth)?.used);
+      if (used >= this.monthlyQuota && this.options.allowPaidOverflow !== true) return { denial: "quota_exhausted" };
+      quotaBucket = used >= this.monthlyQuota ? "paid_overflow" : "monthly";
+    }
+    return { classification: { messageType: "oa_consultation", window, quotaAccount, quotaMonth, quotaBucket } };
   }
 
   override localContact(accountId: string, target: string): Result<Results["getContact"]> {
-    return accountId === this.accountId && oaUid(this.account, target) && this.eligible(target)
+    return accountId === this.accountId && oaUid(this.account, target) && this.sendWindow(target, this.now())
       ? ok({ contactId: target, friendship: "accepted" }) : fail("policy_denied");
   }
 
@@ -96,9 +121,13 @@ export class OaAdapter extends BaseAdapter {
     }
     const prepared = this.prepared.get(c.idempotencyKey);
     this.prepared.delete(c.idempotencyKey);
-    if (!this.eligible(target) || this.store.stopped("support") ||
-      !this.store.db.prepare(`SELECT 1 FROM send_log WHERE id=? AND target=? AND agent='support'
-        AND kind='reply' AND state='reserved'`).get(c.idempotencyKey, this.store.hash(target))) {
+    const now = this.now();
+    const window = this.sendWindow(target, now);
+    const reservation = this.store.db.prepare(`SELECT send_window,quota_month FROM send_log
+      WHERE id=? AND target=? AND agent='support' AND kind='reply' AND state='reserved'
+      AND message_type='oa_consultation' AND quota_account=?`).get(c.idempotencyKey, this.store.hash(target), this.account.oaId);
+    if (!window || this.store.stopped("support") || reservation?.send_window !== window ||
+        (window === "48h_to_7d" && reservation.quota_month !== vietnam(now).date.slice(0, 7))) {
       return Promise.resolve(fail("policy_denied"));
     }
     if (!prepared || prepared.target !== target || prepared.token.expires <= this.now() ||
@@ -167,6 +196,8 @@ export class OaRuntimeChannel implements ChannelAdapter {
   acknowledge(stream: "message" | "friend") { if (stream === "message") this.cursor = this.next; }
 
   onFriendAccepted = async (): Promise<RuntimeResult<Event[]>> => ({ ok: true, value: [] });
+
+  admitSend(request: Request, kind: string, now: number) { return this.adapter.admitSend(request, kind, now); }
 
   localContact(request: Request) {
     if (request.thread && request.thread !== request.target) return { ok: false as const, error: "policy_denied" as const };
