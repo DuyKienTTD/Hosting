@@ -114,3 +114,21 @@ Ads tắt mặc định. Guard trả và ghi `ads_disabled` trước các điề
 Phủ định trong cùng mệnh đề có thể chi phối động từ dừng qua các từ trung gian. Bộ lọc tất định không thu hồi consent trong mệnh đề như vậy. Router cũng bỏ lựa chọn thu hồi khi phát hiện phạm vi phủ định. Sáu câu phủ định và ca AI trả lựa chọn ngoài danh sách đều đạt hồi quy. Tập FIX4 giữ kết quả 0/30 quảng cáo lọt, 0/20 opted_out nhầm ở ca âm khó và 0/30 tin thường tạm dừng.
 
 Node 24.22.3. Typecheck, build và test exit 0. Server 58/58, desktop 20/20, Playwright chạy riêng 1/1, corpus 48/48. Chưa đo AI trên tin thật.
+
+## Z4-S1-DATA · Delivery log
+
+Nguồn quyết định [DIRECTION-04 tại main](https://github.com/DuyKienTTD/Hosting/blob/b9ec088/decisions/ZALO-PRODUCT-DIRECTION-04.md). Base `480fcdd` chứa bản merge PR #73.
+
+- Migration Postgres, repository với phân quyền tại tầng dịch vụ, intake hàng đợi và phiếu việc độc lập với nội dung tin khách.
+- Retention tự động trong phạm vi tin nhắn, có kiểm tra version/chính sách/legal hold, cách ly, audit chỉ ghi thêm và tombstone ngoài DB.
+- Compose riêng, backup mã hóa và restore vào DB tạm, quy trình cấu hình và rollback trong [DEPLOY](../apps/ttd-zalo-agent-server/DEPLOY.md).
+- Runtime cũ vẫn dùng repository SQLite. Chưa có cutover các luồng policy, AI và gửi tin sang repository Postgres. Chỉ test với fixture.
+
+| Kiểm tra trên Node 24.22.3 | Exit | Kết quả |
+|---|---:|---|
+| Assistant `npm run typecheck`, `npm run build`, `npm test` | 0 | 20/20 |
+| Runtime `npm run typecheck`, `npm run build` | 0 | TypeScript đạt |
+| Runtime `RUN_POSTGRES_TESTS=1 npm test` trên PostgreSQL 17.12, có Chromium | 0 | 62/62, gồm kiểm quyền, xóa và restore bản backup cũ |
+| `docker compose -f compose.data.yaml --profile maintenance config --quiet` | 0 | Compose hợp lệ với biến giả lập |
+
+CI `Z4 Postgres data` chạy lại bằng PostgreSQL service container.

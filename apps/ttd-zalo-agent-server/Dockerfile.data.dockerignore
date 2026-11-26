@@ -1,0 +1,5 @@
+**
+!apps/ttd-zalo-agent-server/package*.json
+!apps/ttd-zalo-agent-server/tsconfig.json
+!apps/ttd-zalo-agent-server/src/**
+!apps/ttd-zalo-assistant/src/**

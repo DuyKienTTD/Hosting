@@ -1,0 +1,3 @@
+{$DATA_DOMAIN} {
+  reverse_proxy ttd-zalo-data-app:8080
+}
