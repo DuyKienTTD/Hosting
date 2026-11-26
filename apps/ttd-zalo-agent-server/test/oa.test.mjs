@@ -1,3 +1,4 @@
+import { latestSmokeUid, sendOaSmoke } from "../dist/ttd-zalo-agent-server/src/channels/oa/smoke-cli.js";
 import assert from "node:assert/strict";
 import { createHash, createHmac, randomBytes, randomUUID } from "node:crypto";
 import { createServer } from "node:http";
@@ -90,8 +91,8 @@ async function fixture(t) {
   const advance = ms => { now += ms; };
   const tokenManager = () => new OaTokens(pool, box, scope, account.appId, appSecret, mock + "/v4/oa/access_token", clock);
   const tokens = tokenManager();
-  const makeChannel = (options = {}, channelStore = store) => new OaRuntimeChannel(new OaAdapter(channelStore, box, tokens, account,
-    appSecret, { endpoint: mock + "/v3.0/oa/message/cs", clock, ...options }));
+  const makeChannel = (options = {}, channelStore = store, onSend) => new OaRuntimeChannel(new OaAdapter(channelStore, box, tokens, account,
+    appSecret, { endpoint: mock + "/v3.0/oa/message/cs", clock, ...options }), onSend);
   const channel = makeChannel();
   const inbox = new OaInbox(pool, store, box, account, clock);
   const url = await server(t, oaWebhook(inbox));
@@ -489,4 +490,52 @@ test("signed stale or future events fail before any database access", async () =
     assert.equal(await inbox.accept(raw, "mac=" + signature, AbortSignal.timeout(1000)), status);
     assert.equal(queries - before, status === 200 ? 1 : 0);
   }
+});
+
+test("OA smoke command uses signed inbox evidence, scoped consent, Guard and the provider receipt", { skip: !postgres }, async t => {
+  const f = await fixture(t);
+  await f.install(f.clock() - 25 * hour);
+  const uid = "fixture_uid";
+  const modes = { oaMode: "live", smokeOnly: true, smokeAllowlist: new Set([uid]) };
+  const cfg = structuredClone(defaults);
+  let receipt;
+  const channel = f.makeChannel({ allowedUids: modes.smokeAllowlist }, f.store, result => { receipt = result; });
+  const oa = { channel, account: f.account };
+  const send = (target = uid, options = modes, approve = false) => {
+    receipt = undefined;
+    return sendOaSmoke(f.store, cfg, oa, options, target, "Tin thử fixture", approve, () => receipt, f.clock);
+  };
+  assert.equal((await f.hook(f.message())).status, 200);
+  assert.equal(latestSmokeUid(oa), uid);
+  assert.equal((await send(uid, { ...modes, oaMode: "mock" }, true)).error, "oa_live_required");
+  assert.equal((await send(uid, { ...modes, smokeOnly: false }, true)).error, "oa_smoke_only_required");
+  assert.equal((await send("another_uid", modes, true)).error, "oa_uid_not_allowlisted");
+  f.store.stop("global", true);
+  assert.equal((await send(uid, modes, true)).error, "stopped");
+  f.store.stop("global", false);
+  assert.equal((await send()).error, "consent");
+  assert.equal((await f.pool.query("SELECT 1 FROM consents")).rowCount, 0);
+  assert.equal(f.calls.send.length, 0);
+  assert.equal(f.calls.refresh.length, 0);
+
+  assert.deepEqual(await send(uid, modes, true), { ok: true, message_id: "fixture_delivery" });
+  assert.equal(f.calls.refresh.length, 1);
+  const request = f.calls.send[0];
+  assert.equal(request.message.recipient.user_id, uid);
+  assert.equal(request.proof, createHmac("sha256", f.appSecret).update(request.token).digest("hex"));
+  assert.equal((await f.pool.query("SELECT state FROM send_log")).rows[0].state, "sent");
+  const consents = (await f.pool.query("SELECT purpose,evidence FROM consents ORDER BY purpose")).rows;
+  assert.deepEqual(consents.map(row => row.purpose), ["respond", "send"]);
+  assert.ok(consents.every(row => row.evidence.source === "smoke_test_owner_approved" && row.evidence.inbound));
+
+  f.upstream.sendError = -200;
+  assert.deepEqual(await send(), { ok: false, error: "failed", channel_error: "policy_denied", zalo_error: -200 });
+  f.upstream.disconnect = true;
+  assert.deepEqual(await send(), { ok: false, error: "unknown_delivery", channel_error: "unknown_delivery" });
+  assert.equal(f.calls.send.length, 3);
+  assert.equal((await f.pool.query("SELECT 1 FROM send_log WHERE state='unknown_delivery'")).rowCount, 1);
+
+  await f.withdraw();
+  assert.equal((await send(uid, modes, true)).ok, false);
+  assert.equal(f.calls.send.length, 3);
 });

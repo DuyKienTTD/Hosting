@@ -102,6 +102,7 @@ export interface Results {
 
 export type ChannelErrorCode = "rate_limited" | "auth" | "not_supported" | "unknown_delivery" | "invalid_input" | "policy_denied" | "temporary_failure";
 export interface ChannelError {
+  providerCode?: number;
   code: ChannelErrorCode;
   retryAfterSeconds?: number;
 }

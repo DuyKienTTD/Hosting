@@ -93,14 +93,14 @@ export function liveProvider(wiring: ReturnType<typeof readLiveWiring>, config: 
   return new FakeProvider(wiring.oa && !wiring.smokeOnly ? () => "none" : undefined);
 }
 
-export function createLiveOa(settings: ReturnType<typeof readOa>, store: Store, postgres: PoolConfig) {
+export function createLiveOa(settings: ReturnType<typeof readOa>, store: Store, postgres: PoolConfig, onSend?: ConstructorParameters<typeof OaRuntimeChannel>[1]) {
   const pool = new Pool({ ...postgres, max: 4, connectionTimeoutMillis: 1000,
     statement_timeout: 6500, query_timeout: 7000 });
   const ingressPool = settings.ingress === "embedded" ? new Pool({ ...postgres, max: 4,
     connectionTimeoutMillis: 650, statement_timeout: 1000, query_timeout: 1250 }) : undefined;
   const { account, appSecret, envelope } = settings;
   const tokens = new OaTokens(pool, envelope, accountScope(account), account.appId, appSecret);
-  const channel = new OaRuntimeChannel(new OaAdapter(store, envelope, tokens, account, appSecret, settings));
+  const channel = new OaRuntimeChannel(new OaAdapter(store, envelope, tokens, account, appSecret, settings), onSend);
   const clientAddress = loginClientAddress(process.env.TRUSTED_PROXY);
   const webhook = ingressPool ? oaWebhook(new OaInbox(ingressPool, store, envelope, account, Date.now, settings.maxSkewMs),
     request => clientAddress(request.socket.remoteAddress, request.headers["x-forwarded-for"])) : undefined;
