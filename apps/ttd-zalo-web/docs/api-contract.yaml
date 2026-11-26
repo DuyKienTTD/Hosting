@@ -101,7 +101,8 @@ paths:
   /workspace:
     get:
       operationId: readWorkspace
-      description: 'Chỉ trả dữ liệu được vai trò hiện tại phép đọc. Phản hồi Cache-Control: no-store.'
+      description: 'Chỉ trả dữ liệu được vai trò hiện tại phép đọc. Phản hồi Cache-Control: no-store. Không chứa
+        provider, mô hình hay ngân sách AI Router.'
       responses:
         '200':
           description: Thành công
@@ -174,7 +175,6 @@ paths:
       x-roles:
       - owner
       - support
-      - a0
       requestBody:
         required: true
         content:
@@ -198,7 +198,8 @@ paths:
       operationId: createQuote
       description: Đọc giá và quy cách từ server. 1 m = 1000 mm, 1 thanh = millimetresPerBar, 1 bộ = barsPerSet
         thanh. Làm tròn tổng VND một lần sau khi nhân tổng mm với đơn giá mỗi mét rồi chia 1000. Lưu báo giá nội
-        bộ, không gửi khách.
+        bộ, không gửi khách. Kiểm tra khách, quy cách, số lượng, xác nhận và mã bảng giá đã duyệt còn hiệu lực trước
+        khi lưu.
       responses:
         '201':
           description: Thành công
@@ -224,16 +225,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '409':
+          description: Thiếu xác nhận, giá chưa duyệt hoặc phiên bản giá đã thay đổi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
       x-roles:
       - owner
       - sales
-      - a0
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/QuoteInput'
+              $ref: '#/components/schemas/ConfirmedQuote'
   /work-items:
     post:
       operationId: createWorkItem
@@ -246,27 +252,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkItem'
-        '400': &id002
+        '400': &id001
           description: Dữ liệu yêu cầu không hợp lệ
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '401': &id003
+        '401': &id002
           description: Chưa xác thực hoặc phiên hết hạn
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '403': &id004
+        '403': &id003
           description: Không có quyền hoặc yêu cầu khác nguồn
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      x-roles: &id001
+      x-roles:
       - owner
-      - a0
       requestBody:
         required: true
         content:
@@ -308,7 +313,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      x-roles: *id001
+      x-roles:
+      - owner
   /deletion-requests:
     post:
       operationId: requestDeletion
@@ -345,7 +351,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      x-roles: *id001
+      x-roles:
+      - owner
       requestBody:
         required: true
         content:
@@ -370,7 +377,6 @@ paths:
         và @mention chỉ dùng trong phòng điều phối. Thao tác tạo phiếu gọi API work-items riêng.
       x-roles:
       - owner
-      - a0
       requestBody:
         required: true
         content:
@@ -392,9 +398,108 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RoomMessage'
-        '400': *id002
-        '401': *id003
-        '403': *id004
+        '400': *id001
+        '401': *id002
+        '403': *id003
+  /quotes/oa-send:
+    post:
+      operationId: approveAndQueueOaQuote
+      description: Kiểm tra toàn bộ điều kiện tạo báo giá. Trong cùng giao dịch ghi nhận phê duyệt, lưu báo giá
+        và xếp hàng OA theo định danh khách đã xác minh. Kiểm tra consent báo giá, opt-out, cửa sổ OA và Guard.
+        Worker kiểm tra lại ngay trước khi gửi, giữ ADS_ENABLED=false và không gửi lại unknown_delivery. Trả delivery=queued
+        sau khi ghi bền.
+      responses:
+        '201':
+          description: Đã lưu và đưa vào hàng đợi OA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueuedQuote'
+        '400':
+          description: Dữ liệu yêu cầu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Chưa xác thực hoặc phiên hết hạn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Không có quyền hoặc yêu cầu khác nguồn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Giá, xác nhận hoặc chính sách gửi không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-roles:
+      - owner
+      - sales
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmedQuote'
+  /agent-router:
+    get:
+      operationId: readAgentRouter
+      description: 'Chỉ Chủ dự án và A0 được xem. A0 không có quyền sửa. Phản hồi Cache-Control: no-store.'
+      x-roles:
+      - owner
+      - a0
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Router'
+        '401':
+          description: Chưa xác thực
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Vai trò không được phép xem
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /settings:
+    get:
+      operationId: readSettings
+      description: 'Chỉ Chủ dự án và A0 được xem. A0 không có quyền sửa. Phản hồi Cache-Control: no-store.'
+      x-roles:
+      - owner
+      - a0
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+        '401':
+          description: Chưa xác thực
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Vai trò không được phép xem
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   securitySchemes:
     operatorSession:
@@ -535,6 +640,7 @@ components:
       - millimetresPerBar
       - barsPerSet
       - vndPerMetre
+      - approvedPriceList
       properties:
         id:
           type: string
@@ -542,13 +648,19 @@ components:
           type: string
         millimetresPerBar:
           type: integer
-          minimum: 1
+          minimum: 0
+          description: 0 biểu thị quy cách chưa có, không thể lập báo giá.
         barsPerSet:
           type: integer
-          minimum: 1
+          minimum: 0
+          description: 0 biểu thị quy cách chưa có, không thể lập báo giá.
         vndPerMetre:
           type: integer
           minimum: 0
+        approvedPriceList:
+          type: string
+          nullable: true
+          description: Mã phiên bản bảng giá đã duyệt, null nếu chưa có.
       additionalProperties: false
     QuoteInput:
       type: object
@@ -558,13 +670,13 @@ components:
       - unit
       - quantity
       properties:
-        customerId: &id005
+        customerId: &id004
           type: string
-        productId: &id006
+        productId: &id005
           type: string
-        unit: &id007
+        unit: &id006
           $ref: '#/components/schemas/Unit'
-        quantity: &id008
+        quantity: &id007
           type: number
           minimum: 0.001
           maximum: 10000
@@ -583,16 +695,20 @@ components:
       properties:
         id:
           type: string
-        customerId: *id005
-        productId: *id006
-        unit: *id007
-        quantity: *id008
+        customerId: *id004
+        productId: *id005
+        unit: *id006
+        quantity: *id007
         totalMillimetres:
           type: integer
           minimum: 1
         totalVnd:
           type: integer
           minimum: 0
+        delivery:
+          type: string
+          enum:
+          - queued
       additionalProperties: false
     WorkItem:
       type: object
@@ -717,7 +833,6 @@ components:
       - channels
       - deletionRequests
       - agents
-      - router
       - activity
       - roomMessages
       properties:
@@ -757,8 +872,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Agent'
-        router:
-          $ref: '#/components/schemas/Router'
         activity:
           type: array
           items:
@@ -782,3 +895,117 @@ components:
         text:
           type: string
       additionalProperties: false
+    ConfirmedQuote:
+      type: object
+      required:
+      - customerId
+      - productId
+      - unit
+      - quantity
+      - confirmed
+      - priceList
+      properties:
+        customerId:
+          type: string
+        productId:
+          type: string
+        unit:
+          $ref: '#/components/schemas/Unit'
+        quantity:
+          type: number
+          minimum: 0.001
+          maximum: 10000
+          description: Mét chính xác tới 1 mm. Thanh và bộ phải là số nguyên.
+        confirmed:
+          type: boolean
+          enum:
+          - true
+        priceList:
+          type: string
+          minLength: 1
+      additionalProperties: false
+    QueuedQuote:
+      type: object
+      required:
+      - id
+      - customerId
+      - productId
+      - unit
+      - quantity
+      - totalMillimetres
+      - totalVnd
+      - delivery
+      properties:
+        id:
+          type: string
+        customerId:
+          type: string
+        productId:
+          type: string
+        unit:
+          $ref: '#/components/schemas/Unit'
+        quantity:
+          type: number
+          minimum: 0.001
+          maximum: 10000
+          description: Mét chính xác tới 1 mm. Thanh và bộ phải là số nguyên.
+        totalMillimetres:
+          type: integer
+          minimum: 1
+        totalVnd:
+          type: integer
+          minimum: 0
+        delivery:
+          type: string
+          enum:
+          - queued
+      additionalProperties: false
+    Settings:
+      type: object
+      required:
+      - adsEnabled
+      properties:
+        adsEnabled:
+          type: boolean
+          enum:
+          - false
+      additionalProperties: false
+x-operator-permissions:
+  sharedScreens:
+  - overview
+  - inbox
+  - quotes
+  - customers
+  - coordination
+  - channels
+  - privacy
+  owner:
+    shared: read
+    agentRouter: read
+    settings: read
+    writes:
+    - approveDraft
+    - createQuote
+    - approveAndQueueOaQuote
+    - createWorkItem
+    - postRoomMessage
+    - stopNick
+    - requestDeletion
+  support:
+    shared: read
+    agentRouter: deny
+    settings: deny
+    writes:
+    - approveDraft
+  sales:
+    shared: read
+    agentRouter: deny
+    settings: deny
+    writes:
+    - createQuote
+    - approveAndQueueOaQuote
+  a0:
+    shared: read
+    agentRouter: read
+    settings: read
+    writes: []

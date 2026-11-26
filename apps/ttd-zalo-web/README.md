@@ -13,14 +13,7 @@ npm run dev
 
 Mở URL do Vite in ra và chọn một tài khoản giả lập. Làm mới toàn bộ trang sẽ đặt lại dữ liệu demo. Đăng xuất để thử vai trò khác.
 
-| Vai trò | Thao tác trong bản giả lập |
-| --- | --- |
-| Chủ dự án | Duyệt nháp, lập báo giá, tạo phiếu, bật kill switch, yêu cầu xóa |
-| CSKH | Duyệt nháp |
-| Bán hàng | Lập báo giá |
-| A0 | Duyệt nháp, lập báo giá, tạo phiếu, bật kill switch, yêu cầu xóa |
-
-Bảng trên mô tả quyền thao tác UI dự kiến cho tài khoản vận hành. Quyền agent vẫn do hệ thống hiện hành quản lý.
+[Ma trận quyền vận hành](docs/operator-permissions.md) áp dụng tại điều hướng, tải trực tiếp URL và endpoint API.
 
 ## Tích hợp API
 

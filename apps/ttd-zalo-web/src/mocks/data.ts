@@ -1,4 +1,4 @@
-import type { Workspace } from "../api";
+import type { Router, Workspace } from "../api";
 
 export const initialWorkspace: Workspace = {
   adsEnabled: false,
@@ -77,6 +77,15 @@ export const initialWorkspace: Workspace = {
       millimetresPerBar: 2500,
       barsPerSet: 4,
       vndPerMetre: 120000,
+      approvedPriceList: "BG-ND-2026-01",
+    },
+    {
+      id: "ND-03",
+      label: "Nẹp đồng mẫu thiếu quy cách",
+      millimetresPerBar: 0,
+      barsPerSet: 4,
+      vndPerMetre: 90000,
+      approvedPriceList: "BG-ND-2026-01",
     },
     {
       id: "NN-02",
@@ -84,6 +93,7 @@ export const initialWorkspace: Workspace = {
       millimetresPerBar: 3000,
       barsPerSet: 5,
       vndPerMetre: 75000,
+      approvedPriceList: null,
     },
   ],
   quotes: [
@@ -150,12 +160,6 @@ export const initialWorkspace: Workspace = {
     { label: "A1", role: "Kỹ thuật", status: "Đang làm" },
     { label: "A2", role: "Sản phẩm", status: "Sẵn sàng" },
   ],
-  router: {
-    provider: "anthropic-compatible",
-    budgetVnd: 100000,
-    usedVnd: 24000,
-    model: "Mô hình pilot (giả lập)",
-  },
   activity: [
     { day: "T2", received: 18, answered: 13 },
     { day: "T3", received: 25, answered: 19 },
@@ -165,4 +169,11 @@ export const initialWorkspace: Workspace = {
     { day: "T7", received: 39, answered: 33 },
     { day: "CN", received: 27, answered: 22 },
   ],
+};
+
+export const demoRouter: Router = {
+  provider: "anthropic-compatible",
+  budgetVnd: 100000,
+  usedVnd: 24000,
+  model: "Mô hình pilot (giả lập)",
 };

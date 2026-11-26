@@ -37,6 +37,7 @@ export type Product = {
   millimetresPerBar: number;
   barsPerSet: number;
   vndPerMetre: number;
+  approvedPriceList: string | null;
 };
 export type QuoteInput = {
   customerId: string;
@@ -44,7 +45,12 @@ export type QuoteInput = {
   unit: Unit;
   quantity: number;
 };
+export type ConfirmedQuote = QuoteInput & {
+  confirmed: true;
+  priceList: string;
+};
 export type Quote = QuoteInput & {
+  delivery?: "queued";
   id: string;
   totalMillimetres: number;
   totalVnd: number;
@@ -79,14 +85,15 @@ export type Workspace = {
   channels: Channel[];
   deletionRequests: DeletionRequest[];
   agents: { label: string; role: string; status: string }[];
-  router: {
-    provider: string;
-    budgetVnd: number;
-    usedVnd: number;
-    model: string;
-  };
   activity: { day: string; received: number; answered: number }[];
 };
+export type Router = {
+  provider: string;
+  budgetVnd: number;
+  usedVnd: number;
+  model: string;
+};
+export type Settings = { adsEnabled: false };
 
 export const roleLabels: Record<Role, string> = {
   owner: "Chủ dự án",
@@ -95,11 +102,12 @@ export const roleLabels: Record<Role, string> = {
   a0: "A0",
 };
 export const permissions = {
-  approve: ["owner", "support", "a0"],
-  quote: ["owner", "sales", "a0"],
-  task: ["owner", "a0"],
-  stop: ["owner", "a0"],
-  privacy: ["owner", "a0"],
+  approve: ["owner", "support"],
+  quote: ["owner", "sales"],
+  task: ["owner"],
+  stop: ["owner"],
+  restrictedRead: ["owner", "a0"],
+  privacy: ["owner"],
 } as const satisfies Record<string, readonly Role[]>;
 export type Action = keyof typeof permissions;
 export function can(role: Role, action: Action) {
@@ -151,7 +159,11 @@ export const api = {
       "POST",
       { version, text },
     ),
-  quote: (input: QuoteInput) => request<Quote>("/quotes", "POST", input),
+  quote: (input: ConfirmedQuote) => request<Quote>("/quotes", "POST", input),
+  sendQuote: (input: ConfirmedQuote) =>
+    request<Quote>("/quotes/oa-send", "POST", input),
+  router: () => request<Router>("/agent-router"),
+  settings: () => request<Settings>("/settings"),
   task: (title: string, agent: string) =>
     request<WorkItem>("/work-items", "POST", { title, agent }),
   postRoomMessage: (text: string) =>

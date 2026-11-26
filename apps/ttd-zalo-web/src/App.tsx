@@ -11,6 +11,7 @@ import {
   Radio,
   RefreshCw,
   ShieldCheck,
+  Settings2,
   Users,
   Workflow,
   X,
@@ -18,6 +19,7 @@ import {
 import {
   api,
   ApiError,
+  can,
   demoMode,
   roleLabels,
   type Operator,
@@ -35,6 +37,7 @@ import {
   Overview,
   Privacy,
   Quotes,
+  Settings,
 } from "./screens";
 
 const routes = {
@@ -80,6 +83,12 @@ const routes = {
     icon: Radio,
     screen: Channels,
   },
+  settings: {
+    title: "Cài đặt",
+    description: "Xem các chính sách vận hành.",
+    icon: Settings2,
+    screen: Settings,
+  },
   privacy: {
     title: "Dữ liệu & quyền riêng tư",
     description: "Theo dõi consent và gửi yêu cầu xử lý dữ liệu.",
@@ -88,6 +97,11 @@ const routes = {
   },
 };
 type Page = keyof typeof routes;
+function canOpen(page: Page, role: Role) {
+  return (
+    (page !== "agents" && page !== "settings") || can(role, "restrictedRead")
+  );
+}
 function readRoute(): [Page, string] {
   const [page, selected = ""] = window.location.hash.slice(1).split("/");
   return [Object.hasOwn(routes, page) ? (page as Page) : "overview", selected];
@@ -174,6 +188,7 @@ const messageOf = (error: unknown) =>
 
 export default function App() {
   const [[page, selected], setRoute] = useState(readRoute);
+  const [refresh, setRefresh] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<Operator | null>(null);
   const [data, setData] = useState<Workspace | null>(null);
@@ -262,6 +277,7 @@ export default function App() {
       </main>
     );
 
+  const allowed = canOpen(page, user.role);
   const { title, description, screen: Screen } = routes[page];
   return (
     <div className="shell">
@@ -281,17 +297,19 @@ export default function App() {
           className={menuOpen ? "open" : ""}
           aria-label="Màn hình làm việc"
         >
-          {Object.entries(routes).map(([id, item]) => (
-            <a
-              key={id}
-              href={"#" + id}
-              onClick={() => setMenuOpen(false)}
-              aria-current={page === id ? "page" : undefined}
-            >
-              <item.icon size={18} />
-              {item.title}
-            </a>
-          ))}
+          {Object.entries(routes)
+            .filter(([id]) => canOpen(id as Page, user.role))
+            .map(([id, item]) => (
+              <a
+                key={id}
+                href={"#" + id}
+                onClick={() => setMenuOpen(false)}
+                aria-current={page === id ? "page" : undefined}
+              >
+                <item.icon size={18} />
+                {item.title}
+              </a>
+            ))}
         </nav>
         <div className="sidebar-footer">
           <ShieldCheck size={16} /> Quảng cáo đang tắt
@@ -340,21 +358,28 @@ export default function App() {
           )}
           <div className="page-heading">
             <div>
-              <h1>{title}</h1>
-              <p>{description}</p>
+              <h1>{allowed ? title : "Không có quyền truy cập"}</h1>
+              <p>
+                {allowed
+                  ? description
+                  : "Vai trò hiện tại không được phép mở màn hình này."}
+              </p>
             </div>
-            <button
-              className="secondary"
-              disabled={busy}
-              onClick={() =>
-                void execute(async () => {
-                  setData(await api.workspace());
-                  setNotice("Đã tải trạng thái mới nhất.");
-                })
-              }
-            >
-              <RefreshCw size={16} /> Làm mới
-            </button>
+            {allowed && (
+              <button
+                className="secondary"
+                disabled={busy}
+                onClick={() =>
+                  void execute(async () => {
+                    setData(await api.workspace());
+                    setRefresh((value) => value + 1);
+                    setNotice("Đã tải trạng thái mới nhất.");
+                  })
+                }
+              >
+                <RefreshCw size={16} /> Làm mới
+              </button>
+            )}
           </div>
           {error && (
             <p role="alert" className="notice error">
@@ -366,28 +391,30 @@ export default function App() {
               {notice}
             </p>
           )}
-          {data ? (
-            <Screen
-              key={page}
-              selected={selected}
-              data={data}
-              user={user}
-              busy={busy}
-              run={(work, success) =>
-                execute(async () => {
-                  const update = await work();
-                  setData((current) => current && update(current));
-                  setNotice(success);
-                })
-              }
-            />
-          ) : (
-            <p className="muted">
-              {busy
-                ? "Đang tải dữ liệu…"
-                : "Chưa tải được không gian làm việc."}
-            </p>
-          )}
+          {allowed &&
+            (data ? (
+              <Screen
+                key={page}
+                selected={selected}
+                refresh={refresh}
+                data={data}
+                user={user}
+                busy={busy}
+                run={(work, success) =>
+                  execute(async () => {
+                    const update = await work();
+                    setData((current) => current && update(current));
+                    setNotice(success);
+                  })
+                }
+              />
+            ) : (
+              <p className="muted">
+                {busy
+                  ? "Đang tải dữ liệu…"
+                  : "Chưa tải được không gian làm việc."}
+              </p>
+            ))}
         </main>
       </div>
     </div>

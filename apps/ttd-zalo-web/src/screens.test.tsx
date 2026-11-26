@@ -11,6 +11,7 @@ const props = (role: Role = "owner") => ({
   user: { id: "demo", label: "Mẫu", role },
   run: vi.fn(async () => {}),
   busy: false,
+  refresh: 0,
 });
 
 describe("Quy đổi báo giá", () => {

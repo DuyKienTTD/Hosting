@@ -4,11 +4,11 @@ import {
   roleLabels,
   type Action,
   type Operator,
-  type QuoteInput,
+  type ConfirmedQuote,
   type Role,
 } from "../api";
-import { calculateQuote } from "../quote";
-import { initialWorkspace } from "./data";
+import { approvedPriceList, calculateQuote } from "../quote";
+import { demoRouter, initialWorkspace } from "./data";
 
 const state = structuredClone(initialWorkspace);
 const sessionKey = "ttd-zalo-demo-role";
@@ -89,33 +89,67 @@ export const handlers = [
       return HttpResponse.json(item);
     },
   ),
-  http.post(prefix + "/quotes", async ({ request }) => {
-    const failure = denied("quote");
-    if (failure) return failure;
-    const input = (await request.json().catch(() => null)) as QuoteInput | null;
-    const product = state.products.find(({ id }) => id === input?.productId);
-    if (
-      !input ||
-      !product ||
-      !state.customers.some(({ id }) => id === input.customerId)
-    )
-      return error(400, "Khách hàng hoặc sản phẩm không hợp lệ.");
-    try {
-      const { customerId, productId, unit, quantity } = input;
-      const quote = {
-        id: "BG-" + String(state.quotes.length + 1).padStart(3, "0"),
-        customerId,
-        productId,
-        unit,
-        quantity,
-        ...calculateQuote(product, input),
-      };
-      state.quotes.unshift(quote);
-      return HttpResponse.json(quote, { status: 201 });
-    } catch (err) {
-      return error(400, (err as Error).message);
-    }
-  }),
+  http.get(
+    prefix + "/agent-router",
+    () => denied("restrictedRead") ?? HttpResponse.json(demoRouter),
+  ),
+  http.get(
+    prefix + "/settings",
+    () => denied("restrictedRead") ?? HttpResponse.json({ adsEnabled: false }),
+  ),
+  ...["/quotes", "/quotes/oa-send"].map((path) =>
+    http.post(prefix + path, async ({ request }) => {
+      const send = path.endsWith("/oa-send");
+      const failure = denied("quote");
+      if (failure) return failure;
+      const input = (await request
+        .json()
+        .catch(() => null)) as ConfirmedQuote | null;
+      const product = state.products.find(({ id }) => id === input?.productId);
+      const customer = state.customers.find(
+        ({ id }) => id === input?.customerId,
+      );
+      if (!input || !product || !customer)
+        return error(400, "Khách hàng hoặc sản phẩm không hợp lệ.");
+      if (
+        input.confirmed !== true ||
+        !approvedPriceList(product) ||
+        input.priceList !== product.approvedPriceList
+      ) {
+        return error(409, "Cần xác nhận và dùng bảng giá đã duyệt hiện hành.");
+      }
+      if (
+        send &&
+        (customer.optOut !== "none" ||
+          customer.consent.quote !== "granted" ||
+          !state.conversations.some(
+            (item) => item.customerId === customer.id && item.channel === "oa",
+          ) ||
+          state.channels.find((item) => item.id === "oa")?.state !== "online")
+      ) {
+        return error(
+          409,
+          "Chính sách liên hệ hoặc trạng thái kênh đang chặn gửi báo giá.",
+        );
+      }
+      try {
+        const { customerId, productId, unit, quantity } = input;
+        const quote = {
+          id: "BG-" + String(state.quotes.length + 1).padStart(3, "0"),
+          customerId,
+          productId,
+          unit,
+          quantity,
+          ...calculateQuote(product, input),
+          ...(send ? { delivery: "queued" as const } : {}),
+        };
+        state.quotes.unshift(quote);
+        return HttpResponse.json(quote, { status: 201 });
+      } catch (err) {
+        return error(400, (err as Error).message);
+      }
+    }),
+  ),
   http.post(prefix + "/work-items", async ({ request }) => {
     const failure = denied("task");
     if (failure) return failure;

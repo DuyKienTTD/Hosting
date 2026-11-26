@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import {
   ArrowRight,
   Check,
@@ -14,10 +14,20 @@ import {
   type Channel,
   type Conversation,
   type Operator,
+  type Router,
+  type Settings as SettingsData,
   type Unit,
   type Workspace,
 } from "./api";
-import { calculateQuote, money, number, unitLabels } from "./quote";
+import {
+  approvedPriceList,
+  calculateQuote,
+  hasDimensions,
+  money,
+  number,
+  unitLabels,
+  validQuoteQuantity,
+} from "./quote";
 
 type Props = {
   data: Workspace;
@@ -27,6 +37,7 @@ type Props = {
     success: string,
   ) => Promise<void>;
   busy: boolean;
+  refresh: number;
 };
 
 const channelStates = {
@@ -413,13 +424,62 @@ export function Quotes({ data, user, run, busy }: Props) {
   const [unit, setUnit] = useState<Unit>("bar");
   const [quantity, setQuantity] = useState("2");
   const product = data.products.find(({ id }) => id === productId);
-  let preview: ReturnType<typeof calculateQuote> | undefined;
-  if (product) {
-    try {
-      preview = calculateQuote(product, { unit, quantity: Number(quantity) });
-    } catch {
-      /* An incomplete quantity has no preview. */
-    }
+  const [customerId, setCustomerId] = useState("");
+  const [confirmation, setConfirmation] = useState("");
+  const customer = data.customers.find(({ id }) => id === customerId);
+  const confirmationKey = JSON.stringify([customerId, product, unit, quantity]);
+  const confirmed = confirmation === confirmationKey;
+  const dimensionsReady = !!product && hasDimensions(product);
+  const priceList = approvedPriceList(product);
+  const validQuantity = validQuoteQuantity(unit, Number(quantity));
+  const preview =
+    product && dimensionsReady && priceList && validQuantity
+      ? calculateQuote(product, { unit, quantity: Number(quantity) })
+      : undefined;
+  const reasons = [
+    !customer && "Chọn khách hàng.",
+    !dimensionsReady && "Thiếu kích thước hoặc quy cách sản phẩm.",
+    !validQuantity && "Nhập số lượng hợp lệ.",
+    !priceList && "Giá chưa có trong bảng giá đã duyệt.",
+    !confirmed && "Tích xác nhận báo giá.",
+  ].filter(Boolean);
+  const sendBlocked =
+    !!customer &&
+    (customer.optOut !== "none" ||
+      customer.consent.quote !== "granted" ||
+      !data.conversations.some(
+        (item) => item.customerId === customerId && item.channel === "oa",
+      ) ||
+      data.channels.find((item) => item.id === "oa")?.state !== "online");
+
+  function submit(send: boolean) {
+    if (
+      busy ||
+      reasons.length ||
+      !preview ||
+      !priceList ||
+      (send && sendBlocked) ||
+      !can(user.role, "quote")
+    )
+      return;
+    void run(
+      async () => {
+        const quote = await (send ? api.sendQuote : api.quote)({
+          customerId,
+          productId,
+          unit,
+          quantity: Number(quantity),
+          priceList,
+          confirmed: true,
+        });
+        setConfirmation("");
+        return (current) => ({
+          ...current,
+          quotes: [quote, ...current.quotes],
+        });
+      },
+      send ? "Đã duyệt và xếp hàng gửi qua OA." : "Đã lưu báo giá.",
+    );
   }
   return (
     <div className="dashboard-grid">
@@ -428,29 +488,37 @@ export function Quotes({ data, user, run, busy }: Props) {
           <form
             className="form"
             onSubmit={(event) => {
-              const form = fields(event);
-              if (!preview) return;
-              void run(async () => {
-                const quote = await api.quote({
-                  customerId: String(form.get("customerId")),
-                  productId,
-                  unit,
-                  quantity: Number(quantity),
-                });
-                return (current) => ({
-                  ...current,
-                  quotes: [quote, ...current.quotes],
-                });
-              }, "Đã lưu báo giá.");
+              event.preventDefault();
+              submit(false);
             }}
           >
-            <CustomerSelect data={data} />
+            <label>
+              Khách hàng
+              <select
+                required
+                value={customerId}
+                onChange={(event) => {
+                  setCustomerId(event.target.value);
+                  setConfirmation("");
+                }}
+              >
+                <option value="">Chọn khách hàng</option>
+                {data.customers.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label} · {item.id}
+                  </option>
+                ))}
+              </select>
+            </label>
             <label>
               Sản phẩm
               <select
                 required
                 value={productId}
-                onChange={(event) => setProductId(event.target.value)}
+                onChange={(event) => {
+                  setProductId(event.target.value);
+                  setConfirmation("");
+                }}
               >
                 {data.products.map((item) => (
                   <option value={item.id} key={item.id}>
@@ -464,7 +532,10 @@ export function Quotes({ data, user, run, busy }: Props) {
                 Đơn vị
                 <select
                   value={unit}
-                  onChange={(event) => setUnit(event.target.value as Unit)}
+                  onChange={(event) => {
+                    setUnit(event.target.value as Unit);
+                    setConfirmation("");
+                  }}
                 >
                   {Object.entries(unitLabels).map(([value, label]) => (
                     <option key={value} value={value}>
@@ -482,15 +553,19 @@ export function Quotes({ data, user, run, busy }: Props) {
                   step={unit === "metre" ? "0.001" : "1"}
                   required
                   value={quantity}
-                  onChange={(event) => setQuantity(event.target.value)}
+                  onChange={(event) => {
+                    setQuantity(event.target.value);
+                    setConfirmation("");
+                  }}
                 />
               </label>
             </div>
-            {product && (
+            {product && dimensionsReady && priceList && (
               <div className="callout">
                 <small>
                   {number(product.millimetresPerBar / 1000)} m/thanh ·{" "}
                   {product.barsPerSet} thanh/bộ · {money(product.vndPerMetre)}/m
+                  · {priceList}
                 </small>
                 <div className="quote-total">
                   <span>
@@ -502,7 +577,53 @@ export function Quotes({ data, user, run, busy }: Props) {
                 </div>
               </div>
             )}
-            <button disabled={busy || !preview}>Lưu báo giá</button>
+            <label className="checkbox">
+              <input
+                type="checkbox"
+                checked={confirmed}
+                onChange={(event) =>
+                  setConfirmation(event.target.checked ? confirmationKey : "")
+                }
+              />
+              Tôi đã xác nhận khách hàng, quy cách, số lượng và giá.
+            </label>
+            {reasons.length > 0 && (
+              <ul id="quote-locks" className="muted">
+                {reasons.map((reason) => (
+                  <li key={String(reason)}>{reason}</li>
+                ))}
+              </ul>
+            )}
+            {sendBlocked && (
+              <p id="oa-lock" className="muted">
+                Chưa đủ điều kiện gửi qua OA. Kiểm tra consent báo giá, yêu cầu
+                dừng liên hệ và trạng thái kênh.
+              </p>
+            )}
+            <div className="pair">
+              <button
+                className="secondary"
+                disabled={busy || !!reasons.length}
+                aria-describedby={reasons.length ? "quote-locks" : undefined}
+              >
+                Lưu báo giá
+              </button>
+              <button
+                type="button"
+                disabled={busy || !!reasons.length || sendBlocked}
+                aria-describedby={
+                  [
+                    reasons.length ? "quote-locks" : "",
+                    sendBlocked ? "oa-lock" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ") || undefined
+                }
+                onClick={() => submit(true)}
+              >
+                Duyệt &amp; gửi qua OA
+              </button>
+            </div>
           </form>
         </Can>
       </Card>
@@ -515,9 +636,10 @@ export function Quotes({ data, user, run, busy }: Props) {
                   {item.id} · {item.customerId}
                 </strong>
                 <small>
-                  {item.productId} · {number(item.quantity)}{" "}
-                  {unitLabels[item.unit].toLowerCase()} ·{" "}
-                  {number(item.totalMillimetres / 1000)} m
+                  {item.productId} ·{" "}
+                  {item.delivery === "queued" && "Chờ gửi OA · "}
+                  {number(item.quantity)} {unitLabels[item.unit].toLowerCase()}{" "}
+                  · {number(item.totalMillimetres / 1000)} m
                 </small>
               </div>
               <strong>{money(item.totalVnd)}</strong>
@@ -682,8 +804,50 @@ export function Coordination({ data, user, run, busy }: Props) {
   );
 }
 
-export function Agents({ data }: Props) {
-  const router = data.router;
+function useRestrictedData<T>(load: () => Promise<T>, refresh: number) {
+  const [result, setResult] = useState<{ data?: T; error?: string }>({});
+  useEffect(() => {
+    let active = true;
+    setResult({});
+    void load().then(
+      (data) => {
+        if (active) setResult({ data });
+      },
+      (error) => {
+        if (active)
+          setResult({ error: error.message || "Không tải được dữ liệu." });
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [load, refresh]);
+  return result;
+}
+
+export function Settings({ refresh }: Props) {
+  const { data, error } = useRestrictedData<SettingsData>(
+    api.settings,
+    refresh,
+  );
+  return (
+    <Card title="Chính sách vận hành">
+      {error ? (
+        <p role="alert">{error}</p>
+      ) : data ? (
+        <p>Quảng cáo đang tắt trong pilot.</p>
+      ) : (
+        <p role="status">Đang tải cài đặt…</p>
+      )}
+    </Card>
+  );
+}
+
+export function Agents({ data, refresh }: Props) {
+  const { data: router, error } = useRestrictedData<Router>(
+    api.router,
+    refresh,
+  );
   return (
     <div className="dashboard-grid">
       <Card title="Đội ngũ agent">
@@ -700,21 +864,29 @@ export function Agents({ data }: Props) {
         </div>
       </Card>
       <Card title="Hostinger AI Router">
-        <dl>
-          <dt>Provider</dt>
-          <dd>{router.provider}</dd>
-          <dt>Mô hình</dt>
-          <dd>{router.model}</dd>
-          <dt>Chi phí hôm nay</dt>
-          <dd>
-            {money(router.usedVnd)} / {money(router.budgetVnd)}
-          </dd>
-        </dl>
-        <progress
-          aria-label="Mức sử dụng ngân sách"
-          max={router.budgetVnd || 1}
-          value={router.usedVnd}
-        />
+        {error ? (
+          <p role="alert">{error}</p>
+        ) : router ? (
+          <>
+            <dl>
+              <dt>Provider</dt>
+              <dd>{router.provider}</dd>
+              <dt>Mô hình</dt>
+              <dd>{router.model}</dd>
+              <dt>Chi phí hôm nay</dt>
+              <dd>
+                {money(router.usedVnd)} / {money(router.budgetVnd)}
+              </dd>
+            </dl>
+            <progress
+              aria-label="Mức sử dụng ngân sách"
+              max={router.budgetVnd || 1}
+              value={router.usedVnd}
+            />
+          </>
+        ) : (
+          <p role="status">Đang tải AI Router…</p>
+        )}
       </Card>
     </div>
   );
