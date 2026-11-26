@@ -13,7 +13,12 @@ const legacyRates: Record<string, Config["budget"]["models"][Model]> = {
 };
 
 export class Budget {
-  constructor(private store: Store, private cfg: Config["budget"], private clock: () => number) {}
+  private readonly attributed: boolean;
+  constructor(private store: Store, private cfg: Config["budget"], private clock: () => number) {
+    this.attributed = store.db.backend === "postgres" && !!store.db.prepare(
+      "SELECT 1 FROM pg_attribute WHERE attrelid='ledger'::regclass AND attname='agent_role' AND NOT attisdropped",
+    ).get();
+  }
   cycle(at = this.clock()) {
     const date = vietnam(at).date;
     const [year, month, dateOfMonth] = date.split("-").map(Number);
@@ -99,8 +104,12 @@ export class Budget {
           return;
         }
       }
-      db.prepare(`INSERT INTO ledger(id,cycle,date,model,amount,state,provider,rate_multiplier,input_bound)
-        VALUES(?,?,?,?,?,'reserved',?,?,?)`).run(id, cycle, date, model, amount, provider, multiplier, inputTokens);
+      const columns = "id,cycle,date,model,amount,state,provider,rate_multiplier,input_bound";
+      const values = "?,?,?,?,?,'reserved',?,?,?";
+      db.prepare(this.attributed
+        ? "INSERT INTO ledger(" + columns + ",agent_role) VALUES(" + values + ",?)"
+        : "INSERT INTO ledger(" + columns + ") VALUES(" + values + ")")
+        .run(id, cycle, date, model, amount, provider, multiplier, inputTokens, ...(this.attributed ? [agent] : []));
       return { id, model, batch };
     });
   }

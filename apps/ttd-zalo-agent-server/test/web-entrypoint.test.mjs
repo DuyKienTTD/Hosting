@@ -36,7 +36,7 @@ test("production Web UI receives and replies to OA and sends an approved quote",
     try { await admin.query("DROP DATABASE " + database + " WITH (FORCE)"); }
     finally { await admin.end(); }
   });
-  for (const name of ["001.sql", "002-runtime.sql", "runtime-grants.sql", "006-oa.sql", "007-oa-quota.sql", "009-web-operator.sql", "010-web-accounts.sql", "011-web-oa-inbox.sql", "012-ai-drafts.sql"]) {
+  for (const name of ["001.sql", "002-runtime.sql", "runtime-grants.sql", "006-oa.sql", "007-oa-quota.sql", "009-web-operator.sql", "010-web-accounts.sql", "011-web-oa-inbox.sql", "012-ai-drafts.sql", "014-nick-enrollment.sql", "015-room-agents.sql"]) {
     let sql = await readFile(new URL("../postgres/" + name, import.meta.url), "utf8");
     if (name === "runtime-grants.sql") sql = sql.split("\n").filter(line => line.startsWith("GRANT ")).join("\n");
     await pg.query(sql);

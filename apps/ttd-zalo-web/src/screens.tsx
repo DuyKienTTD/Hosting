@@ -760,6 +760,7 @@ export function Coordination({ data, user, run, busy }: Props) {
                   return (current) => ({
                     ...current,
                     roomMessages: [...current.roomMessages, item],
+                    workItems: item.task ? [item.task, ...current.workItems] : current.workItems,
                   });
                 }, "Đã đăng trao đổi nội bộ.");
               }}
@@ -771,7 +772,7 @@ export function Coordination({ data, user, run, busy }: Props) {
                   required
                   maxLength={1000}
                   rows={2}
-                  placeholder="@agent và nội dung trao đổi"
+                  placeholder="@report tóm tắt hội thoại hôm nay"
                 />
               </label>
               <button disabled={busy}>Đăng trao đổi</button>
@@ -779,6 +780,10 @@ export function Coordination({ data, user, run, busy }: Props) {
           </Can>
         </Card>
         <Card title="Tạo phiếu việc">
+          <button className="secondary" disabled={busy} onClick={() => void run(async () => {
+            const latest = await api.workspace();
+            return (current) => ({ ...current, workItems: latest.workItems, roomMessages: latest.roomMessages });
+          }, "Đã cập nhật phòng điều phối.")}>Làm mới kết quả</button>
           <Can user={user} action="task">
             <form
               className="form"
@@ -824,6 +829,19 @@ export function Coordination({ data, user, run, busy }: Props) {
                   <small>{item.id}</small>
                   <strong>{item.title}</strong>
                   <small>@{item.agent}</small>
+                  {item.result && <p>{item.result}</p>}
+                  {item.reviewDecision && <small>{item.reviewDecision === "accept" ? "Đã chấp nhận" : "Đã bỏ qua"}</small>}
+                  {item.status === "review" && item.result && user.role === "owner" && (
+                    <div className="pair">
+                      {(["accept", "dismiss"] as const).map((decision) => (
+                        <button key={decision} disabled={busy} type="button" onClick={() => void run(async () => {
+                          await api.reviewAgent(item.id, decision);
+                          return (current) => ({ ...current, workItems: current.workItems.map((row) =>
+                            row.id === item.id ? { ...row, status: "done", reviewDecision: decision } : row) });
+                        }, "Đã ghi nhận quyết định.")}>{decision === "accept" ? "Chấp nhận" : "Bỏ qua"}</button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             {!data.workItems.some((item) => item.status === status) && (
@@ -933,11 +951,9 @@ export function Settings({ refresh, user, busy, run }: Props) {
   );
 }
 
-export function Agents({ data, refresh }: Props) {
-  const { data: router, error } = useRestrictedData<Router>(
-    api.router,
-    refresh,
-  );
+export function Agents({ data, refresh, user, busy, run }: Props) {
+  const [changes, setChanges] = useState(0);
+  const { data: router, error } = useRestrictedData<Router>(api.router, refresh + changes);
   return (
     <div className="dashboard-grid">
       <Card title="Đội ngũ agent">
@@ -970,6 +986,27 @@ export function Agents({ data, refresh }: Props) {
                   : money(router.usedVnd) + " / " + money(router.budgetVnd)}
               </dd>
             </dl>
+            {user.role === "owner" && router.agents && (
+              <div className="rows">
+                {router.agents.map((agent) => (
+                  <div className="row" key={agent.id}>
+                    <div>
+                      <strong>@{agent.id}</strong>
+                      <small>{agent.model} · {agent.permission === "read" ? "Chỉ đọc" : "Đề xuất phiếu"}</small>
+                      <small>{agent.usedVnd === null ? "$" + agent.usedUsd.toFixed(6) : money(agent.usedVnd)}</small>
+                      {agent.enabled && agent.blocked && <small>Global STOP đang bật</small>}
+                    </div>
+                    <button type="button" disabled={busy} onClick={() => void run(async () => {
+                      await api.toggleAgent(agent.id, !agent.enabled);
+                      setChanges((value) => value + 1);
+                      const latest = await api.workspace();
+                      return (current) => ({ ...current, agents: latest.agents });
+                    }, agent.enabled ? "Đã tắt agent." : "Đã bật agent.")}>{agent.enabled ? "Tắt" : "Bật"}</button>
+                  </div>
+                ))}
+                {!!router.unassignedUsd && <small>Chi phí chưa phân vai · ${router.unassignedUsd.toFixed(6)}</small>}
+              </div>
+            )}
             {router.usedVnd !== null && router.budgetVnd !== null && (
               <progress
                 aria-label="Mức sử dụng ngân sách"
