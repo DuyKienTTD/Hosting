@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import { once } from "node:events";
 import { createServer } from "node:http";
 import test from "node:test";
+import { Budget } from "../dist/ttd-zalo-agent-server/src/budget.js";
 import { defaults, light, strong } from "../dist/ttd-zalo-agent-server/src/config.js";
 import { MockChannel } from "../dist/ttd-zalo-agent-server/src/channel.js";
 import { createLiveOa, liveProvider, readLiveWiring } from "../dist/ttd-zalo-agent-server/src/live-wiring.js";
@@ -37,6 +38,48 @@ test("live switches default to mock and refuse missing secrets, unsafe smoke, or
   assert.equal(read(ai()).aiMode, "live");
 });
 
+test("live Router credit and monthly defaults, monetary bounds and cap ordering", () => {
+  const env = ai();
+  delete env.AI_ROUTER_MONTHLY_USD;
+  const cfg = structuredClone(defaults);
+  readLiveWiring(env, cfg, false, "mock");
+  assert.equal(cfg.budget.creditUsd, 200);
+  assert.equal(cfg.budget.stopUsd, 195);
+  const maximum = structuredClone(defaults);
+  readLiveWiring({ ...env, AI_ROUTER_CREDIT_USD: "5000", AI_ROUTER_MONTHLY_USD: "5000" }, maximum, false, "mock");
+  assert.equal(maximum.budget.stopUsd, 5000);
+  assert.throws(() => readLiveWiring({ ...env, AI_ROUTER_CREDIT_USD: "100" }, structuredClone(defaults), false, "mock"),
+    /INVALID_AI_ROUTER_MONTHLY_USD/);
+});
+
+test("Router admits the full explicit daily cap and rejects reservations beyond the remaining month", t => {
+  const store = fixtureStore(t, ":memory:", randomBytes(32).toString("hex"));
+  const cfg = structuredClone(defaults);
+  readLiveWiring({ ...ai(), AI_ROUTER_CREDIT_USD: "545", AI_ROUTER_MONTHLY_USD: "500", AI_ROUTER_DAILY_USD: "111" },
+    cfg, false, "mock");
+  assert.equal(cfg.budget.creditUsd, 545);
+  assert.equal(cfg.budget.stopUsd, 500);
+  const usd = 1_000_000_000;
+  let now = Date.parse("2026-11-01T12:00:00Z");
+  const budget = new Budget(store, cfg.budget, () => now);
+  const seed = (id, date, amount) => store.db.prepare(`INSERT INTO ledger(id,cycle,date,model,amount,state,provider)
+    VALUES(?,'2026-11-01',?,?,?,'settled','anthropic-compatible')`).run(id, date, light, amount);
+  const amount = (1000 * cfg.budget.models[light].creation + cfg.budget.maxOutputTokens * cfg.budget.models[light].output) *
+    cfg.budget.compatibleRateMultiplier;
+  seed("day-spend", "2026-11-01", 111 * usd - amount);
+  assert.ok(budget.reserve("at-daily-cap", "router", true, false, 1000));
+  assert.equal(store.db.prepare("SELECT sum(amount) AS n FROM ledger").get().n, 111 * usd);
+  assert.equal(budget.reserve("over-daily-cap", "router", true, false, 1000), undefined);
+  now = Date.parse("2026-11-05T12:00:00Z");
+  seed("other-days", "2026-11-04", 333 * usd);
+  seed("current-day", "2026-11-05", 56 * usd - amount);
+  assert.equal(budget.reserve("background-held", "report", false, false, 1000), undefined); // inbound-only tier
+  assert.equal(budget.reserve("would-cross-month", "router", true, false, 1001), undefined);
+  assert.ok(budget.reserve("at-monthly-cap", "router", true, false, 1000));
+  assert.equal(store.db.prepare("SELECT sum(amount) AS n FROM ledger").get().n, 500 * usd);
+  assert.equal(budget.reserve("over-monthly-cap", "router", true, false, 1000), undefined);
+});
+
 test("real entrypoint refuses live mode before opening a DB connection", () => {
   const entrypoint = new URL("../dist/ttd-zalo-agent-server/src/main.js", import.meta.url);
   for (const [flag, expected] of [["OA_MODE", "MISSING_ZALO_APP_ID"], ["AI_MODE", "MISSING_AI_ROUTER_API_KEY"]]) {
@@ -44,6 +87,20 @@ test("real entrypoint refuses live mode before opening a DB connection", () => {
       DATA_RUNTIME_PASSWORD: randomBytes(24).toString("hex"), IDENTITY_KEY: randomBytes(32).toString("hex"), [flag]: "live" };
     assert.throws(() => execFileSync(process.execPath, [entrypoint.pathname], { env, stdio: "pipe", timeout: 3000 }),
       error => error.status === 1 && error.stderr.toString().includes(expected));
+  }
+});
+
+test("real entrypoint rejects invalid Router monetary limits before opening a DB connection", () => {
+  const entrypoint = new URL("../dist/ttd-zalo-agent-server/src/main.js", import.meta.url);
+  for (const [name, value] of [
+    ["AI_ROUTER_CREDIT_USD", "5000.01"], ["AI_ROUTER_CREDIT_USD", "NaN"], ["AI_ROUTER_CREDIT_USD", "0"],
+    ["AI_ROUTER_MONTHLY_USD", "545.01"], ["AI_ROUTER_MONTHLY_USD", "-1"], ["AI_ROUTER_DAILY_USD", "501"],
+  ]) {
+    const env = { PATH: process.env.PATH, PGHOST: "127.0.0.1", PGDATABASE: "unused_fixture",
+      DATA_RUNTIME_PASSWORD: randomBytes(24).toString("hex"), IDENTITY_KEY: randomBytes(32).toString("hex"), ...ai(),
+      AI_ROUTER_CREDIT_USD: "545", AI_ROUTER_MONTHLY_USD: "500", [name]: value };
+    assert.throws(() => execFileSync(process.execPath, [entrypoint.pathname], { env, stdio: "pipe", timeout: 3000 }),
+      error => error.status === 1 && error.stderr.toString().includes("INVALID_" + name));
   }
 });
 

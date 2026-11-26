@@ -75,10 +75,12 @@ export class Budget {
       // Reserve on-demand rates, including a possible five-minute cache write.
       const amount = Math.ceil((inputTokens * Math.max(rate.input, rate.creation, rate.read) +
         this.cfg.maxOutputTokens * rate.output) * multiplier);
-      if (today + amount > Math.floor((cap - prior) / left)) {
-        if (prior + today + amount > cap) this.notifyHold(cycle, now);
+      if (prior + today + amount > cap) {
+        this.notifyHold(cycle, now);
         return;
       }
+      // Router uses its explicit daily cap below. Keep pacing for direct Anthropic.
+      if (provider === "anthropic" && today + amount > Math.floor((cap - prior) / left)) return;
       if (provider === "anthropic-compatible") {
         if (batch) return;
         const { dailyTokens, monthlyTokens } = this.cfg;

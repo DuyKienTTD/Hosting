@@ -76,7 +76,8 @@ function configureAi(env: Env, budget: Config["budget"]) {
   }
   budget.provider = "anthropic-compatible";
   budget.allowedModels = models;
-  budget.stopUsd = bounded(env, "AI_ROUTER_MONTHLY_USD", NaN, 0.01, budget.stopUsd);
+  budget.creditUsd = bounded(env, "AI_ROUTER_CREDIT_USD", budget.creditUsd, 0.01, 5000);
+  budget.stopUsd = bounded(env, "AI_ROUTER_MONTHLY_USD", budget.stopUsd, 0.01, budget.creditUsd);
   budget.compatibleDailyUsd = bounded(env, "AI_ROUTER_DAILY_USD", NaN, 0.01, budget.stopUsd);
   budget.compatibleRateMultiplier = bounded(env, "AI_ROUTER_RATE_MULTIPLIER", NaN, 1, 100);
   budget.maxEstimatedInputTokens = bounded(env, "AI_MAX_INPUT_TOKENS", 18_000, 1, budget.maxEstimatedInputTokens, true);
