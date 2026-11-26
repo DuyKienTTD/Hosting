@@ -1,8 +1,9 @@
-import type { Pool } from "pg";
+import type { Pool, PoolClient } from "pg";
 import { transaction } from "../data/repository.js";
 import type { Result, Target } from "./schema.js";
 
 export type TicketState = "new" | "working" | "review" | "done";
+export type RunStep = "authorization" | "read" | "claim" | "budget" | "provider" | "plan_write" | "result_write";
 export type Ticket = {
   id: string;
   parent?: string;
@@ -14,6 +15,8 @@ export type Ticket = {
   links: string[];
   result?: Result;
   failure?: "timeout" | "budget" | "rejected" | "provider" | "interrupted";
+  failureStep?: RunStep;
+  runId?: string;
   version: number;
   leaseUntil?: number;
 };
@@ -30,15 +33,19 @@ const initial = (): RoomState => ({
 });
 
 export interface RoomStore {
-  read(): Promise<RoomState>;
-  update<T>(change: (state: RoomState) => T): Promise<T>;
+  read(signal?: AbortSignal): Promise<RoomState>;
+  update<T>(change: (state: RoomState) => T, signal?: AbortSignal): Promise<T>;
 }
 
 // For local tests. Production composition supplies PostgresRoomStore.
 export class MemoryRoomStore implements RoomStore {
   private state = initial();
-  async read() { return structuredClone(this.state); }
-  async update<T>(change: (state: RoomState) => T) {
+  async read(signal?: AbortSignal) {
+    signal?.throwIfAborted();
+    return structuredClone(this.state);
+  }
+  async update<T>(change: (state: RoomState) => T, signal?: AbortSignal) {
+    signal?.throwIfAborted();
     const next = structuredClone(this.state);
     const result = change(next);
     next.revision++;
@@ -49,23 +56,58 @@ export class MemoryRoomStore implements RoomStore {
 
 export class PostgresRoomStore implements RoomStore {
   constructor(private readonly pool: Pool) {}
-  async read() {
-    const { rows } = await this.pool.query<{ state: RoomState }>(
-      "SELECT state FROM coordination_room WHERE singleton = true",
-    );
-    return rows[0]?.state ?? initial();
+  private async withClient<T>(signal: AbortSignal | undefined, work: (client: PoolClient) => Promise<T>) {
+    signal?.throwIfAborted();
+    const client = await this.pool.connect();
+    // Drop the connection on abort so a stalled transaction releases its locks.
+    const abort = () => client.release(true);
+    signal?.addEventListener("abort", abort, { once: true });
+    try {
+      if (signal?.aborted) {
+        abort();
+        signal.throwIfAborted();
+      }
+      return await work(client);
+    } finally {
+      signal?.removeEventListener("abort", abort);
+      if (!signal?.aborted) client.release();
+    }
   }
-  async update<T>(change: (state: RoomState) => T) {
-    return transaction(this.pool, async client => {
+
+  async read(signal?: AbortSignal) {
+    return this.withClient(signal, async client => {
+      const { rows } = await client.query<{ state: RoomState }>(
+        "SELECT state FROM coordination_room WHERE singleton = true",
+      );
+      return rows[0]?.state ?? initial();
+    });
+  }
+
+  async update<T>(change: (state: RoomState) => T, signal?: AbortSignal) {
+    const write = async (client: PoolClient) => {
       await client.query("INSERT INTO coordination_room VALUES (true, $1) ON CONFLICT DO NOTHING", [initial()]);
       const { rows } = await client.query<{ state: RoomState }>(
         "SELECT state FROM coordination_room WHERE singleton = true FOR UPDATE",
       );
+      signal?.throwIfAborted();
       const state = rows[0].state;
       const result = change(state);
       state.revision++;
       await client.query("UPDATE coordination_room SET state=$1 WHERE singleton = true", [state]);
       return result;
+    };
+    if (!signal) return transaction(this.pool, write);
+    return this.withClient(signal, async client => {
+      await client.query("BEGIN");
+      try {
+        const result = await write(client);
+        signal.throwIfAborted();
+        await client.query("COMMIT");
+        return result;
+      } catch (error) {
+        if (!signal.aborted) await client.query("ROLLBACK");
+        throw error;
+      }
     });
   }
 }

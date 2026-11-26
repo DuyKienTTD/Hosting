@@ -142,6 +142,78 @@ test("cap blocks before request, billing discrepancy holds room, timeout finishe
   }
 });
 
+for (const step of ["authorization", "read", "provider", "result_write"]) {
+  test(`claimed ticket times out during ${step} and rejects late completion`, { timeout: 2000 }, async () => {
+    const backing = new MemoryRoomStore();
+    let resume;
+    const blocked = new Promise(resolve => { resume = resolve; });
+    let entered = false;
+    const pause = async () => {
+      entered = true;
+      await blocked;
+    };
+    let reads = 0;
+    let writes = 0;
+    let runChecks = 0;
+    let lateWrite;
+    const store = {
+      async read(signal) {
+        if (signal && ++reads === 2 && step === "read") await pause();
+        return backing.read(signal);
+      },
+      async update(change, signal) {
+        if (signal && ++writes === 3 && step === "result_write") {
+          await pause();
+          // Simulate a host adapter that ignores the signal. Its mutation must
+          // still fail the fence inside the runner's callback.
+          lateWrite = backing.update(change).catch(error => error);
+          return lateWrite;
+        }
+        return backing.update(change, signal);
+      },
+    };
+    const { room, operator, provider } = fixture([async model => {
+      if (step === "provider") await pause();
+      return result(model.model, handoff);
+    }], {
+      store, timeoutMs: 75,
+      allowed: async (_session, action) => {
+        if (action === "run" && ++runChecks === 3 && step === "authorization") await pause();
+        return true;
+      },
+    });
+    const { tickets: [id] } = await room.post(operator, { text: "@crm đọc mẫu", links: [customer] });
+    const completion = AbortSignal.timeout(350);
+    const ticket = await Promise.race([
+      room.run(operator, id),
+      new Promise((_, reject) => completion.addEventListener("abort",
+        () => reject(Error("run still pending after 350 ms")), { once: true })),
+    ]);
+    assert.equal(entered, true);
+    assert.equal(ticket.state, "review");
+    assert.equal(ticket.failure, "timeout");
+    assert.equal(ticket.failureStep, step);
+    assert.equal(ticket.result, undefined);
+    assert.deepEqual((await backing.read()).tickets[id], ticket);
+    resume();
+    await new Promise(resolve => setImmediate(resolve));
+    if (step === "result_write") assert.match((await lateWrite).message, /timeout/);
+    assert.deepEqual((await backing.read()).tickets[id], ticket);
+    assert.equal(provider.calls.length, step === "authorization" || step === "read" ? 0 : 1);
+    await assert.rejects(room.run(operator, id), /conflict/);
+  });
+}
+
+test("a stalled preflight read expires without claiming the ticket", { timeout: 1000 }, async () => {
+  const backing = new MemoryRoomStore();
+  const { room, operator } = fixture([], {
+    store: { read: () => new Promise(() => {}), update: backing.update.bind(backing) }, timeoutMs: 30,
+  });
+  const { tickets: [id] } = await room.post(operator, { text: "@crm xem" });
+  await assert.rejects(room.run(operator, id), /timeout/);
+  assert.equal((await backing.read()).tickets[id].state, "new");
+});
+
 test("key ceiling survives midnight and expired claims can be closed without reissuing calls", async () => {
   let day = Date.parse("2026-11-26T00:00:00Z");
   const { room, operator, provider, store } = fixture([{ summary: "Mẫu", links: [], proposals: [] }],
@@ -241,4 +313,28 @@ test("Postgres serializes room changes and atomically admits a single checked da
     assert.equal((await pool.query("SELECT display_name FROM customers")).rows[0].display_name, "Mẫu nội bộ");
     assert.deepEqual((await pool.query("SELECT actor,action FROM audit_log")).rows,
       [{ actor: "crm", action: "customer.rename" }]);
+
+    const lock = await pool.connect();
+    try {
+      const timed = fixture([async (body, signal) => {
+        await lock.query("BEGIN");
+        await lock.query("SELECT 1 FROM coordination_room FOR UPDATE");
+        signal.addEventListener("abort", () => {
+          // Leave the row locked past the run deadline, then let the independent
+          // failure write proceed while the old connection is being discarded.
+          setTimeout(() => void lock.query("ROLLBACK").catch(() => {}), 20);
+        }, { once: true });
+        return result(body.model, handoff);
+      }], { store, timeoutMs: 300 });
+      const { tickets: [blocked] } = await timed.room.post(timed.operator, { text: "@crm xem", links: [customer] });
+      const expired = await timed.room.run(timed.operator, blocked);
+      assert.equal(expired.state, "review");
+      assert.equal(expired.failure, "timeout");
+      assert.equal(expired.failureStep, "result_write");
+      assert.equal(expired.result, undefined);
+      assert.deepEqual((await store.read()).tickets[blocked], expired);
+    } finally {
+      await lock.query("ROLLBACK");
+      lock.release();
+    }
   });

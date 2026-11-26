@@ -3,7 +3,7 @@ import { uuid } from "../data/repository.js";
 import type { CoordinationRoom } from "./room.js";
 
 type Authenticate = (request: IncomingMessage) => Promise<object | undefined>;
-const statuses: Record<string, number> = { forbidden: 403, invalid: 400, missing: 404, conflict: 409, capacity: 503 };
+const statuses: Record<string, number> = { forbidden: 403, invalid: 400, missing: 404, conflict: 409, capacity: 503, timeout: 504 };
 
 function json(response: ServerResponse, status: number, value: unknown) {
   response.writeHead(status, { "Content-Type": "application/json; charset=utf-8" }).end(JSON.stringify(value));

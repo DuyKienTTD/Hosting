@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { vietnam, type Agent } from "../config.js";
 import { requireCapability } from "../data/repository.js";
+import { RunDeadline } from "./deadline.js";
 import { decode, prepare, type Call, type RoomProvider } from "./provider.js";
 import { isTarget, reference, type Plan, type Result, type Synthesis, type Target } from "./schema.js";
 import type { RoomState, RoomStore, Ticket } from "./store.js";
@@ -10,8 +11,8 @@ type Deps = {
   store: RoomStore;
   provider: RoomProvider;
   // Resolve authenticated session state and current permissions from the host.
-  session: (handle: object) => Promise<Session | undefined>;
-  allowed: (session: Session, action: "read" | "post" | "run" | "approve", target?: Target) => Promise<boolean>;
+  session: (handle: object, signal?: AbortSignal) => Promise<Session | undefined>;
+  allowed: (session: Session, action: "read" | "post" | "run" | "approve", target?: Target, signal?: AbortSignal) => Promise<boolean>;
   agentPrincipal: (agent: Agent) => Promise<object | undefined>;
   writeRename: (request: RenameRequest) => Promise<void>;
   dailyCapNanodollars: number;
@@ -60,11 +61,12 @@ export class CoordinationRoom {
         !Number.isFinite(deps.routerRateMultiplier) || deps.routerRateMultiplier < 1) throw Error("configuration");
   }
 
-  private async principal(handle: object, action: Parameters<Deps["allowed"]>[1], target?: Target) {
-    const session = await this.deps.session(handle);
+  private async principal(handle: object, action: Parameters<Deps["allowed"]>[1], target?: Target, signal?: AbortSignal) {
+    const session = await this.deps.session(handle, signal);
+    signal?.throwIfAborted();
     if (!session || (session.role !== "a0" && session.role !== "operator" &&
       (!isTarget(session.role) || String(session.role) === "claude")) ||
-      !await this.deps.allowed(session, action, target)) throw Error("forbidden");
+      !await this.deps.allowed(session, action, target, signal)) throw Error("forbidden");
     return session;
   }
 
@@ -105,11 +107,18 @@ export class CoordinationRoom {
     });
   }
 
-  private async invoke(handle: object, target: Target, root: string, call: Call, signal: AbortSignal) {
-    await this.principal(handle, "run", target);
-    signal.throwIfAborted();
+  // Check the signal inside the mutation as well as racing its acknowledgement.
+  private updateRun<T>(deadline: RunDeadline, step: Parameters<RunDeadline["during"]>[0], change: (state: RoomState) => T) {
+    return deadline.during(step, signal => this.deps.store.update(state => {
+      signal.throwIfAborted();
+      return change(state);
+    }, signal));
+  }
+
+  private async invoke(handle: object, target: Target, root: string, call: Call, deadline: RunDeadline) {
+    await deadline.during("authorization", signal => this.principal(handle, "run", target, signal));
     const request = prepare(call, this.deps.routerRateMultiplier);
-    await this.deps.store.update(state => {
+    await this.updateRun(deadline, "budget", state => {
       assertActive(state, root, this.now());
       const day = vietnam(this.now()).date;
       if (day > state.spending.day) state.spending = { ...state.spending, day, amount: 0 };
@@ -119,78 +128,81 @@ export class CoordinationRoom {
       state.spending.amount += request.amount;
       state.spending.total += request.amount;
     });
-    signal.throwIfAborted();
-    let abort: () => void = () => {};
+    const response = await deadline.during("provider", signal => this.deps.provider.complete(request.body, signal));
     try {
-      const pending = new Promise<never>((_resolve, reject) => {
-        abort = () => reject(signal.reason);
-        signal.addEventListener("abort", abort, { once: true });
-      });
-      const response = await Promise.race([this.deps.provider.complete(request.body, signal), pending]);
-      try {
-        return decode(response, request);
-      } catch (error) {
-        if (error instanceof Error && error.message === "billing") {
-          await this.deps.store.update(state => { state.spending.held = true; });
-          throw Error("budget");
-        }
-        throw error;
+      return decode(response, request);
+    } catch (error) {
+      if (error instanceof Error && error.message === "billing") {
+        await this.updateRun(deadline, "budget", state => { state.spending.held = true; });
+        throw Error("budget");
       }
-    } finally {
-      signal.removeEventListener("abort", abort);
+      throw error;
     }
   }
 
-  private async claim(id: string, runUntil = this.now() + this.timeout) {
-    return this.deps.store.update(state => {
+  private claim(id: string, runId: string, runUntil: number, deadline: RunDeadline) {
+    return this.updateRun(deadline, "claim", state => {
       const ticket = ticketIn(state, id);
       if (ticket.parent) assertActive(state, ticket.parent, this.now());
       if (ticket.state !== "new" || Date.parse(ticket.dueAt) <= this.now()) throw Error("conflict");
       ticket.state = "working";
       ticket.leaseUntil = Math.min(runUntil, Date.parse(ticket.dueAt));
+      ticket.runId = runId;
       ticket.version++;
       return ticket;
     });
   }
 
-  private async finish(id: string, fields: Pick<Ticket, "result" | "failure">) {
-    return this.deps.store.update(state => {
+  private finish(id: string, result: Result, deadline: RunDeadline) {
+    return this.updateRun(deadline, "result_write", state => {
       const ticket = ticketIn(state, id);
       assertActive(state, id, this.now());
       if (ticket.parent) assertActive(state, ticket.parent, this.now());
-      Object.assign(ticket, fields, { state: "review", version: ticket.version + 1 });
+      Object.assign(ticket, { result, state: "review", version: ticket.version + 1 });
       delete ticket.leaseUntil;
+      delete ticket.runId;
       return ticket;
     });
   }
 
-  private async work(handle: object, ticket: Ticket, agent: Agent, signal: AbortSignal) {
+  private async work(handle: object, ticket: Ticket, agent: Agent, deadline: RunDeadline) {
     const result = await this.invoke(handle, agent, ticket.parent ?? ticket.id, {
       phase: "work", agent, data: { instruction: ticket.instruction, links: ticket.links },
-    }, signal) as Result;
+    }, deadline) as Result;
     if (result.links.some(link => !ticket.links.includes(link)) ||
         result.proposals.some(proposal => !ticket.links.includes(proposal.customer))) throw Error("rejected");
     return result;
   }
 
   async run(handle: object, id: string) {
-    const actor = await this.principal(handle, "run");
-    requireCapability(actor.dataPrincipal, "task.update");
-    const pending = ticketIn(await this.deps.store.read(), id);
-    if (pending.parent) throw Error("conflict");
-    const target = pending.agent;
-    await this.principal(handle, "run", target);
-    const ticket = await this.claim(id);
-    const signal = AbortSignal.timeout(Math.max(1, Math.min(this.timeout, ticket.leaseUntil! - this.now())));
-    let activeChild: Ticket | undefined;
+    const deadline = new RunDeadline(this.timeout);
+    const runUntil = this.now() + this.timeout;
+    const runId = randomUUID();
+    let claiming = false;
+    let claimedRoot = false;
     try {
+      const actor = await deadline.during("authorization", signal => this.principal(handle, "run", undefined, signal));
+      requireCapability(actor.dataPrincipal, "task.update");
+      const pending = ticketIn(await deadline.during("read", signal => this.deps.store.read(signal)), id);
+      if (pending.parent || pending.state !== "new" || Date.parse(pending.dueAt) <= this.now()) throw Error("conflict");
+      const target = pending.agent;
+      deadline.limit(Date.parse(pending.dueAt) - this.now());
+      await deadline.during("authorization", signal => this.principal(handle, "run", target, signal));
+      claiming = true;
+      const claim = await this.claim(id, runId, runUntil, deadline);
+      claimedRoot = true;
+      // Load the committed claim before using the instruction or links.
+      const ticket = ticketIn(await deadline.during("read", signal => this.deps.store.read(signal)), id);
+      if (ticket.runId !== runId) throw Error("conflict");
       let result: Result;
       if (target === "claude") {
         const plan = await this.invoke(handle, target, id, {
           phase: "plan", data: { instruction: ticket.instruction, links: ticket.links },
-        }, signal) as Plan;
-        for (const task of plan.tasks) await this.principal(handle, "run", task.agent);
-        const children = await this.deps.store.update(state => {
+        }, deadline) as Plan;
+        for (const task of plan.tasks) {
+          await deadline.during("authorization", signal => this.principal(handle, "run", task.agent, signal));
+        }
+        const children = await this.updateRun(deadline, "plan_write", state => {
           assertActive(state, id, this.now());
           return plan.tasks.map(task => createTicket(state, {
             agent: task.agent, assignedBy: "claude", parent: id, dueAt: ticket.dueAt,
@@ -199,42 +211,54 @@ export class CoordinationRoom {
         });
         const results: { id: string; summary: string }[] = [];
         for (const child of children) {
-          signal.throwIfAborted();
           if (child.agent === "claude") throw Error("rejected");
-          activeChild = await this.claim(child.id, ticket.leaseUntil);
-          const childResult = await this.work(handle, activeChild, child.agent, signal);
-          await this.finish(child.id, { result: childResult });
-          activeChild = undefined;
+          const claimed = await this.claim(child.id, runId, claim.leaseUntil!, deadline);
+          const childResult = await this.work(handle, claimed, child.agent, deadline);
+          await this.finish(child.id, childResult, deadline);
           results.push({ id: child.id, summary: childResult.summary });
         }
         const synthesis = await this.invoke(handle, target, id, {
           phase: "synthesis", data: { instruction: ticket.instruction, results },
-        }, signal) as Synthesis;
+        }, deadline) as Synthesis;
         result = { summary: synthesis.summary, links: ticket.links, proposals: [] };
       } else {
-        result = await this.work(handle, ticket, target, signal);
+        result = await this.work(handle, ticket, target, deadline);
       }
-      signal.throwIfAborted();
-      return await this.finish(id, { result });
+      return await this.finish(id, result, deadline);
     } catch (error) {
+      if (!claiming) throw error;
       const reason = error instanceof Error ? error.message : "";
-      const failure = signal.aborted || reason === "timeout" ? "timeout" : reason === "budget" ? "budget" :
+      const failure = deadline.signal.aborted || reason === "timeout" ? "timeout" : reason === "budget" ? "budget" :
         ["rejected", "forbidden"].includes(reason) ? "rejected" : "provider";
-      return this.deps.store.update(state => {
-        const current = ticketIn(state, id);
-        if (current.state !== "working") return current;
-        for (const item of Object.values(state.tickets)) {
-          const failed = (item.id === id || item.id === activeChild?.id) && item.state === "working";
-          const pending = item.parent === id && item.state === "new";
-          if (failed || pending) {
-            item.state = "review";
-            item.failure = failed ? failure : "interrupted";
-            item.version++;
-            delete item.leaseUntil;
+      // Record failure independently of the cancelled step. Bound cleanup too
+      // so a full database outage cannot keep the request open indefinitely.
+      const cleanup = new RunDeadline(1000);
+      try {
+        return await this.updateRun(cleanup, "result_write", state => {
+          const current = ticketIn(state, id);
+          if (current.runId !== runId) {
+            if (claimedRoot && failure === "timeout" && current.state === "review") return current;
+            throw error;
           }
-        }
-        return current;
-      });
+          for (const item of Object.values(state.tickets)) {
+            const claimed = item.runId === runId;
+            const pending = item.parent === id && item.state === "new";
+            if (claimed || pending) {
+              item.state = "review";
+              item.failure = claimed ? failure : "interrupted";
+              if (claimed && failure === "timeout") item.failureStep = deadline.step;
+              item.version++;
+              delete item.leaseUntil;
+              delete item.runId;
+            }
+          }
+          return current;
+        });
+      } finally {
+        cleanup.close();
+      }
+    } finally {
+      deadline.close();
     }
   }
 
@@ -251,6 +275,7 @@ export class CoordinationRoom {
           item.failure = "interrupted";
           item.version++;
           delete item.leaseUntil;
+          delete item.runId;
         }
       }
       return ticket;
