@@ -146,11 +146,7 @@ for key, value in zip((b"DATA_APP_IMAGE", b"DATA_POSTGRES_IMAGE"), sys.argv[2:])
         sys.exit("Expected exactly one definition for " + key.decode("ascii"))
 path.write_bytes(data)
 PY
-(
-  env_file="$work/new.env"
-  compose_file="$assets/deploy/compose.prod.yml"
-  compose config --quiet
-)
+docker compose -p "$project" --env-file "$work/new.env" -f "$assets/deploy/compose.prod.yml" config --quiet
 if grep -q '^apply|' "$work/plan"; then
   services_changed=1
   compose stop "${apps[@]}"
