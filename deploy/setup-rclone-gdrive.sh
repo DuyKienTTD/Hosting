@@ -14,22 +14,23 @@ dir=${SECRETS_DIR:?set the private configuration directory}
 config=$dir/rclone.conf
 remote=${RCLONE_REMOTE:-gdrive}
 prefix=${BACKUP_PREFIX:?set the target prefix}
-uid=${RCLONE_CONFIG_UID:-0}
-gid=${RCLONE_CONFIG_GID:-0}
+uid=${RCLONE_CONFIG_UID:-1000}
+gid=${RCLONE_CONFIG_GID:-1000}
 install -d -m 0700 "$dir"
-if [ -e "$config" ] || [ -L "$config" ]; then
+if [ -e "$config" ] || [ -L "$config" ] || [ -e "$dir/rclone-worker.conf" ] || [ -L "$dir/rclone-worker.conf" ]; then
   printf '%s\n' 'Config already exists. Preserve it and review the migration in RUNBOOK.' >&2
   exit 1
 fi
 tmp=$(mktemp -d "$dir/.gdrive.XXXXXX")
 trap 'rm -rf "$tmp"' EXIT
-printf '%s\n' 'Use the project-approved Google Drive account. Run the rclone authorize command printed below on your browser machine and paste the result only into this prompt.'
-rclone --config "$tmp/rclone.conf" config create "$remote" drive scope=drive.file config_is_local=false
+script_dir=$(dirname "$0")
+python3 "$script_dir/rclone-oauth.py" "$tmp" "$remote"
 for path in dumps receipts receipts-backup tombstones; do
   rclone --config "$tmp/rclone.conf" mkdir "$remote:$prefix/$path"
 done
 printf 'z4-tombstones-v1\n' > "$tmp/format"
 rclone --config "$tmp/rclone.conf" copyto "$tmp/format" "$remote:$prefix/tombstones/_format" --immutable
-# The worker reads the bind-mounted file as the Node image UID.
-install -o "$uid" -g "$gid" -m 0600 "$tmp/rclone.conf" "$config"
+# Keep the administrative copy separate from the worker bind mount.
+install -o 0 -g 0 -m 0600 "$tmp/rclone.conf" "$config"
+install -o "$uid" -g "$gid" -m 0400 "$tmp/rclone.conf" "$dir/rclone-worker.conf"
 printf '%s\n' "Configured $config"

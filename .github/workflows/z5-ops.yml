@@ -22,5 +22,21 @@ jobs:
           systemd-analyze calendar '*-*-* 01:00:00 UTC'
           sh deploy/setup-rclone-gdrive.sh --dry-run
           for job in backup drill monitor; do bash deploy/host-job.sh "$job" --dry-run; done
+      - name: Verify URL-safe OAuth encoding
+        run: |
+          python3 - <<'PY'
+          import base64, json, runpy
+          helpers = runpy.run_path("deploy/rclone-oauth.py")
+          encode = helpers["authorize_blob"]
+          value = encode("fixture-client", "fixture-secret")
+          assert "=" not in value and "+" not in value and "/" not in value
+          assert json.loads(base64.urlsafe_b64decode(value + "=" * (-len(value) % 4))) == {
+              "client_id": "fixture-client", "client_secret": "fixture-secret", "scope": "drive.file",
+          }
+          token = {"access_token": "fixture", "refresh_token": "fixture"}
+          response = base64.urlsafe_b64encode(json.dumps({"token": json.dumps(token)}).encode())
+          assert helpers["decode_token"](response.decode().rstrip("=")) == token
+          assert helpers["decode_token"](json.dumps(token)) == token
+          PY
       - name: Verify count retention with stubbed tools
         run: bash deploy/test-backup-retention.sh
