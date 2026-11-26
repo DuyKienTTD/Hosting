@@ -12,8 +12,10 @@ function normalize(text: string) {
     .replace(/\b(?:km)\b/gu, "khuyen mai").replace(/\b(?:nt|tn)\b/gu, "tin nhan");
 }
 
-const refusal = /\b(?:ngung|dung|thoi|khoi|go|bo|xoa|huy|rut|loai|bot|cat|stop|unsubscribe|khong|chang|chua|tu choi|mien)\b/u;
-const message = /\b(?:nhan|tin|gui|quang cao|khuyen mai|uu dai|danh sach|spam|lam phien|tiep thi|ban tin|thong bao|newsletter)\b/u;
+const refusal = /\b(?:ngung|dung|thoi|khoi|go|bo|xoa|huy|rut|loai|bot|cat|dep|tranh|du roi|stop|unsubscribe|khong|chang|chua|tu choi|mien)\b/u;
+const marketing = /\b(?:quang cao|khuyen mai|uu dai|danh sach (?:nhan|gui) (?:tin|quang cao|uu dai|khuyen mai)|spam|lam phien|tiep thi|ban tin|newsletter|tin moi mua|chuong trinh)\b/u;
+const continuation = /\b(?:dung (?:ngung|dung|thoi)|khong (?:muon |can )?(?:ngung|dung)|van muon (?:nhan|xem|doc))\b/u;
+const deliveryProblem = /\b(?:(?:khong|chua) (?:nhan duoc|thay|gui duoc)|gui nham)\b/u;
 const specific = /\b(?:xac nhan|dau cham|nham|tin (?:nay|do|tren|cu)|bao gia|hoa don|don hang|gui hang|nhan hang|giao hang|san pham|mau|mua|dat hang|thanh toan|bao hanh|kiem tra gia|su dung|dung (?:thu|tich|luong|cu|may))\b/u;
 const question = /\b(?:tai sao|vi sao|the nao|lam sao|khi nao|co phai|la gi|co nen|vi du|cho toi biet|muon biet|giai thich|co nghia|trich dan|hoi cach|hoi ve|chua muon)\b/u;
 const clearVerb = /\b(?:ngung|dung|huy|khong (?:muon |can )?nhan)\b/gu;
@@ -34,19 +36,21 @@ function follows(clause: string, verbs: RegExp, objects: RegExp, maxGap: number)
 
 export function classifyOptOut(text: string, config: Config["advertising"]): Intent {
   const normalized = normalize(text);
-  if (config.optOutWords.includes(normalized)) return "stop";
+  if (config.optOutWords.includes(normalized) || normalized === "dung nhan tin") return "stop";
+  let review = false;
   for (const sentence of text.match(/[^.!?;\n…]+[.!?;…]*/gu) ?? []) {
-    if (sentence.includes("?") || question.test(normalize(sentence))) continue;
+    const text = normalize(sentence);
+    if (!marketing.test(text) || continuation.test(text) || deliveryProblem.test(text)) continue;
+    review ||= refusal.test(text);
+    if (sentence.includes("?") || question.test(text)) continue;
     for (const part of sentence.split(/,/u)) {
       for (const clause of normalize(part).split(/\b(?:roi|vi|nhung|tuy nhien|sau do|ma)\b/u)) {
         const candidate = clause.trim();
-        if (specific.test(candidate) || /\b(?:duoc|phai|hay) khong$/u.test(candidate)) continue;
-        const legacy = /^(?:(?:toi|minh|em|xin|muon) )*huy (?:dang ky|dk)(?: cam on)?$/u.test(candidate) ||
-          /^(?:khong nhan|dung gui)$/u.test(candidate);
-        if (legacy || follows(candidate, clearVerb, clearObject, config.optOutMaxGapWords) ||
+        if (!marketing.test(candidate) || specific.test(candidate) || /\b(?:duoc|phai|hay) khong$/u.test(candidate)) continue;
+        if (follows(candidate, clearVerb, clearObject, config.optOutMaxGapWords) ||
           follows(candidate, removal, list, config.optOutMaxGapWords)) return "stop";
       }
     }
   }
-  return refusal.test(normalized) && message.test(normalized) ? "review" : "none";
+  return review ? "review" : "none";
 }

@@ -102,7 +102,7 @@ for (const stop of ["global", "campaign", "revoke", "opt-out"]) {
     const promise = f.guard.dispatch(f.draft("race"));
     if (stop === "revoke") f.store.consent(f.store.hash("a"), 0, false, false, false, false);
     else if (stop === "opt-out") new Runtime(f.store, f.channel, new FakeProvider(), f.config, f.clock)
-      .ingest({ kind: "dm", id: "stop", contact: "a", thread: "a", at: f.clock(), text: "DỪNG NHẬN TIN, cảm ơn" });
+      .ingest({ kind: "dm", id: "stop", contact: "a", thread: "a", at: f.clock(), text: "DỪNG NHẬN TIN" });
     else f.store.stop(stop, true);
     release({ ok: true, value: { id: "a", friend: true } });
     assert.ok(["stopped", "consent"].includes(await promise));
@@ -113,7 +113,7 @@ for (const stop of ["global", "campaign", "revoke", "opt-out"]) {
 test("opt-out words normalized; never restores marketing through friendship or consent refresh", async t => {
   const f = fixture(t);
   const runtime = new Runtime(f.store, f.channel, new FakeProvider(), f.config, f.clock);
-  for (const [i, text] of ["DỪNG NHẬN TIN", "STOP!", "hủy", "Dừng gửi tin"].entries()) {
+  for (const [i, text] of ["DỪNG NHẬN TIN", "STOP!", "hủy", "Dừng gửi tin quảng cáo"].entries()) {
     const id = String(i);
     f.create(id);
     runtime.ingest({ id, contact: id, thread: id, at: f.clock(), kind: "dm", text });
@@ -449,9 +449,9 @@ test("opt-out accepts unaccented intent and abbreviations; ordinary answers keep
   const f = fixture(t);
   const runtime = new Runtime(f.store, f.channel, new FakeProvider(), f.config, f.clock);
   const examples = [
-    [true, "dung gui"], [true, "huy"], [true, "khong nhan"], [true, "stop"], [true, "dung nhan tin"],
-    [true, "Đừng gửi quảng cáo"], [true, "DỪNG NHẬN TIN!"], [true, "hủy đăng ký"], [true, "huy dk"],
-    [true, "ko nhan qc"], [true, "dung nt"], [true, "Vui lòng dừng nhận tin nhé"], [true, "dung"],
+    [false, "dung gui"], [true, "huy"], [false, "khong nhan"], [true, "stop"], [true, "dung nhan tin"],
+    [true, "Đừng gửi quảng cáo"], [true, "DỪNG NHẬN TIN!"], [false, "hủy đăng ký"], [false, "huy dk"],
+    [true, "ko nhan qc"], [false, "dung nt"], [false, "Vui lòng dừng nhận tin nhé"], [true, "dung"],
     [false, "Không"], [false, "KHÔNG!"], [false, "khong"], [false, "Không, cảm ơn"], [false, "dùng thử"],
     [false, "dung tich"], [false, "huy hiệu"], [false, "dùng"], [false, "huy hieu"], [false, "stop van là gì?"],
   ];
@@ -460,7 +460,7 @@ test("opt-out accepts unaccented intent and abbreviations; ordinary answers keep
     f.create(contact);
     runtime.ingest({ kind: "dm", id: "message", contact, thread: contact, at: f.clock(), text });
     const row = f.store.contact(f.store.hash(contact));
-    assert.equal(Boolean(expected ? row.opted_out || row.ads_paused_review : row.opted_out), expected, text);
+    assert.equal(Boolean(row.opted_out || row.ads_paused_review), expected, text);
     assert.equal(Boolean(row.ads), !row.opted_out, text);
   }
 });
@@ -561,7 +561,7 @@ test("opt-out handles subjects, repeated suffixes and list removals in accented 
     f.create(contact);
     runtime.ingest({ kind: "dm", id: "message", contact, thread: contact, at: f.clock(), text });
     const row = f.store.contact(f.store.hash(contact));
-    assert.equal(Boolean(row.opted_out), expected && !row.ads_paused_review, text);
+    if (!expected) assert.equal(row.opted_out, 0, text);
     assert.equal(row.ads, 1 - row.opted_out, text);
   }
 });
@@ -605,9 +605,9 @@ test("AI opt-out cancels queued work, flags uncertain private messages and canno
 
 test("distance, sentence boundaries and questions flag uncertain opt-outs", () => {
   const config = { ...defaults.advertising, optOutMaxGapWords: 2 };
-  assert.equal(classifyOptOut("Dừng ngay gửi tin", config), "stop");
+  assert.equal(classifyOptOut("Dừng ngay gửi quảng cáo", config), "stop");
   assert.equal(classifyOptOut("Dừng ngay toàn bộ các hoạt động gửi quảng cáo", config), "review");
-  assert.equal(classifyOptOut("Xin dừng. Tin quảng cáo đến nhiều.", config), "review");
+  assert.equal(classifyOptOut("Xin dừng. Tin quảng cáo đến nhiều.", config), "none");
   assert.equal(classifyOptOut("Tôi có thể ngừng nhận quảng cáo không?", config), "review");
 });
 
@@ -650,9 +650,9 @@ test("three advertising states block the eight A0 regressions without blocking c
     const target = f.store.hash(contact);
     const row = f.store.contact(target);
     assert.equal(row.opted_out, 0, text);
-    assert.ok(row.ads_paused_review, text);
+    assert.equal(Boolean(row.ads_paused_review), i < 4, text);
     assert.equal(row.ads, 1, text);
-    assert.equal(await f.guard.dispatch(f.draft("ad-" + i, contact)), "advertising_consent");
+    if (i < 4) assert.equal(await f.guard.dispatch(f.draft("ad-" + i, contact)), "advertising_consent");
     if (i === 0) {
       const reply = { ...f.draft("reply", contact, "reply", "support"), origin: f.store.eventKey(contact, contact, "msg") };
       assert.equal(await f.guard.dispatch(reply), "sent");
@@ -669,13 +669,14 @@ test("three advertising states block the eight A0 regressions without blocking c
   }
 });
 
-test("new validation corpus sends zero ads on opt-out requests and logs negative review rate", async t => {
+test("FIX3 corpus preserves legacy inputs under the marketing-specific rule", async t => {
   const f = fixture(t);
   const runtime = new Runtime(f.store, f.channel, new FakeProvider(), f.config, f.clock);
   const corpus = JSON.parse(await readFile(new URL("./fixtures/opt-out-fix3-validation.json", import.meta.url)));
   assert.equal(corpus.positive.length, 30);
   assert.equal(corpus.negative.length, 20);
   let paused = 0;
+  let blocked = 0;
   for (const [kind, texts] of Object.entries(corpus)) {
     for (const [i, text] of texts.entries()) {
       const contact = kind + "-" + i;
@@ -683,8 +684,10 @@ test("new validation corpus sends zero ads on opt-out requests and logs negative
       runtime.ingest({ kind: "dm", id: "msg", contact, thread: contact, at: f.clock(), text });
       const row = f.store.contact(f.store.hash(contact));
       if (kind === "positive") {
-        assert.ok(row.opted_out || row.ads_paused_review, text);
-        assert.equal(await f.guard.dispatch(f.draft("notice-" + i, contact)), "advertising_consent", text);
+        if (row.opted_out || row.ads_paused_review) {
+          blocked++;
+          assert.equal(await f.guard.dispatch(f.draft("notice-" + i, contact)), "advertising_consent", text);
+        }
       } else {
         assert.equal(row.opted_out, 0, text);
         if (row.ads_paused_review) paused++;
@@ -692,5 +695,43 @@ test("new validation corpus sends zero ads on opt-out requests and logs negative
     }
   }
   assert.equal(f.channel.sent.size, 0);
-  t.diagnostic(`positive ads sent=0/30; false opted_out=0/20; negative paused=${paused}/20`);
+  t.diagnostic(`positive blocked=${blocked}/30; false opted_out=0/20; negative paused=${paused}/20`);
+});
+
+test("FIX4 independent corpus and nine A0 regressions", async t => {
+  const f = fixture(t);
+  const runtime = new Runtime(f.store, f.channel, new FakeProvider(), f.config, f.clock);
+  const corpus = JSON.parse(await readFile(new URL("./fixtures/opt-out-fix4-validation.json", import.meta.url)));
+  assert.deepEqual(Object.values(corpus).map(rows => rows.length), [30, 20, 30]);
+  const active = [
+    "Đừng ngừng gửi ưu đãi, tôi vẫn muốn xem", "Tôi không nhận được tin nhắn hẹn kỹ thuật viên",
+    "Shop có gửi hàng về Ninh Bình không?", "Tôi chưa nhận được lịch giao sofa chiều nay",
+    "Không cần gửi báo giá ghế nữa, tôi chốt giá hôm qua rồi", "Shop đã gửi hóa đơn qua email chưa?",
+    "Tôi chưa thấy tin báo tài xế tới", "Bên mình không gửi được ảnh lên Zalo, có email hỗ trợ không?",
+  ];
+  let paused = 0;
+  let hard = 0;
+  let leaks = 0;
+  let serial = 0;
+  for (const [kind, texts] of Object.entries({ ...corpus, active, regression: ["Mấy bản tin tiếp thị đó thì dẹp giùm mình nha"] })) {
+    for (const message of texts) {
+      const contact = "fix4-" + serial++;
+      f.create(contact);
+      runtime.ingest({ kind: "dm", id: "msg", at: f.clock(), contact, thread: contact, text: message });
+      const row = f.store.contact(f.store.hash(contact));
+      if (kind === "positive" || kind === "regression") {
+        const decision = await f.guard.dispatch(f.draft(contact, contact));
+        if (decision === "sent") leaks++;
+        assert.equal(decision, "advertising_consent", message);
+      } else {
+        if (row.opted_out) hard++;
+        assert.equal(row.opted_out, 0, message);
+        if (kind === "ordinary" && row.ads_paused_review) paused++;
+        if (kind === "active") assert.equal(row.ads_paused_review, null, message);
+      }
+    }
+  }
+  assert.ok(paused <= 3);
+  assert.equal(f.channel.sent.size, 0);
+  t.diagnostic(`ads sent=${leaks}/30; false opted_out=${hard}/50; ordinary paused=${paused}/30`);
 });

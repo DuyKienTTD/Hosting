@@ -98,3 +98,11 @@ Theo biên nhận lần 3 trên [PR #73](https://github.com/DuyKienTTD/Hosting/p
 | Hai app `npm run typecheck`, `npm run build`, `npm test` (server với `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium`) | 0 | Server 54/54, desktop 20/20 |
 | Server `PLAYWRIGHT_TEST_EXECUTABLE=/tmp/chromium node --test --test-name-pattern='Playwright fixture' test/adapters.test.mjs` | 0 | 1/1 |
 | Desktop `node scripts/evaluate-corpus.mjs` | 0 | 48/48 |
+
+## V2-02C-FIX4 · 26/11/2026
+
+Bộ lọc tất định chỉ dừng hoặc tạm dừng quảng cáo khi cùng câu có dấu hiệu tiếp thị và từ chối, ngoài lệnh đứng riêng. Phủ định kép và lỗi giao dịch đi qua trạng thái active. Dấu hiệu bổ sung gồm dẹp, cắt, bớt, tránh, miễn và đủ rồi. Chín câu A0 đều đạt.
+
+[Tập FIX4](../apps/ttd-zalo-agent-server/test/fixtures/opt-out-fix4-validation.json) đi qua Runtime và Guard. Kết quả **0/30 quảng cáo lọt**, **0/20 ca âm khó bị opted_out**, **0/30 tin thường bị opted_out**, **0/30 tin thường bị paused**. Hai tập cũ giữ nguyên dữ liệu và được chấm để thấy ảnh hưởng của chính sách mới. Mức chặn tất định lần lượt là **26/30 và 17/30**, vì câu chỉ có dấu hiệu tin/gửi/nhắn hoặc hai dấu hiệu ở hai câu riêng cần lớp AI. Các ca âm cũ vẫn 0 opted_out nhầm. Chưa đo lớp AI trên pilot.
+
+Node 24.22.3. Typecheck, build và test đều exit 0. Server **55/55** gồm Playwright fixture, desktop **20/20**, corpus **48/48**.
