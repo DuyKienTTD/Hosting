@@ -119,7 +119,20 @@ Cài template bằng `nginx -t` rồi reload nếu site còn dùng cấu hình c
 
 3. Trên Zalo Developers, đặt **Callback URL** của app là `https://cskh.thuanthanhdat.com.vn/api/v1/oa/oauth/callback` và lưu quyền OA dùng cho nhắn tin. Giữ STOP, OA mock và AI mock. Đăng nhập giao diện bằng tài khoản owner, mở **Kênh Zalo → Kết nối OA**, rồi chọn đúng OA và bấm cho phép bằng tài khoản quản trị OA. Nút tạo link cấp quyền mới tại `https://oauth.zaloapp.com/v4/oa/permission` với PKCE và state hết hạn sau 10 phút. Sau callback thành công, hệ thống lưu cặp token mã hóa trong Postgres và trở lại Kênh Zalo. [OAuth v4 của Zalo](https://docs.zaloplatforms.com/docs/OA/bat-dau/xac-thuc-va-uy-quyen-cho-ung-dung-new)
 4. Gửi một tin từ tài khoản test đã đồng ý để tạo tương tác. Webhook có chữ ký hợp lệ phải trả 200 dưới 2 giây. Phát lại trong cửa sổ giữ đúng một receipt. Chỉ kiểm thời gian và số receipt.
-5. Trong `.env`, đặt `OA_MODE=live`, `CHANNEL_MODE=mock`, `CHANNEL_SMOKE_ONLY=1`, `SMOKE_ALLOWLIST=<UID OA của tài khoản test>` và `AI_MODE=mock`. Allowlist chứa UID mà OA nhận trong webhook, ví dụ trường `sender.id`. Chạy `cskh up -d --wait runtime`, kiểm health và STOP, rồi chạy `cskh exec -T runtime node dist/ttd-zalo-agent-server/src/main.js resume global` ngay trước lượt gửi đã duyệt. Giữ quảng cáo tắt. Chỉ dùng hội thoại test có consent và đã tương tác hợp lệ.
+5. Đọc UID OA từ `sender.id` của tin test đã xác thực. Lệnh sau in UID của tin văn bản OA gần nhất còn trong inbox mã hóa, kể cả khi runtime đang mock. Chạy ngay sau khi gửi tin test và đối chiếu rằng đó là tin của đúng tài khoản test.
+
+   ```sh
+   cskh exec -T runtime node dist/ttd-zalo-agent-server/src/main.js oa-smoke-latest-uid
+   ```
+
+   Trong `.env`, đặt `OA_MODE=live`, `CHANNEL_MODE=mock`, `CHANNEL_SMOKE_ONLY=1`, `SMOKE_ALLOWLIST=<UID OA của tài khoản test>` và `AI_MODE=mock`. Allowlist dùng `user_id` theo OA, lấy từ `sender.id` trong webhook. Tạo lại runtime bằng `cskh up -d --wait runtime`, kiểm health rồi dùng các lệnh sau cho lượt test đã duyệt. Đặt `TEST_UID` trong phiên shell riêng từ UID đã xác minh.
+
+   ```sh
+   cskh exec -T runtime node dist/ttd-zalo-agent-server/src/main.js resume global
+   printf '%s' 'Tin kiểm thử OA đã duyệt' | cskh exec -T runtime node dist/ttd-zalo-agent-server/src/main.js oa-smoke-send "$TEST_UID" --approve-consent
+   ```
+
+   Dùng `--approve-consent` khi owner đã duyệt và contact chưa tồn tại. Lệnh ghi `smoke_test_owner_approved` vào lịch sử consent, chỉ cấp quyền trả lời và gửi tư vấn cho UID allowlist, đến hết cửa sổ tương tác. Những lượt sau có thể bỏ cờ khi consent còn hiệu lực. Guard vẫn áp STOP, consent, cửa sổ tương tác, quota và giới hạn an toàn. Từ 48 giờ đến dưới 7 ngày cần `OA_ALLOW_AFTER_48H=1` và còn quota `OA_MONTHLY_QUOTA`. Kết quả `unknown_delivery` cần đối chiếu trên OA trước khi cân nhắc gửi lại.
 6. Kết thúc smoke hoặc gặp lỗi, chạy `cskh exec -T runtime node dist/ttd-zalo-agent-server/src/main.js stop global`. Đặt lại `OA_MODE=mock`, `CHANNEL_SMOKE_ONLY=0`, xóa giá trị `SMOKE_ALLOWLIST` và giữ `AI_MODE=mock`. Tạo lại runtime, kiểm `channel=mock` và `stopped=true`. Chỉ xem xét bật AI sau khi owner xác nhận credit, allowlist model và các trần ngân sách.
 
 ## 4. Backup và thử restore
