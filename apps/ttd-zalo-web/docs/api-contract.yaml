@@ -1,0 +1,784 @@
+openapi: 3.0.3
+info:
+  title: TTD Zalo Operator API
+  version: 0.1.0
+  description: Bản đề xuất hợp đồng. Production thực thi xác thực, phân quyền và kiểm tra nghiệp vụ ở server. ADS_ENABLED=false
+    trong pilot.
+servers:
+- url: /api/v1
+security:
+- operatorSession: []
+paths:
+  /session:
+    get:
+      operationId: readSession
+      description: 'Trả tài khoản và vai trò do server xác định. Phản hồi Cache-Control: no-store.'
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operator'
+        '401':
+          description: Chưa xác thực hoặc phiên hết hạn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Không có quyền hoặc yêu cầu khác nguồn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      operationId: createSession
+      description: Xác thực tài khoản vận hành, giới hạn thử đăng nhập và cấp cookie phiên HttpOnly, Secure, SameSite=Strict
+        khi thành công. Từ chối Origin ngoài nguồn cho mọi yêu cầu thay đổi trạng thái. demoRole chỉ có trong MSW.
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operator'
+        '400':
+          description: Dữ liệu yêu cầu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Chưa xác thực hoặc phiên hết hạn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Không có quyền hoặc yêu cầu khác nguồn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - account
+              - passphrase
+              properties:
+                account:
+                  type: string
+                  minLength: 1
+                passphrase:
+                  type: string
+                  minLength: 1
+                  format: password
+              additionalProperties: false
+      security: []
+    delete:
+      operationId: endSession
+      description: Thu hồi phiên ở server và xóa cookie.
+      responses:
+        '204':
+          description: Thành công
+        '401':
+          description: Chưa xác thực hoặc phiên hết hạn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Không có quyền hoặc yêu cầu khác nguồn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /workspace:
+    get:
+      operationId: readWorkspace
+      description: 'Chỉ trả dữ liệu được vai trò hiện tại phép đọc. Phản hồi Cache-Control: no-store.'
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '401':
+          description: Chưa xác thực hoặc phiên hết hạn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Không có quyền hoặc yêu cầu khác nguồn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /conversations/{id}/approve:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    post:
+      operationId: approveDraft
+      description: Ghi phê duyệt có người thực hiện và đưa vào hàng đợi một lần theo id và version. Kiểm tra quyền,
+        người nhận và chính sách. Worker phải kiểm tra lại Guard, consent, opt-out, STOP, trạng thái kênh và ADS_ENABLED
+        ngay trước khi gửi. review và stop đều chặn. Không gửi lại unknown_delivery. Phản hồi queued chỉ xác nhận
+        đã xếp hàng.
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '400':
+          description: Dữ liệu yêu cầu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Chưa xác thực hoặc phiên hết hạn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Không có quyền hoặc yêu cầu khác nguồn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Không tìm thấy dữ liệu trong phạm vi phiên
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Xung đột phiên bản, chính sách hoặc trạng thái
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-roles:
+      - owner
+      - support
+      - a0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - version
+              - text
+              properties:
+                version:
+                  type: integer
+                  minimum: 1
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 2000
+              additionalProperties: false
+  /quotes:
+    post:
+      operationId: createQuote
+      description: Đọc giá và quy cách từ server. 1 m = 1000 mm, 1 thanh = millimetresPerBar, 1 bộ = barsPerSet
+        thanh. Làm tròn tổng VND một lần sau khi nhân tổng mm với đơn giá mỗi mét rồi chia 1000. Lưu báo giá nội
+        bộ, không gửi khách.
+      responses:
+        '201':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '400':
+          description: Dữ liệu yêu cầu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Chưa xác thực hoặc phiên hết hạn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Không có quyền hoặc yêu cầu khác nguồn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-roles:
+      - owner
+      - sales
+      - a0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteInput'
+  /work-items:
+    post:
+      operationId: createWorkItem
+      description: Chỉ phiên vận hành được phân quyền mới tạo phiếu. Nội dung khách hàng không được dùng làm lệnh
+        điều phối. Kiểm tra tên agent bằng danh sách cho phép.
+      responses:
+        '201':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItem'
+        '400': &id002
+          description: Dữ liệu yêu cầu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401': &id003
+          description: Chưa xác thực hoặc phiên hết hạn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403': &id004
+          description: Không có quyền hoặc yêu cầu khác nguồn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-roles: &id001
+      - owner
+      - a0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - title
+              - agent
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 250
+                agent:
+                  type: string
+              additionalProperties: false
+  /channels/nick/stop:
+    post:
+      operationId: stopNick
+      description: Lệnh dừng lặp an toàn. Ghi STOP bền trước khi trả kết quả, chặn lần gửi tiếp theo qua nick và
+        báo trạng thái stopped.
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Channel'
+        '401':
+          description: Chưa xác thực hoặc phiên hết hạn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Không có quyền hoặc yêu cầu khác nguồn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-roles: *id001
+  /deletion-requests:
+    post:
+      operationId: requestDeletion
+      description: Chỉ tạo yêu cầu chờ kiểm tra, không tự cung cấp quyền xóa. Backend kiểm tra legal hold, chứng
+        cứ và nghĩa vụ lưu trước mọi thao tác dữ liệu. Một yêu cầu đang xử lý trên mỗi khách.
+      responses:
+        '201':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionRequest'
+        '400':
+          description: Dữ liệu yêu cầu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Chưa xác thực hoặc phiên hết hạn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Không có quyền hoặc yêu cầu khác nguồn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Xung đột phiên bản, chính sách hoặc trạng thái
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-roles: *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - customerId
+              - reason
+              properties:
+                customerId:
+                  type: string
+                reason:
+                  type: string
+                  minLength: 1
+                  maxLength: 500
+              additionalProperties: false
+  /room-messages:
+    post:
+      operationId: postRoomMessage
+      description: Ghi trao đổi nội bộ từ người vận hành có quyền, dùng danh tính trong phiên làm tác giả. Nội dung
+        và @mention chỉ dùng trong phòng điều phối. Thao tác tạo phiếu gọi API work-items riêng.
+      x-roles:
+      - owner
+      - a0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - text
+              properties:
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 1000
+              additionalProperties: false
+      responses:
+        '201':
+          description: Đã ghi trao đổi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomMessage'
+        '400': *id002
+        '401': *id003
+        '403': *id004
+components:
+  securitySchemes:
+    operatorSession:
+      type: apiKey
+      in: cookie
+      name: ttd_operator_session
+  schemas:
+    Error:
+      type: object
+      required:
+      - message
+      properties:
+        message:
+          type: string
+      additionalProperties: false
+    Operator:
+      type: object
+      required:
+      - id
+      - label
+      - role
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        role:
+          type: string
+          enum:
+          - owner
+          - support
+          - sales
+          - a0
+      additionalProperties: false
+    Unit:
+      type: string
+      enum:
+      - metre
+      - bar
+      - set
+    ChannelId:
+      type: string
+      enum:
+      - oa
+      - nick
+      - bot
+    Conversation:
+      type: object
+      required:
+      - id
+      - customerId
+      - subject
+      - channel
+      - message
+      - time
+      - draft
+      - version
+      - delivery
+      properties:
+        id:
+          type: string
+        customerId:
+          type: string
+        subject:
+          type: string
+        channel:
+          $ref: '#/components/schemas/ChannelId'
+        message:
+          type: string
+        time:
+          type: string
+        draft:
+          type: string
+        version:
+          type: integer
+          minimum: 1
+        delivery:
+          type: string
+          enum:
+          - draft
+          - queued
+          - sent
+          - blocked
+          - unknown_delivery
+        reason:
+          type: string
+      additionalProperties: false
+    Customer:
+      type: object
+      required:
+      - id
+      - label
+      - segment
+      - followUp
+      - optOut
+      - consent
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        segment:
+          type: string
+        followUp:
+          type: string
+        optOut:
+          type: string
+          enum:
+          - none
+          - review
+          - stop
+        consent:
+          type: object
+          required:
+          - support
+          - quote
+          - marketing
+          properties:
+            support:
+              $ref: '#/components/schemas/Consent'
+            quote:
+              $ref: '#/components/schemas/Consent'
+            marketing:
+              $ref: '#/components/schemas/Consent'
+          additionalProperties: false
+      additionalProperties: false
+    Consent:
+      type: string
+      enum:
+      - unknown
+      - granted
+      - withdrawn
+    Product:
+      type: object
+      required:
+      - id
+      - label
+      - millimetresPerBar
+      - barsPerSet
+      - vndPerMetre
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        millimetresPerBar:
+          type: integer
+          minimum: 1
+        barsPerSet:
+          type: integer
+          minimum: 1
+        vndPerMetre:
+          type: integer
+          minimum: 0
+      additionalProperties: false
+    QuoteInput:
+      type: object
+      required:
+      - customerId
+      - productId
+      - unit
+      - quantity
+      properties:
+        customerId: &id005
+          type: string
+        productId: &id006
+          type: string
+        unit: &id007
+          $ref: '#/components/schemas/Unit'
+        quantity: &id008
+          type: number
+          minimum: 0.001
+          maximum: 10000
+          description: Mét chính xác tới 1 mm. Thanh và bộ phải là số nguyên.
+      additionalProperties: false
+    Quote:
+      type: object
+      required:
+      - id
+      - customerId
+      - productId
+      - unit
+      - quantity
+      - totalMillimetres
+      - totalVnd
+      properties:
+        id:
+          type: string
+        customerId: *id005
+        productId: *id006
+        unit: *id007
+        quantity: *id008
+        totalMillimetres:
+          type: integer
+          minimum: 1
+        totalVnd:
+          type: integer
+          minimum: 0
+      additionalProperties: false
+    WorkItem:
+      type: object
+      required:
+      - id
+      - title
+      - agent
+      - status
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        agent:
+          type: string
+        status:
+          type: string
+          enum:
+          - new
+          - active
+          - review
+          - done
+      additionalProperties: false
+    Channel:
+      type: object
+      required:
+      - id
+      - label
+      - state
+      - detail
+      properties:
+        id:
+          $ref: '#/components/schemas/ChannelId'
+        label:
+          type: string
+        state:
+          type: string
+          enum:
+          - online
+          - offline
+          - stopped
+        detail:
+          type: string
+      additionalProperties: false
+    DeletionRequest:
+      type: object
+      required:
+      - id
+      - customerId
+      - reason
+      - status
+      properties:
+        id:
+          type: string
+        customerId:
+          type: string
+        reason:
+          type: string
+        status:
+          type: string
+          enum:
+          - requested
+      additionalProperties: false
+    Agent:
+      type: object
+      required:
+      - label
+      - role
+      - status
+      properties:
+        label:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+      additionalProperties: false
+    Router:
+      type: object
+      required:
+      - provider
+      - budgetVnd
+      - usedVnd
+      - model
+      properties:
+        provider:
+          type: string
+        budgetVnd:
+          type: integer
+          minimum: 0
+        usedVnd:
+          type: integer
+          minimum: 0
+        model:
+          type: string
+      additionalProperties: false
+    Activity:
+      type: object
+      required:
+      - day
+      - received
+      - answered
+      properties:
+        day:
+          type: string
+        received:
+          type: integer
+          minimum: 0
+        answered:
+          type: integer
+          minimum: 0
+      additionalProperties: false
+    Workspace:
+      type: object
+      required:
+      - adsEnabled
+      - conversations
+      - customers
+      - products
+      - quotes
+      - workItems
+      - channels
+      - deletionRequests
+      - agents
+      - router
+      - activity
+      - roomMessages
+      properties:
+        adsEnabled:
+          type: boolean
+          enum:
+          - false
+        conversations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Conversation'
+        customers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer'
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        quotes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Quote'
+        workItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkItem'
+        channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Channel'
+        deletionRequests:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeletionRequest'
+        agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Agent'
+        router:
+          $ref: '#/components/schemas/Router'
+        activity:
+          type: array
+          items:
+            $ref: '#/components/schemas/Activity'
+        roomMessages:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomMessage'
+      additionalProperties: false
+    RoomMessage:
+      type: object
+      required:
+      - id
+      - author
+      - text
+      properties:
+        id:
+          type: string
+        author:
+          type: string
+        text:
+          type: string
+      additionalProperties: false
