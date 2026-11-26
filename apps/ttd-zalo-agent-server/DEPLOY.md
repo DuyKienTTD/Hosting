@@ -134,3 +134,7 @@ Build the web SPA with `npm run build`, serve `apps/ttd-zalo-web/dist` over HTTP
 Use the authoritative catalogue and customer records in PostgreSQL. The administrator enables an approved price by inserting a versioned `web_approved_prices` row referencing `catalogue.id`; retire a version by setting `revoked_at`. An OA recipient must have a verified `channel_identities` entry for the configured OA ID, linked to the same customer as the hashed `runtime_customer` mapping. Current proof-backed `respond` and `send` consent and a retained inbound admission record are required by Guard.
 
 Web deletion creates a review request. Web work items and room messages are persisted for operators. Nick STOP is persisted in runtime settings. Each deployment still needs its approved channel accounts and worker configuration.
+
+### Ghép cặp nick worker
+
+Áp `postgres/014-nick-enrollment.sql` một lần cho DB đang chạy trước khi dùng ghép cặp. Runtime có `WEB_ORIGIN` nhận mã dùng một lần tại `POST /nick-worker/pair` và xác thực credential riêng khi nâng cấp WSS tại `/nick-worker/socket`. Dùng mẫu Nginx cùng PR. Vẫn chặn `/internal/nick-worker` từ ngoài. Giao diện chủ dự án cấp mã và thu hồi kết nối. Runtime đặt STOP khi ghép cặp hoặc thu hồi. Endpoint quản lý kết nối và audit, chưa triển khai điều phối gửi nick.

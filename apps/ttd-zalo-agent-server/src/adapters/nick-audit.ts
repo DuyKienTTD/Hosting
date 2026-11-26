@@ -6,9 +6,9 @@ import type { RuntimeDatabase } from "../sql.js";
 const code = "committed_before_revoke";
 const identifier = /^[A-Za-z0-9_-]{1,100}$/;
 
-export function attachNickAudit(server: Server, db: RuntimeDatabase, credential: string, stopped?: () => boolean) {
-  if (Buffer.byteLength(credential) < 32) throw Error("INVALID_NICK_WORKER_AUTH");
-  const expected = Buffer.from("Bearer " + credential);
+export function attachNickAudit(server: Server, db: RuntimeDatabase, credential: string | ((value: string) => boolean), stopped?: () => boolean) {
+  if (typeof credential === "string" && Buffer.byteLength(credential) < 32) throw Error("INVALID_NICK_WORKER_AUTH");
+  const expected = typeof credential === "string" ? Buffer.from("Bearer " + credential) : undefined;
   const sockets = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
   // One statement atomically persists the send state and the owner notice.
   const audit = db.prepare(`WITH changed AS (
@@ -23,9 +23,17 @@ export function attachNickAudit(server: Server, db: RuntimeDatabase, credential:
   let active: WebSocket | undefined;
   const stop = () => { if (active?.readyState === WebSocket.OPEN) active.send(JSON.stringify({ type: "stop" })); };
   server.on("upgrade", (req, socket, head) => {
-    const received = Buffer.from(req.headers.authorization ?? "");
-    if (req.url !== "/internal/nick-worker" || received.length !== expected.length ||
-      !timingSafeEqual(received, expected)) {
+    const header = req.headers.authorization ?? "";
+    const received = Buffer.from(header);
+    let allowed = false;
+    try {
+      if (req.url === "/nick-worker/socket" && typeof credential === "function" && header.startsWith("Bearer ")) {
+        allowed = credential(header.slice(7));
+      } else if (req.url === "/internal/nick-worker" && expected && received.length === expected.length) {
+        allowed = timingSafeEqual(received, expected);
+      }
+    } catch { /* reject if the credential store is unavailable */ }
+    if (!allowed) {
       socket.end("HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n");
       return;
     }
@@ -37,6 +45,10 @@ export function attachNickAudit(server: Server, db: RuntimeDatabase, credential:
       worker.on("message", (raw, binary) => {
         if (active !== worker || binary) return;
         try {
+          if (typeof credential === "function" && !credential(header.slice(7))) {
+            worker.terminate();
+            return;
+          }
           const msg = JSON.parse(raw.toString());
           if (msg?.type === "heartbeat") {
             worker.send(JSON.stringify({ type: "pong" }));
@@ -56,5 +68,5 @@ export function attachNickAudit(server: Server, db: RuntimeDatabase, credential:
   return Object.assign(() => {
     active?.terminate();
     sockets.close();
-  }, { stop, connected: () => active?.readyState === WebSocket.OPEN });
+  }, { stop, disconnect: () => active?.terminate(), connected: () => active?.readyState === WebSocket.OPEN });
 }

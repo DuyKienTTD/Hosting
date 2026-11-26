@@ -1,6 +1,8 @@
 import { oaWebInbox } from "./web/oa-inbox.js";
 import { latestSmokeUid, modeError, sendOaSmoke } from "./channels/oa/smoke-cli.js";
 import type { Result as OaResult, Results as OaResults } from "./adapters/contract.js";
+import { nickPairing } from "./adapters/nick-pairing.js";
+import { json, readJson } from "./web/http.js";
 import { createOperator } from "./web/accounts.js";
 import { serveWebAssets } from "./web/static.js";
 import { Pool } from "pg";
@@ -207,8 +209,11 @@ if (command !== "serve") {
     try { inbox.project(); }
     catch { console.warn("OA inbox projection failed"); }
   }, 3000);
+  const pairing = webOrigin ? nickPairing(store) : undefined;
   const web = webOrigin ? webApi(store, config, webOrigin, oa, rate, {
     stop: () => closeNickAudit?.stop(),
+    issue: () => pairing!.issue(),
+    revoke: () => { pairing!.revoke(); closeNickAudit?.stop(); closeNickAudit?.disconnect(); },
     connected: () => closeNickAudit?.connected() ?? false,
   }, onboarding, inbox) : undefined;
   const server = createServer((req, res) => {
@@ -216,6 +221,16 @@ if (command !== "serve") {
   });
   const handle = async (req: import("node:http").IncomingMessage, res: import("node:http").ServerResponse) => {
     if (oa?.webhook && req.url === "/webhooks/zalo-oa") return oa.webhook(req, res);
+    if (req.url === "/nick-worker/pair" && req.method === "POST" && pairing) {
+      res.setHeader("Cache-Control", "no-store");
+      const input = await readJson(req);
+      const enrolled = pairing.exchange(input?.code);
+      if (enrolled) {
+        closeNickAudit?.stop();
+        closeNickAudit?.disconnect();
+      }
+      return json(res, enrolled ? 200 : 403, enrolled ?? { message: "Mã ghép cặp không hợp lệ hoặc đã hết hạn." });
+    }
     if (web && await web(req, res)) return;
     if (web && process.env.WEB_DIST && await serveWebAssets(req, res, process.env.WEB_DIST)) return;
     if (hooks && await hooks(req, res)) return;
@@ -228,8 +243,10 @@ if (command !== "serve") {
       ready: okay, channel: oa ? "oa" : mode, oaMode: wiring.oaMode, aiMode: wiring.aiMode, smokeOnly, stopped: store.stopped("global"),
     }));
   };
-  const closeNickAudit = process.env.NICK_WORKER_AUTH && !smokeOnly
-    ? attachNickAudit(server, store.db, process.env.NICK_WORKER_AUTH, webOrigin ? () => store.stopped("nick") : undefined) : undefined;
+  const closeNickAudit = pairing
+    ? attachNickAudit(server, store.db, pairing.accepts, () => true)
+    : process.env.NICK_WORKER_AUTH && !smokeOnly
+      ? attachNickAudit(server, store.db, process.env.NICK_WORKER_AUTH) : undefined;
   const port = Number(process.env.HTTP_PORT || "8080");
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw Error("INVALID_HTTP_PORT");
   server.listen(port, process.env.HTTP_BIND === "container" ? "0.0.0.0" : "127.0.0.1");

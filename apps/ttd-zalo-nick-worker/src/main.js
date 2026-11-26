@@ -37,7 +37,8 @@ try {
   for (const other of restored) await other.close()
   await page.goto(web.href, { waitUntil: 'domcontentloaded' })
   const browser = new Browser(page, { selectors, origin: web.origin })
-  const worker = new Worker(browser, journal)
+  const worker = new Worker(browser, journal, process.env.NICK_SMOKE_ONLY === '1'
+    ? new Set((process.env.NICK_SMOKE_PEERS ?? '').split(',').filter(Boolean)) : undefined)
   let socket
   let retry
   let failures = 0

@@ -7,9 +7,10 @@ const validCommand = msg => id(msg.id) && id(msg.peer) && future(msg.expiresAt, 
   typeof msg.text === 'string' && !!msg.text.trim() && msg.text.length <= 500 && !/[\p{Cc}\p{Zl}\p{Zp}]/u.test(msg.text)
 
 export class Worker {
-  constructor(browser, journal) {
+  constructor(browser, journal, smokePeers) {
     this.browser = browser
     this.journal = journal
+    this.smokePeers = smokePeers
     this.acked = new Set()
     this.connectionEpoch = 0
   }
@@ -124,7 +125,8 @@ export class Worker {
     }
     if (msg.type === 'policy') {
       this.policy = future(msg.expiresAt, 30_000) && limit(msg.hour) && limit(msg.day) &&
-        msg.adsEnabled === false && msg.hour > 0 && msg.day > 0 ? msg : null
+        msg.adsEnabled === false && msg.hour > 0 && msg.day > 0
+        ? { ...msg, hour: Math.min(msg.hour, 2), day: Math.min(msg.day, 5) } : null
       if (!this.policy) {
         if (this.pending) this.pending.revoked = true
         return this.invalidatePermit()
@@ -139,7 +141,7 @@ export class Worker {
     const recorded = this.journal.results.get(msg.id)
     if (recorded) return result(recorded.result, recorded.reason)
     if (msg.type === 'send') {
-      if (this.pending || !this.current(socket) || !validCommand(msg) || !this.journal.withinLimits(this.policy)) {
+      if (this.pending || !this.current(socket) || !validCommand(msg) || (this.smokePeers && !this.smokePeers.has(msg.peer)) || !this.journal.withinLimits(this.policy)) {
         return result('rejected')
       }
       const epoch = this.connectionEpoch

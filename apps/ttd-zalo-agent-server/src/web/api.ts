@@ -19,7 +19,7 @@ const clean = (value: unknown, length: number) =>
   typeof value === "string" && value.trim().length <= length && value.trim() || undefined;
 
 export function webApi(store: Store, config: Config, origin: string,
-  oa?: { account: OaAccount; channel: OaRuntimeChannel }, usdVnd?: number, nick?: { stop(): void; connected(): boolean }, onboarding?: OaOAuth, inbox?: OaWebInbox) {
+  oa?: { account: OaAccount; channel: OaRuntimeChannel }, usdVnd?: number, nick?: { stop(): void; connected(): boolean; issue?(): { code: string; expiresAt: number }; revoke?(): void }, onboarding?: OaOAuth, inbox?: OaWebInbox) {
   const db = store.db;
   const session = operatorSessions(store, origin);
   const oauth = onboarding && oaOAuth(origin, session, onboarding);
@@ -176,6 +176,16 @@ export function webApi(store: Store, config: Config, origin: string,
       }
     }
     if (request.method === "POST") {
+      if (path === "/api/v1/channels/nick/pairing" || path === "/api/v1/channels/nick/revoke") {
+        if (role !== "owner") return deny();
+        response.setHeader("Cache-Control", "no-store");
+        if (path.endsWith("/pairing") && nick?.issue) return json(response, 201, nick.issue());
+        if (path.endsWith("/revoke") && nick?.revoke) {
+          nick.revoke();
+          return json(response, 200, { revoked: true });
+        }
+        return json(response, 503, { message: "Chưa cấu hình ghép cặp nick phụ." });
+      }
       if (path === "/api/v1/operators") {
         if (role !== "owner") return deny();
         const input = await readJson(request);

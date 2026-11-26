@@ -987,6 +987,7 @@ export function Agents({ data, refresh }: Props) {
 }
 
 export function Channels({ data, user, run, busy }: Props) {
+  const [pairing, setPairing] = useState<{ code: string; expiresAt: number }>();
   const [confirm, setConfirm] = useState(false);
   return (
     <div className="channel-grid">
@@ -1007,6 +1008,26 @@ export function Channels({ data, user, run, busy }: Props) {
             >
               Kết nối OA
             </button>
+          )}
+          {channel.id === "nick" && user.role === "owner" && !demoMode && (
+            <div className="form">
+              <button disabled={busy} onClick={() => void run(async () => {
+                setPairing(await api.pairNick());
+                return (current) => current;
+              }, "Đã tạo mã dùng một lần.")}>Tạo mã ghép cặp nick phụ</button>
+              {pairing && (
+                <div>
+                  <label>Mã ghép cặp <input readOnly value={pairing.code} autoComplete="off" /></label>
+                  <p>Hết hạn lúc {new Date(pairing.expiresAt).toLocaleTimeString("vi-VN")}.</p>
+                  <button onClick={() => setPairing(undefined)}>Ẩn mã ghép cặp</button>
+                </div>
+              )}
+              <button disabled={busy} onClick={() => void run(async () => {
+                await api.revokeNick();
+                setPairing(undefined);
+                return (current) => current;
+              }, "Đã thu hồi kết nối nick phụ.")}>Thu hồi kết nối</button>
+            </div>
           )}
           {channel.id === "nick" && channel.state !== "stopped" && (
             <Can user={user} action="stop">

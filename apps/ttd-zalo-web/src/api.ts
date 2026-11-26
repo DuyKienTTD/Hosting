@@ -207,6 +207,8 @@ export const api = {
     request<WorkItem>("/work-items", "POST", { title, agent }),
   postRoomMessage: (text: string) =>
     request<RoomMessage>("/room-messages", "POST", { text }),
+  pairNick: () => request<{code: string; expiresAt: number}>("/channels/nick/pairing", "POST"),
+  revokeNick: () => request<{revoked: boolean}>("/channels/nick/revoke", "POST"),
   stopNick: () => request<Channel>("/channels/nick/stop", "POST"),
   requestDeletion: (customerId: string, reason: string) =>
     request<DeletionRequest>("/deletion-requests", "POST", {
