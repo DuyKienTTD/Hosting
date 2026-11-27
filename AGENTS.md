@@ -4,10 +4,11 @@ Repo **public** cho hạ tầng và tự động hóa marketing của TTD METAL:
 
 ## Mỗi phiên làm việc
 
-1. Đầu phiên: hook tự chạy `python3 scripts/session_start.py`. Nếu công cụ của bạn không có hook thì tự chạy lệnh đó. Lệnh in PROGRESS và các việc đang mở.
+1. Đầu phiên: chạy `python3 scripts/session_start.py`, hoặc đọc `PROGRESS.md` và `work/` nếu không chạy được lệnh. Codex và Claude Code có hook tự chạy bước này; ChatGPT Work thì không, nên phải tự làm.
 2. Làm **đúng một issue**. Không có issue thì không sửa repo; hãy đề xuất issue cho Lập kế hoạch.
 3. Làm trên nhánh `agent/<số-issue>-<mô-tả-ngắn>`. Mở PR có dòng `Closes #<số-issue>`.
-4. Cuối phiên: cập nhật `work/<số-issue>.json`, thêm một mục vào đầu `PROGRESS.md` (tối đa 5 dòng), commit và push. Hook Stop sẽ chặn kết thúc nếu tiêu chí chưa đạt mà không ghi lý do bị chặn.
+4. Cuối phiên: cập nhật `work/<số-issue>.json`, thêm một mục vào đầu `PROGRESS.md` (tối đa 5 dòng), commit và push.
+5. CI chặn merge nếu PR có `Closes #N` mà `work/N.json` chưa `done` (mọi tiêu chí đạt) hoặc chưa `blocked` kèm lý do. Với Codex/Claude Code, hook Stop còn chặn sớm hơn ngay trong phiên.
 
 ## Định nghĩa "xong"
 
@@ -24,8 +25,8 @@ Repo **public** cho hạ tầng và tự động hóa marketing của TTD METAL:
 | Chủ dự án | Chủ sở hữu tài khoản (A0) | Mọi quyền. Merge PR có nhãn `risk:*`. Quyết định tài khoản, chi phí, production. | — |
 | Lập kế hoạch | Trợ lý A0 (ChatGPT, chat) | Viết issue và tiêu chí. Review PR bằng comment. | Push, merge, sửa tiêu chí sau khi đã có người nhận |
 | Điều phối | Claude | Phân loại issue, chọn người thực thi. Merge PR **không** có nhãn `risk:*` khi CI xanh và đã có review. Giữ PROGRESS gọn. | Merge `risk:*`, đổi quyền, đổi thanh toán |
-| Thực thi | Codex (mặc định, dùng hạn mức gói ChatGPT), Claude Code; ChatGPT Work cho việc thao tác web (hPanel, WordPress) | Sửa trong phạm vi issue, trên nhánh `agent/*`, rồi mở PR | Push lên `main`, tự merge, tự review PR của mình, làm việc ngoài issue |
-| Kiểm tự động | CI `check`, Codex review | Chặn merge | — |
+| Thực thi | **ChatGPT Work (mặc định**, dùng hạn mức gói ChatGPT; làm được cả code lẫn thao tác web như hPanel, WordPress); Codex hoặc Claude Code khi cần chạy lệnh trên máy có hook | Sửa trong phạm vi issue, trên nhánh `agent/*`, rồi mở PR | Push lên `main`, tự merge, tự review PR của mình, làm việc ngoài issue |
+| Kiểm tự động | CI `check` (gồm cổng "xong" theo `Closes #N`), bảo vệ nhánh `main` | Chặn merge | — |
 | Runtime | n8n, Hermes trên VPS | Chạy cấu hình đã merge | Nhận việc trực tiếp từ chat |
 
 Việc cần chủ dự án duyệt phải gắn nhãn tương ứng: `risk:prod` (thay đổi live), `risk:cost` (phát sinh chi phí), `risk:secret` (credential, quyền truy cập).

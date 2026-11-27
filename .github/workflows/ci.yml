@@ -14,4 +14,6 @@ jobs:
         with:
           persist-credentials: false
       - name: Kiểm tra bắt buộc (bí mật, PII, Zalo, work/*.json, link)
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: python3 scripts/check.py

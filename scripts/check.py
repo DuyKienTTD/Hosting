@@ -2,6 +2,7 @@
 """Kiểm tra bắt buộc của repo Hosting. CI và hook Stop cùng gọi script này.
 
 Dùng: python3 scripts/check.py            # kiểm toàn bộ
+      PR_BODY="..." python3 scripts/check.py  # CI trên PR: thêm cổng "xong" theo Closes #N
       python3 scripts/check.py --changed  # chỉ file thay đổi so với origin/main (nhanh, cho hook)
 Thoát 0 = đạt, 1 = có lỗi (in danh sách lỗi).
 """
@@ -9,6 +10,7 @@ from __future__ import annotations
 
 import ipaddress
 import json
+import os
 import re
 import subprocess
 import sys
@@ -24,7 +26,7 @@ SECRET_PATTERNS = [
     ("OpenAI/Anthropic key", re.compile(r"\bsk-(ant-|proj-)?[A-Za-z0-9_\-]{24,}")),
     ("AWS key", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
     ("Google API key", re.compile(r"\bAIza[0-9A-Za-z_\-]{35}\b")),
-    ("secret assignment", re.compile(r"(?i)\b(password|passwd|secret|api[_-]?key|access[_-]?token|auth[_-]?token)\b\s*[:=]\s*['\"]?[A-Za-z0-9/+_\-]{20,}")),
+    ("secret assignment", re.compile(r"(?i)\b(password|passwd|secret|api[_-]?key|access[_-]?token|auth[_-]?token)\b\s*[:=]\s*['\"][A-Za-z0-9/+_\-]{20,}['\"]")),
 ]
 PHONE = re.compile(r"(?<![\w.])(?:\+84|0)(?:3|5|7|8|9)\d{8}(?![\w])")
 IPV4 = re.compile(r"(?<![\w.\-])(\d{1,3}(?:\.\d{1,3}){3})(?![\w.\-])")
@@ -158,11 +160,37 @@ def check_links(files: list[str]) -> list[str]:
     return errors
 
 
+def check_pr_done() -> list[str]:
+    """Cổng "xong" cho mọi người thực thi, kể cả công cụ không có hook (ChatGPT Work, Codex cloud).
+
+    PR có "Closes #N" thì work/N.json phải tồn tại, và hoặc status=done (mọi tiêu chí passes=true),
+    hoặc status=blocked kèm blocker. PR không đóng issue nào thì bỏ qua.
+    """
+    body = os.environ.get("PR_BODY")
+    if body is None:
+        return []
+    errors = []
+    for num in sorted(set(re.findall(r"(?i)\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)", body))):
+        f = ROOT / "work" / f"{num}.json"
+        if not f.exists():
+            errors.append(f"PR đóng #{num} nhưng thiếu work/{num}.json")
+            continue
+        try:
+            d = json.loads(f.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue  # check_work đã báo
+        if d.get("status") not in {"done", "blocked"}:
+            left = [c.get("id", "?") for c in d.get("criteria") or [] if c.get("passes") is not True]
+            errors.append(f"#{num} chưa xong (status={d.get('status')}, còn {', '.join(left) or '?'}); "
+                          "hoàn thành và đặt status=done, hoặc status=blocked kèm blocker")
+    return errors
+
+
 def main() -> int:
     changed = "--changed" in sys.argv
     files = tracked_files(changed)
     allow = load_allow()
-    errors = check_paths(files) + check_content(files, allow) + check_work(files) + check_links(files)
+    errors = check_paths(files) + check_content(files, allow) + check_work(files) + check_links(files) + check_pr_done()
     if errors:
         print("CHECK FAIL")
         for e in errors:
