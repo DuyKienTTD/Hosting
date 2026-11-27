@@ -1,0 +1,1347 @@
+{
+  "task": "GOV-02/S2",
+  "phase": "A",
+  "owner": "Codex",
+  "ack": "EXECUTE GOV-02/S2 PHASE A",
+  "assignment_comment": 7092005693,
+  "base": {
+    "head": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "tree": "991af4f21ca12f3db98c7a1bd89c297f18e446d7",
+    "workflow_blob": "69ec0db902f457f06dd547dae171220331df0f5e"
+  },
+  "s1_snapshot": {
+    "pr": 28,
+    "head": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+    "status": "DELTA_REQUIRED",
+    "existing_ledger_heads_and_files_unchanged": true,
+    "new_sources_outside_s1_ledger": [
+      27,
+      28,
+      29
+    ],
+    "full_repository_census": false
+  },
+  "source_prs": [
+    {
+      "pr": 6,
+      "ref": "refs/remotes/origin/planning/multi-agent-capability-allocation-2026-11-23",
+      "head": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+      "base": "a22516aa9e5940baccc37ab2edf9eeed2ccc3d93",
+      "tree": "ed5e95e325277d3bf976a2754bbc81f1b2783302",
+      "draft": true,
+      "state": "OPEN",
+      "changed_paths": [
+        "tasks/2026-11-23-multi-agent-master-allocation-review.md"
+      ]
+    },
+    {
+      "pr": 10,
+      "ref": "refs/remotes/origin/codex/eng-01a-s1-offline-contract-2026-11-23",
+      "head": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "tree": "1b5dfc68d1c32c682619cbee8bccd9873f656a6c",
+      "draft": false,
+      "state": "OPEN",
+      "changed_paths": [
+        "CATALOG.yaml",
+        "CHANGELOG.md",
+        "STATE.md",
+        "reports/2026-11-23-eng-01a-s1-offline-connector-contract.md",
+        "reports/evidence/2026-11-23-eng-01a-s1-offline-connector-contract.json",
+        "sandbox/connector-contracts/README.md",
+        "sandbox/connector-contracts/offline_connector.py",
+        "sandbox/connector-contracts/test_offline_connector.py",
+        "tasks/2026-11-23-eng-01a-s1-offline-connector-contract.md"
+      ]
+    },
+    {
+      "pr": 13,
+      "ref": "refs/remotes/origin/codex/eng-01a-s2-fake-channel-adapters-2026-11-23",
+      "head": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "tree": "c9039bbab2b08b85d1145211dc46733744ce6323",
+      "draft": false,
+      "state": "OPEN",
+      "changed_paths": [
+        "CATALOG.yaml",
+        "CHANGELOG.md",
+        "STATE.md",
+        "reports/2026-11-23-eng-01a-s2-fake-channel-adapters.md",
+        "reports/evidence/2026-11-23-eng-01a-s2-fake-channel-adapters.json",
+        "sandbox/connector-channel-mocks/README.md",
+        "sandbox/connector-channel-mocks/channel_mocks.py",
+        "sandbox/connector-channel-mocks/fixtures.json",
+        "sandbox/connector-channel-mocks/test_channel_mocks.py",
+        "tasks/2026-11-23-eng-01a-s2-fake-channel-adapters.md"
+      ]
+    },
+    {
+      "pr": 19,
+      "ref": "refs/remotes/origin/codex/eng-01a-s3-offline-integration-2026-11-23",
+      "head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "tree": "b0625a0de12d90fba5994f643846459c7a7b989c",
+      "draft": false,
+      "state": "OPEN",
+      "changed_paths": [
+        "reports/2026-11-23-eng-01a-s3-d1-prepared-result-binding.md",
+        "reports/2026-11-23-eng-01a-s3-integration-and-merge-preview.md",
+        "reports/evidence/2026-11-23-eng-01a-s3-d1-prepared-result-binding.json",
+        "reports/evidence/2026-11-23-eng-01a-s3-integration.json",
+        "sandbox/connector-integration/README.md",
+        "sandbox/connector-integration/bridge.py",
+        "sandbox/connector-integration/merge_preview.py",
+        "sandbox/connector-integration/pinned_sources.py",
+        "sandbox/connector-integration/test_integration.py",
+        "tasks/2026-11-23-eng-01a-s3-offline-integration.md"
+      ]
+    },
+    {
+      "pr": 21,
+      "ref": "refs/remotes/origin/codex/eng-01a-s4-linux-release-readiness-2026-11-23",
+      "head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "tree": "2f244bbb4bd1f91405219893a03ba2f18d6bbfd1",
+      "draft": false,
+      "state": "OPEN",
+      "changed_paths": [
+        "reports/2026-11-23-eng-01a-s4-d1-manifest-refresh.md",
+        "reports/2026-11-23-eng-01a-s4-release-readiness.md",
+        "reports/evidence/2026-11-23-eng-01a-s4-d1-manifest-refresh.json",
+        "reports/evidence/2026-11-23-eng-01a-s4-release-readiness.json",
+        "sandbox/connector-release/README.md",
+        "sandbox/connector-release/manifest.json",
+        "sandbox/connector-release/readiness_preview.py",
+        "sandbox/connector-release/release_check.py",
+        "sandbox/connector-release/test_release_check.py",
+        "tasks/2026-11-23-eng-01a-s4-linux-release-readiness.md"
+      ]
+    },
+    {
+      "pr": 16,
+      "ref": "refs/remotes/origin/work/ux-01-s2-offline-prototype-2026-11-23",
+      "head": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "tree": "96bdd5b3b63e0ea1bf35ada4fd30a8500d90be8b",
+      "draft": true,
+      "state": "OPEN",
+      "changed_paths": [
+        "reports/2026-11-23-work-ux01-s2-offline-prototype.md",
+        "reports/evidence/2026-11-23-work-ux01-s2-demo-test-results.json",
+        "sandbox/operator-ui/README.md",
+        "sandbox/operator-ui/app.js",
+        "sandbox/operator-ui/browser-test.cjs",
+        "sandbox/operator-ui/dom-test.cjs",
+        "sandbox/operator-ui/index.html",
+        "sandbox/operator-ui/style.css",
+        "tasks/2026-11-23-work-ux01-s2-offline-prototype.md"
+      ]
+    },
+    {
+      "pr": 20,
+      "ref": "refs/remotes/origin/hermes/biz-02-s1-priorities-kpi-draft-2026-11-23",
+      "head": "fcdc0f898b13b19a42a000d84c8ac4632de1806b",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "tree": "e1e298891a5385d930f7ddc724d9adc3a0a96d17",
+      "draft": true,
+      "state": "OPEN",
+      "changed_paths": [
+        "reports/2026-11-23-hermes-biz02-s1-prioritization.md",
+        "reports/evidence/2026-11-23-hermes-biz02-s1-priority-matrix.json",
+        "tasks/2026-11-23-hermes-biz02-s1-usecases-kpi.md"
+      ]
+    },
+    {
+      "pr": 22,
+      "ref": "refs/remotes/origin/hostinger/ops-01a-s1-offline-monitoring-2026-11-23",
+      "head": "7f18955897c4f05b3523f467398889cf1e53cebd",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "tree": "f5d8ee54ae8515ad4b41d678b9529fb0c6dcc79c",
+      "draft": true,
+      "state": "OPEN",
+      "changed_paths": [
+        "reports/2026-11-23-hostinger-ops01a-s1-monitoring-qa.md",
+        "reports/evidence/2026-11-23-hostinger-ops01a-s1-monitoring-qa.json",
+        "sandbox/ops-monitoring/README.md",
+        "sandbox/ops-monitoring/evaluator.py",
+        "sandbox/ops-monitoring/fixtures/backup_overdue.json",
+        "sandbox/ops-monitoring/fixtures/backup_schedule_unknown.json",
+        "sandbox/ops-monitoring/fixtures/disk_threshold_trend.json",
+        "sandbox/ops-monitoring/fixtures/negative_controls.json",
+        "sandbox/ops-monitoring/fixtures/p0_exit_137.json",
+        "sandbox/ops-monitoring/fixtures/readiness_bad_then_good.json",
+        "sandbox/ops-monitoring/fixtures/readiness_good_then_bad.json",
+        "sandbox/ops-monitoring/fixtures/readiness_unknown_interleave.json",
+        "sandbox/ops-monitoring/fixtures/tls_blocked.json",
+        "sandbox/ops-monitoring/policy.json",
+        "sandbox/ops-monitoring/tests/test_evaluator.py",
+        "tasks/2026-11-23-hostinger-ops01a-s1-monitoring-policy.md"
+      ]
+    },
+    {
+      "pr": 23,
+      "ref": "refs/remotes/origin/hermes/grow-02a-s1-event-dictionary-2026-11-23",
+      "head": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "tree": "7167985fecfabca5082c671bc61ae70e963177e0",
+      "draft": true,
+      "state": "OPEN",
+      "changed_paths": [
+        "reports/2026-11-23-hermes-grow02a-s1-attribution-contract.md",
+        "reports/evidence/2026-11-23-hermes-grow02a-s1-events-and-tests.json",
+        "sandbox/grow02a-offline-validator/validate.py",
+        "tasks/2026-11-23-hermes-grow02a-s1-event-dictionary.md"
+      ]
+    },
+    {
+      "pr": 24,
+      "ref": "refs/remotes/origin/hostinger/ops-01a-s2-lifecycle-2026-11-23",
+      "head": "d981c8189d30f87d5b1349525062322154719e64",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "tree": "51bb2ddb33d2b8b34d878f768d9fbd43a4274770",
+      "draft": true,
+      "state": "OPEN",
+      "changed_paths": [
+        "reports/2026-11-23-hostinger-ops01a-s2-lifecycle.md",
+        "reports/evidence/2026-11-23-hostinger-ops01a-s2-lifecycle.json",
+        "sandbox/ops-monitoring-lifecycle/README.md",
+        "sandbox/ops-monitoring-lifecycle/lifecycle.py",
+        "sandbox/ops-monitoring-lifecycle/policy.json",
+        "sandbox/ops-monitoring-lifecycle/tests/test_lifecycle.py",
+        "tasks/2026-11-23-hostinger-ops01a-s2-lifecycle.md"
+      ]
+    },
+    {
+      "pr": 25,
+      "ref": "refs/remotes/origin/hermes/biz-02-s2-mvp-acceptance-2026-11-23",
+      "head": "6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "tree": "3bac66a30de5a77d548e1fb79004ee2e0023c556",
+      "draft": true,
+      "state": "OPEN",
+      "changed_paths": [
+        "reports/2026-11-23-hermes-biz02-s2-mvp-acceptance.md",
+        "reports/evidence/2026-11-23-hermes-biz02-s2-mvp-scenarios.json",
+        "sandbox/biz02-mvp-acceptance/validate.py",
+        "tasks/2026-11-23-hermes-biz02-s2-mvp-acceptance.md"
+      ]
+    },
+    {
+      "pr": 27,
+      "ref": "refs/remotes/origin/hermes/gov-01-s2-a0-business-decisions-2026-11-23",
+      "head": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "tree": "82a96aa9ad575a1f7450f5cbe11e71b45386aae5",
+      "draft": true,
+      "state": "OPEN",
+      "changed_paths": [
+        "reports/2026-11-23-hermes-gov01-s2-a0-options.md",
+        "reports/evidence/2026-11-23-hermes-gov01-s2-a0-options.json",
+        "reports/evidence/2026-11-23-hermes-gov01-s2-a0-register.json",
+        "sandbox/gov01-a0-decisions/scenarios.json",
+        "sandbox/gov01-a0-decisions/validate.py",
+        "tasks/2026-11-23-hermes-gov01-s2-a0-choices.md"
+      ]
+    },
+    {
+      "pr": 28,
+      "ref": "refs/remotes/origin/codex/gov-02-s1-offline-repo-validator-2026-11-23",
+      "head": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "tree": "341e549bc687969c6dad92f75058b08af26b8203",
+      "draft": true,
+      "state": "OPEN",
+      "changed_paths": [
+        "reports/2026-11-23-codex-gov02-s1-readiness.md",
+        "reports/evidence/2026-11-23-codex-gov02-s1-validator.json",
+        "sandbox/repo-metadata-validator/README.md",
+        "sandbox/repo-metadata-validator/manifest.json",
+        "sandbox/repo-metadata-validator/test_validate.py",
+        "sandbox/repo-metadata-validator/validate.py",
+        "tasks/2026-11-23-codex-gov02-s1-repo-validator.md"
+      ]
+    },
+    {
+      "pr": 29,
+      "ref": "refs/remotes/origin/hostinger/sec-02-s2-hardening-gates-2026-11-23",
+      "head": "d3d6a2690cb3b08609d8708514c5594c0ebdd3e6",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "tree": "07efd514f84e3ee131086d312b4207821dd95918",
+      "draft": true,
+      "state": "OPEN",
+      "changed_paths": [
+        "reports/2026-11-23-hostinger-sec02-s2-tabletop.md",
+        "reports/evidence/2026-11-23-hostinger-sec02-s2-tabletop.json",
+        "runbooks/sec02-s2-controlled-hardening-gates.md",
+        "sandbox/sec02-hardening-fixtures/validate.py",
+        "tasks/2026-11-23-hostinger-sec02-s2-hardening-plan.md"
+      ]
+    }
+  ],
+  "mapping": [
+    {
+      "path": "tasks/2026-11-23-multi-agent-master-allocation-review.md",
+      "kind": "task",
+      "pr": 6,
+      "source_head": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+      "source_blob": "d4206b17122c9c35ff1743251931debc0145438d",
+      "source_id": "ttd-multi-agent-master-allocation-2026-11-23",
+      "proposed_catalog_id": "ttd-multi-agent-master-allocation-2026-11-23",
+      "design_owner": "chatgpt",
+      "executor": "chatgpt",
+      "labels": [
+        "DRAFT"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/2026-11-23-work-ux01-s2-offline-prototype.md",
+      "kind": "report",
+      "pr": 16,
+      "source_head": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+      "source_blob": "8c300cf0d22879d1d3a5469834dda60834b60a40",
+      "source_id": "work-ux01-s2-offline-prototype-review",
+      "proposed_catalog_id": "work-ux01-s2-offline-prototype-review",
+      "design_owner": "chatgpt-work",
+      "executor": "chatgpt-work",
+      "labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/evidence/2026-11-23-work-ux01-s2-demo-test-results.json",
+      "kind": "evidence",
+      "pr": 16,
+      "source_head": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+      "source_blob": "568a37b53614c0c6df6f9b38995ade90f1e61253",
+      "source_id": null,
+      "proposed_catalog_id": "evidence-2026-11-23-work-ux01-s2-demo-test-results",
+      "design_owner": "chatgpt-work",
+      "executor": "chatgpt-work",
+      "labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "tasks/2026-11-23-work-ux01-s2-offline-prototype.md",
+      "kind": "task",
+      "pr": 16,
+      "source_head": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+      "source_blob": "c49dfe25cc2f54c3030a13a43a6f88e12bbbdbb3",
+      "source_id": "ttd-work-ux01-s2-offline-prototype",
+      "proposed_catalog_id": "ttd-work-ux01-s2-offline-prototype",
+      "design_owner": "chatgpt-work",
+      "executor": "chatgpt-work",
+      "labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/2026-11-23-eng-01a-s3-d1-prepared-result-binding.md",
+      "kind": "report",
+      "pr": 19,
+      "source_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "source_blob": "f703a99967b1b4ecd6ca9840104192e7302c594e",
+      "source_id": "report-2026-11-23-eng-01a-s3-d1-prepared-result-binding",
+      "proposed_catalog_id": "report-2026-11-23-eng-01a-s3-d1-prepared-result-binding",
+      "design_owner": "codex",
+      "executor": "codex",
+      "labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/2026-11-23-eng-01a-s3-integration-and-merge-preview.md",
+      "kind": "report",
+      "pr": 19,
+      "source_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "source_blob": "b23cd64693731a16940ef5fd33b30f03b2dbd0d5",
+      "source_id": "eng-01a-s3-integration-and-merge-preview-report",
+      "proposed_catalog_id": "eng-01a-s3-integration-and-merge-preview-report",
+      "design_owner": "codex",
+      "executor": "codex",
+      "labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/evidence/2026-11-23-eng-01a-s3-d1-prepared-result-binding.json",
+      "kind": "evidence",
+      "pr": 19,
+      "source_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "source_blob": "dea0a3471683852891133cf1dca41eea5d50efb7",
+      "source_id": null,
+      "proposed_catalog_id": "evidence-2026-11-23-eng-01a-s3-d1-prepared-result-binding",
+      "design_owner": "codex",
+      "executor": "codex",
+      "labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/evidence/2026-11-23-eng-01a-s3-integration.json",
+      "kind": "evidence",
+      "pr": 19,
+      "source_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "source_blob": "3bb923798df585351ca33e15f55f232338d2f647",
+      "source_id": null,
+      "proposed_catalog_id": "evidence-2026-11-23-eng-01a-s3-integration",
+      "design_owner": "codex",
+      "executor": "codex",
+      "labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "tasks/2026-11-23-eng-01a-s3-offline-integration.md",
+      "kind": "task",
+      "pr": 19,
+      "source_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "source_blob": "24cd7b2a8a41ad1ca642d10fc29c7fd9d5a504eb",
+      "source_id": "eng-01a-s3-offline-integration",
+      "proposed_catalog_id": "eng-01a-s3-offline-integration",
+      "design_owner": "codex",
+      "executor": "codex",
+      "labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/2026-11-23-hermes-biz02-s1-prioritization.md",
+      "kind": "report",
+      "pr": 20,
+      "source_head": "fcdc0f898b13b19a42a000d84c8ac4632de1806b",
+      "source_blob": "6c5c701574fbdc8d7f0fbe4c011a6150bc7adf70",
+      "source_id": "hermes-biz02-s1-prioritization-2026-11-23",
+      "proposed_catalog_id": "hermes-biz02-s1-prioritization-2026-11-23",
+      "design_owner": "hermes-webui",
+      "executor": "hermes-webui",
+      "labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/evidence/2026-11-23-hermes-biz02-s1-priority-matrix.json",
+      "kind": "evidence",
+      "pr": 20,
+      "source_head": "fcdc0f898b13b19a42a000d84c8ac4632de1806b",
+      "source_blob": "f2458f91c4f253f292a5c41615a996c8a7c2f24e",
+      "source_id": null,
+      "proposed_catalog_id": "evidence-2026-11-23-hermes-biz02-s1-priority-matrix",
+      "design_owner": "hermes-webui",
+      "executor": "hermes-webui",
+      "labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "tasks/2026-11-23-hermes-biz02-s1-usecases-kpi.md",
+      "kind": "task",
+      "pr": 20,
+      "source_head": "fcdc0f898b13b19a42a000d84c8ac4632de1806b",
+      "source_blob": "536c08c2a8e6c8ad2ba02008acf69f77e5ae58c1",
+      "source_id": "hermes-biz02-s1-usecases-kpi-2026-11-23",
+      "proposed_catalog_id": "hermes-biz02-s1-usecases-kpi-2026-11-23",
+      "design_owner": "hermes-webui",
+      "executor": "hermes-webui",
+      "labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/2026-11-23-eng-01a-s4-d1-manifest-refresh.md",
+      "kind": "report",
+      "pr": 21,
+      "source_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "source_blob": "540115151ae9b3a4f8187f66128bedb579cd7490",
+      "source_id": "report-2026-11-23-eng-01a-s4-d1-manifest-refresh",
+      "proposed_catalog_id": "report-2026-11-23-eng-01a-s4-d1-manifest-refresh",
+      "design_owner": "codex",
+      "executor": "codex",
+      "labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/2026-11-23-eng-01a-s4-release-readiness.md",
+      "kind": "report",
+      "pr": 21,
+      "source_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "source_blob": "6027eb612a17630c3433caf7b1e2e5add8cf9648",
+      "source_id": "report-2026-11-23-eng-01a-s4-release-readiness",
+      "proposed_catalog_id": "report-2026-11-23-eng-01a-s4-release-readiness",
+      "design_owner": "codex",
+      "executor": "codex",
+      "labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/evidence/2026-11-23-eng-01a-s4-d1-manifest-refresh.json",
+      "kind": "evidence",
+      "pr": 21,
+      "source_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "source_blob": "a02dcf93eb87beab4548038ad6c031ef446c3483",
+      "source_id": null,
+      "proposed_catalog_id": "evidence-2026-11-23-eng-01a-s4-d1-manifest-refresh",
+      "design_owner": "codex",
+      "executor": "codex",
+      "labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/evidence/2026-11-23-eng-01a-s4-release-readiness.json",
+      "kind": "evidence",
+      "pr": 21,
+      "source_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "source_blob": "4704488bdfd0d387f938ea2990d902dda770ebd4",
+      "source_id": null,
+      "proposed_catalog_id": "evidence-2026-11-23-eng-01a-s4-release-readiness",
+      "design_owner": "codex",
+      "executor": "codex",
+      "labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "tasks/2026-11-23-eng-01a-s4-linux-release-readiness.md",
+      "kind": "task",
+      "pr": 21,
+      "source_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "source_blob": "0411237644e7228438edbf74d984b8242946714e",
+      "source_id": "eng-01a-s4-linux-release-readiness",
+      "proposed_catalog_id": "eng-01a-s4-linux-release-readiness",
+      "design_owner": "codex",
+      "executor": "codex",
+      "labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/2026-11-23-hostinger-ops01a-s1-monitoring-qa.md",
+      "kind": "report",
+      "pr": 22,
+      "source_head": "7f18955897c4f05b3523f467398889cf1e53cebd",
+      "source_blob": "4bbdf9043d9d15b58c7340e46d0cb347fb5e5b23",
+      "source_id": "ttd-hostinger-ops01a-s1-monitoring-qa-2026-11-23",
+      "proposed_catalog_id": "ttd-hostinger-ops01a-s1-monitoring-qa-2026-11-23",
+      "design_owner": "hostinger-agent",
+      "executor": "hostinger-agent",
+      "labels": [
+        "DRAFT",
+        "SOURCE_ACCEPTED",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/evidence/2026-11-23-hostinger-ops01a-s1-monitoring-qa.json",
+      "kind": "evidence",
+      "pr": 22,
+      "source_head": "7f18955897c4f05b3523f467398889cf1e53cebd",
+      "source_blob": "519fd67ddb7ffac337e7b5d7703e78a26a6e74a0",
+      "source_id": null,
+      "proposed_catalog_id": "evidence-2026-11-23-hostinger-ops01a-s1-monitoring-qa",
+      "design_owner": "hostinger-agent",
+      "executor": "hostinger-agent",
+      "labels": [
+        "DRAFT",
+        "SOURCE_ACCEPTED",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "tasks/2026-11-23-hostinger-ops01a-s1-monitoring-policy.md",
+      "kind": "task",
+      "pr": 22,
+      "source_head": "7f18955897c4f05b3523f467398889cf1e53cebd",
+      "source_blob": "d2dafafe0a8bc9d4a96e86f16149c01cfa01ea9e",
+      "source_id": "ttd-hostinger-ops01a-s1-offline-monitoring-2026-11-23",
+      "proposed_catalog_id": "ttd-hostinger-ops01a-s1-offline-monitoring-2026-11-23",
+      "design_owner": "hostinger-agent",
+      "executor": "hostinger-agent",
+      "labels": [
+        "DRAFT",
+        "SOURCE_ACCEPTED",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/2026-11-23-hermes-grow02a-s1-attribution-contract.md",
+      "kind": "report",
+      "pr": 23,
+      "source_head": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61",
+      "source_blob": "5d4d66ed341c77cf8ffa1e916583df8ffc48871c",
+      "source_id": "hermes-grow02a-s1-attribution-contract-2026-11-23",
+      "proposed_catalog_id": "hermes-grow02a-s1-attribution-contract-2026-11-23",
+      "design_owner": "hermes-webui-support",
+      "executor": "hermes-webui-support",
+      "labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/evidence/2026-11-23-hermes-grow02a-s1-events-and-tests.json",
+      "kind": "evidence",
+      "pr": 23,
+      "source_head": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61",
+      "source_blob": "1a4fa5f991f1220ed2ed0e7aaac9b9276ca82cae",
+      "source_id": null,
+      "proposed_catalog_id": "evidence-2026-11-23-hermes-grow02a-s1-events-and-tests",
+      "design_owner": "hermes-webui-support",
+      "executor": "hermes-webui-support",
+      "labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "tasks/2026-11-23-hermes-grow02a-s1-event-dictionary.md",
+      "kind": "task",
+      "pr": 23,
+      "source_head": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61",
+      "source_blob": "ca3ecf6748bf806660a2f0936e6c0a5cb6bbbb2e",
+      "source_id": "hermes-grow02a-s1-event-dictionary-task-2026-11-23",
+      "proposed_catalog_id": "hermes-grow02a-s1-event-dictionary-task-2026-11-23",
+      "design_owner": "hermes-webui-support",
+      "executor": "hermes-webui-support",
+      "labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/2026-11-23-hostinger-ops01a-s2-lifecycle.md",
+      "kind": "report",
+      "pr": 24,
+      "source_head": "d981c8189d30f87d5b1349525062322154719e64",
+      "source_blob": "d8c76fd52d6eecd419f412ffc0777ec71e29a32a",
+      "source_id": "ttd-hostinger-ops01a-s2-lifecycle-2026-11-23",
+      "proposed_catalog_id": "ttd-hostinger-ops01a-s2-lifecycle-2026-11-23-report",
+      "design_owner": "hostinger-agent",
+      "executor": "hostinger-agent",
+      "labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "HOLD_FOR_OWNER_ID_DECISION",
+      "qa_context": "NEEDS_HOSTINGER_DELTA; RE_QA_PENDING"
+    },
+    {
+      "path": "reports/evidence/2026-11-23-hostinger-ops01a-s2-lifecycle.json",
+      "kind": "evidence",
+      "pr": 24,
+      "source_head": "d981c8189d30f87d5b1349525062322154719e64",
+      "source_blob": "6ef5966de9a2dae03d3bc860da63e45b23dde1f6",
+      "source_id": null,
+      "proposed_catalog_id": "evidence-2026-11-23-hostinger-ops01a-s2-lifecycle",
+      "design_owner": "hostinger-agent",
+      "executor": "hostinger-agent",
+      "labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE",
+      "qa_context": "NEEDS_HOSTINGER_DELTA; RE_QA_PENDING"
+    },
+    {
+      "path": "tasks/2026-11-23-hostinger-ops01a-s2-lifecycle.md",
+      "kind": "task",
+      "pr": 24,
+      "source_head": "d981c8189d30f87d5b1349525062322154719e64",
+      "source_blob": "76bd97e0e3387d7a3578cec48a19236798ca6631",
+      "source_id": "ttd-hostinger-ops01a-s2-lifecycle-2026-11-23",
+      "proposed_catalog_id": "ttd-hostinger-ops01a-s2-lifecycle-2026-11-23",
+      "design_owner": "hostinger-agent",
+      "executor": "hostinger-agent",
+      "labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE",
+      "qa_context": "NEEDS_HOSTINGER_DELTA; RE_QA_PENDING"
+    },
+    {
+      "path": "reports/2026-11-23-hermes-biz02-s2-mvp-acceptance.md",
+      "kind": "report",
+      "pr": 25,
+      "source_head": "6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd",
+      "source_blob": "36f3681a63b1ffca08868da58d37b993ccd70984",
+      "source_id": "hermes-biz02-s2-mvp-acceptance-2026-11-23",
+      "proposed_catalog_id": "hermes-biz02-s2-mvp-acceptance-2026-11-23",
+      "design_owner": "hermes-webui",
+      "executor": "hermes-webui",
+      "labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/evidence/2026-11-23-hermes-biz02-s2-mvp-scenarios.json",
+      "kind": "evidence",
+      "pr": 25,
+      "source_head": "6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd",
+      "source_blob": "b517a54fc84071ddde87abfa31b5c84956604cd8",
+      "source_id": null,
+      "proposed_catalog_id": "evidence-2026-11-23-hermes-biz02-s2-mvp-scenarios",
+      "design_owner": "hermes-webui",
+      "executor": "hermes-webui",
+      "labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "tasks/2026-11-23-hermes-biz02-s2-mvp-acceptance.md",
+      "kind": "task",
+      "pr": 25,
+      "source_head": "6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd",
+      "source_blob": "56ccb0549cefdbaaf58aed52650411d76656cd68",
+      "source_id": "hermes-biz02-s2-mvp-acceptance-task-2026-11-23",
+      "proposed_catalog_id": "hermes-biz02-s2-mvp-acceptance-task-2026-11-23",
+      "design_owner": "hermes-webui",
+      "executor": "hermes-webui",
+      "labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "S1_GAP",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/2026-11-23-hermes-gov01-s2-a0-options.md",
+      "kind": "report",
+      "pr": 27,
+      "source_head": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+      "source_blob": "e0da464f2af6d686cd2fcbc000065b23234e5a08",
+      "source_id": "hermes-gov01-s2-a0-options-2026-11-23",
+      "proposed_catalog_id": "hermes-gov01-s2-a0-options-2026-11-23",
+      "design_owner": "hermes-webui",
+      "executor": "hermes-webui",
+      "labels": [
+        "DRAFT",
+        "A0_PENDING"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/evidence/2026-11-23-hermes-gov01-s2-a0-options.json",
+      "kind": "evidence",
+      "pr": 27,
+      "source_head": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+      "source_blob": "9f3aee70b0fd1d1186e6c6a2ddb8f072961d45ff",
+      "source_id": null,
+      "proposed_catalog_id": "evidence-2026-11-23-hermes-gov01-s2-a0-options",
+      "design_owner": "hermes-webui",
+      "executor": "hermes-webui",
+      "labels": [
+        "DRAFT",
+        "A0_PENDING"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/evidence/2026-11-23-hermes-gov01-s2-a0-register.json",
+      "kind": "evidence",
+      "pr": 27,
+      "source_head": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+      "source_blob": "aeb584d011a14b073aaa422f6a7526fd94ad256e",
+      "source_id": null,
+      "proposed_catalog_id": "evidence-2026-11-23-hermes-gov01-s2-a0-register",
+      "design_owner": "hermes-webui",
+      "executor": "hermes-webui",
+      "labels": [
+        "DRAFT",
+        "A0_PENDING"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "tasks/2026-11-23-hermes-gov01-s2-a0-choices.md",
+      "kind": "task",
+      "pr": 27,
+      "source_head": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+      "source_blob": "98893f4e539a4edceb3c5e2c430c066fe0f3234a",
+      "source_id": "hermes-gov01-s2-a0-choices-2026-11-23",
+      "proposed_catalog_id": "hermes-gov01-s2-a0-choices-2026-11-23",
+      "design_owner": "hermes-webui",
+      "executor": "hermes-webui",
+      "labels": [
+        "DRAFT",
+        "A0_PENDING"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/2026-11-23-codex-gov02-s1-readiness.md",
+      "kind": "report",
+      "pr": 28,
+      "source_head": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+      "source_blob": "3c2ad875c6d72f85d97ece64275bd6ca239412eb",
+      "source_id": "report-2026-11-23-codex-gov02-s1-readiness",
+      "proposed_catalog_id": "report-2026-11-23-codex-gov02-s1-readiness",
+      "design_owner": "codex",
+      "executor": "codex",
+      "labels": [
+        "DRAFT",
+        "SOURCE_ACCEPTED",
+        "INDEPENDENT_QA_PENDING"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/evidence/2026-11-23-codex-gov02-s1-validator.json",
+      "kind": "evidence",
+      "pr": 28,
+      "source_head": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+      "source_blob": "fe1573a76fa392b19b758f656cf03e4d8609652e",
+      "source_id": null,
+      "proposed_catalog_id": "evidence-2026-11-23-codex-gov02-s1-validator",
+      "design_owner": "codex",
+      "executor": "codex",
+      "labels": [
+        "DRAFT",
+        "SOURCE_ACCEPTED",
+        "INDEPENDENT_QA_PENDING"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "tasks/2026-11-23-codex-gov02-s1-repo-validator.md",
+      "kind": "task",
+      "pr": 28,
+      "source_head": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+      "source_blob": "ed05934674c41457f41ad84b2e6fcce032aa99a7",
+      "source_id": "codex-gov02-s1-repo-validator",
+      "proposed_catalog_id": "codex-gov02-s1-repo-validator",
+      "design_owner": "codex",
+      "executor": "codex",
+      "labels": [
+        "DRAFT",
+        "SOURCE_ACCEPTED",
+        "INDEPENDENT_QA_PENDING"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE"
+    },
+    {
+      "path": "reports/2026-11-23-hostinger-sec02-s2-tabletop.md",
+      "kind": "report",
+      "pr": 29,
+      "source_head": "d3d6a2690cb3b08609d8708514c5594c0ebdd3e6",
+      "source_blob": "a375064177a117b36feaa5f2eda6be7d1aa8736b",
+      "source_id": "sec02-s2-tabletop-2026-11-23",
+      "proposed_catalog_id": "sec02-s2-tabletop-2026-11-23",
+      "design_owner": "hostinger-agent",
+      "executor": "hermes-webui",
+      "labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE",
+      "owner_review": "HOSTINGER_ACK_PENDING",
+      "scope": "HERMES_TABLETOP_ONLY",
+      "work_orders": "NOT_AUTHORIZED"
+    },
+    {
+      "path": "reports/evidence/2026-11-23-hostinger-sec02-s2-tabletop.json",
+      "kind": "evidence",
+      "pr": 29,
+      "source_head": "d3d6a2690cb3b08609d8708514c5594c0ebdd3e6",
+      "source_blob": "68301cd033efc41e13359b54141238aca86109fe",
+      "source_id": null,
+      "proposed_catalog_id": "evidence-2026-11-23-hostinger-sec02-s2-tabletop",
+      "design_owner": "hostinger-agent",
+      "executor": "hermes-webui",
+      "labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE",
+      "owner_review": "HOSTINGER_ACK_PENDING",
+      "scope": "HERMES_TABLETOP_ONLY",
+      "work_orders": "NOT_AUTHORIZED"
+    },
+    {
+      "path": "runbooks/sec02-s2-controlled-hardening-gates.md",
+      "kind": "runbook",
+      "pr": 29,
+      "source_head": "d3d6a2690cb3b08609d8708514c5594c0ebdd3e6",
+      "source_blob": "1da798a04b2f4d1e6cc30a5ac512e40cb82ff2fe",
+      "source_id": "sec02-s2-controlled-hardening-gates",
+      "proposed_catalog_id": "sec02-s2-controlled-hardening-gates",
+      "design_owner": "hostinger-agent",
+      "executor": "hermes-webui",
+      "labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE",
+      "owner_review": "HOSTINGER_ACK_PENDING",
+      "scope": "HERMES_TABLETOP_ONLY",
+      "work_orders": "NOT_AUTHORIZED"
+    },
+    {
+      "path": "tasks/2026-11-23-hostinger-sec02-s2-hardening-plan.md",
+      "kind": "task",
+      "pr": 29,
+      "source_head": "d3d6a2690cb3b08609d8708514c5594c0ebdd3e6",
+      "source_blob": "753b93bb1782e891592277a446fd63921ea92cb3",
+      "source_id": "sec02-s2-hardening-gates-2026-11-23",
+      "proposed_catalog_id": "sec02-s2-hardening-gates-2026-11-23",
+      "design_owner": "hostinger-agent",
+      "executor": "hermes-webui",
+      "labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "origin": "DELTA_SCOPE",
+      "target": "CATALOG.yaml",
+      "writer": "codex-after-explicit-approval",
+      "action": "ADD_WHEN_ON_APPROVED_BASE",
+      "owner_review": "HOSTINGER_ACK_PENDING",
+      "scope": "HERMES_TABLETOP_ONLY",
+      "work_orders": "NOT_AUTHORIZED"
+    }
+  ],
+  "existing_catalog_scope": "union of inspected main and source PRs; insertion only after path exists on approved base",
+  "duplicate_id_resolution": {
+    "path": "reports/2026-11-23-hostinger-ops01a-s2-lifecycle.md",
+    "kind": "report",
+    "pr": 24,
+    "source_head": "d981c8189d30f87d5b1349525062322154719e64",
+    "source_blob": "d8c76fd52d6eecd419f412ffc0777ec71e29a32a",
+    "source_id": "ttd-hostinger-ops01a-s2-lifecycle-2026-11-23",
+    "proposed_catalog_id": "ttd-hostinger-ops01a-s2-lifecycle-2026-11-23-report",
+    "design_owner": "hostinger-agent",
+    "executor": "hostinger-agent",
+    "labels": [
+      "DRAFT",
+      "INDEPENDENT_QA_PENDING",
+      "REAL_UNTESTED"
+    ],
+    "origin": "S1_GAP",
+    "target": "CATALOG.yaml",
+    "writer": "codex-after-explicit-approval",
+    "action": "HOLD_FOR_OWNER_ID_DECISION",
+    "qa_context": "NEEDS_HOSTINGER_DELTA; RE_QA_PENDING"
+  },
+  "plan_stale_rows": [
+    {
+      "portfolio": "BIZ-02",
+      "line": 66,
+      "source_head": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+      "plan_path": "tasks/2026-11-23-multi-agent-master-allocation-review.md",
+      "plan_blob": "d4206b17122c9c35ff1743251931debc0145438d",
+      "old_marker": "NO_TASK_YET",
+      "replace_with_targets": [
+        {
+          "pr": 20,
+          "head": "fcdc0f898b13b19a42a000d84c8ac4632de1806b",
+          "path": "tasks/2026-11-23-hermes-biz02-s1-usecases-kpi.md",
+          "blob": "536c08c2a8e6c8ad2ba02008acf69f77e5ae58c1"
+        },
+        {
+          "pr": 25,
+          "head": "6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd",
+          "path": "tasks/2026-11-23-hermes-biz02-s2-mvp-acceptance.md",
+          "blob": "56ccb0549cefdbaaf58aed52650411d76656cd68"
+        }
+      ],
+      "writer": "chatgpt",
+      "origin": "S1_GAP"
+    },
+    {
+      "portfolio": "UX-01",
+      "line": 67,
+      "source_head": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+      "plan_path": "tasks/2026-11-23-multi-agent-master-allocation-review.md",
+      "plan_blob": "d4206b17122c9c35ff1743251931debc0145438d",
+      "old_marker": "NO_TASK_YET",
+      "replace_with_targets": [
+        {
+          "pr": 16,
+          "head": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+          "path": "tasks/2026-11-23-work-ux01-s2-offline-prototype.md",
+          "blob": "c49dfe25cc2f54c3030a13a43a6f88e12bbbdbb3"
+        }
+      ],
+      "writer": "chatgpt",
+      "origin": "S1_GAP"
+    },
+    {
+      "portfolio": "ENG-01A",
+      "line": 68,
+      "source_head": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+      "plan_path": "tasks/2026-11-23-multi-agent-master-allocation-review.md",
+      "plan_blob": "d4206b17122c9c35ff1743251931debc0145438d",
+      "old_marker": "NO_TASK_YET",
+      "replace_with_targets": [
+        {
+          "pr": 10,
+          "head": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+          "path": "tasks/2026-11-23-eng-01a-s1-offline-connector-contract.md",
+          "blob": "89dc5d08aa308f3cd3500fc32d7c59ca81261737"
+        },
+        {
+          "pr": 13,
+          "head": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+          "path": "tasks/2026-11-23-eng-01a-s2-fake-channel-adapters.md",
+          "blob": "d5fa3485a962321c6c2f4dbe70dec024eaaff954"
+        },
+        {
+          "pr": 19,
+          "head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+          "path": "tasks/2026-11-23-eng-01a-s3-offline-integration.md",
+          "blob": "24cd7b2a8a41ad1ca642d10fc29c7fd9d5a504eb"
+        },
+        {
+          "pr": 21,
+          "head": "272855817cffe5334757fcf3a64cfae750b3b119",
+          "path": "tasks/2026-11-23-eng-01a-s4-linux-release-readiness.md",
+          "blob": "0411237644e7228438edbf74d984b8242946714e"
+        }
+      ],
+      "writer": "chatgpt",
+      "origin": "S1_GAP"
+    },
+    {
+      "portfolio": "GROW-02A",
+      "line": 71,
+      "source_head": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+      "plan_path": "tasks/2026-11-23-multi-agent-master-allocation-review.md",
+      "plan_blob": "d4206b17122c9c35ff1743251931debc0145438d",
+      "old_marker": "NO_TASK_YET",
+      "replace_with_targets": [
+        {
+          "pr": 23,
+          "head": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61",
+          "path": "tasks/2026-11-23-hermes-grow02a-s1-event-dictionary.md",
+          "blob": "ca3ecf6748bf806660a2f0936e6c0a5cb6bbbb2e"
+        }
+      ],
+      "writer": "chatgpt",
+      "origin": "S1_GAP"
+    },
+    {
+      "portfolio": "OPS-01A",
+      "line": 73,
+      "source_head": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+      "plan_path": "tasks/2026-11-23-multi-agent-master-allocation-review.md",
+      "plan_blob": "d4206b17122c9c35ff1743251931debc0145438d",
+      "old_marker": "NO_TASK_YET",
+      "replace_with_targets": [
+        {
+          "pr": 22,
+          "head": "7f18955897c4f05b3523f467398889cf1e53cebd",
+          "path": "tasks/2026-11-23-hostinger-ops01a-s1-monitoring-policy.md",
+          "blob": "d2dafafe0a8bc9d4a96e86f16149c01cfa01ea9e"
+        },
+        {
+          "pr": 24,
+          "head": "d981c8189d30f87d5b1349525062322154719e64",
+          "path": "tasks/2026-11-23-hostinger-ops01a-s2-lifecycle.md",
+          "blob": "76bd97e0e3387d7a3578cec48a19236798ca6631"
+        }
+      ],
+      "writer": "chatgpt",
+      "origin": "S1_GAP"
+    },
+    {
+      "portfolio": "GOV-02",
+      "line": 54,
+      "source_head": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+      "plan_path": "tasks/2026-11-23-multi-agent-master-allocation-review.md",
+      "plan_blob": "d4206b17122c9c35ff1743251931debc0145438d",
+      "old_marker": "NO_TASK_YET",
+      "replace_with_targets": [
+        {
+          "pr": 28,
+          "head": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+          "path": "tasks/2026-11-23-codex-gov02-s1-repo-validator.md",
+          "blob": "ed05934674c41457f41ad84b2e6fcce032aa99a7"
+        }
+      ],
+      "writer": "chatgpt",
+      "origin": "DELTA_SCOPE"
+    }
+  ],
+  "shared_files": [
+    {
+      "path": "CATALOG.yaml",
+      "prs": [
+        10,
+        13
+      ],
+      "target_blobs": {
+        "10": "d5371e4887ae1b47028495366e06021de3a1b610",
+        "13": "ba2f0da47c12a05858a2e86787c96ae6c5f5fbc9"
+      }
+    },
+    {
+      "path": "CHANGELOG.md",
+      "prs": [
+        10,
+        13
+      ],
+      "target_blobs": {
+        "10": "9c34f426f89080d0240c364f0c297a85b0642099",
+        "13": "dd1d1e06cc22db6d82358881d86dfe42f083aad1"
+      }
+    },
+    {
+      "path": "STATE.md",
+      "prs": [
+        10,
+        13
+      ],
+      "target_blobs": {
+        "10": "119fcb2ec0c2bc2e6761930aec206d838b67d5cb",
+        "13": "c1c3a531951f1332f37d73cc729d9f4b7c6e97c2"
+      }
+    }
+  ],
+  "counts": {
+    "mapped_from_s1": 24,
+    "added_scope": 16,
+    "total": 40,
+    "held": 1,
+    "shared_overlap": 3,
+    "s1_stale": 5,
+    "additional_stale": 1
+  },
+  "source_acceptance_anchors": {
+    "s1": 7092001295,
+    "s3_d1": 7091488222,
+    "s4_d1": 7091856757,
+    "ops_s1": 7091677094,
+    "ops_s2_needs_delta": 7091997554,
+    "biz_s2": 7091870025,
+    "a0_dossier": 7091925689,
+    "sec_owner_gate": 7092009189
+  },
+  "checks_observed": [
+    "GitHub HEAD, tree, base and file list cross-check for all 14 sources",
+    "old gap mapping bijective; all candidate paths exist at source HEAD with matching Git blob",
+    "all candidate IDs unique and disjoint from observed catalog IDs",
+    "all candidates absent from current main and observed catalog union",
+    "five old and one new stale rows backed by source tasks",
+    "OPS duplicate confirmed, SEC executor from front matter, five A0 decisions still pending"
+  ],
+  "writers": {
+    "CATALOG.yaml": "Codex after explicit approval",
+    "CHANGELOG.md": "Codex after explicit approval",
+    "STATE.md": "ChatGPT Coordinator",
+    "PR#6": "ChatGPT Coordinator"
+  },
+  "phase_b_gate": "BLOCKED_PENDING_INDEPENDENT_QA_AND_COORDINATOR_APPROVAL",
+  "verdict": "GOV02_S2_RECONCILIATION_PLAN_READY_FOR_REVIEW",
+  "next_owner": "ChatGPT Coordinator",
+  "work_s1_qa": {
+    "pr": 28,
+    "head": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+    "comment": 7092060267,
+    "verdict": "NEEDS_CODEX_DELTA",
+    "finding": "GOV02-QA-01",
+    "phase_a_source_recheck": {
+      "frontmatter_paths": 30,
+      "distinct_ids": 29,
+      "duplicates": {
+        "ttd-hostinger-ops01a-s2-lifecycle-2026-11-23": [
+          "reports/2026-11-23-hostinger-ops01a-s2-lifecycle.md",
+          "tasks/2026-11-23-hostinger-ops01a-s2-lifecycle.md"
+        ]
+      }
+    },
+    "required_before_phase_b": [
+      "Separately authorized S1 fix and cross-package regression",
+      "Independent Work PASS at the reviewed repaired HEAD",
+      "Explicit coordinator approval of Phase B write set"
+    ]
+  }
+}
