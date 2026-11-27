@@ -1,0 +1,387 @@
+{
+  "task_id": "ENG-01A-S3",
+  "agent": "codex",
+  "observed_date_ict": "2026-11-23",
+  "recorded_utc": "2026-11-23T03:55:59.570363+00:00",
+  "base_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "rules_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "workflow_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "spec_commit": "e039f187486a16035ccbc88a086a8f38e5b13063",
+  "assignment": "https://github.com/DuyKienTTD/Hosting/pull/13#issuecomment-7091064405",
+  "ack_execute": "EXECUTE_RECEIVED_AND_ACKNOWLEDGED_2026_11_23",
+  "sources": {
+    "s1_pr10": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+    "s2_pr13": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+    "plan_pr6": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+    "d1_pr7": "d4962a4c1cd35b672f6c016d8057079b5a963268",
+    "biz01_pr12": "8c821bbf1842eccb8519127f54ba7673965276d5"
+  },
+  "pinned_artifacts": {
+    "offline_connector.py": {
+      "commit": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+      "path": "sandbox/connector-contracts/offline_connector.py",
+      "git_blob": "2bbfb4ef308e39ea1b548f22553c673d3a684a97"
+    },
+    "channel_mocks.py": {
+      "commit": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+      "path": "sandbox/connector-channel-mocks/channel_mocks.py",
+      "git_blob": "bfda39bf3ac07aba09009462bb60620970a31951"
+    },
+    "fixtures.json": {
+      "commit": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+      "path": "sandbox/connector-channel-mocks/fixtures.json",
+      "git_blob": "ec30d2dd9d2fb9a0dbd0b6179d0a424321fdd166"
+    }
+  },
+  "tested_source": {
+    "sandbox/connector-integration/bridge.py": {
+      "git_blob": "f4f34acc1b4a6d29e6e0f3775bead5ec0e7989a5",
+      "checked_out_sha256": "9b5055b974753408eaccac1b18a9db981eab901e131627f20a65b2cde6d33c25"
+    },
+    "sandbox/connector-integration/pinned_sources.py": {
+      "git_blob": "78bc55a75782c5ea2905b0efa5d12abd3ff9ef27",
+      "checked_out_sha256": "2d69db9f56a3cf9a3fdd2d6f9a067c44296d5561225f1633c4eaae8b175c8756"
+    },
+    "sandbox/connector-integration/merge_preview.py": {
+      "git_blob": "d8e122c98cc095644f42cffdc66b91bcd4387707",
+      "checked_out_sha256": "91bfe218f499355106a68883e090cca432171c188612f5be73ed95bdad819a09"
+    },
+    "sandbox/connector-integration/test_integration.py": {
+      "git_blob": "8fbe718e96d41786e63f9cc50426e6adbd89a5b7",
+      "checked_out_sha256": "b894ece91b9f0acc06d7369efa906045d21cd199652451f7f5c3fc5f3cce7908"
+    }
+  },
+  "source_manifest_sha256": "f5272522021ace0cdbdf0b844c89339a34705e4452243072b55930ef57f24274",
+  "environment": {
+    "python": "3.12.3",
+    "implementation": "CPython",
+    "os": "Windows",
+    "os_release": "11",
+    "machine": "AMD64",
+    "sqlite": "3.45.1",
+    "git": "git version 2.54.0.windows.1",
+    "utf8_mode": true,
+    "dependencies": "standard library and pinned offline modules"
+  },
+  "environment_sha256": "6bfdda24b341a53f9ef49487d12fe6ed094bea166d30e88511443b8524cbd282",
+  "source_audit": {
+    "imports": [
+      "argparse",
+      "bridge",
+      "hashlib",
+      "importlib.util",
+      "json",
+      "os",
+      "pathlib",
+      "pinned_sources",
+      "re",
+      "subprocess",
+      "sys",
+      "tempfile",
+      "unittest"
+    ],
+    "live_enabled": false,
+    "socket_audit_self_check": "denied",
+    "git_external_protocols_and_lazy_fetch_disabled": true
+  },
+  "tests_run": 8,
+  "cases": {
+    "callback_binding": {
+      "expected": "mismatched native request denied, valid callback returns same receipt",
+      "observed": {
+        "rejected": true,
+        "unchanged": true,
+        "receipt_binding": {
+          "contract_version": 1,
+          "s3_request_sha256": "c48dc1948f48b05f164a65be27be5192d4bf31c16a545c95b4eef23fd527fb3c",
+          "native_request_sha256": "4dffa9d53becd9a7797360bb0249e3e1c8afa8501f087504042fe0c43ab20c46",
+          "native_receipt_id": "receipt-c15abd9feb88936976cde4fd6807270f289ba894c231fa99f21f4c0d05a1586a",
+          "result_sha256": "93d864511a3044f477ffb1db14031a91f7581eef7cbaf298580f426afb176581",
+          "outcome": "completed",
+          "binding_sha256": "35cfe97d755ab158d56d697e790b2a4da53daccdb18b717cfe2fab86d3634bba"
+        }
+      }
+    },
+    "crash_after_receipt": {
+      "expected": "same outbox and committed receipt after fresh worker ACK, no reread",
+      "observed": {
+        "before_state": "sending",
+        "outcome": "completed",
+        "same_native_receipt": true,
+        "same_callback": true,
+        "dispatches": 1,
+        "read_attempts": 1,
+        "receipts": 1,
+        "external_effect_delivered": false,
+        "exit": 86,
+        "crash_pid": 2488,
+        "recovery_pid": 27192,
+        "receipt_binding": {
+          "contract_version": 1,
+          "s3_request_sha256": "24cb4f1e62fe35ad193f56b625168b9dfc29a12a10ac2a346cb4aaf72360a273",
+          "native_request_sha256": "276c9bfda45cdf0e7bd4460b50c949a2acce3f199136378368c2d6a807601b31",
+          "native_receipt_id": "receipt-aa1b943316441bbb68b23e38b51f2a1a3bdce9906146d79d2713c90657c3df53",
+          "result_sha256": "631c1ee678df3589ce7b1a46a31690f9742c1452aa5e6084d5ff156524e53e69",
+          "outcome": "completed",
+          "binding_sha256": "23ff69bd7085bb1380f6799734f3f4199dd834e8fd405dba5a2392af29ff411d"
+        },
+        "audit": [
+          {
+            "sequence": 1,
+            "event": "admitted",
+            "observed_ms": 0
+          },
+          {
+            "sequence": 2,
+            "event": "working",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 3,
+            "event": "fake_dispatch",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 4,
+            "event": "sending",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 5,
+            "event": "receipt_committed",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 6,
+            "event": "receipt_ack",
+            "observed_ms": 2
+          }
+        ]
+      }
+    },
+    "crash_after_read": {
+      "expected": "one fake dispatch/read before crash; immutable unknown and one receipt after restart",
+      "observed": {
+        "before_state": "working",
+        "outcome": "outcome_unknown",
+        "dispatches": 1,
+        "read_attempts": 1,
+        "receipts": 1,
+        "late_settlement_rejected": true,
+        "result_exposed": false,
+        "external_effect_delivered": false,
+        "exit": 86,
+        "crash_pid": 18764,
+        "recovery_pid": 39052,
+        "receipt_binding": {
+          "contract_version": 1,
+          "s3_request_sha256": "2d549376512740d5992360d07e3829b02805c4d1d1176c3f37cb686f48b08ae0",
+          "native_request_sha256": "f26ba83803f62e097d52b564edb114bf753fdeb64e010b5b19fe6c90a8c57fd4",
+          "native_receipt_id": "receipt-37ee7bd396956a1ce75e3b72fec55e269548d0ac5c574a6e3ba7433eed86f97f",
+          "result_sha256": null,
+          "outcome": "outcome_unknown",
+          "binding_sha256": "0380931b8e900a0392b1f1d6469f6e1f6d0a27f846b54c1d299dd8e2a78029a8"
+        },
+        "audit": [
+          {
+            "sequence": 1,
+            "event": "admitted",
+            "observed_ms": 0
+          },
+          {
+            "sequence": 2,
+            "event": "working",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 3,
+            "event": "fake_dispatch",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 4,
+            "event": "sending",
+            "observed_ms": 2
+          },
+          {
+            "sequence": 5,
+            "event": "receipt_committed",
+            "observed_ms": 2
+          },
+          {
+            "sequence": 6,
+            "event": "receipt_ack",
+            "observed_ms": 2
+          }
+        ]
+      }
+    },
+    "errors_and_unknown": {
+      "expected": "403/429/404/422 failed, 504 unknown, no cursor/watermark advancement or retry",
+      "observed": {
+        "forbidden": {
+          "http": 403,
+          "outcome": "failed",
+          "dispatches": 1,
+          "receipts": 1
+        },
+        "quota": {
+          "http": 429,
+          "outcome": "failed",
+          "dispatches": 1,
+          "receipts": 1
+        },
+        "delayed": {
+          "http": 504,
+          "outcome": "outcome_unknown",
+          "dispatches": 1,
+          "receipts": 1
+        },
+        "missing_status": 404,
+        "invalid_status": 422,
+        "same_cursor_valid_after_faults": true
+      }
+    },
+    "ga4_admission_replay": {
+      "expected": "3 attributed rows, stable job and receipt, conflict 409",
+      "observed": {
+        "rows": 3,
+        "replay_http": 200,
+        "conflict_http": 409,
+        "request_sha256": "3efe9fad17c5a287ad324a9068b6a090676b478121e68e5475abf49f2c3489fc",
+        "receipt_binding": {
+          "contract_version": 1,
+          "s3_request_sha256": "3efe9fad17c5a287ad324a9068b6a090676b478121e68e5475abf49f2c3489fc",
+          "native_request_sha256": "76ea8809b36fa60ab757e58a4553aa0ec3c95128ac1c458558fc6af94b36e268",
+          "native_receipt_id": "receipt-c48d233fefd72863b15154baaaa442dbfe8c3487d81cb8fb1cfa616c87f0b84b",
+          "result_sha256": "93d864511a3044f477ffb1db14031a91f7581eef7cbaf298580f426afb176581",
+          "outcome": "completed",
+          "binding_sha256": "e0d466c6cc19a15759f049cca2b6416946591da20f8c30b93fcf171188dae6e0"
+        },
+        "audit": [
+          {
+            "sequence": 1,
+            "event": "admitted",
+            "observed_ms": 0
+          },
+          {
+            "sequence": 2,
+            "event": "working",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 3,
+            "event": "fake_dispatch",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 4,
+            "event": "sending",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 5,
+            "event": "receipt_committed",
+            "observed_ms": 1
+          },
+          {
+            "sequence": 6,
+            "event": "receipt_ack",
+            "observed_ms": 1
+          }
+        ]
+      }
+    },
+    "native_deadline": {
+      "expected": "expired S1 deadline creates an unknown receipt with zero fake dispatches and S2 reads",
+      "observed": {
+        "outcome": "outcome_unknown",
+        "dispatches": 0,
+        "read_attempts": 0,
+        "receipts": 1,
+        "receipt_binding": {
+          "contract_version": 1,
+          "s3_request_sha256": "fed2b1c6beba188e2d263afc308d8ef5b7a75baf6919956a44bb5ef85223e6a1",
+          "native_request_sha256": "c08af693da018c82ade36e1bb9a8bd1d796671190c43bf35634e7c306eea95cb",
+          "native_receipt_id": "receipt-5e05dc665c10ee58a1e4128fb225deafadb58e0a429341df998e21da96a28d45",
+          "result_sha256": null,
+          "outcome": "outcome_unknown",
+          "binding_sha256": "55b196fcf0ebe4553ad0316cd9b2b928769ecf0008dbb4183a75d209f823fad4"
+        }
+      }
+    },
+    "offline_safety": {
+      "expected": "malformed/unauthorized/live config denied, pin drift refused, synthetic provenance",
+      "observed": {
+        "invalid_intents": 6,
+        "endpoint_denied": true,
+        "credentials_denied": true,
+        "socket_audit_denied": true,
+        "pin_mutation_rejected": true,
+        "normalized_rows": 5,
+        "personal_fields": 0
+      }
+    },
+    "wp_woo_reads": {
+      "expected": "EN/VI list, correct currency, stable cursor and same snapshot re-read",
+      "observed": {
+        "per_locale": {
+          "en": [
+            "fake-product-en-a",
+            "fake-product-en-b"
+          ],
+          "vi": [
+            "fake-product-vi-a",
+            "fake-product-vi-b"
+          ]
+        },
+        "detail": "fake-page-vi-a",
+        "same_snapshot": true
+      }
+    }
+  },
+  "merge_preview": {
+    "merge_base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "s1": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+    "s2": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+    "merged_tree": "d2e23b3d0c9eaf41a9b3384823cab6da60424b98",
+    "status": "CLEAN_PREVIEW",
+    "conflict_paths": [],
+    "metadata_conflict_matrix": {
+      "CATALOG.yaml": false,
+      "STATE.md": false,
+      "CHANGELOG.md": false
+    },
+    "functional_packages_unchanged": true,
+    "refs_unchanged": true,
+    "detached_checkout_removed": true,
+    "proposed_metadata_diff": "diff --git a/CATALOG.yaml b/CATALOG.yaml\nindex 719c9c5..97b2140 100644\n--- a/CATALOG.yaml\n+++ b/CATALOG.yaml\n@@ -1,5 +1,5 @@\n schema_version: 1\n-updated_at: 2026-11-22\n+updated_at: 2026-11-23\n repository_visibility: public\n default_language: vi\n \n@@ -202,6 +202,32 @@ documents:\n     updated_at: 2026-11-21\n     sensitivity: public-redacted\n \n+  - id: eng-01a-s2-fake-channel-adapters\n+    path: tasks/2026-11-23-eng-01a-s2-fake-channel-adapters.md\n+    type: task\n+    status: ready_for_review\n+    authoritative_for: eng-01a-s2-synthetic-read-scope\n+    updated_at: 2026-11-23\n+    sensitivity: public\n+\n+  - id: eng-01a-s2-fake-channel-adapters-report\n+    path: reports/2026-11-23-eng-01a-s2-fake-channel-adapters.md\n+    type: report\n+    status: current\n+    authoritative_for: eng-01a-s2-fake-ga4-wordpress-woo-read-and-mapping-results\n+    updated_at: 2026-11-23\n+    verified_at: 2026-11-23\n+    sensitivity: public-redacted\n+\n+  - id: eng-01a-s2-fake-channel-adapters-evidence\n+    path: reports/evidence/2026-11-23-eng-01a-s2-fake-channel-adapters.json\n+    type: evidence\n+    status: current\n+    authoritative_for: eng-01a-s2-delta-cases-and-source-environment-digests\n+    updated_at: 2026-11-23\n+    verified_at: 2026-11-23\n+    sensitivity: public-redacted\n+\n   - id: hostinger-account-capability-inventory-2026-11-21\n     path: reports/2026-11-21-hostinger-account-capability-inventory.md\n     type: report\n@@ -1104,6 +1130,32 @@ documents:\n     updated_at: 2026-11-22\n     sensitivity: public-redacted\n \n+  - id: eng-01a-s1-offline-connector-contract\n+    path: tasks/2026-11-23-eng-01a-s1-offline-connector-contract.md\n+    type: task\n+    status: ready_for_review\n+    authoritative_for: eng-01a-s1-offline-fake-connector-scope\n+    updated_at: 2026-11-23\n+    sensitivity: public\n+\n+  - id: eng-01a-s1-offline-connector-contract-report\n+    path: reports/2026-11-23-eng-01a-s1-offline-connector-contract.md\n+    type: report\n+    status: current\n+    authoritative_for: eng-01a-s1-offline-contract-and-worker-recovery-results\n+    updated_at: 2026-11-23\n+    verified_at: 2026-11-23\n+    sensitivity: public-redacted\n+\n+  - id: eng-01a-s1-offline-connector-contract-evidence\n+    path: reports/evidence/2026-11-23-eng-01a-s1-offline-connector-contract.json\n+    type: evidence\n+    status: current\n+    authoritative_for: eng-01a-s1-local-case-results-and-source-environment-digests\n+    updated_at: 2026-11-23\n+    verified_at: 2026-11-23\n+    sensitivity: public-redacted\n+\n collections:\n   agents: verified agent role profiles and capability evidence\n   tasks: committed work orders and acceptance criteria\ndiff --git a/CHANGELOG.md b/CHANGELOG.md\nindex 2d1095f..15c41e6 100644\n--- a/CHANGELOG.md\n+++ b/CHANGELOG.md\n@@ -2,8 +2,12 @@\n \n ## 2026-11-23\n \n+- ENG-01A-S1 \u0111\u1ea1t 8/8 ki\u1ec3m th\u1eed offline, g\u1ed3m b\u1ed1n c\u1eeda s\u1ed5 worker crash/restart, replay kh\u00f4ng dispatch l\u1eb7p v\u00e0 receipt b\u1ea5t bi\u1ebfn. Ch\u1edd ChatGPT \u0110i\u1ec1u ph\u1ed1i nghi\u1ec7m thu. [B\u00e1o c\u00e1o](reports/2026-11-23-eng-01a-s1-offline-connector-contract.md).\n+\n - Nghi\u1ec7m thu B2-O fake local t\u1ea1i `d95f161` v\u00e0 chu\u1ea9n b\u1ecb B2-P preflight ch\u1ec9 \u0111\u1ecdc.\n \n+- ENG-01A-S2 \u0111\u1ea1t 7/7 test delta cho GA4 v\u00e0 WordPress/WooCommerce synthetic reads. Ch\u1edd ChatGPT \u0110i\u1ec1u ph\u1ed1i nghi\u1ec7m thu, connector th\u1eadt ch\u01b0a th\u1eed. [B\u00e1o c\u00e1o](reports/2026-11-23-eng-01a-s2-fake-channel-adapters.md).\n+\n ## 2026-11-22\n \n - Ph\u00e2n vai WS-02: Hostinger Agent x\u00e1c minh hi\u1ec7n tr\u1ea1ng qua hPanel \u0111\u1ed9c l\u1eadp, Work so\u1ea1n runbook v\u00e0 di\u1ec5n t\u1eadp. [Task Hostinger](tasks/2026-11-22-hostinger-ws02-infrastructure-baseline.md).\ndiff --git a/STATE.md b/STATE.md\nindex c8e8941..f5de4d4 100644\n--- a/STATE.md\n+++ b/STATE.md\n@@ -2,7 +2,7 @@\n id: current-state\n type: state\n status: current\n-updated_at: 2026-11-22\n+updated_at: 2026-11-23\n verified_at: 2026-11-21\n sensitivity: public-redacted\n ---\n@@ -92,6 +92,8 @@ sensitivity: public-redacted\n \n ## Vi\u1ec7c \u0111ang ch\u1edd\n \n+- **ENG-01A-S1:** Codex b\u00e1o `ENG01A_S1_OFFLINE_CONTRACT_PASS` sau 8/8 ki\u1ec3m th\u1eed local, g\u1ed3m crash/restart worker \u1edf `working/sending`. Ch\u1edd ChatGPT \u0110i\u1ec1u ph\u1ed1i nghi\u1ec7m thu. Connector th\u1eadt `REAL_CONNECTOR_UNTESTED`. [B\u00e1o c\u00e1o](reports/2026-11-23-eng-01a-s1-offline-connector-contract.md).\n+\n - **WS-02 \u2014 Hostinger Agent:** X\u00e1c minh baseline VPS, Docker v\u00e0 backup qua hPanel ch\u1ec9 \u0111\u1ecdc theo PR ri\u00eang. Work ti\u1ebfp t\u1ee5c runbook/di\u1ec5n t\u1eadp, Codex ti\u1ebfp t\u1ee5c B2-O. Handoff `PREPARED_FOR_OWNER_FORWARD`. [Task Hostinger](tasks/2026-11-22-hostinger-ws02-infrastructure-baseline.md).\n \n - **WS-02 \u2014 Work \u0111\u1ed9c l\u1eadp:** Chu\u1ea9n b\u1ecb runbook gi\u00e1m s\u00e1t/triage VPS, n8n v\u00e0 Hermes c\u00f9ng ba ca di\u1ec5n t\u1eadp gi\u1ea3 theo backlog v\u1eadn h\u00e0nh. \u0110\u1ea7u ra v\u00e0 PR ri\u00eang, \u0111\u1ed9c l\u1eadp B2-O. Handoff `PREPARED_FOR_OWNER_FORWARD`. [Task Work](tasks/2026-11-22-work-ws02-monitoring-and-triage.md).\n@@ -179,6 +181,8 @@ sensitivity: public-redacted\n - Provider E2E v\u00e0 GATE A mock \u0111\u00e3 c\u00f3 evidence. **GATE B \u0111\u00e3 \u0111\u01b0\u1ee3c ph\u00ea duy\u1ec7t c\u00f3 \u0111i\u1ec1u ki\u1ec7n** cho t\u1ed1i \u0111a \u0111\u00fang m\u1ed9t Hermes Agent paid call; v\u1eabn ch\u1edd Codex ch\u1ea1y/ghi evidence, kh\u00f4ng \u0111\u01b0\u1ee3c t\u1ef1 \u0111\u1ed5i guard hay d\u00f9ng adapter OpenAI tr\u1ef1c ti\u1ebfp \u0111\u1ec3 thay b\u1eb1ng ch\u1ee9ng Hermes.\n - Ch\u01b0a k\u1ebft n\u1ed1i/x\u00e1c minh Google Ads, GA4, WordPress/WooCommerce, YouTube, TikTok, Meta, Kling, HeyGen ho\u1eb7c ElevenLabs.\n \n+- **ENG-01A-S2:** Codex b\u00e1o `ENG01A_S2_CHANNEL_MOCK_PASS` sau 7/7 test delta Windows, ch\u1edd ChatGPT \u0110i\u1ec1u ph\u1ed1i nghi\u1ec7m thu. GA4 v\u00e0 WP/Woo th\u1eadt ch\u01b0a th\u1eed, `LINUX_NOT_RUN / INTEGRATION_PENDING_PR10`. [B\u00e1o c\u00e1o](reports/2026-11-23-eng-01a-s2-fake-channel-adapters.md).\n+\n ## T\u00e0i li\u1ec7u ti\u1ebfp theo\n \n - Ki\u1ec3m k\u00ea: `inventory/current-vps-state.md`\n"
+  },
+  "proposed_merge_order": [
+    "review S1 PR #10",
+    "recheck and review S2 PR #13 against updated main",
+    "review S3 harness against both approved sources"
+  ],
+  "scope_counters": {
+    "fixture_network_requests": 0,
+    "provider_calls": 0,
+    "paid_attempts": 0,
+    "usd": 0,
+    "kvm2_accesses": 0,
+    "production_mutations": 0,
+    "original_pr_changes": 0,
+    "main_updates": 0
+  },
+  "limits": {
+    "linux": "LINUX_NOT_RUN",
+    "linux_reason": "WSL listed only docker-desktop; no authorized independent Linux runtime",
+    "real_connector": "REAL_CONNECTOR_UNTESTED",
+    "external_effect_exactly_once": "NOT_PROVEN",
+    "historical_suites_rerun": false,
+    "paid_gate_b": "BLOCKED_PREFLIGHT"
+  },
+  "verdict": "ENG01A_S3_OFFLINE_INTEGRATION_PASS",
+  "blockers": [],
+  "next_owner": "chatgpt",
+  "handoff_state": "PREPARED_FOR_OWNER_FORWARD"
+}
