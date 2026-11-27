@@ -1,0 +1,373 @@
+{
+  "task": "ENG-01A-S4-D1",
+  "agent": "Codex",
+  "verdict": "ENG01A_S4_D1_MANIFEST_REFRESH_PASS_OFFLINE_LINUX_NOT_RUN",
+  "base_rules": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "workflow_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+  "phase_b_instruction": 7091621291,
+  "phase_a_handoff": 7091484845,
+  "work_qa": {
+    "comment": 7091488222,
+    "verdict": "S3_D1_INDEPENDENT_QA_PASS_WITH_LIMITS",
+    "head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba"
+  },
+  "pr21_parent_head": "761e9545d2fcca8f359513b9918d0a6bb4aef776",
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "arch": "AMD64",
+    "python": "3.12.3",
+    "sqlite": "3.45.1",
+    "git": "git version 2.54.0.windows.1",
+    "linux": "LINUX_NOT_RUN",
+    "wsl": "only stopped Docker Desktop distro"
+  },
+  "pinned_sources": [
+    {
+      "pr": 10,
+      "head": "79dfe8aae5c30d4e896c29333e0296ada1671b7e"
+    },
+    {
+      "pr": 13,
+      "head": "0235b5f9bb38d0d7e99a600188705d50977527f5"
+    },
+    {
+      "pr": 19,
+      "head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba"
+    }
+  ],
+  "manifest_delta": {
+    "changed_blob_pins": [
+      {
+        "path": "sandbox/connector-integration/README.md",
+        "old": {
+          "git_blob_sha1": "5ceac7f8759ecbcaac828b8b0e23794f311fea06",
+          "content_sha256": "9a90be95d712040ac757db67b334e29ff2288236b8bba4c0937f78572893ab37"
+        },
+        "new": {
+          "git_blob_sha1": "ab327ae4bb756bbf7b22b6926f34e6e6888502f7",
+          "content_sha256": "55a6b11b338ed7a24939a3839a92ea8d3d1d34162dcc4802f2655f9be6c59650"
+        }
+      },
+      {
+        "path": "sandbox/connector-integration/bridge.py",
+        "old": {
+          "git_blob_sha1": "f4f34acc1b4a6d29e6e0f3775bead5ec0e7989a5",
+          "content_sha256": "9b5055b974753408eaccac1b18a9db981eab901e131627f20a65b2cde6d33c25"
+        },
+        "new": {
+          "git_blob_sha1": "f65a6f699e9fedc20c9869deea33edb7c20fa2b8",
+          "content_sha256": "0760b96a43bb92bdd5e72f190173220a7e34b29534a04f8924565e08c0766afc"
+        }
+      },
+      {
+        "path": "sandbox/connector-integration/test_integration.py",
+        "old": {
+          "git_blob_sha1": "8fbe718e96d41786e63f9cc50426e6adbd89a5b7",
+          "content_sha256": "b894ece91b9f0acc06d7369efa906045d21cd199652451f7f5c3fc5f3cce7908"
+        },
+        "new": {
+          "git_blob_sha1": "7bc35d40c317056d18c10bef9fdd47b2f6db3d98",
+          "content_sha256": "192fb372b4d71359b629fe5386894d7afb7ed7a7e2c0048d9281deae1e755f1b"
+        }
+      }
+    ],
+    "projected_bundle_sha256": "57d930a7d45cf695cd25bd372a9057a64bf7786d62b83134548dc7d9c0528119",
+    "old_bundle_sha256": "a2ea777f2ea051ff69d75415e36920757e891f772545cb3e98521b19d42701d7",
+    "pinned_paths_preserved": true,
+    "main_policy_s1_s2_pins_preserved": true
+  },
+  "observed_assembly": {
+    "manifest_sha256": "fa224e4608339b4944190c17d5d3c600b29c58d655551173a11cb06143df2887",
+    "bundle_sha256": "57d930a7d45cf695cd25bd372a9057a64bf7786d62b83134548dc7d9c0528119",
+    "assemblies_equal": true,
+    "files_verified": 12,
+    "temporary_assemblies_removed": true
+  },
+  "s4_tests": {
+    "methods": [
+      "test_manifest_changes_fail_closed",
+      "test_assembled_runtime_has_no_live_transport",
+      "test_assembled_unknown_receipt_survives_reopen_and_late_settlement"
+    ],
+    "run": 3,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "passed": true,
+    "old_manifest_rejected_before_creating_destination": true,
+    "observed": {
+      "manifest_drift": {
+        "denied_before_destination_creation": [
+          "baseline_tree",
+          "source_head",
+          "content_digest",
+          "undeclared_path",
+          "duplicate_path",
+          "enable_network"
+        ]
+      },
+      "offline_runtime": {
+        "modules_checked": [
+          "offline_connector.py",
+          "channel_mocks.py",
+          "bridge.py"
+        ],
+        "socket_audit_denial_observed": true
+      },
+      "assembled_unknown": {
+        "state": "outcome_unknown",
+        "native_channel": "fixture",
+        "synthetic_http": 504,
+        "synthetic_records": 0,
+        "receipt_binding": {
+          "contract_version": 1,
+          "s3_request_sha256": "e7bd625ac6de4debcd5cd2819192071281a2116cab83f85cf8d531644c2731e1",
+          "native_request_sha256": "96e2556608675a12cd40594bc7bfce3da2098ce21c45679881d2f9f048ec7e8d",
+          "native_receipt_id": "receipt-dd85562b6c7f9fcd7d5a33d7f56738f8e5cc4a40437cca2140ef06ad85066835",
+          "result_sha256": "81d60785929f89ae04aa60b32006ab1947051b3ed60234ceb5f39f302c5fb01b",
+          "outcome": "outcome_unknown",
+          "binding_sha256": "7adf8e050c6e9f2a8432d8b84cd1f133ff6fb8002f0ff951c2db5b6bc3a4edfe"
+        },
+        "fake_dispatches": 1,
+        "synthetic_reads": 1,
+        "stable_after_reopen": true,
+        "late_settlement_rejected": true,
+        "external_side_effect": false,
+        "artifact_digest_unchanged": true,
+        "observed_fixture_journals": {
+          "state.sqlite": "delete",
+          "worker-lock.sqlite": "delete"
+        }
+      }
+    }
+  },
+  "s3_d1_delta": {
+    "head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+    "worktree_removed": true,
+    "script": "sandbox/connector-integration/test_integration.py",
+    "methods": [
+      "test_recovery_does_not_bind_orphan_delayed_result",
+      "test_crash_inside_settlement_rolls_back_outbox_and_binding",
+      "test_completed_delayed_result_is_bound_after_outbox_restart",
+      "test_crash_after_receipt_before_ack_replays_receipt_only"
+    ],
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "tests_run": 4,
+    "cases": {
+      "orphan_504": {
+        "expected": "prepared 504 survived pre-settlement exception but is absent from recovery receipt",
+        "observed": {
+          "prepared_status": 504,
+          "before_state": "working",
+          "dispatches": 1,
+          "reads": 1,
+          "receipts": 1,
+          "replay_stable": true,
+          "late_settlement_rejected": true,
+          "binding": {
+            "contract_version": 1,
+            "s3_request_sha256": "fb8fad9818856696baa79d7996d30aac2e762ca3f6bcef08ade1ecaaf9c307c3",
+            "native_request_sha256": "0344a04691cc53b161d701ab0d8eaac5b22e95c1ca9f955a1ca0d199b77659c5",
+            "native_receipt_id": "receipt-54ef5f3ec80ea597c53d3195d7109113de9eca39e75db44d5ece7964f7080a35",
+            "result_sha256": null,
+            "outcome": "outcome_unknown",
+            "binding_sha256": "8074d1edb18a1054de36781997065a4871dcda7abe8ce38d87e28d2a0aed24c3"
+          }
+        }
+      },
+      "transaction_crash": {
+        "expected": "exit rolls back outbox and association; recovery suppresses unbound 504",
+        "observed": {
+          "exit": 86,
+          "crash_pid": 3452,
+          "before_state": "working",
+          "outbox_rolled_back": true,
+          "association_rolled_back": true,
+          "dispatches": 1,
+          "reads": 1,
+          "receipts": 1,
+          "binding": {
+            "contract_version": 1,
+            "s3_request_sha256": "c67640651c6551f0eb2cb00e866af2032182f71082356b5f9eab8db6561c9db8",
+            "native_request_sha256": "5abd81d95265adbe3e0fdad7f0b10f4210509ab431e85bcea45f5451d9ba5e92",
+            "native_receipt_id": "receipt-de343ca0857e36fe118932876eb6eb86829875a8566346b111526400f7fbb3b2",
+            "result_sha256": null,
+            "outcome": "outcome_unknown",
+            "binding_sha256": "15d865d035e850c7a53c085ae9bfbd28cb2a3133ed5ef7fc22ca7bab8c11ecdc"
+          }
+        }
+      },
+      "bound_504": {
+        "expected": "normal 504 and committed outbox restart both expose a verified 504 under native unknown",
+        "observed": {
+          "status": 504,
+          "dispatches": 1,
+          "reads": 1,
+          "receipts": 1,
+          "normal_binding": {
+            "contract_version": 1,
+            "s3_request_sha256": "8656ed2f4a171156df38195f2bd4a16daec7239162c92efa7fdc2c944b24932d",
+            "native_request_sha256": "3eced422eaacbd2f329da991525d648016255d8e7596b70012aeef351ad4874a",
+            "native_receipt_id": "receipt-e9717f9d8e287c787ca3c57d2e7c1d9d38b5cee46b41677afcc3afd5b2d0d765",
+            "result_sha256": "81d60785929f89ae04aa60b32006ab1947051b3ed60234ceb5f39f302c5fb01b",
+            "outcome": "outcome_unknown",
+            "binding_sha256": "bad3d957647db301c1279689f0b22ff2763f40dbb6ec6e99244bd5fc4a346f25"
+          },
+          "exit": 86,
+          "crash_pid": 30160,
+          "recovery_pid": 9308,
+          "recovered_binding": {
+            "contract_version": 1,
+            "s3_request_sha256": "fa4aace514f65c464e5b626ef28733b5a36275ad1e739748e4c43ded0ae53474",
+            "native_request_sha256": "41fe2686cf11f7faf81da4679c3ceaac4c79af3ba4982ed073c11e88bbb6bd8b",
+            "native_receipt_id": "receipt-b392e6252136991671ccc352e1e438a79af048121475a3c3c84dec464c9cdf3f",
+            "result_sha256": "81d60785929f89ae04aa60b32006ab1947051b3ed60234ceb5f39f302c5fb01b",
+            "outcome": "outcome_unknown",
+            "binding_sha256": "bb07b212a882e643c5d5af8a159a390831f41c804e90a672f2bb4b53287ba590"
+          }
+        }
+      },
+      "crash_after_receipt": {
+        "expected": "same outbox and committed receipt after fresh worker ACK, no reread",
+        "observed": {
+          "before_state": "sending",
+          "outcome": "completed",
+          "same_native_receipt": true,
+          "same_callback": true,
+          "dispatches": 1,
+          "read_attempts": 1,
+          "receipts": 1,
+          "external_effect_delivered": false,
+          "exit": 86,
+          "crash_pid": 16528,
+          "recovery_pid": 17008,
+          "receipt_binding": {
+            "contract_version": 1,
+            "s3_request_sha256": "24cb4f1e62fe35ad193f56b625168b9dfc29a12a10ac2a346cb4aaf72360a273",
+            "native_request_sha256": "276c9bfda45cdf0e7bd4460b50c949a2acce3f199136378368c2d6a807601b31",
+            "native_receipt_id": "receipt-aa1b943316441bbb68b23e38b51f2a1a3bdce9906146d79d2713c90657c3df53",
+            "result_sha256": "631c1ee678df3589ce7b1a46a31690f9742c1452aa5e6084d5ff156524e53e69",
+            "outcome": "completed",
+            "binding_sha256": "23ff69bd7085bb1380f6799734f3f4199dd834e8fd405dba5a2392af29ff411d"
+          },
+          "audit": [
+            {
+              "sequence": 1,
+              "event": "admitted",
+              "observed_ms": 0
+            },
+            {
+              "sequence": 2,
+              "event": "working",
+              "observed_ms": 1
+            },
+            {
+              "sequence": 3,
+              "event": "fake_dispatch",
+              "observed_ms": 1
+            },
+            {
+              "sequence": 4,
+              "event": "sending",
+              "observed_ms": 1
+            },
+            {
+              "sequence": 5,
+              "event": "receipt_committed",
+              "observed_ms": 1
+            },
+            {
+              "sequence": 6,
+              "event": "receipt_ack",
+              "observed_ms": 2
+            }
+          ]
+        }
+      }
+    }
+  },
+  "merge_preview": {
+    "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "plan_pr6_head": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+    "steps": [
+      {
+        "pr": 10,
+        "head": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+        "merge_base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+        "input_tree_or_commit": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+        "preview_tree": "1b5dfc68d1c32c682619cbee8bccd9873f656a6c",
+        "functional_conflicts": [],
+        "shared_metadata_conflicts": [],
+        "other_conflicts": []
+      },
+      {
+        "pr": 13,
+        "head": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+        "merge_base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+        "input_tree_or_commit": "1b5dfc68d1c32c682619cbee8bccd9873f656a6c",
+        "preview_tree": "d2e23b3d0c9eaf41a9b3384823cab6da60424b98",
+        "functional_conflicts": [],
+        "shared_metadata_conflicts": [],
+        "other_conflicts": []
+      },
+      {
+        "pr": 19,
+        "head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+        "merge_base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+        "input_tree_or_commit": "d2e23b3d0c9eaf41a9b3384823cab6da60424b98",
+        "preview_tree": "00e7c4de7d97f1e171606dfcf9775b69fe84a3b8",
+        "functional_conflicts": [],
+        "shared_metadata_conflicts": [],
+        "other_conflicts": []
+      }
+    ],
+    "status": "CLEAN_TEXT_PREVIEW",
+    "combined_tree": "00e7c4de7d97f1e171606dfcf9775b69fe84a3b8",
+    "functional_blobs_unchanged": true,
+    "index_semantics": {
+      "duplicate_catalog_ids": [],
+      "new_missing_relative_index_links": [],
+      "preexisting_missing_relative_index_links": [],
+      "offline_task_catalog_status": {
+        "tasks/2026-11-23-eng-01a-s2-fake-channel-adapters.md": "ready_for_review",
+        "tasks/2026-11-23-eng-01a-s1-offline-connector-contract.md": "ready_for_review"
+      },
+      "s3_existing_paths_not_yet_indexed": [
+        "reports/2026-11-23-eng-01a-s3-d1-prepared-result-binding.md",
+        "reports/2026-11-23-eng-01a-s3-integration-and-merge-preview.md",
+        "reports/evidence/2026-11-23-eng-01a-s3-d1-prepared-result-binding.json",
+        "reports/evidence/2026-11-23-eng-01a-s3-integration.json",
+        "tasks/2026-11-23-eng-01a-s3-offline-integration.md"
+      ],
+      "plan_eng01a_stale_no_task_yet": true,
+      "plan_eng01a_mentions_s3": false
+    }
+  },
+  "phase_a_preview_including_original_pr21": {
+    "tree": "0e13b1f37a94a0139f53f457b5fdcdd0c2588d55",
+    "merge_base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "functional_conflicts": [],
+    "shared_metadata_conflicts": [],
+    "other_conflicts": [],
+    "candidate_manifest_applied": false,
+    "current_pr21_contains_stale_s3_pin": true,
+    "s4_existing_paths_not_yet_indexed": [
+      "reports/2026-11-23-eng-01a-s4-release-readiness.md",
+      "reports/evidence/2026-11-23-eng-01a-s4-release-readiness.json",
+      "tasks/2026-11-23-eng-01a-s4-linux-release-readiness.md"
+    ]
+  },
+  "limits": {
+    "historical_suites_rerun": false,
+    "production": false,
+    "kvm2": false,
+    "live_connectors": false,
+    "paid_api": false,
+    "actions": false,
+    "gate_b_paid": "BLOCKED_PREFLIGHT",
+    "ai03": "NO_GO_CURRENT_PREFLIGHT"
+  },
+  "next_owner": "ChatGPT Coordinator"
+}
