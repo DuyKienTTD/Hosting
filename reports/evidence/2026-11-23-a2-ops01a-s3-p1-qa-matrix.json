@@ -1,0 +1,346 @@
+{
+  "task": "A2-OPS01A-S3-P1-TECHNICAL-SPEC",
+  "version": "P1-D1",
+  "source_pr36_head": "5626bb55072cdcca0d39f3ba57180d3c57af05ad",
+  "source_lifecycle_blob": "0043cb1a00ff1a3e9fbc7f1267900ebde02f4769",
+  "execution_status": "DESIGNED_NOT_RUN",
+  "scenario_count": 24,
+  "scenarios": [
+    {
+      "id": "M01",
+      "title": "Replay before watermark",
+      "precondition": "row NORMAL rev=4, E1, id=A committed, last_ts=T2",
+      "input": "same canonical A at T1; current last_ts=T2",
+      "fault_point": "after validation, before watermark",
+      "expected": "EXACT_REPLAY; ledger=1; rev=4; no outbox; no new ACK",
+      "evidence_required": "ledger key/hash, control rev, classification trace",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M02",
+      "title": "Conflicting replay after restart",
+      "precondition": "snapshot restored with A hash H, rev=5",
+      "input": "A with changed signal/canonical H2",
+      "fault_point": "after restart lookup",
+      "expected": "CONFLICTING_REPLAY; ledger=1; rev=5; no outbox",
+      "evidence_required": "durable hash, restart boot ID, incident/outbox",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M03",
+      "title": "Canonical/version mismatch",
+      "precondition": "A stored with canonical v1 and original-byte digest",
+      "input": "same semantic JSON with changed timestamp format, then v2 canonicalization request",
+      "fault_point": "canonical compare/version check",
+      "expected": "conflict or explicit migration mapping; never silently reapply; rev fixed",
+      "evidence_required": "canonical spec/version and hashes",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M04",
+      "title": "Crash before commit",
+      "precondition": "fresh B after 2 bad; ledger and control tx open",
+      "input": "crash after ledger INSERT before COMMIT",
+      "fault_point": "process kill before commit",
+      "expected": "rollback ledger/control/outbox; retry B commits once; exactly one OPEN",
+      "evidence_required": "WAL/tx log, row counts, commit boundary",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M05",
+      "title": "Commit then lost ACK",
+      "precondition": "B completes OPEN transaction",
+      "input": "terminate response path immediately after COMMIT",
+      "fault_point": "post-commit/pre-ACK",
+      "expected": "retry B exact replay, no second OPEN/outbox; ambiguous first ACK reconciled",
+      "evidence_required": "commit LSN/revision, ACK trace, outbox key",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M06",
+      "title": "Concurrent same identity",
+      "precondition": "two workers W1 W2, scope rev=7, E1",
+      "input": "both submit identical C",
+      "fault_point": "interleave unique insert and row lock",
+      "expected": "one committed application; other EXACT_REPLAY in fresh tx; one outbox max",
+      "evidence_required": "txn IDs, unique error, control rev, row count",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M07",
+      "title": "Concurrent conflicts/fence",
+      "precondition": "epoch E2 current, W1 stale E1, W2 valid E2",
+      "input": "W1 bad C, W2 good D",
+      "fault_point": "lease expiry between validation and write",
+      "expected": "W1 rejected at transactional epoch CAS, W2 only effective",
+      "evidence_required": "epoch revision, lock order, commits",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M08",
+      "title": "ENOSPC/SQLITE_BUSY",
+      "precondition": "ledger 90% capacity, durable OPEN and pending outbox",
+      "input": "new unique D and simulated disk full/busy",
+      "fault_point": "during journal/WAL write or lock acquisition",
+      "expected": "fail closed, no partial row/state/outbox, independent degraded signal",
+      "evidence_required": "disk fault log, integrity, alert receipt",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M09",
+      "title": "Tampered backup",
+      "precondition": "signed manifest over DB+ledger+outbox, gen=10",
+      "input": "modify ledger bytes/delete interruption row",
+      "fault_point": "restore verification",
+      "expected": "quarantine; no intake or dispatch; no fallback to audit",
+      "evidence_required": "digest validation, restore decision",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M10",
+      "title": "Old valid signed backup",
+      "precondition": "witness gen=12, backup gen=10",
+      "input": "restore authentic gen=10",
+      "fault_point": "pre-activation freshness check",
+      "expected": "quarantine; no old sample reuse or lost pending notification",
+      "evidence_required": "manifest signatures, witness gen, intake gate",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M11",
+      "title": "Saturation/no eviction",
+      "precondition": "dedupe ledger at configured safe threshold",
+      "input": "256 unique interruptions plus repeated old IDs",
+      "fault_point": "capacity guard",
+      "expected": "new IDs rejected/degraded, old IDs still EXACT_REPLAY; no state reset",
+      "evidence_required": "ledger counts, archived lookup, degraded receipt",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M12",
+      "title": "Storage recovery/archive",
+      "precondition": "ledger full, E1 active, OPEN incident and pending outbox",
+      "input": "increase capacity or archive immutable E1 after approved barrier",
+      "fault_point": "operator archive transaction/restart",
+      "expected": "old IDs searchable, OPEN seq/pending outbox retained, intake only after verification",
+      "evidence_required": "retention manifest, replay lookup, row counts",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M13",
+      "title": "Unauthorized reset",
+      "precondition": "authenticated reader lacks recovery role",
+      "input": "request epoch reset/ledger truncate",
+      "fault_point": "authorization gate",
+      "expected": "DENY; ledger/control/outbox/witness unchanged",
+      "evidence_required": "audit of rejected operation, permissions",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M14",
+      "title": "Independent degraded status",
+      "precondition": "primary DB unavailable, external status channel healthy",
+      "input": "heartbeat and ENOSPC signal",
+      "fault_point": "database connection failure",
+      "expected": "UNKNOWN/NO_GO transmitted via separate fault domain; no false RECOVERED",
+      "evidence_required": "external receipt, topology proof, alert budget",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M15",
+      "title": "Outbox crash/retry",
+      "precondition": "OPEN transition committed, outbox id O=PENDING",
+      "input": "worker crash after send before delivery ACK",
+      "fault_point": "external send/ACK boundary",
+      "expected": "same idempotency key reused; receiver dedupes or status UNCERTAIN requiring reconcile",
+      "evidence_required": "receiver call log, outbox attempts, ack",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M16",
+      "title": "Legacy v1 migration",
+      "precondition": "v1 snapshot contains TRUSTED_INTERRUPTION audit no canonical ledger",
+      "input": "attempt live import",
+      "fault_point": "migration validation",
+      "expected": "REJECT/QUARANTINE; never synthesize replay ledger from audit",
+      "evidence_required": "migration dry-run log, old snapshot digest",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M17",
+      "title": "Downgrade code/rollback",
+      "precondition": "new DB schema/gen and pending outbox",
+      "input": "start old code against new DB/restore older DB",
+      "fault_point": "schema compatibility and startup gate",
+      "expected": "old code blocked or read-only; no reset ledger/outbox",
+      "evidence_required": "schema version, deployment gate, checkpoint",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M18",
+      "title": "Spoofed identity",
+      "precondition": "server-bound resource rule producer P; unsigned event",
+      "input": "JSON source/rule spoof plus valid-looking id",
+      "fault_point": "authentication and admission",
+      "expected": "REJECT before identity reservation; no state/ledger change",
+      "evidence_required": "auth decision, ledger no-row assertion",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M19",
+      "title": "WAL/replica gap",
+      "precondition": "ACKed gen=30; replica/archive at gen=29",
+      "input": "promote lagging replica or restore missing WAL",
+      "fault_point": "promotion/reconciliation barrier",
+      "expected": "QUARANTINE until witness/committed log reconciled; no misleading ACK history",
+      "evidence_required": "LSN/timeline, witness, promotion logs",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "M20",
+      "title": "Cooldown incident identity",
+      "precondition": "OPEN seq=8 alert at T0, bad streak as defined",
+      "input": "bad×3 at +899,+900,+901; recovery good×3",
+      "fault_point": "outbox eligibility evaluation",
+      "expected": "+899 suppressed; +900 eligible; +901 not additional unless newly qualified and cooldown; OPEN seq stable, RECOVERED same incident",
+      "evidence_required": "revision sequence, outbox keys, timestamps",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "N01",
+      "title": "Cross-epoch replay laundering",
+      "precondition": "E1 U committed; epoch rotation authorized E2 with fence",
+      "input": "delayed U(E1) rewrapped as E2 or missing epoch",
+      "fault_point": "epoch-bound authentication/admission",
+      "expected": "REJECT; no row in E2, no streak reset, archived E1 identity accessible",
+      "evidence_required": "signed envelope, epoch issuance, sequence barrier",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "N02",
+      "title": "ACK to witness gap",
+      "precondition": "gen=40 anchored, event U would commit gen=41",
+      "input": "DB commit U then witness timeout before ACK; restore gen=40",
+      "fault_point": "between durable COMMIT and witness advance",
+      "expected": "no final protected ACK; intake/dispatch quarantined on uncertain anchor; reconcile before U replay",
+      "evidence_required": "commit gen, witness response, ACK trace, restore log",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "N03",
+      "title": "Stale outbox worker",
+      "precondition": "W1 lease=5; W2 takes lease=6 after expiry",
+      "input": "W1 resumes after W2 send+ACK",
+      "fault_point": "dispatch fence just before send plus in-flight race",
+      "expected": "W1 denied if not sent; already in-flight can only rely on receiver idempotency or UNCERTAIN",
+      "evidence_required": "lease versions, receiver IDs, attempt states",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    },
+    {
+      "id": "N04",
+      "title": "Common-mode alert failure",
+      "precondition": "primary DB and status reporter mistakenly share disk/credential",
+      "input": "simultaneous ENOSPC and channel auth loss",
+      "fault_point": "correlated fault injection",
+      "expected": "mark monitoring UNKNOWN/NO_GO; no claim of independent alert continuity; activate out-of-band runbook",
+      "evidence_required": "fault-domain map, out-of-band operator receipt",
+      "status": "DESIGNED_NOT_RUN",
+      "applicability": [
+        "SQLITE_WAL_SINGLE_HOST",
+        "POSTGRESQL_MULTI_WORKER"
+      ]
+    }
+  ]
+}
