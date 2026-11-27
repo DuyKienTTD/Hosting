@@ -1,0 +1,38 @@
+{
+  "task": "INF-01B",
+  "agent": "hostinger-agent",
+  "base_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "measured_at_utc": "2026-11-23T03:49:46Z",
+  "verdict": "INF01B_READONLY_PREFLIGHT_INPUT_READY_FOR_REVIEW",
+  "candidate": {
+    "name": "h6-b2-p-fake-candidate",
+    "planned_mode": "fake-only",
+    "live_enabled": false,
+    "planned_platform": "linux-amd64",
+    "planned_host_ports": 0,
+    "planned_services": 8,
+    "planned_internal_networks": 7,
+    "planned_volumes": 6,
+    "planned_cpu_vcpu": 1.5,
+    "planned_memory_mib": 2304
+  },
+  "observations": [
+    {"field":"identity_boundary","status":"PASS_INPUT","observed":"KVM2 VPS and separate managed Hermes resource are distinct","source":"Hostinger control-plane inventory","measured_at_utc":"2026-11-23T03:49Z"},
+    {"field":"project_name_collision","status":"PASS_INPUT","observed":"candidate project absent from observed current project list","scope":"observed project list only"},
+    {"field":"network_volume_bind_collision","status":"NOT_MEASURED","observed":"exact nonce names and bind root unavailable; deeper listing blocked"},
+    {"field":"image_platform_cache","status":"BLOCKED_ACCESS","observed":"candidate resolved manifest/platform/cache not inspected; no pull/build performed"},
+    {"field":"host_memory_disk_inode","status":"PASS_INPUT","observed":"RAM 7940 MiB total, 5185 MiB available, no swap; root 14% blocks and 4% inodes used","measured_at_utc":"2026-11-23T03:49:46Z"},
+    {"field":"docker_current_usage","status":"PASS_INPUT","observed":"point-in-time stats collected for active projects; no trend inferred"},
+    {"field":"p0_reasoner","status":"RISK_FOUND","observed":"current project listing still reports exited 137; no logs/restart"},
+    {"field":"rollback_ledger","status":"PASS_INPUT","observed":"document-only schema recorded; future IDs intentionally absent"},
+    {"field":"security_boundary","status":"RISK_FOUND","observed":"SEC-02 exposure findings carried forward; credential value not re-queried"}
+  ],
+  "blockers": [
+    "candidate image/platform/cache unresolved",
+    "exact nonce network/volume/bind collision unresolved",
+    "P0 reasoner exit state and cause unresolved",
+    "fresh host CPU contention/trend unavailable",
+    "no fixture or runtime validation permitted"
+  ],
+  "next_owner": "chatgpt"
+}
