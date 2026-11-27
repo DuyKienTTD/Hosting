@@ -1,0 +1,10 @@
+{
+  "rule_version": "ops-01a-s1-v2",
+  "mode": "synthetic-only",
+  "proposed_thresholds": {"readiness_bad_samples": 3, "readiness_good_samples": 3, "disk_high_pct": 90, "disk_coherent_samples": 3, "disk_deadline_hours": 4, "backup_verified_weekly_hours": 168, "backup_overdue_grace_hours": 24},
+  "dedupe": {"key": "resource_alias:environment:rule", "cooldown_seconds": 900},
+  "allowed_sources": ["synthetic", "hostinger-readonly", "work-runbook"],
+  "expected_resource_alias": "kvm2",
+  "missing_data": "UNKNOWN",
+  "external_transport": false
+}

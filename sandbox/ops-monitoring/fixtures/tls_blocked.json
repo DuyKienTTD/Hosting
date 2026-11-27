@@ -1,0 +1,1 @@
+{"fixture_id":"tls_blocked","samples":[{"sample_id":"tls-01","source":"synthetic","resource_alias":"kvm2","environment":"synthetic","probe_origin":"fixture","observed_at_utc":"2026-01-01T00:01:00Z","measure_name":"tls_probe","value":"blocked","health_status":"observed","freshness":"fresh"}]}
