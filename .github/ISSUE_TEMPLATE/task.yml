@@ -1,0 +1,36 @@
+name: Việc cho agent
+description: Một đầu việc có tiêu chí "xong" kiểm được
+labels: ["agent"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Mục tiêu
+      description: Một hai câu. Vì sao cần làm.
+    validations: { required: true }
+  - type: textarea
+    id: criteria
+    attributes:
+      label: Tiêu chí xong
+      description: Mỗi dòng một tiêu chí, kèm cách kiểm (lệnh, URL trả 200, file tồn tại...). Không dùng "làm tốt", "hoàn thiện".
+      placeholder: |
+        - C1: ... | kiểm: ...
+        - C2: ... | kiểm: ...
+    validations: { required: true }
+  - type: textarea
+    id: scope
+    attributes:
+      label: Phạm vi được sửa
+      description: Thư mục/file/hệ thống được đụng tới. Ngoài phạm vi thì không làm.
+    validations: { required: true }
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Rủi ro
+      options: ["none", "risk:prod (thay đổi live)", "risk:cost (phát sinh chi phí)", "risk:secret (credential/quyền)"]
+    validations: { required: true }
+  - type: dropdown
+    id: executor
+    attributes:
+      label: Người thực thi đề xuất
+      options: ["Codex", "Claude Code", "ChatGPT Work (thao tác web)", "Chủ dự án"]

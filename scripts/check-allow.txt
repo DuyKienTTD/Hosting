@@ -1,0 +1,5 @@
+# Mỗi dòng là regex áp lên "đường/dẫn:nội dung dòng". Chỉ thêm giá trị giả lập hoặc đã xác minh là an toàn, kèm lý do.
+# Phiên bản kernel WSL trong bằng chứng cũ, không phải IP.
+^archive/legacy-2026-11/reports/evidence/2026-11-22-ttd-hermes-gate-b-h6-b2-l-idle-writer\.json:.*6\.6\.114\.1-microsoft
+# Số giả lập dùng trong fixture test.
+0900000000
