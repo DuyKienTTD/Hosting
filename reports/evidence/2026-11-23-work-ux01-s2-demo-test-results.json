@@ -1,0 +1,84 @@
+{
+  "runtime": "Node v24.22.3",
+  "browser": "BROWSER_NOT_RUN",
+  "browser_blockers": [
+    "Local Chromium process singleton socket denied (EPERM)",
+    "Cloud Browser denied file://"
+  ],
+  "results": [
+    {
+      "id": "J1",
+      "verdict": "FUNCTIONAL_PASS",
+      "scope": "DOM_CONTRACT_ONLY",
+      "observed": "Empty graph rejected; fixture produced one repeatable local run and receipt."
+    },
+    {
+      "id": "J2",
+      "verdict": "FUNCTIONAL_PASS",
+      "scope": "DOM_CONTRACT_ONLY",
+      "observed": "Reconciliation request recorded without changing unknown."
+    },
+    {
+      "id": "N3",
+      "verdict": "FUNCTIONAL_PASS",
+      "scope": "DOM_CONTRACT_ONLY",
+      "observed": "Wrong digest rejected; identical fixture replay returns the prior receipt."
+    },
+    {
+      "id": "N4",
+      "verdict": "FUNCTIONAL_PASS",
+      "scope": "DOM_CONTRACT_ONLY",
+      "observed": "Paid retry disabled; one dispatch retained."
+    },
+    {
+      "id": "J3",
+      "verdict": "FUNCTIONAL_PASS",
+      "scope": "DOM_CONTRACT_ONLY",
+      "observed": "Separate reviewer approves a draft and Publish stays disabled."
+    },
+    {
+      "id": "N2",
+      "verdict": "FUNCTIONAL_PASS",
+      "scope": "DOM_CONTRACT_ONLY",
+      "observed": "Expired approval and nonzero/unknown budget were blocked."
+    },
+    {
+      "id": "N1",
+      "verdict": "FUNCTIONAL_PASS",
+      "scope": "DOM_CONTRACT_ONLY",
+      "observed": "Reviewer cannot edit; validator rejects missing fixture permission."
+    },
+    {
+      "id": "J4",
+      "verdict": "FUNCTIONAL_PASS",
+      "scope": "DOM_CONTRACT_ONLY",
+      "observed": "Saved a synthetic read-only GA4 proposal."
+    },
+    {
+      "id": "N5",
+      "verdict": "FUNCTIONAL_PASS",
+      "scope": "DOM_CONTRACT_ONLY",
+      "observed": "Unverified account has a readable OAuth block."
+    },
+    {
+      "id": "J5",
+      "verdict": "FUNCTIONAL_PASS",
+      "scope": "DOM_CONTRACT_ONLY",
+      "observed": "Readiness escalated and closed; backup escalated with restore UNKNOWN."
+    }
+  ],
+  "supplemental": [
+    "cycle",
+    "invalid mapping",
+    "missing port",
+    "fork invalidates mock approval",
+    "node add/reorder/remove",
+    "audit",
+    "CSP and no external script/style/network API in source"
+  ],
+  "responsive": "NOT_RUN",
+  "keyboard_browser": "NOT_RUN",
+  "screen_reader": "NOT_RUN",
+  "external_requests_from_tests": 0,
+  "live_backend": "UNIMPLEMENTED"
+}
