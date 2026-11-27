@@ -1,0 +1,27 @@
+{
+  "task": "OPS-01A/S2",
+  "agent": "hostinger-agent",
+  "status": "OPS01A_S2_OFFLINE_LIFECYCLE_PASS",
+  "main_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "s1_pin": "ops-01a-s1-v2",
+  "rule_version": "ops-01a-s2-v1",
+  "cooldown_seconds": 900,
+  "boundary_tests": {"899":"SUPPRESSED_COOLDOWN","900":"ELIGIBLE_REOPEN"},
+  "tests": {"run":10,"passed":10,"failed":0,"duration_seconds":0.055},
+  "cases": {
+    "A_open_recover_second_open": "PASS",
+    "B_899_suppressed": "PASS",
+    "C_900_eligible_reopen": "PASS",
+    "D_unknown_interrupts": "PASS",
+    "E_duplicate_order_identity_source_fail_closed": "PASS",
+    "F_source_change_cannot_spoof": "PASS",
+    "G_s1_composition": "PASS",
+    "clock_reversal": "PASS",
+    "snapshot_replay": "PASS",
+    "cooldown_distinct_from_notification": "PASS"
+  },
+  "side_effect_controls": {"network_calls":0,"external_notifications":0,"live_monitoring":0,"vps_actions":0,"production_actions":0,"paid_api_calls":0},
+  "persistence_claim": "synthetic_snapshot_replay_only",
+  "verdict": "OPS01A_S2_OFFLINE_LIFECYCLE_PASS",
+  "next_owner": "chatgpt"
+}

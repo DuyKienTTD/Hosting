@@ -1,0 +1,20 @@
+{
+  "rule_version": "ops-01a-s2-v1",
+  "state_machine": ["NORMAL", "OPEN", "RECOVERED"],
+  "qualifying_bad_samples": 3,
+  "qualifying_good_samples_after_open": 3,
+  "timestamp_policy": "strictly_advancing_utc_after_full_validation",
+  "validation_order": ["fields", "timestamp_parse", "resource", "source", "rule_version", "freshness_health_signal", "strictly_advancing_time", "sample_id_replay"],
+  "rejected_sample_mutation": "control_state_unchanged; audit_only",
+  "replay_policy": {"exact_same_id_payload":"reject_no_control_mutation","same_id_conflicting_payload":"reject_no_control_mutation"},
+  "incident_policy": {"NORMAL_bad3":"OPEN_new_incident","RECOVERED_bad3":"OPEN_new_incident_independent_of_notification_cooldown","OPEN_bad3":"notification_only_no_new_incident"},
+  "cooldown_seconds": 900,
+  "boundary": {"899":"SUPPRESSED_COOLDOWN","900":"ELIGIBLE_NOTIFICATION","901":"ELIGIBLE_NOTIFICATION"},
+  "dedupe_key": "resource:rule:rule_version:incident_seq",
+  "incident_id": "resource:rule:rule_version:incident_seq",
+  "unknown_policy": "reject_before_control_mutation",
+  "out_of_order_policy": "reject_before_control_mutation",
+  "external_notifications": false,
+  "persistence_claim": "synthetic_snapshot_replay_only",
+  "s1_composition": "pinned_fixture_only; no runtime S1 claim"
+}
