@@ -1,0 +1,14 @@
+{
+  "task": "GOV-01/S2",
+  "agent": "Hermes WebUI",
+  "status": "GOV01_S2_A0_OPTIONS_PASS_PENDING_A0",
+  "main_sha": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+  "source_pins": {"biz02_s1":"fcdc0f898b13b19a42a000d84c8ac4632de1806b","biz02_s2":"6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd","grow02a":"f2f092aab3ceef0d16260f0a2c6b222f7baecc61","pr25_source_timing":"current head read before dossier"},
+  "decisions": {"count":5,"ids":["A0-1","A0-2","A0-3","A0-4","A0-5"],"unique":true,"all_status":"AWAITING_A0_DECISION","recommendations":"PROPOSAL_NOT_APPROVED"},
+  "validator": {"schema":"PASS","unique_ids":true,"all_pending":true,"implicit_approval":false},
+  "scenarios": {"count":3,"passed":3,"ids":["SC-01","SC-02","SC-03"]},
+  "side_effect_controls": {"production_calls":0,"paid_calls":0,"publishes":0,"account_mutations":0,"customer_data":0},
+  "authority": "A0/user",
+  "next_owner": "chatgpt",
+  "verdict": "GOV01_S2_A0_OPTIONS_PASS_PENDING_A0"
+}
