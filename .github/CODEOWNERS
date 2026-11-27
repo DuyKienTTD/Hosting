@@ -1,0 +1,6 @@
+# Thông báo cho chủ dự án ở các file định nghĩa quyền và cổng kiểm tra.
+AGENTS.md @DuyKienTTD
+.github/ @DuyKienTTD
+.codex/ @DuyKienTTD
+.claude/ @DuyKienTTD
+scripts/ @DuyKienTTD

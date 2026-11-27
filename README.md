@@ -1,12 +1,30 @@
-# Hosting — KNG-01 knowledge entry
+# Hosting — TTD METAL
 
-**Priority (A0, 2026-11-23): KNG-01 ONLY.** G0/UC01/UI/Ads/media/infra ngoài KNG đang hold, không tự gửi việc mới. [Canonical candidate current routing](program/current.json), [WBS 32 IDs](program/WORK_BREAKDOWN.md), [A1 roadmap](program/roadmaps/a1.md). Candidate không cấp quyền production, chi phí, merge hay tự tạo Work ACK.
+Hạ tầng và tự động hóa marketing của TTD METAL. Mục tiêu dài hạn: một nền tảng AI tự động hóa có kiểm soát cho 5 luồng việc:
 
-**Khởi động nhiệm vụ:** Áp dụng chính sách đọc trong [AGENTS.md](AGENTS.md) trên main đã xác minh. Sau khi MSC có hiệu lực, đọc ba nhóm ban đầu: AGENTS, hồ sơ đúng vai trò và work order pin commit. Đọc đầy đủ workflow, security, STATE và bằng chứng có thẩm quyền khi điều kiện trong AGENTS yêu cầu. Tra cứu CATALOG theo ID/path liên quan. [PROJECT charter](PROJECT.md).
+1. **Media:** ý tưởng, kịch bản, ảnh/video/voiceover, QA.
+2. **Quảng cáo:** Google Ads, Demand Gen và các kênh khác.
+3. **Website và SEO:** WordPress/WooCommerce tại https://wroughtiron.shop/.
+4. **Mạng xã hội:** YouTube, TikTok, Facebook/Instagram.
+5. **Báo cáo:** tổng hợp đa kênh, cảnh báo bất thường.
 
-**Authoritative facts:** current KNG owner/route in `program/current.json` only after A0-authorized main merge; current task receipts need real ACK. Historical Git/QA evidence in [reports](reports/) and [tasks](tasks/); [CATALOG](CATALOG.yaml) for stable IDs. Live VPS/WordPress/Ads state requires fresh authorized read, not Git inference.
+Hạ tầng hiện có: VPS Hostinger chạy n8n và Hermes ([tra cứu](docs/reference/vps.md)).
 
-**Security:** the full [Repository Security rule](rules/REPOSITORY_SECURITY.md) is authoritative; this quick-start does not duplicate or supersede any clause. STOP unapproved live/paid/production/merge/force-push. Reuse prior verified tests, validate diff and readback.
+Repo này **public**. Sản phẩm chăm sóc khách hàng qua Zalo nằm ở repo private `TTD-Zalo-Assistant`.
 
-**Previous full README** remains retrievable at [main `e385c1be`](https://github.com/DuyKienTTD/Hosting/blob/e385c1bea2070973e3007e5717f7e980348d6ab3/README.md).
+## Việc chạy thế nào
 
+```
+Trợ lý A0 viết Issue (có tiêu chí kiểm được)
+  → Điều phối giao cho Codex / Claude Code / ChatGPT Work
+  → agent làm trên nhánh agent/*  (hook nạp PROGRESS đầu phiên, chặn kết thúc khi tiêu chí chưa đạt)
+  → mở PR → CI check + Codex review
+  → merge (Điều phối; PR có nhãn risk:* thì chủ dự án)
+  → Issue tự đóng; cron hằng ngày gắn nhãn "treo" cho việc đứng yên 3 ngày
+```
+
+Quy tắc cho agent: [AGENTS.md](AGENTS.md). Nhật ký: [PROGRESS.md](PROGRESS.md). Quyết định: [docs/adr](docs/adr/).
+
+## Lịch sử
+
+Mô hình vận hành cũ (rules, program, reports, CATALOG, STATE…) được giữ nguyên trong [archive/legacy-2026-11](archive/legacy-2026-11/) để tra cứu. Lý do thay đổi: [ADR-0001](docs/adr/0001-tai-cau-truc-repo.md).

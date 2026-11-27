@@ -1,0 +1,22 @@
+name: nhac-viec-treo
+on:
+  schedule:
+    - cron: "17 1 * * *"   # 08:17 giờ Việt Nam mỗi ngày
+  workflow_dispatch:
+permissions:
+  issues: write
+  pull-requests: write
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          days-before-stale: 3
+          days-before-close: -1
+          stale-issue-label: treo
+          stale-pr-label: treo
+          exempt-issue-labels: "cho-chu-du-an,tam-dung"
+          stale-issue-message: "Issue này không có cập nhật 3 ngày. Điều phối: kiểm tra người thực thi, cập nhật work/<issue>.json (blocked kèm lý do nếu bị chặn) hoặc giao lại."
+          stale-pr-message: "PR này đứng yên 3 ngày. Cần review, sửa theo review, hoặc đóng nếu không còn cần."
+          remove-stale-when-updated: true

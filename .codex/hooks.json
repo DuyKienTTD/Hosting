@@ -1,0 +1,32 @@
+{
+  "description": "Hosting: nạp ngữ cảnh đầu phiên và chặn kết thúc khi tiêu chí chưa đạt. Xem AGENTS.md.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/scripts/session_start.py\"",
+            "commandWindows": "python scripts\\session_start.py",
+            "timeout": 30,
+            "statusMessage": "Đang nạp PROGRESS và việc đang mở"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/scripts/stop_gate.py\"",
+            "commandWindows": "python scripts\\stop_gate.py",
+            "timeout": 120,
+            "statusMessage": "Đang kiểm tiêu chí trước khi kết thúc"
+          }
+        ]
+      }
+    ]
+  }
+}

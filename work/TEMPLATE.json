@@ -1,0 +1,17 @@
+{
+  "issue": 0,
+  "title": "Mô tả ngắn của issue",
+  "status": "todo",
+  "owner": "codex",
+  "risk": "none",
+  "blocker": null,
+  "criteria": [
+    {
+      "id": "C1",
+      "description": "Kết quả kiểm được, ví dụ: script X chạy không lỗi trên Ubuntu 24.04",
+      "verify": "python3 infra/scripts/x.py --dry-run",
+      "passes": false,
+      "evidence": null
+    }
+  ]
+}
