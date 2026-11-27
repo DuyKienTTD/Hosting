@@ -1,0 +1,201 @@
+{
+  "task": "GROW-01/S2-D1",
+  "source_pr": 34,
+  "pr_pre_head": "f7881d843b85d69c1f5ed6f6ff45e85ffac6541d",
+  "a1_comment": "https://github.com/DuyKienTTD/Hosting/pull/34#issuecomment-7093292211",
+  "assignment_comment": "https://github.com/DuyKienTTD/Hosting/pull/34#issuecomment-7093352519",
+  "code_blob_tested": "7d605cab771c104113f68613b8f136d0852179e5",
+  "tests_blob_tested": "a83735066869f2f41270f5b07ac4e8c4ebca794b",
+  "schema_blob": "a5c4f64c38752beaa0d24b69a293face40b5b24d",
+  "unchanged_s1_fixture_blob": "2e1fc5f1acc72e83ea062c7d21ede9aa49688fb5",
+  "test_execution": {
+    "command": "python3 -B -m unittest discover -s sandbox/grow01-package-contract -p test_contract.py -v",
+    "python": "3.14.10",
+    "platform": "Linux-6.12.116+deb13-amd64-x86_64-with-glibc2.41",
+    "executed": 31,
+    "passed": 31,
+    "failures": 0,
+    "errors": 0,
+    "scope": "LOCAL_STDLIB_OFFLINE_AUTHOR_RUN; NOT INDEPENDENT_QA"
+  },
+  "red_phase": {
+    "source": "original PR34 contract, new A1 6 probes added first",
+    "executed": 21,
+    "passed": 15,
+    "failed": 5,
+    "errors": 1
+  },
+  "test_results": [
+    {
+      "case_id": "test_01_three_inherited_drafts",
+      "expected": "three inherited P1/P2/P3 remain DRAFT and rights UNVERIFIED",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_02_draft_to_review",
+      "expected": "unmodified synthetic DRAFT transitions to IN_REVIEW",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_03_missing_rights_blocks_approval",
+      "expected": "missing rights fixture review token rejects mark_ready without mutation",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_04_p2_requires_technical_review",
+      "expected": "P2 missing technical fixture review token rejects mark_ready",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_05_unverified_channel_blocks_release",
+      "expected": "missing channel fixture review token rejects mark_ready",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_06_self_approval_blocked",
+      "expected": "editor cannot act as owner on legitimate READY fixture",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_07_stale_revision_and_digest_rejected",
+      "expected": "stale revision and digest both reject",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_08_replay_stable",
+      "expected": "exact idempotent replay returns stored snapshot once",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_09_key_collision_rejected",
+      "expected": "same key with different request rejects KEY_COLLISION",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_10_fork_invalidates_review",
+      "expected": "fork resets revision state, digest and decision history",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_11_publish_and_paid_render_blocked",
+      "expected": "publish and paid_render reject FORBIDDEN_SIDE_EFFECT",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_12_missing_callback_and_out_of_order",
+      "expected": "unknown callbacks reject and create no decision",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_13_unauthorized_role_and_client_switch",
+      "expected": "client-selected unauthorized role rejects",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_14_synthetic_owner_sequence",
+      "expected": "DRAFT -> IN_REVIEW -> READY -> APPROVED mock-only sequence succeeds",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_15_digest_canonical_and_audit",
+      "expected": "canonical digest is key-order independent and audit excludes secret",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_16_a1_f01_forged_ready_review_blocked",
+      "expected": "A1 F01 forged READY plus five VERIFIED fields fails provenance",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_17_a1_f02_external_asset_blocked",
+      "expected": "A1 F02 external-looking nonplaceholder asset and rights claim reject",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_18_a1_f02_extra_property_blocked",
+      "expected": "A1 F02 extra_html unknown package property rejects",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_19_a1_f03_nan_typed_error",
+      "expected": "A1 F03 NaN review status rejects with ContractError",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_20_a1_f03_html_note_blocked",
+      "expected": "A1 F03 HTML in content_note rejects at mock boundary",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_21_a1_f01_forged_owner_approval_blocked",
+      "expected": "A1 F01 forged APPROVED and owner field with empty log reject",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_22_forged_plausible_history_cannot_bootstrap_ledger",
+      "expected": "plausible self-authored review history is not accepted by internal MockLedger",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_23_tampering_after_real_review_rejected",
+      "expected": "post-review mutable package tampering cannot reach owner decision",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_24_nested_asset_extra_and_remote_ref_rejected",
+      "expected": "nested extra asset property or remote URL reject",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_25_invalid_types_and_finite_numbers",
+      "expected": "malformed types and non-finite number reject with typed errors",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_26_raw_dict_ledger_rejected",
+      "expected": "caller-provided raw dict is not an accepted transition ledger",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_27_fork_child_has_registered_state_and_new_review",
+      "expected": "forked child registered, returns DRAFT and can submit next revision",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_28_review_token_with_wrong_shape_is_atomic",
+      "expected": "invalid tokens fail atomically without mutating prior state",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_29_owner_status_rewrite_after_approval_rejected",
+      "expected": "owner approval status tampering after legitimate sequence rejects",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_30_canonical_unicode_and_16k_byte_boundary",
+      "expected": "canonical Unicode is stable; valid fixture under 16KiB passes, oversized package rejects",
+      "observed": "PASS_OFFLINE"
+    },
+    {
+      "case_id": "test_31_source_ref_and_revision_drift_rejected",
+      "expected": "source_ref ID mismatch and unregistered revision drift reject",
+      "observed": "PASS_OFFLINE"
+    }
+  ],
+  "limits": [
+    "MockLedger state remains in-process and mutable by hostile same-process Python; no IAM, durable ledger, cryptographic signature or cross-process serialization",
+    "Mock fixture review tokens and role strings are not external approval or identity",
+    "validate() checks structural/log consistency only; transition() additionally checks internal snapshot; no service authorization",
+    "No UI renderer tested; HTML content_note rejected here but every future UI string needs contextual escaping",
+    "No real asset/consent rights verified; A0 decisions remain pending"
+  ],
+  "side_effects": {
+    "paid_calls": 0,
+    "publishes": 0,
+    "uploads": 0,
+    "production_writes": 0,
+    "vps_changes": 0
+  },
+  "verdict": "GROW01_S2_D1_AUTHOR_TESTS_PASS_OFFLINE_PENDING_INDEPENDENT_QA",
+  "next_owner": "ChatGPT Điều phối -> independent A1/Work re-QA"
+}
