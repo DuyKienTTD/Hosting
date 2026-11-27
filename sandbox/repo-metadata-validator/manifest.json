@@ -1,0 +1,367 @@
+{
+  "version": 1,
+  "baseline": {
+    "ref": "refs/remotes/origin/main",
+    "head": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+    "tree": "991af4f21ca12f3db98c7a1bd89c297f18e446d7"
+  },
+  "plan": {
+    "pr": 6,
+    "ref": "refs/remotes/origin/planning/multi-agent-capability-allocation-2026-11-23",
+    "head": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+    "tree": "ed5e95e325277d3bf976a2754bbc81f1b2783302",
+    "path": "tasks/2026-11-23-multi-agent-master-allocation-review.md",
+    "blob": "d4206b17122c9c35ff1743251931debc0145438d"
+  },
+  "packages": [
+    {
+      "pr": 10,
+      "ref": "refs/remotes/origin/codex/eng-01a-s1-offline-contract-2026-11-23",
+      "head": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+      "tree": "1b5dfc68d1c32c682619cbee8bccd9873f656a6c",
+      "task_id": "eng-01a-s1-offline-connector-contract",
+      "portfolio_id": "ENG-01A",
+      "owner": "codex",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "pr_draft": false,
+      "verdict": "ENG01A_S1_OFFLINE_CONTRACT_PASS",
+      "approval": "REVIEW",
+      "scope": "OFFLINE",
+      "readiness": [
+        "QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "production_ready": false,
+      "dependencies": [],
+      "task": {
+        "path": "tasks/2026-11-23-eng-01a-s1-offline-connector-contract.md",
+        "blob": "89dc5d08aa308f3cd3500fc32d7c59ca81261737"
+      },
+      "report": {
+        "path": "reports/2026-11-23-eng-01a-s1-offline-connector-contract.md",
+        "blob": "81213d922b17447cc734c60a5d91b79fbee767dd"
+      },
+      "evidence": {
+        "path": "reports/evidence/2026-11-23-eng-01a-s1-offline-connector-contract.json",
+        "blob": "774e8e5df2f8a34d5fa318e466bcacb297f0b522"
+      }
+    },
+    {
+      "pr": 13,
+      "ref": "refs/remotes/origin/codex/eng-01a-s2-fake-channel-adapters-2026-11-23",
+      "head": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+      "tree": "c9039bbab2b08b85d1145211dc46733744ce6323",
+      "task_id": "eng-01a-s2-fake-channel-adapters",
+      "portfolio_id": "ENG-01A",
+      "owner": "codex",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "pr_draft": false,
+      "verdict": "ENG01A_S2_CHANNEL_MOCK_PASS",
+      "approval": "REVIEW",
+      "scope": "OFFLINE",
+      "readiness": [
+        "QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "production_ready": false,
+      "dependencies": [
+        "eng-01a-s1-offline-connector-contract"
+      ],
+      "task": {
+        "path": "tasks/2026-11-23-eng-01a-s2-fake-channel-adapters.md",
+        "blob": "d5fa3485a962321c6c2f4dbe70dec024eaaff954"
+      },
+      "report": {
+        "path": "reports/2026-11-23-eng-01a-s2-fake-channel-adapters.md",
+        "blob": "9d3867af9d3f911b4fd7f08781ba2d4b6c71e221"
+      },
+      "evidence": {
+        "path": "reports/evidence/2026-11-23-eng-01a-s2-fake-channel-adapters.json",
+        "blob": "3f085c68aa806d8279025de49a6f026ecc72101a"
+      }
+    },
+    {
+      "pr": 19,
+      "ref": "refs/remotes/origin/codex/eng-01a-s3-offline-integration-2026-11-23",
+      "head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "tree": "b0625a0de12d90fba5994f643846459c7a7b989c",
+      "task_id": "eng-01a-s3-offline-integration",
+      "portfolio_id": "ENG-01A",
+      "owner": "codex",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "pr_draft": false,
+      "verdict": "ENG01A_S3_D1_PREPARED_RESULT_BINDING_PASS",
+      "approval": "OFFLINE_ACCEPTED",
+      "scope": "OFFLINE",
+      "readiness": [
+        "QA_PASS_OFFLINE",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "production_ready": false,
+      "dependencies": [
+        "eng-01a-s1-offline-connector-contract",
+        "eng-01a-s2-fake-channel-adapters"
+      ],
+      "task": {
+        "path": "tasks/2026-11-23-eng-01a-s3-offline-integration.md",
+        "blob": "24cd7b2a8a41ad1ca642d10fc29c7fd9d5a504eb"
+      },
+      "report": {
+        "path": "reports/2026-11-23-eng-01a-s3-d1-prepared-result-binding.md",
+        "blob": "f703a99967b1b4ecd6ca9840104192e7302c594e"
+      },
+      "evidence": {
+        "path": "reports/evidence/2026-11-23-eng-01a-s3-d1-prepared-result-binding.json",
+        "blob": "dea0a3471683852891133cf1dca41eea5d50efb7"
+      }
+    },
+    {
+      "pr": 21,
+      "ref": "refs/remotes/origin/codex/eng-01a-s4-linux-release-readiness-2026-11-23",
+      "head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "tree": "2f244bbb4bd1f91405219893a03ba2f18d6bbfd1",
+      "task_id": "eng-01a-s4-linux-release-readiness",
+      "portfolio_id": "ENG-01A",
+      "owner": "codex",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "pr_draft": false,
+      "verdict": "ENG01A_S4_D1_MANIFEST_REFRESH_PASS_OFFLINE_LINUX_NOT_RUN",
+      "approval": "OFFLINE_ACCEPTED",
+      "scope": "OFFLINE",
+      "readiness": [
+        "QA_PASS_OFFLINE",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "production_ready": false,
+      "dependencies": [
+        "eng-01a-s1-offline-connector-contract",
+        "eng-01a-s2-fake-channel-adapters",
+        "eng-01a-s3-offline-integration"
+      ],
+      "task": {
+        "path": "tasks/2026-11-23-eng-01a-s4-linux-release-readiness.md",
+        "blob": "0411237644e7228438edbf74d984b8242946714e"
+      },
+      "report": {
+        "path": "reports/2026-11-23-eng-01a-s4-d1-manifest-refresh.md",
+        "blob": "540115151ae9b3a4f8187f66128bedb579cd7490"
+      },
+      "evidence": {
+        "path": "reports/evidence/2026-11-23-eng-01a-s4-d1-manifest-refresh.json",
+        "blob": "a02dcf93eb87beab4548038ad6c031ef446c3483"
+      }
+    },
+    {
+      "pr": 16,
+      "ref": "refs/remotes/origin/work/ux-01-s2-offline-prototype-2026-11-23",
+      "head": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+      "tree": "96bdd5b3b63e0ea1bf35ada4fd30a8500d90be8b",
+      "task_id": "ttd-work-ux01-s2-offline-prototype",
+      "portfolio_id": "UX-01",
+      "owner": "chatgpt-work",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "pr_draft": true,
+      "verdict": "UX01_S2_CODE_READY_BROWSER_UNTESTED",
+      "approval": "DRAFT",
+      "scope": "OFFLINE",
+      "readiness": [
+        "SOURCE_REVIEW",
+        "QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "production_ready": false,
+      "dependencies": [],
+      "task": {
+        "path": "tasks/2026-11-23-work-ux01-s2-offline-prototype.md",
+        "blob": "c49dfe25cc2f54c3030a13a43a6f88e12bbbdbb3"
+      },
+      "report": {
+        "path": "reports/2026-11-23-work-ux01-s2-offline-prototype.md",
+        "blob": "8c300cf0d22879d1d3a5469834dda60834b60a40"
+      },
+      "evidence": {
+        "path": "reports/evidence/2026-11-23-work-ux01-s2-demo-test-results.json",
+        "blob": "568a37b53614c0c6df6f9b38995ade90f1e61253"
+      }
+    },
+    {
+      "pr": 22,
+      "ref": "refs/remotes/origin/hostinger/ops-01a-s1-offline-monitoring-2026-11-23",
+      "head": "7f18955897c4f05b3523f467398889cf1e53cebd",
+      "tree": "f5d8ee54ae8515ad4b41d678b9529fb0c6dcc79c",
+      "task_id": "ttd-hostinger-ops01a-s1-offline-monitoring-2026-11-23",
+      "portfolio_id": "OPS-01A",
+      "owner": "hostinger-agent",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "pr_draft": true,
+      "verdict": "OPS01A_S1_OFFLINE_MONITORING_POLICY_PASS",
+      "approval": "DRAFT",
+      "scope": "OFFLINE",
+      "readiness": [
+        "QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "production_ready": false,
+      "dependencies": [],
+      "task": {
+        "path": "tasks/2026-11-23-hostinger-ops01a-s1-monitoring-policy.md",
+        "blob": "d2dafafe0a8bc9d4a96e86f16149c01cfa01ea9e"
+      },
+      "report": {
+        "path": "reports/2026-11-23-hostinger-ops01a-s1-monitoring-qa.md",
+        "blob": "4bbdf9043d9d15b58c7340e46d0cb347fb5e5b23"
+      },
+      "evidence": {
+        "path": "reports/evidence/2026-11-23-hostinger-ops01a-s1-monitoring-qa.json",
+        "blob": "519fd67ddb7ffac337e7b5d7703e78a26a6e74a0"
+      }
+    },
+    {
+      "pr": 24,
+      "ref": "refs/remotes/origin/hostinger/ops-01a-s2-lifecycle-2026-11-23",
+      "head": "d981c8189d30f87d5b1349525062322154719e64",
+      "tree": "51bb2ddb33d2b8b34d878f768d9fbd43a4274770",
+      "task_id": "ttd-hostinger-ops01a-s2-lifecycle-2026-11-23",
+      "portfolio_id": "OPS-01A",
+      "owner": "hostinger-agent",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "pr_draft": true,
+      "verdict": "OPS01A_S2_OFFLINE_LIFECYCLE_PASS",
+      "approval": "DRAFT",
+      "scope": "OFFLINE",
+      "readiness": [
+        "QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "production_ready": false,
+      "dependencies": [
+        "ttd-hostinger-ops01a-s1-offline-monitoring-2026-11-23"
+      ],
+      "task": {
+        "path": "tasks/2026-11-23-hostinger-ops01a-s2-lifecycle.md",
+        "blob": "76bd97e0e3387d7a3578cec48a19236798ca6631"
+      },
+      "report": {
+        "path": "reports/2026-11-23-hostinger-ops01a-s2-lifecycle.md",
+        "blob": "d8c76fd52d6eecd419f412ffc0777ec71e29a32a"
+      },
+      "evidence": {
+        "path": "reports/evidence/2026-11-23-hostinger-ops01a-s2-lifecycle.json",
+        "blob": "6ef5966de9a2dae03d3bc860da63e45b23dde1f6"
+      }
+    },
+    {
+      "pr": 20,
+      "ref": "refs/remotes/origin/hermes/biz-02-s1-priorities-kpi-draft-2026-11-23",
+      "head": "fcdc0f898b13b19a42a000d84c8ac4632de1806b",
+      "tree": "e1e298891a5385d930f7ddc724d9adc3a0a96d17",
+      "task_id": "hermes-biz02-s1-usecases-kpi-2026-11-23",
+      "portfolio_id": "BIZ-02",
+      "owner": "hermes-webui",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "pr_draft": true,
+      "verdict": "BIZ02_S1_PRIORITIZATION_DRAFT_READY_FOR_REVIEW",
+      "approval": "DRAFT",
+      "scope": "DESIGN",
+      "readiness": [
+        "SOURCE_REVIEW",
+        "QA_PENDING",
+        "BLOCKED"
+      ],
+      "production_ready": false,
+      "dependencies": [],
+      "task": {
+        "path": "tasks/2026-11-23-hermes-biz02-s1-usecases-kpi.md",
+        "blob": "536c08c2a8e6c8ad2ba02008acf69f77e5ae58c1"
+      },
+      "report": {
+        "path": "reports/2026-11-23-hermes-biz02-s1-prioritization.md",
+        "blob": "6c5c701574fbdc8d7f0fbe4c011a6150bc7adf70"
+      },
+      "evidence": {
+        "path": "reports/evidence/2026-11-23-hermes-biz02-s1-priority-matrix.json",
+        "blob": "f2458f91c4f253f292a5c41615a996c8a7c2f24e"
+      }
+    },
+    {
+      "pr": 23,
+      "ref": "refs/remotes/origin/hermes/grow-02a-s1-event-dictionary-2026-11-23",
+      "head": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61",
+      "tree": "7167985fecfabca5082c671bc61ae70e963177e0",
+      "task_id": "hermes-grow02a-s1-event-dictionary-task-2026-11-23",
+      "portfolio_id": "GROW-02A",
+      "owner": "hermes-webui-support",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "pr_draft": true,
+      "verdict": "GROW02A_S1_D1_COMPOSITE_DEDUP_PASS",
+      "approval": "DRAFT",
+      "scope": "DESIGN",
+      "readiness": [
+        "SOURCE_REVIEW",
+        "QA_PENDING",
+        "REAL_UNTESTED",
+        "BLOCKED"
+      ],
+      "production_ready": false,
+      "dependencies": [
+        "hermes-biz02-s1-usecases-kpi-2026-11-23"
+      ],
+      "task": {
+        "path": "tasks/2026-11-23-hermes-grow02a-s1-event-dictionary.md",
+        "blob": "ca3ecf6748bf806660a2f0936e6c0a5cb6bbbb2e"
+      },
+      "report": {
+        "path": "reports/2026-11-23-hermes-grow02a-s1-attribution-contract.md",
+        "blob": "5d4d66ed341c77cf8ffa1e916583df8ffc48871c"
+      },
+      "evidence": {
+        "path": "reports/evidence/2026-11-23-hermes-grow02a-s1-events-and-tests.json",
+        "blob": "1a4fa5f991f1220ed2ed0e7aaac9b9276ca82cae"
+      }
+    },
+    {
+      "pr": 25,
+      "ref": "refs/remotes/origin/hermes/biz-02-s2-mvp-acceptance-2026-11-23",
+      "head": "6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd",
+      "tree": "3bac66a30de5a77d548e1fb79004ee2e0023c556",
+      "task_id": "hermes-biz02-s2-mvp-acceptance-task-2026-11-23",
+      "portfolio_id": "BIZ-02",
+      "owner": "hermes-webui",
+      "base": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "pr_draft": true,
+      "verdict": "BIZ02_S2_OFFLINE_MVP_ACCEPTANCE_DRAFT_READY_FOR_REVIEW",
+      "approval": "DRAFT",
+      "scope": "DESIGN",
+      "readiness": [
+        "SOURCE_REVIEW",
+        "QA_PENDING",
+        "BLOCKED"
+      ],
+      "production_ready": false,
+      "dependencies": [
+        "eng-01a-s1-offline-connector-contract",
+        "eng-01a-s2-fake-channel-adapters",
+        "eng-01a-s3-offline-integration",
+        "eng-01a-s4-linux-release-readiness",
+        "ttd-work-ux01-s2-offline-prototype",
+        "ttd-hostinger-ops01a-s1-offline-monitoring-2026-11-23",
+        "hermes-biz02-s1-usecases-kpi-2026-11-23",
+        "hermes-grow02a-s1-event-dictionary-task-2026-11-23"
+      ],
+      "task": {
+        "path": "tasks/2026-11-23-hermes-biz02-s2-mvp-acceptance.md",
+        "blob": "56ccb0549cefdbaaf58aed52650411d76656cd68"
+      },
+      "report": {
+        "path": "reports/2026-11-23-hermes-biz02-s2-mvp-acceptance.md",
+        "blob": "36f3681a63b1ffca08868da58d37b993ccd70984"
+      },
+      "evidence": {
+        "path": "reports/evidence/2026-11-23-hermes-biz02-s2-mvp-scenarios.json",
+        "blob": "b517a54fc84071ddde87abfa31b5c84956604cd8"
+      }
+    }
+  ]
+}
