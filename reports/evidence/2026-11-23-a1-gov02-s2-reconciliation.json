@@ -1,0 +1,2090 @@
+{
+  "schema_version": 1,
+  "task_id": "A1-GOV02-S2-A",
+  "agent": "A1",
+  "ack": "ACKNOWLEDGED",
+  "mode": "READ_ONLY_ANALYSIS_AND_ISOLATED_ARTIFACTS",
+  "created_at": "2026-11-23",
+  "original_spec": {
+    "pr": 30,
+    "comment_id": 7092666512
+  },
+  "source_provenance": {
+    "main": {
+      "head": "e385c1bea2070973e3007e5717f7e980348d6ab3",
+      "tree": "991af4f21ca12f3db98c7a1bd89c297f18e446d7",
+      "catalog_blob": "719c9c5d2832382285d732b9ad21f55d8c163733",
+      "catalog_entries": 124
+    },
+    "main_rules_blob": "69ec0db902f457f06dd547dae171220331df0f5e",
+    "pr31_unmerged_rules_blob": "21b8e76321f5f32fb865ce597b953ab1e3d43a57",
+    "security_blob": "c24d608036b11dcd3fafcaefbefa23fdb591990e",
+    "a1_profile_blob": "e7fe4375edf9638a26623938bb0b04c618d0612b",
+    "pr30_phase_a_report_blob": "ae123535be2b43186e7a1cfc9ada8a84de20f779",
+    "pr30_phase_a_evidence_blob": "3c735391c2bb377cb55021b9e8657830a5d98a75",
+    "source_pr_heads_and_trees": {
+      "6": {
+        "head": "2cceedd8dfb3802802440f88b5e8a6127a1eae2f",
+        "tree": "72e72ffe4a4c3dcbd95b5a83075ed7ae1d388479"
+      },
+      "10": {
+        "head": "79dfe8aae5c30d4e896c29333e0296ada1671b7e",
+        "tree": "1b5dfc68d1c32c682619cbee8bccd9873f656a6c"
+      },
+      "13": {
+        "head": "0235b5f9bb38d0d7e99a600188705d50977527f5",
+        "tree": "c9039bbab2b08b85d1145211dc46733744ce6323"
+      },
+      "16": {
+        "head": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+        "tree": "96bdd5b3b63e0ea1bf35ada4fd30a8500d90be8b"
+      },
+      "19": {
+        "head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+        "tree": "b0625a0de12d90fba5994f643846459c7a7b989c"
+      },
+      "20": {
+        "head": "fcdc0f898b13b19a42a000d84c8ac4632de1806b",
+        "tree": "e1e298891a5385d930f7ddc724d9adc3a0a96d17"
+      },
+      "21": {
+        "head": "272855817cffe5334757fcf3a64cfae750b3b119",
+        "tree": "2f244bbb4bd1f91405219893a03ba2f18d6bbfd1"
+      },
+      "22": {
+        "head": "7f18955897c4f05b3523f467398889cf1e53cebd",
+        "tree": "f5d8ee54ae8515ad4b41d678b9529fb0c6dcc79c"
+      },
+      "23": {
+        "head": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61",
+        "tree": "7167985fecfabca5082c671bc61ae70e963177e0"
+      },
+      "24": {
+        "head": "e9c2d8f759850ea9c654de7e103549e041f66679",
+        "tree": "b82a5d16b8bd17c3887cb0bb4926aacd76cf3475"
+      },
+      "25": {
+        "head": "6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd",
+        "tree": "3bac66a30de5a77d548e1fb79004ee2e0023c556"
+      },
+      "27": {
+        "head": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+        "tree": "82a96aa9ad575a1f7450f5cbe11e71b45386aae5"
+      },
+      "28": {
+        "head": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+        "tree": "341e549bc687969c6dad92f75058b08af26b8203"
+      },
+      "29": {
+        "head": "d3d6a2690cb3b08609d8708514c5594c0ebdd3e6",
+        "tree": "07efd514f84e3ee131086d312b4207821dd95918"
+      },
+      "30": {
+        "head": "be48b3e19c6b2deee48f631497feac4be2ef2834",
+        "tree": "2da1ec7b839c6ddd0997d8c8eaa6c4d3ede19498"
+      },
+      "31": {
+        "head": "f03dc7e8d9cd88f425b1f04ac7908a3de5d64060",
+        "tree": "c7e3571569da564a79b2c6ee07a79e4eb2fc53ee"
+      },
+      "32": {
+        "head": "0dfe61f501a1706f9c065ad08c82df4db21dd8c5",
+        "tree": "aa6c8dd4f477bff619d85c39f4a3eac7aacd66f7"
+      }
+    },
+    "original_ledger_source_pr_count": 14,
+    "github_tree_query": "GitHub git/trees/<tree>?recursive=1, untruncated; exact current source path and blob readback; main tree and catalogs"
+  },
+  "verification": {
+    "legacy_rows": 40,
+    "legacy_source_paths_verified": 40,
+    "unchanged_original_blob": 39,
+    "updated_original_blob": 1,
+    "head_drift_rows": 4,
+    "old_pr6_blob_drift_rows": 1,
+    "old_pr24_head_drift_rows": 3,
+    "original_ledger_paths_on_main": 0,
+    "original_ledger_paths_missing_from_current_source": 0,
+    "duplicate_legacy_catalog_ids": 0,
+    "duplicates_vs_main_catalog": 0,
+    "main_catalog_entries": 124,
+    "pr31_source_catalog_entries": 127,
+    "new_scope_paths": 13,
+    "all_scoped_paths": 53,
+    "add_conditional": 48,
+    "hold": 2,
+    "already_in_source_catalog": 3,
+    "full_reaudit_12_snapshots": "NOT_RUN",
+    "latest_source_content_read_every_artifact": "NOT_RUN_ALL_40; used immutable Git blob/source report for old mappings"
+  },
+  "legacy_40": [
+    {
+      "ordinal": 1,
+      "pr": 6,
+      "kind": "task",
+      "path": "tasks/2026-11-23-multi-agent-master-allocation-review.md",
+      "catalog_id": "ttd-multi-agent-master-allocation-2026-11-23",
+      "frontmatter_id": "ttd-multi-agent-master-allocation-2026-11-23",
+      "historical_source_head": "03fb56b6d3b4f42a1cb65c6e3c87a19099785044",
+      "current_head": "2cceedd8dfb3802802440f88b5e8a6127a1eae2f",
+      "historical_source_blob": "d4206b17122c9c35ff1743251931debc0145438d",
+      "current_source_blob": "00a65f5a69365db7b4c3040cbe0cd10db340af38",
+      "blob_changed_since_ledger": true,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "HEAD_DRIFT"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 2,
+      "pr": 16,
+      "kind": "report",
+      "path": "reports/2026-11-23-work-ux01-s2-offline-prototype.md",
+      "catalog_id": "work-ux01-s2-offline-prototype-review",
+      "frontmatter_id": "work-ux01-s2-offline-prototype-review",
+      "historical_source_head": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+      "current_head": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+      "historical_source_blob": "8c300cf0d22879d1d3a5469834dda60834b60a40",
+      "current_source_blob": "8c300cf0d22879d1d3a5469834dda60834b60a40",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 3,
+      "pr": 16,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-work-ux01-s2-demo-test-results.json",
+      "catalog_id": "evidence-2026-11-23-work-ux01-s2-demo-test-results",
+      "frontmatter_id": null,
+      "historical_source_head": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+      "current_head": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+      "historical_source_blob": "568a37b53614c0c6df6f9b38995ade90f1e61253",
+      "current_source_blob": "568a37b53614c0c6df6f9b38995ade90f1e61253",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 4,
+      "pr": 16,
+      "kind": "task",
+      "path": "tasks/2026-11-23-work-ux01-s2-offline-prototype.md",
+      "catalog_id": "ttd-work-ux01-s2-offline-prototype",
+      "frontmatter_id": "ttd-work-ux01-s2-offline-prototype",
+      "historical_source_head": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+      "current_head": "9a629fb04ea73f949d0a1851b76dd837edee845f",
+      "historical_source_blob": "c49dfe25cc2f54c3030a13a43a6f88e12bbbdbb3",
+      "current_source_blob": "c49dfe25cc2f54c3030a13a43a6f88e12bbbdbb3",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 5,
+      "pr": 19,
+      "kind": "report",
+      "path": "reports/2026-11-23-eng-01a-s3-d1-prepared-result-binding.md",
+      "catalog_id": "report-2026-11-23-eng-01a-s3-d1-prepared-result-binding",
+      "frontmatter_id": "report-2026-11-23-eng-01a-s3-d1-prepared-result-binding",
+      "historical_source_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "current_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "historical_source_blob": "f703a99967b1b4ecd6ca9840104192e7302c594e",
+      "current_source_blob": "f703a99967b1b4ecd6ca9840104192e7302c594e",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 6,
+      "pr": 19,
+      "kind": "report",
+      "path": "reports/2026-11-23-eng-01a-s3-integration-and-merge-preview.md",
+      "catalog_id": "eng-01a-s3-integration-and-merge-preview-report",
+      "frontmatter_id": "eng-01a-s3-integration-and-merge-preview-report",
+      "historical_source_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "current_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "historical_source_blob": "b23cd64693731a16940ef5fd33b30f03b2dbd0d5",
+      "current_source_blob": "b23cd64693731a16940ef5fd33b30f03b2dbd0d5",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 7,
+      "pr": 19,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-eng-01a-s3-d1-prepared-result-binding.json",
+      "catalog_id": "evidence-2026-11-23-eng-01a-s3-d1-prepared-result-binding",
+      "frontmatter_id": null,
+      "historical_source_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "current_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "historical_source_blob": "dea0a3471683852891133cf1dca41eea5d50efb7",
+      "current_source_blob": "dea0a3471683852891133cf1dca41eea5d50efb7",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 8,
+      "pr": 19,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-eng-01a-s3-integration.json",
+      "catalog_id": "evidence-2026-11-23-eng-01a-s3-integration",
+      "frontmatter_id": null,
+      "historical_source_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "current_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "historical_source_blob": "3bb923798df585351ca33e15f55f232338d2f647",
+      "current_source_blob": "3bb923798df585351ca33e15f55f232338d2f647",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 9,
+      "pr": 19,
+      "kind": "task",
+      "path": "tasks/2026-11-23-eng-01a-s3-offline-integration.md",
+      "catalog_id": "eng-01a-s3-offline-integration",
+      "frontmatter_id": "eng-01a-s3-offline-integration",
+      "historical_source_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "current_head": "17ac45c1350776614e00ef0e14bdaf52b382b6ba",
+      "historical_source_blob": "24cd7b2a8a41ad1ca642d10fc29c7fd9d5a504eb",
+      "current_source_blob": "24cd7b2a8a41ad1ca642d10fc29c7fd9d5a504eb",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 10,
+      "pr": 20,
+      "kind": "report",
+      "path": "reports/2026-11-23-hermes-biz02-s1-prioritization.md",
+      "catalog_id": "hermes-biz02-s1-prioritization-2026-11-23",
+      "frontmatter_id": "hermes-biz02-s1-prioritization-2026-11-23",
+      "historical_source_head": "fcdc0f898b13b19a42a000d84c8ac4632de1806b",
+      "current_head": "fcdc0f898b13b19a42a000d84c8ac4632de1806b",
+      "historical_source_blob": "6c5c701574fbdc8d7f0fbe4c011a6150bc7adf70",
+      "current_source_blob": "6c5c701574fbdc8d7f0fbe4c011a6150bc7adf70",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 11,
+      "pr": 20,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-hermes-biz02-s1-priority-matrix.json",
+      "catalog_id": "evidence-2026-11-23-hermes-biz02-s1-priority-matrix",
+      "frontmatter_id": null,
+      "historical_source_head": "fcdc0f898b13b19a42a000d84c8ac4632de1806b",
+      "current_head": "fcdc0f898b13b19a42a000d84c8ac4632de1806b",
+      "historical_source_blob": "f2458f91c4f253f292a5c41615a996c8a7c2f24e",
+      "current_source_blob": "f2458f91c4f253f292a5c41615a996c8a7c2f24e",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 12,
+      "pr": 20,
+      "kind": "task",
+      "path": "tasks/2026-11-23-hermes-biz02-s1-usecases-kpi.md",
+      "catalog_id": "hermes-biz02-s1-usecases-kpi-2026-11-23",
+      "frontmatter_id": "hermes-biz02-s1-usecases-kpi-2026-11-23",
+      "historical_source_head": "fcdc0f898b13b19a42a000d84c8ac4632de1806b",
+      "current_head": "fcdc0f898b13b19a42a000d84c8ac4632de1806b",
+      "historical_source_blob": "536c08c2a8e6c8ad2ba02008acf69f77e5ae58c1",
+      "current_source_blob": "536c08c2a8e6c8ad2ba02008acf69f77e5ae58c1",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 13,
+      "pr": 21,
+      "kind": "report",
+      "path": "reports/2026-11-23-eng-01a-s4-d1-manifest-refresh.md",
+      "catalog_id": "report-2026-11-23-eng-01a-s4-d1-manifest-refresh",
+      "frontmatter_id": "report-2026-11-23-eng-01a-s4-d1-manifest-refresh",
+      "historical_source_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "current_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "historical_source_blob": "540115151ae9b3a4f8187f66128bedb579cd7490",
+      "current_source_blob": "540115151ae9b3a4f8187f66128bedb579cd7490",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 14,
+      "pr": 21,
+      "kind": "report",
+      "path": "reports/2026-11-23-eng-01a-s4-release-readiness.md",
+      "catalog_id": "report-2026-11-23-eng-01a-s4-release-readiness",
+      "frontmatter_id": "report-2026-11-23-eng-01a-s4-release-readiness",
+      "historical_source_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "current_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "historical_source_blob": "6027eb612a17630c3433caf7b1e2e5add8cf9648",
+      "current_source_blob": "6027eb612a17630c3433caf7b1e2e5add8cf9648",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 15,
+      "pr": 21,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-eng-01a-s4-d1-manifest-refresh.json",
+      "catalog_id": "evidence-2026-11-23-eng-01a-s4-d1-manifest-refresh",
+      "frontmatter_id": null,
+      "historical_source_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "current_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "historical_source_blob": "a02dcf93eb87beab4548038ad6c031ef446c3483",
+      "current_source_blob": "a02dcf93eb87beab4548038ad6c031ef446c3483",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 16,
+      "pr": 21,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-eng-01a-s4-release-readiness.json",
+      "catalog_id": "evidence-2026-11-23-eng-01a-s4-release-readiness",
+      "frontmatter_id": null,
+      "historical_source_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "current_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "historical_source_blob": "4704488bdfd0d387f938ea2990d902dda770ebd4",
+      "current_source_blob": "4704488bdfd0d387f938ea2990d902dda770ebd4",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 17,
+      "pr": 21,
+      "kind": "task",
+      "path": "tasks/2026-11-23-eng-01a-s4-linux-release-readiness.md",
+      "catalog_id": "eng-01a-s4-linux-release-readiness",
+      "frontmatter_id": "eng-01a-s4-linux-release-readiness",
+      "historical_source_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "current_head": "272855817cffe5334757fcf3a64cfae750b3b119",
+      "historical_source_blob": "0411237644e7228438edbf74d984b8242946714e",
+      "current_source_blob": "0411237644e7228438edbf74d984b8242946714e",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "SOURCE_ACCEPTED",
+        "LINUX_NOT_RUN",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 18,
+      "pr": 22,
+      "kind": "report",
+      "path": "reports/2026-11-23-hostinger-ops01a-s1-monitoring-qa.md",
+      "catalog_id": "ttd-hostinger-ops01a-s1-monitoring-qa-2026-11-23",
+      "frontmatter_id": "ttd-hostinger-ops01a-s1-monitoring-qa-2026-11-23",
+      "historical_source_head": "7f18955897c4f05b3523f467398889cf1e53cebd",
+      "current_head": "7f18955897c4f05b3523f467398889cf1e53cebd",
+      "historical_source_blob": "4bbdf9043d9d15b58c7340e46d0cb347fb5e5b23",
+      "current_source_blob": "4bbdf9043d9d15b58c7340e46d0cb347fb5e5b23",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "SOURCE_ACCEPTED",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 19,
+      "pr": 22,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-hostinger-ops01a-s1-monitoring-qa.json",
+      "catalog_id": "evidence-2026-11-23-hostinger-ops01a-s1-monitoring-qa",
+      "frontmatter_id": null,
+      "historical_source_head": "7f18955897c4f05b3523f467398889cf1e53cebd",
+      "current_head": "7f18955897c4f05b3523f467398889cf1e53cebd",
+      "historical_source_blob": "519fd67ddb7ffac337e7b5d7703e78a26a6e74a0",
+      "current_source_blob": "519fd67ddb7ffac337e7b5d7703e78a26a6e74a0",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "SOURCE_ACCEPTED",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 20,
+      "pr": 22,
+      "kind": "task",
+      "path": "tasks/2026-11-23-hostinger-ops01a-s1-monitoring-policy.md",
+      "catalog_id": "ttd-hostinger-ops01a-s1-offline-monitoring-2026-11-23",
+      "frontmatter_id": "ttd-hostinger-ops01a-s1-offline-monitoring-2026-11-23",
+      "historical_source_head": "7f18955897c4f05b3523f467398889cf1e53cebd",
+      "current_head": "7f18955897c4f05b3523f467398889cf1e53cebd",
+      "historical_source_blob": "d2dafafe0a8bc9d4a96e86f16149c01cfa01ea9e",
+      "current_source_blob": "d2dafafe0a8bc9d4a96e86f16149c01cfa01ea9e",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "SOURCE_ACCEPTED",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 21,
+      "pr": 23,
+      "kind": "report",
+      "path": "reports/2026-11-23-hermes-grow02a-s1-attribution-contract.md",
+      "catalog_id": "hermes-grow02a-s1-attribution-contract-2026-11-23",
+      "frontmatter_id": "hermes-grow02a-s1-attribution-contract-2026-11-23",
+      "historical_source_head": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61",
+      "current_head": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61",
+      "historical_source_blob": "5d4d66ed341c77cf8ffa1e916583df8ffc48871c",
+      "current_source_blob": "5d4d66ed341c77cf8ffa1e916583df8ffc48871c",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 22,
+      "pr": 23,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-hermes-grow02a-s1-events-and-tests.json",
+      "catalog_id": "evidence-2026-11-23-hermes-grow02a-s1-events-and-tests",
+      "frontmatter_id": null,
+      "historical_source_head": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61",
+      "current_head": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61",
+      "historical_source_blob": "1a4fa5f991f1220ed2ed0e7aaac9b9276ca82cae",
+      "current_source_blob": "1a4fa5f991f1220ed2ed0e7aaac9b9276ca82cae",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 23,
+      "pr": 23,
+      "kind": "task",
+      "path": "tasks/2026-11-23-hermes-grow02a-s1-event-dictionary.md",
+      "catalog_id": "hermes-grow02a-s1-event-dictionary-task-2026-11-23",
+      "frontmatter_id": "hermes-grow02a-s1-event-dictionary-task-2026-11-23",
+      "historical_source_head": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61",
+      "current_head": "f2f092aab3ceef0d16260f0a2c6b222f7baecc61",
+      "historical_source_blob": "ca3ecf6748bf806660a2f0936e6c0a5cb6bbbb2e",
+      "current_source_blob": "ca3ecf6748bf806660a2f0936e6c0a5cb6bbbb2e",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 24,
+      "pr": 24,
+      "kind": "report",
+      "path": "reports/2026-11-23-hostinger-ops01a-s2-lifecycle.md",
+      "catalog_id": "ttd-hostinger-ops01a-s2-lifecycle-2026-11-23-report",
+      "frontmatter_id": "ttd-hostinger-ops01a-s2-lifecycle-2026-11-23",
+      "historical_source_head": "d981c8189d30f87d5b1349525062322154719e64",
+      "current_head": "e9c2d8f759850ea9c654de7e103549e041f66679",
+      "historical_source_blob": "d8c76fd52d6eecd419f412ffc0777ec71e29a32a",
+      "current_source_blob": "d8c76fd52d6eecd419f412ffc0777ec71e29a32a",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "HEAD_DRIFT",
+        "QA_PENDING",
+        "DUPLICATE_ID",
+        "OWNER_REVIEW_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "HOLD_UNTIL_HOSTINGER_FIXES_DISTINCT_REPORT_ID"
+    },
+    {
+      "ordinal": 25,
+      "pr": 24,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-hostinger-ops01a-s2-lifecycle.json",
+      "catalog_id": "evidence-2026-11-23-hostinger-ops01a-s2-lifecycle",
+      "frontmatter_id": null,
+      "historical_source_head": "d981c8189d30f87d5b1349525062322154719e64",
+      "current_head": "e9c2d8f759850ea9c654de7e103549e041f66679",
+      "historical_source_blob": "6ef5966de9a2dae03d3bc860da63e45b23dde1f6",
+      "current_source_blob": "6ef5966de9a2dae03d3bc860da63e45b23dde1f6",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "HEAD_DRIFT",
+        "QA_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 26,
+      "pr": 24,
+      "kind": "task",
+      "path": "tasks/2026-11-23-hostinger-ops01a-s2-lifecycle.md",
+      "catalog_id": "ttd-hostinger-ops01a-s2-lifecycle-2026-11-23",
+      "frontmatter_id": "ttd-hostinger-ops01a-s2-lifecycle-2026-11-23",
+      "historical_source_head": "d981c8189d30f87d5b1349525062322154719e64",
+      "current_head": "e9c2d8f759850ea9c654de7e103549e041f66679",
+      "historical_source_blob": "76bd97e0e3387d7a3578cec48a19236798ca6631",
+      "current_source_blob": "76bd97e0e3387d7a3578cec48a19236798ca6631",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "HEAD_DRIFT",
+        "QA_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 27,
+      "pr": 25,
+      "kind": "report",
+      "path": "reports/2026-11-23-hermes-biz02-s2-mvp-acceptance.md",
+      "catalog_id": "hermes-biz02-s2-mvp-acceptance-2026-11-23",
+      "frontmatter_id": "hermes-biz02-s2-mvp-acceptance-2026-11-23",
+      "historical_source_head": "6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd",
+      "current_head": "6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd",
+      "historical_source_blob": "36f3681a63b1ffca08868da58d37b993ccd70984",
+      "current_source_blob": "36f3681a63b1ffca08868da58d37b993ccd70984",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 28,
+      "pr": 25,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-hermes-biz02-s2-mvp-scenarios.json",
+      "catalog_id": "evidence-2026-11-23-hermes-biz02-s2-mvp-scenarios",
+      "frontmatter_id": null,
+      "historical_source_head": "6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd",
+      "current_head": "6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd",
+      "historical_source_blob": "b517a54fc84071ddde87abfa31b5c84956604cd8",
+      "current_source_blob": "b517a54fc84071ddde87abfa31b5c84956604cd8",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 29,
+      "pr": 25,
+      "kind": "task",
+      "path": "tasks/2026-11-23-hermes-biz02-s2-mvp-acceptance.md",
+      "catalog_id": "hermes-biz02-s2-mvp-acceptance-task-2026-11-23",
+      "frontmatter_id": "hermes-biz02-s2-mvp-acceptance-task-2026-11-23",
+      "historical_source_head": "6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd",
+      "current_head": "6b2a77086307a6c6ecaa0c87f725c09b31e7bdfd",
+      "historical_source_blob": "56ccb0549cefdbaaf58aed52650411d76656cd68",
+      "current_source_blob": "56ccb0549cefdbaaf58aed52650411d76656cd68",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "A0_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 30,
+      "pr": 27,
+      "kind": "report",
+      "path": "reports/2026-11-23-hermes-gov01-s2-a0-options.md",
+      "catalog_id": "hermes-gov01-s2-a0-options-2026-11-23",
+      "frontmatter_id": "hermes-gov01-s2-a0-options-2026-11-23",
+      "historical_source_head": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+      "current_head": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+      "historical_source_blob": "e0da464f2af6d686cd2fcbc000065b23234e5a08",
+      "current_source_blob": "e0da464f2af6d686cd2fcbc000065b23234e5a08",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "A0_PENDING"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 31,
+      "pr": 27,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-hermes-gov01-s2-a0-options.json",
+      "catalog_id": "evidence-2026-11-23-hermes-gov01-s2-a0-options",
+      "frontmatter_id": null,
+      "historical_source_head": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+      "current_head": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+      "historical_source_blob": "9f3aee70b0fd1d1186e6c6a2ddb8f072961d45ff",
+      "current_source_blob": "9f3aee70b0fd1d1186e6c6a2ddb8f072961d45ff",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "A0_PENDING"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 32,
+      "pr": 27,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-hermes-gov01-s2-a0-register.json",
+      "catalog_id": "evidence-2026-11-23-hermes-gov01-s2-a0-register",
+      "frontmatter_id": null,
+      "historical_source_head": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+      "current_head": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+      "historical_source_blob": "aeb584d011a14b073aaa422f6a7526fd94ad256e",
+      "current_source_blob": "aeb584d011a14b073aaa422f6a7526fd94ad256e",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "A0_PENDING"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 33,
+      "pr": 27,
+      "kind": "task",
+      "path": "tasks/2026-11-23-hermes-gov01-s2-a0-choices.md",
+      "catalog_id": "hermes-gov01-s2-a0-choices-2026-11-23",
+      "frontmatter_id": "hermes-gov01-s2-a0-choices-2026-11-23",
+      "historical_source_head": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+      "current_head": "b8c64655f4d6cd9c309fb2501ce58207c9b3c1db",
+      "historical_source_blob": "98893f4e539a4edceb3c5e2c430c066fe0f3234a",
+      "current_source_blob": "98893f4e539a4edceb3c5e2c430c066fe0f3234a",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "A0_PENDING"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 34,
+      "pr": 28,
+      "kind": "report",
+      "path": "reports/2026-11-23-codex-gov02-s1-readiness.md",
+      "catalog_id": "report-2026-11-23-codex-gov02-s1-readiness",
+      "frontmatter_id": "report-2026-11-23-codex-gov02-s1-readiness",
+      "historical_source_head": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+      "current_head": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+      "historical_source_blob": "3c2ad875c6d72f85d97ece64275bd6ca239412eb",
+      "current_source_blob": "3c2ad875c6d72f85d97ece64275bd6ca239412eb",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "SOURCE_ACCEPTED",
+        "INDEPENDENT_QA_PENDING"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 35,
+      "pr": 28,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-codex-gov02-s1-validator.json",
+      "catalog_id": "evidence-2026-11-23-codex-gov02-s1-validator",
+      "frontmatter_id": null,
+      "historical_source_head": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+      "current_head": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+      "historical_source_blob": "fe1573a76fa392b19b758f656cf03e4d8609652e",
+      "current_source_blob": "fe1573a76fa392b19b758f656cf03e4d8609652e",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "SOURCE_ACCEPTED",
+        "INDEPENDENT_QA_PENDING"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 36,
+      "pr": 28,
+      "kind": "task",
+      "path": "tasks/2026-11-23-codex-gov02-s1-repo-validator.md",
+      "catalog_id": "codex-gov02-s1-repo-validator",
+      "frontmatter_id": "codex-gov02-s1-repo-validator",
+      "historical_source_head": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+      "current_head": "6dafae50bd17bc1a18080b13b86c5b8c35573580",
+      "historical_source_blob": "ed05934674c41457f41ad84b2e6fcce032aa99a7",
+      "current_source_blob": "ed05934674c41457f41ad84b2e6fcce032aa99a7",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "SOURCE_ACCEPTED",
+        "INDEPENDENT_QA_PENDING"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 37,
+      "pr": 29,
+      "kind": "report",
+      "path": "reports/2026-11-23-hostinger-sec02-s2-tabletop.md",
+      "catalog_id": "sec02-s2-tabletop-2026-11-23",
+      "frontmatter_id": "sec02-s2-tabletop-2026-11-23",
+      "historical_source_head": "d3d6a2690cb3b08609d8708514c5594c0ebdd3e6",
+      "current_head": "d3d6a2690cb3b08609d8708514c5594c0ebdd3e6",
+      "historical_source_blob": "a375064177a117b36feaa5f2eda6be7d1aa8736b",
+      "current_source_blob": "a375064177a117b36feaa5f2eda6be7d1aa8736b",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING",
+        "OWNER_REVIEW_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 38,
+      "pr": 29,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-hostinger-sec02-s2-tabletop.json",
+      "catalog_id": "evidence-2026-11-23-hostinger-sec02-s2-tabletop",
+      "frontmatter_id": null,
+      "historical_source_head": "d3d6a2690cb3b08609d8708514c5594c0ebdd3e6",
+      "current_head": "d3d6a2690cb3b08609d8708514c5594c0ebdd3e6",
+      "historical_source_blob": "68301cd033efc41e13359b54141238aca86109fe",
+      "current_source_blob": "68301cd033efc41e13359b54141238aca86109fe",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING",
+        "OWNER_REVIEW_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 39,
+      "pr": 29,
+      "kind": "runbook",
+      "path": "runbooks/sec02-s2-controlled-hardening-gates.md",
+      "catalog_id": "sec02-s2-controlled-hardening-gates",
+      "frontmatter_id": "sec02-s2-controlled-hardening-gates",
+      "historical_source_head": "d3d6a2690cb3b08609d8708514c5594c0ebdd3e6",
+      "current_head": "d3d6a2690cb3b08609d8708514c5594c0ebdd3e6",
+      "historical_source_blob": "1da798a04b2f4d1e6cc30a5ac512e40cb82ff2fe",
+      "current_source_blob": "1da798a04b2f4d1e6cc30a5ac512e40cb82ff2fe",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING",
+        "OWNER_REVIEW_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    },
+    {
+      "ordinal": 40,
+      "pr": 29,
+      "kind": "task",
+      "path": "tasks/2026-11-23-hostinger-sec02-s2-hardening-plan.md",
+      "catalog_id": "sec02-s2-hardening-gates-2026-11-23",
+      "frontmatter_id": "sec02-s2-hardening-gates-2026-11-23",
+      "historical_source_head": "d3d6a2690cb3b08609d8708514c5594c0ebdd3e6",
+      "current_head": "d3d6a2690cb3b08609d8708514c5594c0ebdd3e6",
+      "historical_source_blob": "753b93bb1782e891592277a446fd63921ea92cb3",
+      "current_source_blob": "753b93bb1782e891592277a446fd63921ea92cb3",
+      "blob_changed_since_ledger": false,
+      "current_source_path_exists": true,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "original_labels": [
+        "DRAFT",
+        "INDEPENDENT_QA_PENDING",
+        "REAL_UNTESTED"
+      ],
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING",
+        "OWNER_REVIEW_PENDING"
+      ],
+      "historical_index_writer": "codex-after-explicit-approval",
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED",
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION"
+    }
+  ],
+  "additional_scope": [
+    {
+      "pr": 24,
+      "kind": "report",
+      "path": "reports/2026-11-23-hostinger-ops01a-s2-d1-lifecycle-remediation.md",
+      "catalog_id": "ttd-hostinger-ops01a-s2-d1-lifecycle-remediation-report",
+      "frontmatter_id": null,
+      "current_source_blob": "b09f3f59a74441fdf7538c5c7b2e03b47e248f8c",
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "OWNER_REVIEW_PENDING",
+        "QA_PENDING"
+      ],
+      "action": "HOLD_MISSING_FRONTMATTER_ID_UNTIL_HOSTINGER_SOURCE_CORRECTION",
+      "current_head": "e9c2d8f759850ea9c654de7e103549e041f66679",
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED"
+    },
+    {
+      "pr": 24,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-hostinger-ops01a-s2-d1-lifecycle-remediation.json",
+      "catalog_id": "ttd-hostinger-ops01a-s2-d1-lifecycle-remediation-evidence",
+      "frontmatter_id": null,
+      "current_source_blob": "46bedbcfae0637f8f05e436dd97e9effad4bd61b",
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING"
+      ],
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION",
+      "current_head": "e9c2d8f759850ea9c654de7e103549e041f66679",
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED"
+    },
+    {
+      "pr": 30,
+      "kind": "task",
+      "path": "tasks/2026-11-23-codex-gov02-s2-reconciliation-plan.md",
+      "catalog_id": "codex-gov02-s2-reconciliation-plan",
+      "frontmatter_id": "codex-gov02-s2-reconciliation-plan",
+      "current_source_blob": "dd34a9a9bd7800b5afaaa2ea55cccb01abdc6a74",
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING"
+      ],
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION",
+      "current_head": "be48b3e19c6b2deee48f631497feac4be2ef2834",
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED"
+    },
+    {
+      "pr": 30,
+      "kind": "report",
+      "path": "reports/2026-11-23-codex-gov02-s2-merge-readiness.md",
+      "catalog_id": "report-2026-11-23-codex-gov02-s2-merge-readiness",
+      "frontmatter_id": "report-2026-11-23-codex-gov02-s2-merge-readiness",
+      "current_source_blob": "ae123535be2b43186e7a1cfc9ada8a84de20f779",
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING"
+      ],
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION",
+      "current_head": "be48b3e19c6b2deee48f631497feac4be2ef2834",
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED"
+    },
+    {
+      "pr": 30,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-codex-gov02-s2-merge-readiness.json",
+      "catalog_id": "evidence-2026-11-23-codex-gov02-s2-merge-readiness",
+      "frontmatter_id": null,
+      "current_source_blob": "3c735391c2bb377cb55021b9e8657830a5d98a75",
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING"
+      ],
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION",
+      "current_head": "be48b3e19c6b2deee48f631497feac4be2ef2834",
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED"
+    },
+    {
+      "pr": 31,
+      "kind": "knowledge",
+      "path": "agents/a1.md",
+      "catalog_id": "agent-a1-chatgpt-standard",
+      "frontmatter_id": "agent-a1-chatgpt-standard",
+      "current_source_blob": "e7fe4375edf9638a26623938bb0b04c618d0612b",
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_APPROVED_DIRECTIVE",
+        "UNMERGED_GOVERNANCE"
+      ],
+      "action": "PRESERVE_PREEXISTING_CATALOG_ENTRY_IN_PR31_DO_NOT_READD",
+      "current_head": "f03dc7e8d9cd88f425b1f04ac7908a3de5d64060",
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED"
+    },
+    {
+      "pr": 31,
+      "kind": "task",
+      "path": "tasks/2026-11-23-a1-cost-first-master-allocation.md",
+      "catalog_id": "ttd-a1-cost-first-master-allocation-2026-11-23",
+      "frontmatter_id": "ttd-a1-cost-first-master-allocation-2026-11-23",
+      "current_source_blob": "343ce5c4e10f037da3cec914604ce9638379b021",
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_APPROVED_DIRECTIVE",
+        "UNMERGED_GOVERNANCE"
+      ],
+      "action": "PRESERVE_PREEXISTING_CATALOG_ENTRY_IN_PR31_DO_NOT_READD",
+      "current_head": "f03dc7e8d9cd88f425b1f04ac7908a3de5d64060",
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED"
+    },
+    {
+      "pr": 31,
+      "kind": "report",
+      "path": "reports/2026-11-23-a1-codex-cost-reallocation.md",
+      "catalog_id": "report-2026-11-23-a1-codex-cost-reallocation",
+      "frontmatter_id": "report-2026-11-23-a1-codex-cost-reallocation",
+      "current_source_blob": "c35def18993a8fdf44fc5aeeec48e3e8da259296",
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "A0_APPROVED_DIRECTIVE",
+        "UNMERGED_GOVERNANCE"
+      ],
+      "action": "PRESERVE_PREEXISTING_CATALOG_ENTRY_IN_PR31_DO_NOT_READD",
+      "current_head": "f03dc7e8d9cd88f425b1f04ac7908a3de5d64060",
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED"
+    },
+    {
+      "pr": 32,
+      "kind": "report",
+      "path": "reports/2026-11-23-a1-gov02-qa01-validator-delta.md",
+      "catalog_id": "ttd-a1-gov02-qa01-validator-delta-2026-11-23",
+      "frontmatter_id": "ttd-a1-gov02-qa01-validator-delta-2026-11-23",
+      "current_source_blob": "70512d9fc604064b377a7b4ec992d8657d4e0f00",
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING"
+      ],
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION",
+      "current_head": "0dfe61f501a1706f9c065ad08c82df4db21dd8c5",
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED"
+    },
+    {
+      "pr": 32,
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-a1-gov02-qa01-validator-delta.json",
+      "catalog_id": "evidence-2026-11-23-a1-gov02-qa01-validator-delta",
+      "frontmatter_id": null,
+      "current_source_blob": "3d90ede9e0539871c6be73edadcf4e88e99dd62d",
+      "classification": [
+        "VERIFIED_SOURCE",
+        "MISSING_ON_BASE",
+        "QA_PENDING"
+      ],
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION",
+      "current_head": "0dfe61f501a1706f9c065ad08c82df4db21dd8c5",
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED"
+    },
+    {
+      "pr": "A1_S2",
+      "kind": "task",
+      "path": "tasks/2026-11-23-a1-gov02-s2-reconciliation.md",
+      "catalog_id": "ttd-a1-gov02-s2-reconciliation-2026-11-23",
+      "frontmatter_id": "ttd-a1-gov02-s2-reconciliation-2026-11-23",
+      "current_source_blob": null,
+      "classification": [
+        "NEW_DELIVERABLE_PENDING_COMMIT",
+        "MISSING_ON_BASE"
+      ],
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION",
+      "current_head": null,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED"
+    },
+    {
+      "pr": "A1_S2",
+      "kind": "report",
+      "path": "reports/2026-11-23-a1-gov02-s2-reconciliation.md",
+      "catalog_id": "report-2026-11-23-a1-gov02-s2-reconciliation",
+      "frontmatter_id": "report-2026-11-23-a1-gov02-s2-reconciliation",
+      "current_source_blob": null,
+      "classification": [
+        "NEW_DELIVERABLE_PENDING_COMMIT",
+        "MISSING_ON_BASE"
+      ],
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION",
+      "current_head": null,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED"
+    },
+    {
+      "pr": "A1_S2",
+      "kind": "evidence",
+      "path": "reports/evidence/2026-11-23-a1-gov02-s2-reconciliation.json",
+      "catalog_id": "evidence-2026-11-23-a1-gov02-s2-reconciliation",
+      "frontmatter_id": null,
+      "current_source_blob": null,
+      "classification": [
+        "NEW_DELIVERABLE_PENDING_COMMIT",
+        "MISSING_ON_BASE"
+      ],
+      "action": "PROPOSE_ADD_ONLY_AFTER_APPROVED_SOURCE_INTEGRATION",
+      "current_head": null,
+      "present_on_main": false,
+      "present_in_main_catalog": false,
+      "proposed_index_writer": "A1_ONLY_IF_LATER_AUTHORIZED"
+    }
+  ],
+  "index_candidate_diff": {
+    "catalog_add_after_source_merge": [
+      {
+        "id": "ttd-multi-agent-master-allocation-2026-11-23",
+        "path": "tasks/2026-11-23-multi-agent-master-allocation-review.md",
+        "kind": "task",
+        "source_pr": 6
+      },
+      {
+        "id": "work-ux01-s2-offline-prototype-review",
+        "path": "reports/2026-11-23-work-ux01-s2-offline-prototype.md",
+        "kind": "report",
+        "source_pr": 16
+      },
+      {
+        "id": "evidence-2026-11-23-work-ux01-s2-demo-test-results",
+        "path": "reports/evidence/2026-11-23-work-ux01-s2-demo-test-results.json",
+        "kind": "evidence",
+        "source_pr": 16
+      },
+      {
+        "id": "ttd-work-ux01-s2-offline-prototype",
+        "path": "tasks/2026-11-23-work-ux01-s2-offline-prototype.md",
+        "kind": "task",
+        "source_pr": 16
+      },
+      {
+        "id": "report-2026-11-23-eng-01a-s3-d1-prepared-result-binding",
+        "path": "reports/2026-11-23-eng-01a-s3-d1-prepared-result-binding.md",
+        "kind": "report",
+        "source_pr": 19
+      },
+      {
+        "id": "eng-01a-s3-integration-and-merge-preview-report",
+        "path": "reports/2026-11-23-eng-01a-s3-integration-and-merge-preview.md",
+        "kind": "report",
+        "source_pr": 19
+      },
+      {
+        "id": "evidence-2026-11-23-eng-01a-s3-d1-prepared-result-binding",
+        "path": "reports/evidence/2026-11-23-eng-01a-s3-d1-prepared-result-binding.json",
+        "kind": "evidence",
+        "source_pr": 19
+      },
+      {
+        "id": "evidence-2026-11-23-eng-01a-s3-integration",
+        "path": "reports/evidence/2026-11-23-eng-01a-s3-integration.json",
+        "kind": "evidence",
+        "source_pr": 19
+      },
+      {
+        "id": "eng-01a-s3-offline-integration",
+        "path": "tasks/2026-11-23-eng-01a-s3-offline-integration.md",
+        "kind": "task",
+        "source_pr": 19
+      },
+      {
+        "id": "hermes-biz02-s1-prioritization-2026-11-23",
+        "path": "reports/2026-11-23-hermes-biz02-s1-prioritization.md",
+        "kind": "report",
+        "source_pr": 20
+      },
+      {
+        "id": "evidence-2026-11-23-hermes-biz02-s1-priority-matrix",
+        "path": "reports/evidence/2026-11-23-hermes-biz02-s1-priority-matrix.json",
+        "kind": "evidence",
+        "source_pr": 20
+      },
+      {
+        "id": "hermes-biz02-s1-usecases-kpi-2026-11-23",
+        "path": "tasks/2026-11-23-hermes-biz02-s1-usecases-kpi.md",
+        "kind": "task",
+        "source_pr": 20
+      },
+      {
+        "id": "report-2026-11-23-eng-01a-s4-d1-manifest-refresh",
+        "path": "reports/2026-11-23-eng-01a-s4-d1-manifest-refresh.md",
+        "kind": "report",
+        "source_pr": 21
+      },
+      {
+        "id": "report-2026-11-23-eng-01a-s4-release-readiness",
+        "path": "reports/2026-11-23-eng-01a-s4-release-readiness.md",
+        "kind": "report",
+        "source_pr": 21
+      },
+      {
+        "id": "evidence-2026-11-23-eng-01a-s4-d1-manifest-refresh",
+        "path": "reports/evidence/2026-11-23-eng-01a-s4-d1-manifest-refresh.json",
+        "kind": "evidence",
+        "source_pr": 21
+      },
+      {
+        "id": "evidence-2026-11-23-eng-01a-s4-release-readiness",
+        "path": "reports/evidence/2026-11-23-eng-01a-s4-release-readiness.json",
+        "kind": "evidence",
+        "source_pr": 21
+      },
+      {
+        "id": "eng-01a-s4-linux-release-readiness",
+        "path": "tasks/2026-11-23-eng-01a-s4-linux-release-readiness.md",
+        "kind": "task",
+        "source_pr": 21
+      },
+      {
+        "id": "ttd-hostinger-ops01a-s1-monitoring-qa-2026-11-23",
+        "path": "reports/2026-11-23-hostinger-ops01a-s1-monitoring-qa.md",
+        "kind": "report",
+        "source_pr": 22
+      },
+      {
+        "id": "evidence-2026-11-23-hostinger-ops01a-s1-monitoring-qa",
+        "path": "reports/evidence/2026-11-23-hostinger-ops01a-s1-monitoring-qa.json",
+        "kind": "evidence",
+        "source_pr": 22
+      },
+      {
+        "id": "ttd-hostinger-ops01a-s1-offline-monitoring-2026-11-23",
+        "path": "tasks/2026-11-23-hostinger-ops01a-s1-monitoring-policy.md",
+        "kind": "task",
+        "source_pr": 22
+      },
+      {
+        "id": "hermes-grow02a-s1-attribution-contract-2026-11-23",
+        "path": "reports/2026-11-23-hermes-grow02a-s1-attribution-contract.md",
+        "kind": "report",
+        "source_pr": 23
+      },
+      {
+        "id": "evidence-2026-11-23-hermes-grow02a-s1-events-and-tests",
+        "path": "reports/evidence/2026-11-23-hermes-grow02a-s1-events-and-tests.json",
+        "kind": "evidence",
+        "source_pr": 23
+      },
+      {
+        "id": "hermes-grow02a-s1-event-dictionary-task-2026-11-23",
+        "path": "tasks/2026-11-23-hermes-grow02a-s1-event-dictionary.md",
+        "kind": "task",
+        "source_pr": 23
+      },
+      {
+        "id": "evidence-2026-11-23-hostinger-ops01a-s2-lifecycle",
+        "path": "reports/evidence/2026-11-23-hostinger-ops01a-s2-lifecycle.json",
+        "kind": "evidence",
+        "source_pr": 24
+      },
+      {
+        "id": "ttd-hostinger-ops01a-s2-lifecycle-2026-11-23",
+        "path": "tasks/2026-11-23-hostinger-ops01a-s2-lifecycle.md",
+        "kind": "task",
+        "source_pr": 24
+      },
+      {
+        "id": "hermes-biz02-s2-mvp-acceptance-2026-11-23",
+        "path": "reports/2026-11-23-hermes-biz02-s2-mvp-acceptance.md",
+        "kind": "report",
+        "source_pr": 25
+      },
+      {
+        "id": "evidence-2026-11-23-hermes-biz02-s2-mvp-scenarios",
+        "path": "reports/evidence/2026-11-23-hermes-biz02-s2-mvp-scenarios.json",
+        "kind": "evidence",
+        "source_pr": 25
+      },
+      {
+        "id": "hermes-biz02-s2-mvp-acceptance-task-2026-11-23",
+        "path": "tasks/2026-11-23-hermes-biz02-s2-mvp-acceptance.md",
+        "kind": "task",
+        "source_pr": 25
+      },
+      {
+        "id": "hermes-gov01-s2-a0-options-2026-11-23",
+        "path": "reports/2026-11-23-hermes-gov01-s2-a0-options.md",
+        "kind": "report",
+        "source_pr": 27
+      },
+      {
+        "id": "evidence-2026-11-23-hermes-gov01-s2-a0-options",
+        "path": "reports/evidence/2026-11-23-hermes-gov01-s2-a0-options.json",
+        "kind": "evidence",
+        "source_pr": 27
+      },
+      {
+        "id": "evidence-2026-11-23-hermes-gov01-s2-a0-register",
+        "path": "reports/evidence/2026-11-23-hermes-gov01-s2-a0-register.json",
+        "kind": "evidence",
+        "source_pr": 27
+      },
+      {
+        "id": "hermes-gov01-s2-a0-choices-2026-11-23",
+        "path": "tasks/2026-11-23-hermes-gov01-s2-a0-choices.md",
+        "kind": "task",
+        "source_pr": 27
+      },
+      {
+        "id": "report-2026-11-23-codex-gov02-s1-readiness",
+        "path": "reports/2026-11-23-codex-gov02-s1-readiness.md",
+        "kind": "report",
+        "source_pr": 28
+      },
+      {
+        "id": "evidence-2026-11-23-codex-gov02-s1-validator",
+        "path": "reports/evidence/2026-11-23-codex-gov02-s1-validator.json",
+        "kind": "evidence",
+        "source_pr": 28
+      },
+      {
+        "id": "codex-gov02-s1-repo-validator",
+        "path": "tasks/2026-11-23-codex-gov02-s1-repo-validator.md",
+        "kind": "task",
+        "source_pr": 28
+      },
+      {
+        "id": "sec02-s2-tabletop-2026-11-23",
+        "path": "reports/2026-11-23-hostinger-sec02-s2-tabletop.md",
+        "kind": "report",
+        "source_pr": 29
+      },
+      {
+        "id": "evidence-2026-11-23-hostinger-sec02-s2-tabletop",
+        "path": "reports/evidence/2026-11-23-hostinger-sec02-s2-tabletop.json",
+        "kind": "evidence",
+        "source_pr": 29
+      },
+      {
+        "id": "sec02-s2-controlled-hardening-gates",
+        "path": "runbooks/sec02-s2-controlled-hardening-gates.md",
+        "kind": "runbook",
+        "source_pr": 29
+      },
+      {
+        "id": "sec02-s2-hardening-gates-2026-11-23",
+        "path": "tasks/2026-11-23-hostinger-sec02-s2-hardening-plan.md",
+        "kind": "task",
+        "source_pr": 29
+      },
+      {
+        "id": "ttd-hostinger-ops01a-s2-d1-lifecycle-remediation-evidence",
+        "path": "reports/evidence/2026-11-23-hostinger-ops01a-s2-d1-lifecycle-remediation.json",
+        "kind": "evidence",
+        "source_pr": 24
+      },
+      {
+        "id": "codex-gov02-s2-reconciliation-plan",
+        "path": "tasks/2026-11-23-codex-gov02-s2-reconciliation-plan.md",
+        "kind": "task",
+        "source_pr": 30
+      },
+      {
+        "id": "report-2026-11-23-codex-gov02-s2-merge-readiness",
+        "path": "reports/2026-11-23-codex-gov02-s2-merge-readiness.md",
+        "kind": "report",
+        "source_pr": 30
+      },
+      {
+        "id": "evidence-2026-11-23-codex-gov02-s2-merge-readiness",
+        "path": "reports/evidence/2026-11-23-codex-gov02-s2-merge-readiness.json",
+        "kind": "evidence",
+        "source_pr": 30
+      },
+      {
+        "id": "ttd-a1-gov02-qa01-validator-delta-2026-11-23",
+        "path": "reports/2026-11-23-a1-gov02-qa01-validator-delta.md",
+        "kind": "report",
+        "source_pr": 32
+      },
+      {
+        "id": "evidence-2026-11-23-a1-gov02-qa01-validator-delta",
+        "path": "reports/evidence/2026-11-23-a1-gov02-qa01-validator-delta.json",
+        "kind": "evidence",
+        "source_pr": 32
+      },
+      {
+        "id": "ttd-a1-gov02-s2-reconciliation-2026-11-23",
+        "path": "tasks/2026-11-23-a1-gov02-s2-reconciliation.md",
+        "kind": "task",
+        "source_pr": "A1_S2"
+      },
+      {
+        "id": "report-2026-11-23-a1-gov02-s2-reconciliation",
+        "path": "reports/2026-11-23-a1-gov02-s2-reconciliation.md",
+        "kind": "report",
+        "source_pr": "A1_S2"
+      },
+      {
+        "id": "evidence-2026-11-23-a1-gov02-s2-reconciliation",
+        "path": "reports/evidence/2026-11-23-a1-gov02-s2-reconciliation.json",
+        "kind": "evidence",
+        "source_pr": "A1_S2"
+      }
+    ],
+    "catalog_hold": [
+      {
+        "id": "ttd-hostinger-ops01a-s2-lifecycle-2026-11-23-report",
+        "path": "reports/2026-11-23-hostinger-ops01a-s2-lifecycle.md",
+        "reason": "HOLD_UNTIL_HOSTINGER_FIXES_DISTINCT_REPORT_ID",
+        "source_pr": 24
+      },
+      {
+        "id": "ttd-hostinger-ops01a-s2-d1-lifecycle-remediation-report",
+        "path": "reports/2026-11-23-hostinger-ops01a-s2-d1-lifecycle-remediation.md",
+        "reason": "HOLD_MISSING_FRONTMATTER_ID_UNTIL_HOSTINGER_SOURCE_CORRECTION",
+        "source_pr": 24
+      }
+    ],
+    "catalog_already_in_pr31_source": [
+      {
+        "id": "agent-a1-chatgpt-standard",
+        "path": "agents/a1.md",
+        "source_pr": 31
+      },
+      {
+        "id": "ttd-a1-cost-first-master-allocation-2026-11-23",
+        "path": "tasks/2026-11-23-a1-cost-first-master-allocation.md",
+        "source_pr": 31
+      },
+      {
+        "id": "report-2026-11-23-a1-codex-cost-reallocation",
+        "path": "reports/2026-11-23-a1-codex-cost-reallocation.md",
+        "source_pr": 31
+      }
+    ],
+    "catalog_removals": [],
+    "changelog_add_one_event": "GOV-02/S2 A1 reconciliation: cite PR30 old ledger, PR6/24 drift, PR31/32 gates; historical status retained.",
+    "changelog_removals": [],
+    "state_proposal": "Coordinator adds pending review/QA and approval gates; no production-ready claim.",
+    "state_removals": [],
+    "pr6_proposal_replace_rows": [
+      {
+        "portfolio": "GOV-02",
+        "current_line": 63,
+        "old_marker": "NO_TASK_YET",
+        "target_prs": [
+          28,
+          32,
+          30
+        ],
+        "proposed_text": "PR #28 S1 + PR #32 A1 validator delta (QA pending) + PR #30 S2 Phase A historical proposal"
+      },
+      {
+        "portfolio": "BIZ-02",
+        "current_line": 75,
+        "old_marker": "NO_TASK_YET",
+        "target_prs": [
+          20,
+          25
+        ],
+        "proposed_text": "PR #20 use-cases/KPI draft + PR #25 MVP scenarios; A0/business review pending"
+      },
+      {
+        "portfolio": "UX-01",
+        "current_line": 76,
+        "old_marker": "NO_TASK_YET",
+        "target_prs": [
+          16
+        ],
+        "proposed_text": "PR #16 offline operator prototype; browser QA unverified"
+      },
+      {
+        "portfolio": "ENG-01A",
+        "current_line": 77,
+        "old_marker": "NO_TASK_YET",
+        "target_prs": [
+          10,
+          13,
+          19,
+          21
+        ],
+        "proposed_text": "PR #10 -> #13 -> #19 -> #21; source accepted/QA and Linux NOT_RUN gates preserved"
+      },
+      {
+        "portfolio": "GROW-02A",
+        "current_line": 80,
+        "old_marker": "NO_TASK_YET",
+        "target_prs": [
+          23
+        ],
+        "proposed_text": "PR #23 event-dictionary offline, independent QA accepted with limits; no real tracking"
+      },
+      {
+        "portfolio": "OPS-01A",
+        "current_line": 82,
+        "old_marker": "NO_TASK_YET",
+        "target_prs": [
+          22,
+          24
+        ],
+        "proposed_text": "PR #22 S1 + PR #24 S2-D1 author repair; Work re-QA pending; duplicate report ID unresolved"
+      }
+    ]
+  },
+  "owner_matrix": [
+    {
+      "path": "CATALOG.yaml",
+      "future_writer": "A1",
+      "authority": "PROPOSAL_ONLY_PENDING_COORDINATOR_A0",
+      "scope": "add approved-source entries after file exists; review duplicates, semantic status, exact ID/path"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "future_writer": "A1",
+      "authority": "PROPOSAL_ONLY_PENDING_COORDINATOR_A0",
+      "scope": "append ONE reconciliation event with links/source SHA; retain history"
+    },
+    {
+      "path": "STATE.md",
+      "future_writer": "ChatGPT Điều phối",
+      "authority": "SEPARATE_SCOPED_WRITE_ONLY",
+      "scope": "conditional state and QA/ownership/production gates"
+    },
+    {
+      "path": "tasks/2026-11-23-multi-agent-master-allocation-review.md (PR6)",
+      "future_writer": "ChatGPT Điều phối",
+      "authority": "SEPARATE_SCOPED_WRITE_ONLY",
+      "scope": "six stale NO_TASK_YET replacements after re-pin; do not rewrite historical role allocations"
+    },
+    {
+      "path": "all PR source code/task/report",
+      "future_writer": "respective source owner",
+      "authority": "NO_A1_WRITE",
+      "scope": "Hostinger owns OPS report-ID normalization; PR31 remains unmerged"
+    },
+    {
+      "path": "independent validation",
+      "future_writer": "ChatGPT Work",
+      "authority": "REVIEW_ONLY",
+      "scope": "review this A1 proposal and PR28/32 validator separately"
+    }
+  ],
+  "review_order": {
+    "eng_stack": [
+      10,
+      13,
+      19,
+      21
+    ],
+    "gov_stack": [
+      28,
+      32
+    ],
+    "independent_reviews": [
+      "Work QA on exact PR32 HEAD pending",
+      "Work PR24 D1 re-QA pending",
+      "Hostinger PR29 owner feasibility review pending"
+    ],
+    "separate_gates": [
+      "PR31 cost-first governance unmerged but A0 directive current",
+      "PR27 A0-1..A0-5 pending",
+      "PR24 distinct ID correction by Hostinger",
+      "A0 approval and coordinator separately gate metadata integration",
+      "No merge authorized by this artifact"
+    ],
+    "semantic_merge_check": "GitHub mergeability/text preview alone not evidence of correctness. Re-pin and inspect CATALOG/STATE/CHANGELOG after each integrated PR."
+  },
+  "synthetic_decision_matrix": [
+    {
+      "id": "SYN-01-PR31-SOURCE-CATALOG",
+      "mode": "REMOTE_OBSERVED_PLUS_DECISION_TABLETOP",
+      "mutation": "Treat PR31's 3 internally catalogued docs as new unindexed entries",
+      "expected": "NO_READD; preserve 3 entries from PR31 branch after approved integration",
+      "observed": "PR31 CATALOG tree has 127 vs main 124 entries and already includes exact 3 paths/IDs; source PR31 still unmerged",
+      "result": "PASS_TABLETOP_DECISION"
+    },
+    {
+      "id": "SYN-02-PR32-NEW-QA-GATE",
+      "mode": "REMOTE_OBSERVED_PLUS_DECISION_TABLETOP",
+      "mutation": "Promote #32 QA report to independent accepted while Work only has assignment",
+      "expected": "QA_PENDING; do not grant acceptance",
+      "observed": "PR32 at 0dfe61f, Work #7092578088 assignment only; no independent verdict at time of check",
+      "result": "PASS_TABLETOP_DECISION"
+    },
+    {
+      "id": "SYN-03-PR24-HEAD-DRIFT",
+      "mode": "REMOTE_OBSERVED_PLUS_DECISION_TABLETOP",
+      "mutation": "Use stale PR24 d981c81 HEAD as if current",
+      "expected": "HEAD_DRIFT and re-pin 3 entries; preserve unchanged source blobs",
+      "observed": "PR24 is e9c2d8f; all 3 old source blobs match at new tree; 2 D1 additions",
+      "result": "PASS_TABLETOP_DECISION"
+    },
+    {
+      "id": "SYN-04-PR6-BLOB-DRIFT",
+      "mode": "REMOTE_OBSERVED_PLUS_DECISION_TABLETOP",
+      "mutation": "Use old PR6 plan blob d4206b as if latest",
+      "expected": "HEAD_DRIFT and blob drift; re-pin/refresh row numbers",
+      "observed": "PR6 is 2cceedd and plan blob 00a65f, six NO_TASK_YET rows remain",
+      "result": "PASS_TABLETOP_DECISION"
+    },
+    {
+      "id": "SYN-05-OPS-DUPLICATE-ID",
+      "mode": "REMOTE_OBSERVED_PLUS_DECISION_TABLETOP",
+      "mutation": "Catalog both OPS-01A/S2 task and report under their identical frontmatter ID",
+      "expected": "HOLD report pending Hostinger different report ID and source correction",
+      "observed": "PR24 task and report frontmatter share id ttd-hostinger-ops01a-s2-lifecycle-2026-11-23",
+      "result": "PASS_TABLETOP_DECISION"
+    },
+    {
+      "id": "SYN-06-MISSING-ON-MAIN",
+      "mode": "REMOTE_OBSERVED_PLUS_DECISION_TABLETOP",
+      "mutation": "Add all PR30 ledger document paths to CATALOG on current main",
+      "expected": "REJECT until paths exist on approved target base",
+      "observed": "Main git tree has 0/40 PR30 ledger paths; all 40 exist at current source trees",
+      "result": "PASS_TABLETOP_DECISION"
+    },
+    {
+      "id": "SYN-07-FALSE-PRODUCTION",
+      "mode": "HYPOTHETICAL_TABLETOP_NOT_EXECUTED",
+      "mutation": "Set production_ready:true on a Draft/REAL_UNTESTED source PR",
+      "expected": "REJECT DEPLOYMENT_CONTRADICTION; keep REAL_UNTESTED, A0_PENDING and approval gates",
+      "observed": "No mutation or validator execution performed; policy-only expected decision",
+      "result": "PASS_TABLETOP_EXPECTATION_ONLY"
+    },
+    {
+      "id": "SYN-08-UNAPPROVED-SEC-OWNER",
+      "mode": "REMOTE_OBSERVED_PLUS_DECISION_TABLETOP",
+      "mutation": "Mark PR29 Hostinger feasibility accepted based on Hermes-authored tabletop",
+      "expected": "OWNER_REVIEW_PENDING and A0 production NOT_AUTHORIZED",
+      "observed": "PR29 Draft; Hermes executor and Hostinger nominated owner; review task #7092672344 assigned, no completed reviewer verdict at check",
+      "result": "PASS_TABLETOP_DECISION"
+    },
+    {
+      "id": "SYN-09-STACKED-GOV02",
+      "mode": "REMOTE_OBSERVED_PLUS_DECISION_TABLETOP",
+      "mutation": "Merge PR32 or assert merged main is validated without PR28/Work QA",
+      "expected": "BLOCK; separate independent QA of #28->#32 and approval required",
+      "observed": "PR28/32 both Draft; PR32 base PR28; Work QA comment is assignment, not PASS",
+      "result": "PASS_TABLETOP_DECISION"
+    },
+    {
+      "id": "SYN-10-OVERLAPPING-WRITERS",
+      "mode": "REMOTE_OBSERVED_PLUS_DECISION_TABLETOP",
+      "mutation": "Accept #10/#13 simultaneous edits to CATALOG/STATE/CHANGELOG without semantic review",
+      "expected": "BLOCK double-writer; one approved owner and re-pin after each step",
+      "observed": "PR10 and PR13 each modify the 3 shared files; independent merge semantic review remains pending",
+      "result": "PASS_TABLETOP_DECISION"
+    },
+    {
+      "id": "SYN-11-D1-MISSING-FRONTMATTER-ID",
+      "mode": "REMOTE_OBSERVED_PLUS_DECISION_TABLETOP",
+      "mutation": "Treat new PR24 D1 report frontmatter as if it contained id",
+      "expected": "HOLD report pending source owner identity normalization; evidence can be indexed after path exists",
+      "observed": "D1 report starts with task/owner/next_owner/status/verdict; no id field",
+      "result": "PASS_TABLETOP_DECISION"
+    },
+    {
+      "id": "SYN-12-STALE-PLAN-ROWS",
+      "mode": "REMOTE_OBSERVED_PLUS_DECISION_TABLETOP",
+      "mutation": "Leave six portfolio NO_TASK_YET markers as current despite source PRs",
+      "expected": "Coordinator-only PR6 proposed six replacements; historic fields preserved",
+      "observed": "PR6 current lines 63,75,76,77,80,82 retain marker with new cost-first override near top",
+      "result": "PASS_TABLETOP_DECISION"
+    }
+  ],
+  "invariant_policy": {
+    "production_ready": false,
+    "external_paid_calls": 0,
+    "code_implementation": false,
+    "shared_index_write": false,
+    "merge": false,
+    "source_branch_write": false,
+    "preserve_states": [
+      "DRAFT",
+      "SOURCE_ACCEPTED",
+      "QA_PENDING",
+      "LINUX_NOT_RUN",
+      "REAL_UNTESTED",
+      "A0_PENDING",
+      "OWNER_REVIEW_PENDING"
+    ],
+    "rollback_future": "If approved metadata patch later fails paths/status/QA, revert only that future metadata commit via separately approved PR; preserve historical source and evidence; STOP now before such patch."
+  },
+  "checks_executed": {
+    "current_source_git_tree_sha_validation": "PASS 40/40 path existence; 39/40 original blobs identical; 1 PR6 blob moved",
+    "catalog_path_and_id_uniqueness": "PASS 53 unique IDs and 53 unique paths in candidate universe",
+    "synthetic_matrix": "12 policy cases documented; remote observations grounded where indicated; NO test code or mutation executed",
+    "evidence_shape": "JSON generation checked counts and uniqueness",
+    "secret_scan": "pending before push"
+  },
+  "verdict": "A1_GOV02_S2_RECONCILIATION_PLAN_READY_FOR_REVIEW",
+  "independent_review": "PENDING",
+  "phase_b": "NOT_AUTHORIZED",
+  "next_owner": "ChatGPT Điều phối"
+}
